@@ -46,6 +46,9 @@ class SVMLocator:
     def __init__(self,type=SVM.TYPE_NU_SVR,**kwargs):
         self.x_svm = SVM.SVM(type=type,**kwargs)
         self.y_svm = SVM.SVM(type=type,**kwargs)
+        self.x_sum = 0.0
+        self.y_sum = 0.0
+        self.point_count = 0
     
     def addTraining(self,image,location):
         '''
@@ -55,13 +58,20 @@ class SVMLocator:
         self.x_svm.addTraining(location.X(),image)
         self.y_svm.addTraining(location.Y(),image)
 
+        self.x_sum += location.X()
+        self.y_sum += location.Y()
+        self.point_count += 1
         
     def train(self):
         # compute the mean location
         self.x_svm.train()
         self.y_svm.train()
-
         
+        cx = self.x_sum/self.point_count
+        cy = self.y_sum/self.point_count
+        
+        self.mean = Point(cx,cy)    
+    
     def predict(self,image):
         x = self.x_svm.predict(image)
         y = self.y_svm.predict(image)

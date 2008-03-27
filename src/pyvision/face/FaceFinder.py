@@ -50,15 +50,16 @@ class FaceFinder:
     the eye coordinates.
     '''
     
-    def __init__(self, face_detector=CascadeDetector(), left_eye=Point(32,40), right_eye=Point(96,40), tile_size=(128,128), validate=None):
+    #TODO: the left eye points and right eye points should be learned from the input data
+    def __init__(self, face_detector=CascadeDetector(), tile_size=(128,128), validate=None):
         ''' 
         Create an eye locator.  This default implentation uses a 
         cascade classifier for face detection and then SVR for eye
         location. 
         '''
         self.face_detector = face_detector
-        self.left_eye      = left_eye
-        self.right_eye     = right_eye
+        self.left_eye      = None
+        self.right_eye     = None
         self.tile_size     = tile_size
         self.validate      = validate
 
@@ -107,6 +108,9 @@ class FaceFinder:
         self.left_locator.train()
         self.right_locator.train()        
         
+        self.left_eye      = self.left_locator.mean
+        self.right_eye     = self.right_locator.mean
+
         
     def detect(self, im, n_iter=3, annotate=False):
         '''
