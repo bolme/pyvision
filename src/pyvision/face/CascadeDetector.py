@@ -68,11 +68,16 @@ DEFAULT_NEGATIVE=os.path.join(pyvision.__path__[0],"data","nonface")
 class CascadeDetector:
     ''' This class is a wrapper around the OpenCV cascade detectior. '''
     
-    def __init__(self, cascade_name=DEFAULT_CASCADE,orig_size=None):
+    def __init__(self, cascade_name=DEFAULT_CASCADE,orig_size=None,min_size=(60,60), image_scale=1.3, haar_scale=1.2, min_neighbors=2, haar_flags=0):
         ''' Init the detector and create the cascade classifier '''
 
-        self.cascade_name = cascade_name
-
+        self.cascade_name  = cascade_name
+        self.min_size      = min_size
+        self.image_scale   = image_scale
+        self.haar_scale    = haar_scale
+        self.min_neighbors = min_neighbors
+        self.haar_flags    = haar_flags
+        
         if cascade_name != None:
             if not os.path.isfile(cascade_name):
                 raise CascadeNotFound("Could not find file: "+cascade_name)
@@ -95,15 +100,22 @@ class CascadeDetector:
     def __getstate__(self):
         ''' Function required to save and load the state from pickel. '''
         state = {}
-        state['cascade_name'] = self.cascade_name
-        state['cascade_data'] = self.cascade_data
+        
+        for key,value in self.__dict__.iteritems():
+            if key in ['cascade','storage']:
+                continue
+            
+            state[key] = value
+
         return state
     
     def __setstate__(self,state):
         ''' Function required to save and load the state from pickel. '''
         # Modeled after SVM pickling
-        self.cascade_name = state['cascade_name']  
-        self.cascade_data = state['cascade_data'] 
+        
+        for key,value in state.iteritems():
+            self.__dict__[key] = value
+            
         
         filename = tempfile.mktemp()
         open(filename,'w').write(self.cascade_data)
@@ -125,11 +137,11 @@ class CascadeDetector:
         cvResize( image, resized, CV_INTER_LINEAR )
         return resized
         
-    def detect(self, im, image_scale=1.3, haar_scale=1.2, min_neighbors=2, haar_flags=0, min_size=(60,60)):
+    def detect(self, im):
         ''' Runs the cascade classifer on an image. '''
         image = im.asOpenCV()
         
-        min_size = cvSize(min_size[0],min_size[1])
+        min_size = cvSize(self.min_size[0],self.min_size[1])
         
         # Create a resized gray scale image
         if image.nChannels == 3:
@@ -138,7 +150,7 @@ class CascadeDetector:
             image = gray
             
             
-        image = self._resizeImage(image,image_scale)
+        image = self._resizeImage(image,self.image_scale)
     
         # Equalize the image
         cvEqualizeHist( image, image )
@@ -147,12 +159,12 @@ class CascadeDetector:
         cvClearMemStorage( self.storage )
         
         faces = cvHaarDetectObjects( image, self.cascade, self.storage,
-                                 haar_scale, min_neighbors, haar_flags, min_size );
+                                 self.haar_scale, self.min_neighbors, self.haar_flags, min_size );
     
         # Transform and return the points
         result = []
         for r in faces:
-            rect = Rect(r.x/image_scale, r.y/image_scale, r.width/image_scale, r.height/image_scale)
+            rect = Rect(r.x/self.image_scale, r.y/self.image_scale, r.width/self.image_scale, r.height/self.image_scale)
             result.append(rect)
             
         return result
@@ -340,7 +352,7 @@ class _TestFaceRecognition(unittest.TestCase):
         self.assert_( len(self.images) == 173 )
 
     
-    def dtest_detect_bad_file(self):
+    def test_detect_bad_file(self):
         '''
         If the cascade file does not exist, opencv can crash without warning.
         This makes sure a test is run to make sure the cascade is there.
