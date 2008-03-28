@@ -222,7 +222,7 @@ class VectorClassifier:
         '''
         raise NotImplementedError("This is an abstract method")
         
-    def train(self):
+    def train(self,**kwargs):
         '''
         Train the classifer on the training data.
         
@@ -231,7 +231,7 @@ class VectorClassifier:
         '''
         self.trainNormalization()
         
-        self.trainClassifer(self.labels,self.vectors)
+        self.trainClassifer(self.labels,self.vectors,**kwargs)
         
         # remove training data
         del self.labels

@@ -114,12 +114,12 @@ class SVM(VectorClassifier):
             self.__dict__[key] = value
             
     
-    def trainClassifer(self,labels,vectors):
+    def trainClassifer(self,labels,vectors,verbose=False):
         '''
         Do not call this function instead call train.
         '''
-        print
-        print "Training the SVM"
+        if verbose: print
+        if verbose: print "Training the SVM"
         # Convert the vectors to lists of floats
         new_vectors = []
         for vec in vectors:
@@ -131,24 +131,23 @@ class SVM(VectorClassifier):
         
         #TODO: Select the training and validation sets here instead of in each function.  
         
-        print self.svm_type  
         if self.svm_type in (TYPE_C_SVC,TYPE_NU_SVC) and self.kernel == KERNEL_RBF:
-            print "TRAINING SVC RBF"
-            self.train_SVC_RBF(labels,vectors)
+            if verbose: print "TRAINING SVC RBF"
+            self.train_SVC_RBF(labels,vectors,verbose)
         elif self.svm_type in (TYPE_C_SVC,TYPE_NU_SVC) and self.kernel == KERNEL_LINEAR:
-            print "TRAINING SVC Linear"
-            self.train_SVC_Linear(labels,vectors)
+            if verbose: print "TRAINING SVC Linear"
+            self.train_SVC_Linear(labels,vectors,verbose)
         elif self.svm_type in (TYPE_NU_SVR,TYPE_EPSILON_SVR) and self.kernel == KERNEL_RBF:
-            print "TRAINING SVC RBF"
-            self.train_SVR_RBF(labels,vectors)
+            if verbose: print "TRAINING SVC RBF"
+            self.train_SVR_RBF(labels,vectors,verbose)
         elif self.svm_type in (TYPE_NU_SVR,TYPE_EPSILON_SVR) and self.kernel == KERNEL_LINEAR:
-            print "TRAINING SVC Linear"
-            self.train_SVR_Linear(labels,vectors)
+            if verbose: print "TRAINING SVC Linear"
+            self.train_SVR_Linear(labels,vectors,verbose)
         else:
             raise NotImplementedError("Unknown SVM type or kernel")
                     
         
-    def train_SVC_RBF(self,labels,vectors):
+    def train_SVC_RBF(self,labels,vectors, verbose):
         '''Private use only'''
         # combine the labels and vectors into one set.
         data = []
@@ -169,7 +168,7 @@ class SVM(VectorClassifier):
         else:
             raise NotImplementedError("Cannot determine validation set from %s"%self.validation_size)
             
-        print "Training Cutoff:",len(labels),training_cutoff
+        if verbose: print "Training Cutoff:",len(labels),training_cutoff
         training_data = data[:training_cutoff]
         validation_data = data[training_cutoff:]
         
@@ -200,32 +199,32 @@ class SVM(VectorClassifier):
                         successes += 1
                 rate  = successes/total
  
-                print c,g,rate
+                if verbose: print c,g,rate
                 training_svm.append(test_svm)
                 training_info.append([C,G,rate])
                 
-        print 
-        print "------------------------------"
-        print " Tuning Information:"
-        print "         C      gamma    rate"
-        print "------------------------------"
+        if verbose: print 
+        if verbose: print "------------------------------"
+        if verbose: print " Tuning Information:"
+        if verbose: print "         C      gamma    rate"
+        if verbose: print "------------------------------"
         best = training_info[0]
         best_svm = training_svm[0]
         for i in range(len(training_info)):
             each = training_info[i]
-            print " %8.3e  %8.3e  %0.8f"%(each[0],each[1],each[-1])
+            if verbose: print " %8.3e  %8.3e  %0.8f"%(each[0],each[1],each[-1])
             if best[-1] < each[-1]:
                 best = each
                 best_svm = training_svm[i]
-        print "------------------------------"
-        print 
-        print "------------------------------"
-        print " Best Tuning:"
-        print "         C      gamma    rate"
-        print "------------------------------"
-        print " %8.3e  %8.3e  %0.8f"%(best[0],best[1],best[-1])
-        print "------------------------------"
-        print
+        if verbose: print "------------------------------"
+        if verbose: print 
+        if verbose: print "------------------------------"
+        if verbose: print " Best Tuning:"
+        if verbose: print "         C      gamma    rate"
+        if verbose: print "------------------------------"
+        if verbose: print " %8.3e  %8.3e  %0.8f"%(best[0],best[1],best[-1])
+        if verbose: print "------------------------------"
+        if verbose: print
         self.training_info = training_info
         self.C     = best[0]
         self.gamma = best[1]
@@ -234,7 +233,7 @@ class SVM(VectorClassifier):
         self.svm = best_svm
         
         
-    def train_SVR_RBF(self,labels,vectors):
+    def train_SVR_RBF(self,labels,vectors,verbose):
         '''Private use only'''
         # combine the labels and vectors into one set.
         data = []
@@ -255,7 +254,7 @@ class SVM(VectorClassifier):
         else:
             raise NotImplementedError("Cannot determine validation set from %s"%self.validation_size)
             
-        print "Training Cutoff:",len(labels),training_cutoff
+        if verbose: print "Training Cutoff:",len(labels),training_cutoff
         training_data = data[:training_cutoff]
         validation_data = data[training_cutoff:]
         
@@ -271,7 +270,7 @@ class SVM(VectorClassifier):
         training_svm = []
         for c in range(-5,16,1):
             for g in range(-15,4,1):
-                print "Testing:",c,g,
+                if verbose: print "Testing:",c,g,
                 C = pow(2,c)
                 G = pow(2,g)
                 
@@ -287,32 +286,32 @@ class SVM(VectorClassifier):
                     mse += error*error
                 mse = mse/total
  
-                print mse
+                if verbose: print mse
                 training_svm.append(test_svm)
                 training_info.append([C,G,mse])
                 
-        print 
-        print "------------------------------"
-        print " Tuning Information:"
-        print "         C      gamma   error"
-        print "------------------------------"
+        if verbose: print 
+        if verbose: print "------------------------------"
+        if verbose: print " Tuning Information:"
+        if verbose: print "         C      gamma   error"
+        if verbose: print "------------------------------"
         best = training_info[0]
         best_svm = training_svm[0]
         for i in range(len(training_info)):
             each = training_info[i]
-            print " %8.3e  %8.3e  %0.8f"%(each[0],each[1],each[-1])
+            if verbose: print " %8.3e  %8.3e  %0.8f"%(each[0],each[1],each[-1])
             if best[-1] > each[-1]:
                 best = each
                 best_svm = training_svm[i]
-        print "------------------------------"
-        print 
-        print "------------------------------"
-        print " Best Tuning:"
-        print "         C      gamma   error"
-        print "------------------------------"
-        print " %8.3e  %8.3e  %0.8f"%(best[0],best[1],best[-1])
-        print "------------------------------"
-        print
+        if verbose: print "------------------------------"
+        if verbose: print 
+        if verbose: print "------------------------------"
+        if verbose: print " Best Tuning:"
+        if verbose: print "         C      gamma   error"
+        if verbose: print "------------------------------"
+        if verbose: print " %8.3e  %8.3e  %0.8f"%(best[0],best[1],best[-1])
+        if verbose: print "------------------------------"
+        if verbose: print
         self.training_info = training_info
         self.C     = best[0]
         self.gamma = best[1]
@@ -321,7 +320,7 @@ class SVM(VectorClassifier):
         self.svm = best_svm
         
 
-    def train_SVC_Linear(self,labels,vectors):
+    def train_SVC_Linear(self,labels,vectors,verbose):
         '''Private use only.'''
         # combine the labels and vectors into one set.
         data = []
@@ -342,7 +341,7 @@ class SVM(VectorClassifier):
         else:
             raise NotImplementedError("Cannot determine validation set from %s"%self.validation_size)
             
-        print "Training Cutoff:",len(labels),training_cutoff
+        if verbose: print "Training Cutoff:",len(labels),training_cutoff
         training_data = data[:training_cutoff]
         validation_data = data[training_cutoff:]
         
@@ -374,28 +373,28 @@ class SVM(VectorClassifier):
             training_svm.append(test_svm)
             training_info.append([C,rate])
                 
-        print 
-        print "------------------------------"
-        print " Tuning Information:"
-        print "         C   error"
-        print "------------------------------"
+        if verbose: print 
+        if verbose: print "------------------------------"
+        if verbose: print " Tuning Information:"
+        if verbose: print "         C   error"
+        if verbose: print "------------------------------"
         best = training_info[0]
         best_svm = training_svm[0]
         for i in range(len(training_info)):
             each = training_info[i]
-            print " %8.3e  %0.8f"%(each[0],each[1])
+            if verbose: print " %8.3e  %0.8f"%(each[0],each[1])
             if best[-1] < each[-1]:
                 best = each
                 best_svm = training_svm[i]
-        print "------------------------------"
-        print 
-        print "------------------------------"
-        print " Best Tuning:"
-        print "         C   error"
-        print "------------------------------"
-        print " %8.3e  %0.8f"%(best[0],best[1])
-        print "------------------------------"
-        print
+        if verbose: print "------------------------------"
+        if verbose: print 
+        if verbose: print "------------------------------"
+        if verbose: print " Best Tuning:"
+        if verbose: print "         C   error"
+        if verbose: print "------------------------------"
+        if verbose: print " %8.3e  %0.8f"%(best[0],best[1])
+        if verbose: print "------------------------------"
+        if verbose: print
         self.training_info = training_info
         self.C     = best[0]
         self.tuned_rate = best[1]
@@ -403,7 +402,7 @@ class SVM(VectorClassifier):
         self.svm = best_svm
         
         
-    def train_SVR_Linear(self,labels,vectors):
+    def train_SVR_Linear(self,labels,vectors,verbose):
         '''Private use only'''
         # combine the labels and vectors into one set.
         data = []
@@ -424,7 +423,7 @@ class SVM(VectorClassifier):
         else:
             raise NotImplementedError("Cannot determine validation set from %s"%self.validation_size)
             
-        print "Training Cutoff:",len(labels),training_cutoff
+        if verbose: print "Training Cutoff:",len(labels),training_cutoff
         training_data = data[:training_cutoff]
         validation_data = data[training_cutoff:]
         
@@ -456,28 +455,28 @@ class SVM(VectorClassifier):
             training_svm.append(test_svm)
             training_info.append([C,mse])
                 
-        print 
-        print "------------------------------"
-        print " Tuning Information:"
-        print "         C   error"
-        print "------------------------------"
+        if verbose: print 
+        if verbose: print "------------------------------"
+        if verbose: print " Tuning Information:"
+        if verbose: print "         C   error"
+        if verbose: print "------------------------------"
         best = training_info[0]
         best_svm = training_svm[0]
         for i in range(len(training_info)):
             each = training_info[i]
-            print " %8.3e  %0.8f"%(each[0],each[1])
+            if verbose: print " %8.3e  %0.8f"%(each[0],each[1])
             if best[-1] > each[-1]:
                 best = each
                 best_svm = training_svm[i]
-        print "------------------------------"
-        print 
-        print "------------------------------"
-        print " Best Tuning:"
-        print "         C   error"
-        print "------------------------------"
-        print " %8.3e  %0.8f"%(best[0],best[1])
-        print "------------------------------"
-        print
+        if verbose: print "------------------------------"
+        if verbose: print 
+        if verbose: print "------------------------------"
+        if verbose: print " Best Tuning:"
+        if verbose: print "         C   error"
+        if verbose: print "------------------------------"
+        if verbose: print " %8.3e  %0.8f"%(best[0],best[1])
+        if verbose: print "------------------------------"
+        if verbose: print
         self.training_info = training_info
         self.C     = best[0]
         self.error = best[1]
@@ -529,7 +528,7 @@ class TestSVM(unittest.TestCase):
             xor.addTraining(1,[1,0])
 
         xor.train()
-        print "XOR"
+        #if verbose: print "XOR"
         self.assertEqual(xor.predict([0,0]),0)
         self.assertEqual(xor.predict([1,1]),0)
         self.assertEqual(xor.predict([1,0]),1)
@@ -564,7 +563,7 @@ class TestSVM(unittest.TestCase):
             xor.addTraining(1,[1,0])
 
         xor.train()
-        print "XOR"
+        #print "XOR"
         
         # A linear model should not be able to perficly fit this data
         self.assertEqual(xor.predict([0,0]),0) 
@@ -594,7 +593,7 @@ class TestSVM(unittest.TestCase):
             e = p - labels[i]
             mse += e*e
         mse = mse/(len(labels)-50)
-        print "Regression Error:",mse
+        #print "Regression Error:",mse
         
         self.assertAlmostEqual(mse,0.47066712325873877,places=4)
         
@@ -619,7 +618,7 @@ class TestSVM(unittest.TestCase):
         for i in range(50,len(labels)):
             p = rega.predict(vectors[i])
             e = p - labels[i]
-            print labels[i],p,e
+            #print labels[i],p,e
             mse += e*e
         mse = mse/(len(labels)-50)
         self.assertAlmostEqual(mse,0.52674701087510767,places=4)
@@ -653,7 +652,7 @@ class TestSVM(unittest.TestCase):
             if guess == labels[i]:
                 sucesses += 1
             total += 1
-        print "ScrapShots Male/Female Rate:", sucesses/total
+        #print "ScrapShots Male/Female Rate:", sucesses/total
         self.assertAlmostEqual(sucesses/total,0.86301369863013699,places=4)
         
 
@@ -684,9 +683,7 @@ class TestSVM(unittest.TestCase):
                 success += 1
             total += 1
             
-        print "Breast Cancer Rate:",success/total
+        #print "Breast Cancer Rate:",success/total
         
         self.assertAlmostEqual(success/total, 0.97744360902255634,places=4)
         
-    def test_turn_off_output(self):
-        self.assert_(False)
