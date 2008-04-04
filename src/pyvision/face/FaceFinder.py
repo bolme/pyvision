@@ -51,7 +51,7 @@ class FaceFinder:
     '''
     
     #TODO: the left eye points and right eye points should be learned from the input data
-    def __init__(self, face_detector=CascadeDetector(), tile_size=(128,128), validate=None):
+    def __init__(self, face_detector=CascadeDetector(), tile_size=(128,128), validate=None, n_iter=3, annotate=False):
         ''' 
         Create an eye locator.  This default implentation uses a 
         cascade classifier for face detection and then SVR for eye
@@ -62,6 +62,8 @@ class FaceFinder:
         self.right_eye     = None
         self.tile_size     = tile_size
         self.validate      = validate
+        self.n_iter        = n_iter
+        self.annotate      = annotate
 
         # point locators that learn to find the eyes.
         self.left_locator  = SVMLocator()
@@ -112,7 +114,7 @@ class FaceFinder:
         self.right_eye     = self.right_locator.mean
 
         
-    def detect(self, im, n_iter=3, annotate=False):
+    def detect(self, im):
         '''
         Returns a list of tuples where each tuple contains:
             (registered_image, detection_rect, left_eye, right_eye) 
@@ -128,7 +130,7 @@ class FaceFinder:
             affine = AffineFromRect(rect,self.tile_size)
             cropped = affine.transformImage(im)
             
-            for p in range(n_iter):
+            for p in range(self.n_iter):
                 # Find the eyes            
                 pleye = self.left_locator.predict(cropped)
                 preye = self.right_locator.predict(cropped)
@@ -146,13 +148,13 @@ class FaceFinder:
 
             if self.validate != None and not self.validate(reg):
                 # Validate the face.
-                if annotate:
+                if self.annotate:
                     im.annotateRect(rect,color='red')        
                     im.annotatePoint(pleye,color='red')
                     im.annotatePoint(preye,color='red')
                 continue
             
-            if annotate:
+            if self.annotate:
                 reg.annotatePoint(self.left_eye,color='green')
                 reg.annotatePoint(self.right_eye,color='green')
                 im.annotatePoint(pleye,color='green')
@@ -215,6 +217,8 @@ class _TestFaceFinder(unittest.TestCase):
         image_dir = join(pyvision.__path__[0],'data','csuScrapShots')
         
         face_finder = FaceFinderFromDatabase(eyes_file, image_dir, image_ext=".pgm", face_detector=face_detector)
+        
+        
         self.assert_(False) # remove training output
         self.assert_(False) # add a test
         
