@@ -44,7 +44,7 @@ from pyvision.point.PointLocator import SVMLocator
 from pyvision.types.Affine import *
 from pyvision.analysis.FaceAnalysis.FaceDetectionTest import face_from_eyes, is_success
 
-class FaceFinder:
+class SVMEyeDetector:
     ''' 
     This class detects faces and then returns the detection rectangles and 
     the eye coordinates.
@@ -165,13 +165,13 @@ class FaceFinder:
         return result
 
 
-def FaceFinderFromDatabase(eyes_file, image_dir, training_set = None, training_size=1000, image_ext='.jpg', **kwargs):
+def SVMEyeDetectorFromDatabase(eyes_file, image_dir, training_set = None, training_size=1000, image_ext='.jpg', **kwargs):
     '''
     Train a face finder using an Eye Coordanates file and a face dataset.
     '''
 
     # Create a face finder
-    face_finder = FaceFinder(**kwargs)
+    face_finder = SVMEyeDetector(**kwargs)
     
     if training_set == None:
         training_set = eyes_file.files()
@@ -197,7 +197,7 @@ def FaceFinderFromDatabase(eyes_file, image_dir, training_set = None, training_s
 #############################################################################
 # Unit Tests
 #############################################################################
-class _TestFaceFinder(unittest.TestCase):
+class _TestSVMEyeDetector(unittest.TestCase):
     
     def test_training(self):
         '''
@@ -216,7 +216,7 @@ class _TestFaceFinder(unittest.TestCase):
 
         image_dir = join(pyvision.__path__[0],'data','csuScrapShots')
         
-        face_finder = FaceFinderFromDatabase(eyes_file, image_dir, image_ext=".pgm", face_detector=face_detector)
+        face_finder = SVMEyeDetectorFromDatabase(eyes_file, image_dir, image_ext=".pgm", face_detector=face_detector)
         
         
         self.assert_(False) # remove training output
