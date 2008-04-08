@@ -44,6 +44,7 @@ from svm import *
 
 import pyvision
 from pyvision.vector.VectorClassifier import *
+from pyvision.analysis.Table import Table
 
 # SVM Types
 TYPE_C_SVC       = C_SVC
@@ -182,6 +183,9 @@ class SVM(VectorClassifier):
         
         training_info = []
         training_svm = []
+        training_table = Table()
+        self.training_table = training_table
+        i=0
         for c in range(-5,16,1):
             for g in range(-15,4,1):
                 C = pow(2,c)
@@ -202,6 +206,13 @@ class SVM(VectorClassifier):
                 if verbose: print c,g,rate
                 training_svm.append(test_svm)
                 training_info.append([C,G,rate])
+                
+                training_table.setElement(i,'c',c)
+                training_table.setElement(i,'C',C)
+                training_table.setElement(i,'g',g)
+                training_table.setElement(i,'G',G)
+                training_table.setElement(i,'rate',rate)
+                i+=1
                 
         if verbose: print 
         if verbose: print "------------------------------"
@@ -268,6 +279,9 @@ class SVM(VectorClassifier):
         
         training_info = []
         training_svm = []
+        training_table=Table()
+        self.training_table = training_table
+        i = 0
         for c in range(-5,16,1):
             for g in range(-15,4,1):
                 if verbose: print "Testing:",c,g,
@@ -289,6 +303,12 @@ class SVM(VectorClassifier):
                 if verbose: print mse
                 training_svm.append(test_svm)
                 training_info.append([C,G,mse])
+                training_table.setElement(i,'c',c)
+                training_table.setElement(i,'C',C)
+                training_table.setElement(i,'g',g)
+                training_table.setElement(i,'G',G)
+                training_table.setElement(i,'mse',mse)
+                i+=1
                 
         if verbose: print 
         if verbose: print "------------------------------"
@@ -355,6 +375,9 @@ class SVM(VectorClassifier):
         
         training_info = []
         training_svm = []
+        training_table = Table()
+        self.training_table = training_table
+        i=0
         for c in range(-5,16,1):
             C = pow(2,c)
                 
@@ -372,6 +395,10 @@ class SVM(VectorClassifier):
  
             training_svm.append(test_svm)
             training_info.append([C,rate])
+            training_table.setElement(i,'c',c)
+            training_table.setElement(i,'C',C)
+            training_table.setElement(i,'rate',rate)
+            i+=1
                 
         if verbose: print 
         if verbose: print "------------------------------"
@@ -437,6 +464,9 @@ class SVM(VectorClassifier):
         
         training_info = []
         training_svm = []
+        training_table = Table()
+        self.training_table = training_table
+        i=0
         for c in range(-5,16,1):
             C = pow(2,c)
                 
@@ -454,6 +484,10 @@ class SVM(VectorClassifier):
  
             training_svm.append(test_svm)
             training_info.append([C,mse])
+            training_table.setElement(i,'c',c)
+            training_table.setElement(i,'C',C)
+            training_table.setElement(i,'mse',mse)
+            i+=1
                 
         if verbose: print 
         if verbose: print "------------------------------"
@@ -496,19 +530,41 @@ class SVM(VectorClassifier):
     
     def predictSVMProbability(self,data):
         assert self.svm != None
+        data = self.normalizeVector(data)
         new_vec = []
         for value in data:
             new_vec.append(float(value))
         prd, prb = self.svm.predict_probability(new_vec)
+        #if self.type == TYPE_TWOCLASS or self.type == TYPE_MULTICLASS:
+        #    return self.invertClass(value)
+        #if self.type == TYPE_REGRESSION:
+        #    return self.invertReg(value)
         return prd,prb
 
     def predictSVMValues(self,data):
         assert self.svm != None
+        data = self.normalizeVector(data)
         new_vec = []
         for value in data:
             new_vec.append(float(value))
         d = self.svm.predict_values(new_vec)
-        return d
+        
+        result = {}
+        for key,value in d.iteritems():
+            new_key = tuple()
+            for each in key:
+                if self.type == TYPE_TWOCLASS or self.type == TYPE_MULTICLASS:
+                    each =  self.invertClass(each)
+                #if self.type == TYPE_REGRESSION:
+                #    return self.invertReg(value)
+                new_key = new_key + (each,)
+            result[new_key] = value
+                
+        #if self.type == TYPE_TWOCLASS or self.type == TYPE_MULTICLASS:
+        #    return self.invertClass(value)
+        #if self.type == TYPE_REGRESSION:
+        #    return self.invertReg(value)
+        return result
 
 
 class TestSVM(unittest.TestCase):
@@ -649,6 +705,7 @@ class TestSVM(unittest.TestCase):
         total = 0.0
         for i in range(100,len(labels)):
             guess = gender.predict(vectors[i])
+            #print gender.predictSVMValues(vectors[i])
             if guess == labels[i]:
                 sucesses += 1
             total += 1
@@ -656,7 +713,7 @@ class TestSVM(unittest.TestCase):
         self.assertAlmostEqual(sucesses/total,0.86301369863013699,places=4)
         
 
-    def test_svm_breast_cancer(self):
+    def test_svm_breast_cancer_rbf(self):
         filename = os.path.join(pyvision.__path__[0],'data','ml','breast-cancer-wisconsin.data')
         reader = csv.reader(open(filename, "rb"))
         breast_cancer_labels = []
@@ -681,9 +738,82 @@ class TestSVM(unittest.TestCase):
             label = cancer.predict(breast_cancer_data[i])
             if breast_cancer_labels[i] == label:
                 success += 1
+            #else:
+            #    print breast_cancer_labels[i],cancer.predictSVMValues(breast_cancer_data[i])
+            total += 1
+            
+        #print "Breast Cancer Rate:",success/total
+        #print cancer.training_table    
+        
+        self.assertAlmostEqual(success/total, 0.97744360902255634,places=4)
+
+    
+    def test_svm_breast_cancer_lin(self):
+        filename = os.path.join(pyvision.__path__[0],'data','ml','breast-cancer-wisconsin.data')
+        reader = csv.reader(open(filename, "rb"))
+        breast_cancer_labels = []
+        breast_cancer_data = []
+        for row in reader:
+            data = []
+            for item in row[1:-2]:
+                if item == '?':
+                    data.append(0)
+                else:
+                    data.append(int(item))
+            breast_cancer_labels.append(int(row[-1]))
+            breast_cancer_data.append(data)
+
+        cancer = SVM(type=TYPE_SVC,kernel=KERNEL_LINEAR,random_seed=0)
+        for i in range(300):
+            cancer.addTraining(breast_cancer_labels[i],breast_cancer_data[i])        
+        cancer.train()
+        success = 0.0
+        total = 0.0
+        for i in range(300,len(breast_cancer_labels)):
+            label = cancer.predict(breast_cancer_data[i])
+            if breast_cancer_labels[i] == label:
+                success += 1
+            #else:
+            #    print breast_cancer_labels[i],cancer.predictSVMValues(breast_cancer_data[i])
+            total += 1
+        #print cancer.training_table    
+        #print "Breast Cancer Rate:",success/total
+        
+        self.assertAlmostEqual(success/total, 0.97994987468671679,places=4)
+
+    
+    def test_svm_breast_cancer_nu(self):
+        filename = os.path.join(pyvision.__path__[0],'data','ml','breast-cancer-wisconsin.data')
+        reader = csv.reader(open(filename, "rb"))
+        breast_cancer_labels = []
+        breast_cancer_data = []
+        for row in reader:
+            data = []
+            for item in row[1:-2]:
+                if item == '?':
+                    data.append(0)
+                else:
+                    data.append(int(item))
+            breast_cancer_labels.append(int(row[-1]))
+            breast_cancer_data.append(data)
+
+        cancer = SVM(type=TYPE_NU_SVC,random_seed=0)
+        for i in range(300):
+            cancer.addTraining(breast_cancer_labels[i],breast_cancer_data[i])        
+        cancer.train()
+        success = 0.0
+        total = 0.0
+        #print
+        #print cancer.training_table
+        for i in range(300,len(breast_cancer_labels)):
+            label = cancer.predict(breast_cancer_data[i])
+            if breast_cancer_labels[i] == label:
+                success += 1
+            #else:
+            #    print breast_cancer_labels[i],cancer.predictSVMValues(breast_cancer_data[i])
             total += 1
             
         #print "Breast Cancer Rate:",success/total
         
-        self.assertAlmostEqual(success/total, 0.97744360902255634,places=4)
+        self.assertAlmostEqual(success/total, 0.97994987468671679,places=4)
         
