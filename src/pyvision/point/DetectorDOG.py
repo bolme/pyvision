@@ -230,24 +230,24 @@ def TaylorApprox(params,s,x,y):
     
 
 
-class DetectorCornerTestCase(unittest.TestCase):
+class DetectorDOGTestCase(unittest.TestCase):
     def setUp(self):
         pass
     
         
-    def testDetectorCorner1(self):
+    def testDetectorDOG1(self):
         detector = DetectorDOG(selector='best',n=100)
         filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_1.jpg')
         im = Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        print len(points)
+        #print len(points)
         for score,pt,radius in points:
             im.annotateCircle(pt,radius)
-        im.show()
-        #self.assertEquals(len(points),0)
+        #im.show()
+        self.assertEquals(len(points),100)
 
-    def dtestDetectorCorner2(self):
+    def testDetectorDOG2(self):
         detector = DetectorDOG(selector='best')
         filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_19.jpg')
         im = Image(filename,bw_annotate=True)
@@ -256,9 +256,9 @@ class DetectorCornerTestCase(unittest.TestCase):
         for score,pt,radius in points:
             im.annotatePoint(pt)
             
-        self.assertEquals(len(points),0)
+        self.assertEquals(len(points),250)
 
-    def dtestDetectorCorner3(self):
+    def testDetectorDOG3(self):
         detector = DetectorDOG()
         filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_22.jpg')
         im = Image(filename,bw_annotate=True)
@@ -267,9 +267,9 @@ class DetectorCornerTestCase(unittest.TestCase):
         for score,pt,radius in points:
             im.annotatePoint(pt)
             
-        self.assertEquals(len(points),0)
+        self.assertEquals(len(points),329)
 
-    def dtestDetectorCorner4(self):
+    def testDetectorDOG4(self):
         detector = DetectorDOG()
         filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
         im = Image(filename,bw_annotate=True)
@@ -278,9 +278,9 @@ class DetectorCornerTestCase(unittest.TestCase):
         for score,pt,radius in points:
             im.annotatePoint(pt)
             
-        self.assertEquals(len(points),0)
+        self.assertEquals(len(points),293)
 
-    def dtestDetectorCorner5(self):
+    def testDetectorDOG5(self):
         detector = DetectorDOG(selector='best')
         filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
         im = Image(filename,bw_annotate=True)
@@ -289,9 +289,9 @@ class DetectorCornerTestCase(unittest.TestCase):
         for score,pt,radius in points:
             im.annotatePoint(pt)
             
-        self.assertEquals(len(points),0)
+        self.assertEquals(len(points),250)
         
-    def dtestDetectorCorner6(self):
+    def testDetectorDOG6(self):
         detector = DetectorDOG(selector='all')
         filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
         im = Image(filename,bw_annotate=True)
@@ -300,7 +300,7 @@ class DetectorCornerTestCase(unittest.TestCase):
         for score,pt,radius in points:
             im.annotatePoint(pt)
             
-        self.assertEquals(len(points),0)
+        self.assertEquals(len(points),554)
         
 
   
