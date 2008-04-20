@@ -45,6 +45,8 @@ PCA (Face)            face recognition    pyvision.face.PCA
 Genetic Algorithm     optimization        pyvision.optimize.GeneticAlgorithm
 '''
 
+import unittest
+
 __version__ = "$Rev: 634 $"
 __info__ = "$Id: __init__.py 634 2008-03-24 20:43:42Z bolme $"
 __license__= '''
@@ -134,4 +136,70 @@ __all__ = ['analysis','edge','face','optimize','other','point','types','vector']
 #     Fundimental Matrix and 3D Reconstruction
 #     LBP - Texture analysis and face recognition.
 
+class _VersionTest(unittest.TestCase):
+    ''' Check the installed versions of the dependencies '''
+    
+    def test_python_version(self):
+        import sys
+        major,minor,sub = sys.version.split(' ')[0].split('.')[:3]
+        rmajor,rminor,rsub = 2,3,0 # 2008/03/20
+        major,minor,sub = int(major),int(minor),int(sub)
+        print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        self.assert_(major > rmajor 
+                     or major == rmajor and minor >= rminor 
+                     or major == rmajor and minor == rminor and sub >= sub)
 
+    def test_pil____version(self):
+        import PIL.Image
+        major,minor,sub = PIL.Image.VERSION.split('.')[:3]
+        rmajor,rminor,rsub = 1,1,5 # 2008/03/20
+        major,minor,sub = int(major),int(minor),int(sub)
+        print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        self.assert_(major > rmajor 
+                     or major == rmajor and minor >= rminor 
+                     or major == rmajor and minor == rminor and sub >= sub)
+
+    def test_opencv_version(self):
+        import opencv
+        major,minor,sub = opencv.CV_VERSION.split('.')[:3]
+        rmajor,rminor,rsub = 1,0,0 # 2008/03/20
+        major,minor,sub = int(major),int(minor),int(sub)
+        print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        self.assert_(major > rmajor 
+                     or major == rmajor and minor >= rminor 
+                     or major == rmajor and minor == rminor and sub >= sub)
+
+    def test_scipy__version(self):
+        import scipy
+        major,minor,sub = scipy.__version__.split('.')[:3]
+        rmajor,rminor,rsub = 0,7,0 # 2008/03/20
+        major,minor,sub = int(major),int(minor),int(sub)
+        print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        self.assert_(major > rmajor 
+                     or major == rmajor and minor >= rminor 
+                     or major == rmajor and minor == rminor and sub >= sub)
+        
+    def test_numpy__version(self):
+        import numpy
+        major,minor,sub = numpy.__version__.split('.')[:3]
+        rmajor,rminor,rsub = 1,0,4 # 2008/03/20
+        major,minor,sub = int(major),int(minor),int(sub)
+        print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        self.assert_(major > rmajor 
+                     or major == rmajor and minor >= rminor 
+                     or major == rmajor and minor == rminor and sub >= sub)
+        
+    def test_libsvm_version(self):
+        import svm
+        #major,minor,sub = svm.__version__.split('.')[:3]
+        rmajor,rminor,rsub = 2,86,0 # 2008/03/20
+        #major,minor,sub = int(major),int(minor),int(sub)
+        #print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        print "No way to get version numbers >= %d.%d "%(rmajor,rminor),
+        #self.assert_(major > rmajor 
+        #             or major == rmajor and minor >= rminor 
+        #             or major == rmajor and minor == rminor and sub >= sub)
+        self.assert_(True)        
+        
+        
+        
