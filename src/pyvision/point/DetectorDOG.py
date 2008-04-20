@@ -59,16 +59,6 @@ from pyvision.analysis.ImageLog import ImageLog
 from numpy import sqrt,array,nonzero
 from numpy.lib.polynomial import polyfit
 
-#import convert
-#TODO: update to numpy
-#import numarray
-#from numarray.nd_image import gaussian_filter, maximum_filter, minimum_filter
-#from scipy.weave import converters
-#from scipy import weave
-#import numpy
-#import scipy 
-
-#TODO: minimize this: (MATCHED_SSE+NOT_MATCHED_POINTS)/MATCHED_POINTS
 
 EXTREMA_SIZE=3
 DEFAULT_SIGMA=sqrt(2) # from Lowe99
@@ -314,19 +304,6 @@ class DetectorCornerTestCase(unittest.TestCase):
         
 
   
-
-if __name__ == '__main__':
-    from PIL import Image
-    import convert
-    img = Image.open("/Users/bolme/webcam.jpg")
-    img.save("test.jpg")
-    img = img.resize((640,480))
-    a = convert.image_to_matrix(img)
-    #a = (a - a.mean())/a.stddev()
-    a = numarray.log(a+1)
-    image_pyramid = pyramid.ImagePyramid(a,minsize=80)
-    computeDOGPyramid(image_pyramid)
-    print "done."
 
 
 
