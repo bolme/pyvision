@@ -62,10 +62,10 @@ class SVMLocator:
         self.y_sum += location.Y()
         self.point_count += 1
         
-    def train(self):
+    def train(self,**kwargs):
         # compute the mean location
-        self.x_svm.train()
-        self.y_svm.train()
+        self.x_svm.train(**kwargs)
+        self.y_svm.train(**kwargs)
         
         cx = self.x_sum/self.point_count
         cy = self.y_sum/self.point_count

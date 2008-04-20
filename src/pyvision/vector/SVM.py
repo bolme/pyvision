@@ -119,6 +119,8 @@ class SVM(VectorClassifier):
         '''
         Do not call this function instead call train.
         '''
+        self.training_size = len(labels)
+        
         if verbose: print
         if verbose: print "Training the SVM"
         # Convert the vectors to lists of floats
@@ -284,7 +286,7 @@ class SVM(VectorClassifier):
         i = 0
         for c in range(-5,16,1):
             for g in range(-15,4,1):
-                if verbose: print "Testing:",c,g,
+                if verbose: print "Testing: %5d %5d"%(c,g),
                 C = pow(2,c)
                 G = pow(2,g)
                 
@@ -300,7 +302,7 @@ class SVM(VectorClassifier):
                     mse += error*error
                 mse = mse/total
  
-                if verbose: print mse
+                if verbose: print "%15.8e"%mse
                 training_svm.append(test_svm)
                 training_info.append([C,G,mse])
                 training_table.setElement(i,'c',c)

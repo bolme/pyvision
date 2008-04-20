@@ -281,7 +281,7 @@ class EyePickerFrame(wx.Frame):
         
 
 if __name__ == '__main__':
-    image_dir = "/Users/bolme/vision/data/CSUScarecrow-FULL/SourceTiff"
+    image_dir = "/Users/bolme/Documents/workspace/FaceRec/val_data"
     app = wx.PySimpleApp()
     frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=2)
     frame.Show(True)
