@@ -47,8 +47,8 @@ Genetic Algorithm     optimization        pyvision.optimize.GeneticAlgorithm
 
 import unittest
 
-__version__ = "$Rev: 634 $"
-__info__ = "$Id: __init__.py 634 2008-03-24 20:43:42Z bolme $"
+__version__ = "$Rev$"
+__info__ = "$Id$"
 __license__= '''
 PyVision License
 
