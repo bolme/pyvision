@@ -271,7 +271,7 @@ def rsquared():
             
 
 import unittest
-class TestStats(unittest.TestCase):
+class _TestStats(unittest.TestCase):
     def setUp(self):
         self.normal_data = [1.3139,  5.2441,  0.0756,  4.4679,  2.3845,  
                             2.9330,  2.9803,  2.3844,  0.7643,  -2.2058,  

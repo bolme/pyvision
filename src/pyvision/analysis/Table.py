@@ -267,7 +267,7 @@ class Table:
     
     
 import unittest
-class _TableTest(unittest.TestCase):
+class _TestTable(unittest.TestCase):
     def setUp(self):
         color = Table(default_value=0)
         color.accumulateData('red','red',1)

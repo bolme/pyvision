@@ -150,7 +150,7 @@ class DetectorCorner(DetectorROI):
 
 class _CornerTest(unittest.TestCase):
     def setUp(self):
-        self.SHOW_IMAGES = True
+        self.SHOW_IMAGES = False
     
         
     def testDetectorCorner1(self):

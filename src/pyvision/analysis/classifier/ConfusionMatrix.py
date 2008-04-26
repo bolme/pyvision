@@ -140,7 +140,7 @@ class ConfusionMatrix(Table):
 
                 
                 
-class ConfusionMatrixTest(unittest.TestCase):
+class _TestConfusionMatrix(unittest.TestCase):
     def setUp(self):
         color = ConfusionMatrix()
         color.addData('red','red')
@@ -176,17 +176,17 @@ class ConfusionMatrixTest(unittest.TestCase):
         sim_face.computeRates()
         self.sim_face = sim_face
         
-    def test__str__(self):
-        print
-        print self.color
-        print self.color.rate()
-        print self.color.confidenceInterval()
-        print self.sim_face
-        
+    def test_color(self):
+        #print
+        #print self.color
+        self.assertAlmostEquals(self.color.rate(),0.6842,places=4)
+        self.assertAlmostEquals(self.color.confidenceInterval()[0],0.4345,places=4)
+        self.assertAlmostEquals(self.color.confidenceInterval()[1],0.8742,places=4)
+    
     def test_verification(self):
-        print self.sim_face
-        print
-        print self.sim_face.verificationAsText()
+        self.assertAlmostEquals(self.sim_face.rate(),0.99890100000000004,places=4)
+        self.assertAlmostEquals(self.sim_face.confidenceInterval()[0],0.99883409247930877,places=4)
+        self.assertAlmostEquals(self.sim_face.confidenceInterval()[1],0.99896499025635421,places=4)
         
         
         

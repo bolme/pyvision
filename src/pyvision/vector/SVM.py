@@ -569,7 +569,7 @@ class SVM(VectorClassifier):
         return result
 
 
-class TestSVM(unittest.TestCase):
+class _TestSVM(unittest.TestCase):
     ''' Unit tests for SVM '''
     
     def setUp(self):

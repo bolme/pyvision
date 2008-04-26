@@ -140,8 +140,8 @@ class SVMEyeDetector:
         
         vectors = self.normalize.vectors
         
-        print len(self.training_labels)
-        print vectors.shape
+        #print len(self.training_labels)
+        #print vectors.shape
         
         for i in range(len(self.training_labels)):
             leye,reye = self.training_labels[i]
@@ -232,7 +232,7 @@ def SVMEyeDetectorFromDatabase(eyes_file, image_dir, training_set = None, traini
         training_size = len(training_set)
 
     for filename in training_set[:training_size]:
-        print "Processing file:",filename
+        #print "Processing file:",filename
         im_name = join(image_dir,filename+image_ext)
         
         # Detect faces
@@ -273,12 +273,12 @@ class _TestSVMEyeDetector(unittest.TestCase):
 
         # Load an eyes file
         eyes_filename = join(pyvision.__path__[0],'data','csuScrapShots','coords.txt')
-        print "Creating eyes File."
+        #print "Creating eyes File."
         eyes_file = EyesFile(eyes_filename)
         
         # Create a face detector
         cascade_file = join(pyvision.__path__[0],'config','facedetector_celebdb2.xml')
-        print "Creating a face detector from:",cascade_file
+        #print "Creating a face detector from:",cascade_file
         face_detector = CascadeDetector(cascade_file)
 
         image_dir = join(pyvision.__path__[0],'data','csuScrapShots')
@@ -286,9 +286,9 @@ class _TestSVMEyeDetector(unittest.TestCase):
         ed = SVMEyeDetectorFromDatabase(eyes_file, image_dir, image_ext=".pgm", face_detector=face_detector,random_seed=0)
         edt = EyeDetectionTest(name='scraps')
 
-        print "Testing..."
+        #print "Testing..."
         for img in self.images:
-            print img.filename
+            #print img.filename
             faces = ed.detect(img)
 
             #faces = ed.detect(img)
@@ -301,7 +301,7 @@ class _TestSVMEyeDetector(unittest.TestCase):
             edt.addSample(truth_eyes, pred_eyes, im=img, annotate=False)
         
         print edt.createSummary()
-        print edt
+        #print edt
         #self.assertAlmostEqual( edt.elapse_time , 49.7727022171, places = 3 )
         #self.assertAlmostEqual( edt.face_rate , 0.9249, places = 3 )
         #self.assertAlmostEqual( edt.both25_rate , 0.8960, places = 3 )
@@ -312,10 +312,5 @@ class _TestSVMEyeDetector(unittest.TestCase):
         self.assert_(False) # add a test
         
         
-    def test_evaluation(self):
-        '''
-        This tests basing FaceFinder evaluation.
-        '''
-        self.assert_(False) # add a test
       
             

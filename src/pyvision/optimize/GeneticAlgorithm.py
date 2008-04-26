@@ -200,7 +200,7 @@ class GeneticAlgorithm:
             else:
                 if self.population[0][1] > best:
                     best = self.population[0][1]
-            print "Iteration:",i,"Best:",best,"Worst:",self.population[-1][1]
+            #print "Iteration:",i,"Best:",best,"Worst:",self.population[-1][1]
         
     def iteration(self):
         parents = [self.population[0]]
@@ -226,7 +226,7 @@ class GeneticAlgorithm:
         if repr(idv3) not in self.tested: 
             self.tested.add(repr(idv3))
         else:
-            print "No new combination found."
+            #print "No new combination found."
             return
         fit = self.fitness(idv3)
         self.population.append([idv3,fit])
@@ -248,7 +248,7 @@ class GeneticAlgorithm:
             self.population.sort(lambda x,y: cmp(x[1],y[1]))
         else:
             self.population.sort(lambda x,y: cmp(y[1],x[1]))
-        print "Best: ",self.population[0][1]
+        #print "Best: ",self.population[0][1]
         
     def random(self):
         idv = []

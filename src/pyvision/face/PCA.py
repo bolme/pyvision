@@ -165,7 +165,7 @@ SCRAPS_FACE_DATA = os.path.join(pyvision.__path__[0],"data","csuScrapShots")
 
 PCA_SIZE = (64,64)
 
-class _TestFaceRecognition(unittest.TestCase):
+class _TestFacePCA(unittest.TestCase):
     
     def setUp(self):
         self.images = []

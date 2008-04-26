@@ -85,36 +85,5 @@ class LinearReg:
         
         
         
-class TestLinearReg(unittest.TestCase):
-    
-    def setUp(self):
-        pass   
-        
-    def tearDown(self):
-        pass
-    
-    def test_line(self):
-        inputs = numpy.array([[0],[1],[2],[3]],'f')
-        targets = numpy.array([[0,3],[1,2],[2,1],[3,0]],'f')
-        
-        reg = LinearReg()
-        reg.train_least_squares(inputs,targets)
-        
-        for i in range(10):
-            print i,reg.map(numpy.array([i],'f'))
-
-            
-    def test_cos(self):
-        pass
-    
-    def test_sin(self):
-        pass
-
-if __name__ == "__main__":
-    #unittest.main()
-    
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestLinearReg)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-    
 
         

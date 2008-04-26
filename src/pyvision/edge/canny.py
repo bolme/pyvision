@@ -44,8 +44,6 @@ from numpy import array,ones,zeros,nonzero
 from scipy.ndimage import convolve
 from scipy.ndimage import maximum_filter
 
-
-print opencv.cvCanny
 from  opencv.adaptors import PIL2Ipl,Ipl2PIL,Ipl2NumPy
 
 def canny(im,threshold1=40.0,threshold2=100.0,aperture_size=3):
@@ -67,7 +65,7 @@ class _TestCanny(unittest.TestCase):
     ''' Unit tests for the canny detector'''
     
     def setUp(self):
-        self.show_results = True
+        self.show_results = False
         pass
         
     def test_canny1(self):

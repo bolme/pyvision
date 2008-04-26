@@ -173,7 +173,7 @@ def QuadradicEstimation(pc, max_point):
 # TODO: Add UnitTests
 import unittest
 
-class TestPhaseCorrelation(unittest.TestCase):
+class _TestPhaseCorrelation(unittest.TestCase):
     
     def test_Registration1(self):
         import os.path

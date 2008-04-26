@@ -33,6 +33,7 @@
 
 
 from numpy import array
+from math import sqrt
 
 class Point:
     def __init__(self,x=0.0,y=0.0,z=0.0,w=1.0,scale=1.0,rotation=0.0):
@@ -70,6 +71,13 @@ class Point:
     def asVector3H(self):
         ''' Return a 3D homogenious vector [x,y,z,w] '''
         return array([[self.x],[self.y],[self.z],[self.w]])
+    
+    def l2(self,point):
+        dx = self.X()-point.X()
+        dy = self.Y()-point.Y()
+        dz = self.Z()-point.Z()
+        
+        return sqrt(dx*dx + dy*dy + dz*dz)
     
     def __sub__(self,point):
         return Point(self.X()-point.X(),self.Y()-point.Y(),self.Z()-point.Z())

@@ -230,7 +230,7 @@ def TaylorApprox(params,s,x,y):
     
 
 
-class DetectorDOGTestCase(unittest.TestCase):
+class _DetectorDOGTestCase(unittest.TestCase):
     def setUp(self):
         pass
     

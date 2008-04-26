@@ -334,7 +334,7 @@ NONFACE_DATA = os.path.join(pyvision.__path__[0],"data","NonFace")
 BAD_CASCADE=os.path.join(pyvision.__path__[0],"config","not_there.xml")
 
 
-class _TestFaceRecognition(unittest.TestCase):
+class _TestCascadeDetector(unittest.TestCase):
     ''' Unit tests for the Cascade Detector '''
     
     def setUp(self):

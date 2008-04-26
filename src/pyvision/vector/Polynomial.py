@@ -97,7 +97,7 @@ class Polynomial2D(VectorClassifier):
 
 import unittest
 
-class PolyTest(unittest.TestCase):
+class _PolyTest(unittest.TestCase):
     def test_buildrow(self):
         poly = Polynomial2D(ord=3)
         row = array(poly.buildRow(2,2))
