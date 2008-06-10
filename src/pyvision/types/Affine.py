@@ -40,7 +40,7 @@ from numpy import array,dot
 from numpy.linalg import inv,solve
 
 import pyvision
-from pyvision.types.Image import Image, TYPE_PIL, TYPE_MATRIX2D
+from pyvision.types.Image import Image, TYPE_PIL, TYPE_MATRIX_2D
 from pyvision.types.Point import Point
 from pyvision.types.Rect import Rect
 
@@ -53,6 +53,12 @@ def AffineTranslate(dx,dy,new_size,filter=BILINEAR):
 def AffineScale(scale,new_size,filter=BILINEAR):
     ''' Construct an affine tranfrom that performs a scale. '''
     matrix = array([[scale,0,0],[0,scale,0],[0,0,1]],'d')
+
+    return AffineTransform(matrix,new_size,filter)
+    
+def AffineNonUniformScale(sx,sy,new_size,filter=BILINEAR):
+    ''' Construct an affine tranfrom that performs a scale. '''
+    matrix = array([[sx,0,0],[0,sy,0],[0,0,1]],'d')
 
     return AffineTransform(matrix,new_size,filter)
     
