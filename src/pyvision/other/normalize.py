@@ -32,25 +32,49 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from math import *
+from pyvision.types.Image import Image
 
+def normalizeMeanStd(matrix):
+    ''' TODO: deprecated please use meanStd.'''
+    print '''normalizeMeanStd is deprecated.  Please call as normalize.meanStd'''
+    return meanStd(matrix)
 
 def meanStd(matrix):
     ''' zero mean, one standard deviation '''
+    is_image = False
+    if isinstance(matrix,Image):
+        matrix = matrix.asMatrix2D()
+        is_image = True
+    # Otherwize, assume it is a numpy matrix
     matrix = matrix - matrix.mean()
     matrix = (1.0/matrix.std()) * matrix
+    if is_image:
+        return Image(matrix)
     return matrix
 
 def meanUnit(matrix):
     ''' zero mean, unit length '''
+    is_image = False
+    if isinstance(matrix,Image):
+        matrix = matrix.asMatrix2D()
+        is_image = True
     matrix = matrix - matrix.mean()
     length = sqrt( (matrix*matrix).sum() )
     matrix = (1.0/length) * matrix
+    if is_image:
+        return Image(matrix)
     return matrix
 
 def unit(matrix):
     ''' unit length '''
+    is_image = False
+    if isinstance(matrix,Image):
+        matrix = matrix.asMatrix2D()
+        is_image = True
     length = sqrt( (matrix*matrix).sum() )
     matrix = (1.0/length) * matrix
+    if is_image:
+        return Image(matrix)
     return matrix
 
 
