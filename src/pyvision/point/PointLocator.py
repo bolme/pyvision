@@ -39,6 +39,7 @@ come from a face detector.
 
 from pyvision.types.Point import Point
 from pyvision.vector import SVM
+from pyvision.vector.RidgeRegression import KernelRidgeRegression
     
     
 class SVMLocator:
@@ -79,4 +80,44 @@ class SVMLocator:
         return Point(x,y)
         
     
+    
+class KRRLocator:
+    
+    def __init__(self,**kwargs):
+        self.x_krr = KernelRidgeRegression(**kwargs)
+        self.y_krr = KernelRidgeRegression(**kwargs)
+        self.x_sum = 0.0
+        self.y_sum = 0.0
+        self.point_count = 0
+    
+    def addTraining(self,image,location):
+        '''
+        Pass in an image that is roughly centered on the feature,
+        and a true location of that feature in the image.
+        '''
+        self.x_krr.addTraining(location.X(),image)
+        self.y_krr.addTraining(location.Y(),image)
+
+        self.x_sum += location.X()
+        self.y_sum += location.Y()
+        self.point_count += 1
+        
+    def train(self,**kwargs):
+        # compute the mean location
+        self.x_krr.train(**kwargs)
+        self.y_krr.train(**kwargs)
+        
+        cx = self.x_sum/self.point_count
+        cy = self.y_sum/self.point_count
+        
+        self.mean = Point(cx,cy)    
+    
+    def predict(self,image):
+        x = self.x_krr.predict(image)
+        y = self.y_krr.predict(image)
+
+        return Point(x,y)
+        
+    
+        
     
