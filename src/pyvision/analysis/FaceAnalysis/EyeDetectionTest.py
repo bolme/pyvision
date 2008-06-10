@@ -95,6 +95,14 @@ class EyeDetectionTest:
             detect_r10  = False
             detect_r05  = False
             eye_dist = None
+            tl_x  = None
+            tl_y  = None
+            tr_x  = None
+            tr_y  = None
+            pl_x  = None
+            pl_y  = None
+            pr_x  = None
+            pr_y  = None
             dlx   = None
             dly   = None
             dl2   = None
@@ -165,7 +173,18 @@ class EyeDetectionTest:
             self.table.setElement(self.faces,'detect_b25',detect_b25)              
             self.table.setElement(self.faces,'detect_b10',detect_b10)              
             self.table.setElement(self.faces,'detect_b05',detect_b05)              
-            self.table.setElement(self.faces,'eye_dist',eye_dist)              
+            self.table.setElement(self.faces,'eye_dist',eye_dist)
+                          
+            self.table.setElement(self.faces,'truth_lx',tl_x)              
+            self.table.setElement(self.faces,'truth_ly',tl_y)              
+            self.table.setElement(self.faces,'truth_rx',tr_x)              
+            self.table.setElement(self.faces,'truth_ry',tr_y)              
+            
+            self.table.setElement(self.faces,'pred_lx',pl_x)              
+            self.table.setElement(self.faces,'pred_ly',pl_y)              
+            self.table.setElement(self.faces,'pred_rx',pr_x)              
+            self.table.setElement(self.faces,'pred_ry',pr_y)              
+            
             self.table.setElement(self.faces,'dlx',dlx)              
             self.table.setElement(self.faces,'dly',dly)              
             #self.table.setElement(self.faces,'dl2',dl2)              
