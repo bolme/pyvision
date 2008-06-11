@@ -118,12 +118,68 @@ def cibinom(size,success,alpha=0.05):
     return (lb,ub)
     
          
-def factorial(n):
-    if n <= 1: return 1
-    else: return n*factorial(n-1)
-       
 def mcnemar_test(sf,fs):
-    # From Zhoo and Chellappa. "Face Processining". Chapter 3.
+    ''' 
+    From Zhoo and Chellappa. "Face Processining". Chapter 3.
+    
+    Compairs the output of two algorithms on the same set of trials.
+    Input to the function are two counts:
+        sf - the number of trials algorithm A succeeded and algorithm B failed.
+        fs - the number of trials algorithm A failed and algorithm B succeeded.
+    Notice that trials where they both succeeded or both failed are ignored.
+    Output: The two-sided p-value for McNemar's Exact Test.  For one sided
+            divide by two.
+    
+    If sf+fs is large you may want to use the approximate test.
+    
+    Here is an example on a simple classifer...  The problem is classifing 
+    images of bananas, apples, and oranges.  Two algorithms are compaired by 
+    running the algorithms on the same set of 9 test images.  Here are the
+    outcomes.
+    
+    |---|--------|--------|--------|-----------|-----------|
+    |   | truth  | Alg A  | Alg B  | Success A | Success B |
+    |---|--------|--------|--------|-----------|-----------|
+    | 1 | banana | banana | banana | T         | T         |
+    | 2 | apple  | apple  | banana | T         | F         |
+    | 3 | orange | apple  | orange | F         | T         |
+    | 4 | orange | apple  | apple  | F         | F         |
+    | 5 | apple  | apple  | apple  | T         | T         |
+    | 6 | banana | banana | banana | T         | T         |
+    | 7 | apple  | apple  | banana | T         | F         |
+    | 8 | orange | orange | apple  | T         | F         |
+    | 9 | banana | None   | banana | T         | T         |
+    |---|--------|--------|--------|-----------|-----------|
+    
+    Now you can count the number of times both algorithms succeed, both 
+    algorithms fail, A succeeds and B fails, and A fails and B succeeds.
+    
+    |-------|-----|-----|-------|
+    |       | A=T | A=F | Total |
+    |-------|-----|-----|-------|
+    | B=T   |   4 |   1 |     5 |
+    | B=F   |   3 |   1 |     4 |
+    |-------|-----|-----|-------|
+    | Total |   7 |   2 |     9 |
+    |-------|-----|-----|-------|
+    
+    From this table you can compute success rates (A=T)/Total...
+
+    > 7.0/9.0 # A Success Rate
+    0.77777777777777779
+    
+    > 5.0/9.0 # B Success Rate
+    0.55555555555555558    
+    
+    The input to McNemar's Test are the SF (A=T,B=F) = 3 and FS (A=F,B=T) = 1.
+    
+    > mcnemar_test(3,1) # Two-sided p-value
+    0.625
+    '''
+    def factorial(n):
+        if n <= 1: return 1
+        else: return n*factorial(n-1)
+           
     low = min(sf,fs)
     high = max(sf,fs)
     n = low + high
