@@ -38,6 +38,7 @@ import math
 from PIL.Image import AFFINE,NEAREST,BILINEAR,BICUBIC
 from numpy import array,dot
 from numpy.linalg import inv,solve
+import random
 
 import pyvision
 from pyvision.types.Image import Image, TYPE_PIL, TYPE_MATRIX_2D
@@ -110,7 +111,28 @@ def AffineFromPoints(src1,src2,dst1,dst2,new_size,filter=BILINEAR):
     
     return AffineTransform(matrix,new_size,filter)
 
+def AffinePerturb(Dscale, Drotate, Dtranslate, new_size):
+    '''
+    Randomly and slite
+    '''
+    tile_size = new_size
+    w,h = tile_size
     
+    tx = random.uniform(-Dtranslate,Dtranslate)
+    ty = random.uniform(-Dtranslate,Dtranslate)
+    s  = random.uniform(1-Dscale,1+Dscale)
+    r  = random.uniform(-Drotate,Drotate)
+    
+    there = AffineTranslate(-w/2,-h/2,tile_size)
+    scale = AffineScale(s,tile_size)
+    rotate = AffineRotate(r,tile_size)
+    translate = AffineTranslate(tx,ty,tile_size)
+    back = AffineTranslate(w/2,h/2,tile_size)
+    affine = back*translate*rotate*scale*there
+    
+    return affine
+
+
 # TODO: add least squares factories
 
 class AffineTransform:
