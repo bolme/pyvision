@@ -52,9 +52,13 @@ def canny(im,threshold1=40.0,threshold2=100.0,aperture_size=3):
               double threshold2, int aperture_size=3 );
     '''
     cvim = im.asOpenCV()
-    gray = opencv.cvCreateImage( opencv.cvGetSize(cvim), 8, 1 );
     edges = opencv.cvCreateImage( opencv.cvGetSize(cvim), 8, 1 );
-    opencv.cvCvtColor( cvim, gray, opencv.CV_BGR2GRAY );
+
+    if cvim.nChannels == 3:
+        gray = opencv.cvCreateImage( opencv.cvGetSize(cvim), 8, 1 );
+        opencv.cvCvtColor( cvim, gray, opencv.CV_BGR2GRAY );
+    else:
+        gray = cvim
 
     opencv.cvCanny(gray,edges,threshold1,threshold2,aperture_size)
     
