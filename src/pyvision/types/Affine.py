@@ -38,6 +38,7 @@ import math
 from PIL.Image import AFFINE,NEAREST,BILINEAR,BICUBIC
 from numpy import array,dot
 from numpy.linalg import inv,solve
+from scipy.ndimage import affine_transform
 import random
 
 import pyvision
@@ -111,24 +112,35 @@ def AffineFromPoints(src1,src2,dst1,dst2,new_size,filter=BILINEAR):
     
     return AffineTransform(matrix,new_size,filter)
 
-def AffinePerturb(Dscale, Drotate, Dtranslate, new_size):
+def AffinePerturb(Dscale, Drotate, Dtranslate, new_size, mirror=False, flip=False, rng = None):
     '''
     Randomly and slite
     '''
     tile_size = new_size
     w,h = tile_size
+    if rng == None:
+        rng = random
     
-    tx = random.uniform(-Dtranslate,Dtranslate)
-    ty = random.uniform(-Dtranslate,Dtranslate)
-    s  = random.uniform(1-Dscale,1+Dscale)
-    r  = random.uniform(-Drotate,Drotate)
+    tx = rng.uniform(-Dtranslate,Dtranslate)
+    ty = rng.uniform(-Dtranslate,Dtranslate)
+    if mirror:
+        sx = rng.choice([-1.,1.])
+    else:
+        sx = 1.0
+    if flip:
+        sy = rng.choice([-1.,1.])
+    else:
+        sy = 1.0
+    s  = rng.uniform(1-Dscale,1+Dscale)
+    r  = rng.uniform(-Drotate,Drotate)
     
     there = AffineTranslate(-w/2,-h/2,tile_size)
+    flipflop = AffineNonUniformScale(sx,sy,tile_size)
     scale = AffineScale(s,tile_size)
     rotate = AffineRotate(r,tile_size)
     translate = AffineTranslate(tx,ty,tile_size)
     back = AffineTranslate(w/2,h/2,tile_size)
-    affine = back*translate*rotate*scale*there
+    affine = back*translate*rotate*scale*flipflop*there
     
     return affine
 
@@ -150,6 +162,13 @@ class AffineTransform:
             data = (matrix[0,0],matrix[0,1],matrix[0,2],matrix[1,0],matrix[1,1],matrix[1,2])
             pil = im.asPIL().transform(self.size, AFFINE, data, self.filter)
             return Image(pil)
+        if im.getType() == TYPE_MATRIX_2D:
+            # TODO: This does not seem to handle translations.
+            mat = im.asMatrix2D()
+            affine = array([[matrix[0,0],matrix[0,1]],[matrix[1,0],matrix[1,1]]])
+            offset = (matrix[0,2],matrix[1,2])
+            mat = affine_transform(mat, affine, output_shape=self.size)
+            return Image(mat)
         else:
             raise NotImplementedError("Unhandled image type for affine transform.")
         

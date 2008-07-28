@@ -55,7 +55,7 @@ class DetectorROI:
         self.bin_size = bin_size
         pass
     
-    def detect(self,image):
+    def detect(self,image,**kwargs):
         '''
         Returns a list of region of interest. Each element in the list is a 
         tuple of (score,centerpoint,radius). Radius of "None" is used for point 
@@ -71,7 +71,7 @@ class DetectorROI:
         else:
             raise TypeError("ERROR Unknown Type (%s) - Only arrays and pyvision images supported."%type(image))
     
-        L = self._detect(image)
+        L = self._detect(image,**kwargs)
         
         L.sort()
         L.reverse()

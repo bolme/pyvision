@@ -57,6 +57,9 @@ class EyeDetectionTest:
         self.both05_successes = 0
         self.left05_successes = 0
         self.right05_successes = 0
+        self.bothsse = 0.0
+        self.rightsse = 0.0
+        self.leftsse = 0.0
         self.pixels = 0
         self.images = 0
         self.faces = 0
@@ -199,7 +202,11 @@ class EyeDetectionTest:
             self.table.setElement(self.faces,'dmean',dmean) 
                          
             self.faces += 1
-
+            if dlfrac != None:
+                self.bothsse += dlfrac**2 + drfrac**2
+                self.leftsse += dlfrac**2
+                self.rightsse += drfrac**2
+            
             if detect_face: self.face_successes    += 1
             if detect_b25:  self.both25_successes  += 1
             if detect_l25:  self.left25_successes  += 1
@@ -231,6 +238,10 @@ class EyeDetectionTest:
             self.right10_ci    = cibinom(self.faces,self.right10_successes,alpha=0.05)
             self.right05_rate  = float(self.right05_successes)/self.faces
             self.right05_ci    = cibinom(self.faces,self.right05_successes,alpha=0.05)
+            if self.face_successes > 0:
+                self.bothrmse = math.sqrt(self.bothsse/(2*self.face_successes))
+                self.leftrmse = math.sqrt(self.leftsse/self.face_successes)
+                self.rightrmse = math.sqrt(self.rightsse/self.face_successes)
             self.elapse_time  = self.stop_time - self.start_time
             self.time_per_image = self.elapse_time / self.images
             self.time_per_face  = self.elapse_time / self.faces
@@ -251,6 +262,7 @@ class EyeDetectionTest:
         self.summary_table.setElement('Both05Rate','Estimate',self.both05_rate)  
         self.summary_table.setElement('Both05Rate','Lower95',self.both05_ci[0])  
         self.summary_table.setElement('Both05Rate','Upper95',self.both05_ci[1])  
+        self.summary_table.setElement('BothRMSE','Estimate',self.bothrmse)
         self.summary_table.setElement('Left25Rate','Estimate',self.left25_rate)  
         self.summary_table.setElement('Left25Rate','Lower95',self.left25_ci[0])  
         self.summary_table.setElement('Left25Rate','Upper95',self.left25_ci[1])  
@@ -260,6 +272,7 @@ class EyeDetectionTest:
         self.summary_table.setElement('Left05Rate','Estimate',self.left05_rate)  
         self.summary_table.setElement('Left05Rate','Lower95',self.left05_ci[0])  
         self.summary_table.setElement('Left05Rate','Upper95',self.left05_ci[1])  
+        self.summary_table.setElement('LeftRMSE','Estimate',self.leftrmse)
         self.summary_table.setElement('Right25Rate','Estimate',self.right25_rate)  
         self.summary_table.setElement('Right25Rate','Lower95',self.right25_ci[0])  
         self.summary_table.setElement('Right25Rate','Upper95',self.right25_ci[1])  
@@ -269,9 +282,12 @@ class EyeDetectionTest:
         self.summary_table.setElement('Right05Rate','Estimate',self.right05_rate)  
         self.summary_table.setElement('Right05Rate','Lower95',self.right05_ci[0])  
         self.summary_table.setElement('Right05Rate','Upper95',self.right05_ci[1])
+        self.summary_table.setElement('RightRMSE','Estimate',self.rightrmse)
         self.summary_table.setElement('ElapsedTime','Estimate',self.elapse_time)
         self.summary_table.setElement('ImageTime','Estimate',self.time_per_image)
         self.summary_table.setElement('FaceTime','Estimate',self.time_per_face)
+        self.summary_table.setElement('ImageCount','Estimate',self.images)
+        self.summary_table.setElement('FaceCount','Estimate',self.faces)
         return self.summary_table  
 
     def __str__(self):

@@ -88,6 +88,10 @@ class Point:
     def __mul__(self,val):
         if isinstance(val,float) or isinstance(val,int): 
             return Point(self.X()*val,self.Y()*val,self.Z()*val)
+
+    def __rmul__(self,val):
+        if isinstance(val,float) or isinstance(val,int): 
+            return Point(self.X()*val,self.Y()*val,self.Z()*val)
     
     def __str__(self):
         return "Point(%f,%f,%f)"%(self.X(),self.Y(),self.Z())

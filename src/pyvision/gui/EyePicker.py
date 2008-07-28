@@ -36,6 +36,7 @@ import wx
 import os
 import os.path
 import csv
+import random
 '''
 TODO:
 This program is a simple gui for selecting eye coordinates for a 
@@ -56,7 +57,7 @@ IMAGE_FORMATS=[".JPG",".PNG",".PPM",".PGM",".GIF",".TIF",".TIFF",]
 
 class EyePickerFrame(wx.Frame):
     
-    def __init__(self,parent,id,name,image_dir,n_points=None):
+    def __init__(self,parent,id,name,image_dir,n_points=None,randomize=False,scale=1.0):
         wx.Frame.__init__(self,parent,id,name)
         
         # ---------------- Basic Data -------------------
@@ -65,11 +66,13 @@ class EyePickerFrame(wx.Frame):
         self.image_names = []
         self.current_image = None  
         self.image_name = None 
-        self.scale = 1.0 
+        self.scale = scale 
         for name in os.listdir(image_dir):
             for format in IMAGE_FORMATS:
                 if name.upper().endswith(format):
                     self.image_names.append(name)
+        if randomize:
+            random.shuffle(self.image_names)
         self.filename = None
         self.coords = {}
         
@@ -198,8 +201,9 @@ class EyePickerFrame(wx.Frame):
             sw = self.current_image.GetSize().GetWidth()
             sh = self.current_image.GetSize().GetHeight()
             
-            self.scale = min(tw/float(sw),th/float(sh))
-
+            #self.scale = min(tw/float(sw),th/float(sh))
+            
+            
             tw = int(sw*self.scale)
             th = int(sh*self.scale)
             
@@ -235,7 +239,7 @@ class EyePickerFrame(wx.Frame):
             self.coords[self.image_name] = []
             self.first_click = False
             
-        if len(self.coords[self.image_name]) < self.n_points:
+        if len(self.coords[self.image_name]) < self.n_points or self.n_points == None:
             self.coords[self.image_name].append((x,y,))
             self.DisplayImage()
            
@@ -281,9 +285,9 @@ class EyePickerFrame(wx.Frame):
         
 
 if __name__ == '__main__':
-    image_dir = "/Users/bolme/Documents/workspace/FaceRec/val_data"
+    image_dir = "/Users/bolme/vision/data/ICE2005/Spring2004iris"
     app = wx.PySimpleApp()
-    frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=2)
+    frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=None,randomize=True,scale=1.5)
     frame.Show(True)
     app.MainLoop()
     

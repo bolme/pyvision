@@ -213,31 +213,4 @@ def toBits(val,bits = 4):
 
    
         
-if __name__ == "__main__":
-    f = open("/Users/bolme/workspace/pyIntel/sample_data/optdigits/optdigits.tra")
-    clfy = ID3()
-    c = 0
-    for line in f:
-        vals = line.split(',')
-
-        label =  int(vals[-1])
-        
-        vals = vals[0:-1] # strip label from back
-        feature = []
-        for each in vals:
-            feature += toBits(int(each))
-            
-        if c < 3000:
-            clfy.addTraining(label,feature)
-        else:
-            clfy.addTesting(label,feature)
-        
-        
-        #print label, feature
-        c += 1
-    print clfy.labels
-    print len(clfy.training_data)
-    print c
-    clfy.train()
-    clfy.test()
     

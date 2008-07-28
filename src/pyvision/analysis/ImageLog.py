@@ -54,6 +54,7 @@ class ImageLog:
     def table(self,table,label="NOLABEL"):
         filename = join(self.dir,'%012d_%s.csv'%(self.count,label))
         table.save(filename)
+        self.count += 1
         
     def csv(self,data,headers=None,label="NOLABEL"):
         filename = join(self.dir,'%012d_%s.csv'%(self.count,label))
