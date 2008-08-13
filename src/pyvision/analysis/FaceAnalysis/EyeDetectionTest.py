@@ -42,6 +42,10 @@ from pyvision.analysis.stats import cibinom
 from pyvision.analysis.FaceAnalysis.FaceDetectionTest import face_from_eyes,is_success
 
 class EyeDetectionTest:
+    '''
+    BUGFIX: 20080813 Bailey Draper found a bug that the field dl in the full 
+    report was really dl^2.
+    '''
     def __init__(self,name=None,threshold=0.25):
         ''''''
         self.name = name
@@ -191,7 +195,7 @@ class EyeDetectionTest:
             self.table.setElement(self.faces,'dlx',dlx)              
             self.table.setElement(self.faces,'dly',dly)              
             #self.table.setElement(self.faces,'dl2',dl2)              
-            self.table.setElement(self.faces,'dl',dl2)              
+            self.table.setElement(self.faces,'dl',dl) # BUGFIX: 20080813 This was outputing dl2.             
             self.table.setElement(self.faces,'dlfrac',dlfrac)              
             self.table.setElement(self.faces,'drx',drx)              
             self.table.setElement(self.faces,'dry',dry)              
@@ -218,6 +222,8 @@ class EyeDetectionTest:
             if detect_l05:  self.left05_successes  += 1
             if detect_r05:  self.right05_successes += 1
             
+
+    def finish(self):
             self.face_rate    = float(self.face_successes)/self.faces
             self.face_ci      = cibinom(self.faces,self.face_successes,alpha=0.05)
             self.both25_rate  = float(self.both25_successes)/self.faces
@@ -250,6 +256,7 @@ class EyeDetectionTest:
         
     def createSummary(self): 
         ''''''   
+        self.finish()
         self.summary_table.setElement('FaceRate','Estimate',self.face_rate)  
         self.summary_table.setElement('FaceRate','Lower95',self.face_ci[0])  
         self.summary_table.setElement('FaceRate','Upper95',self.face_ci[1])  
