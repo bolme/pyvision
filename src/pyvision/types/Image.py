@@ -241,14 +241,6 @@ class Image:
         '''
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
-        #line = [point.X()+3,point.Y(),point.X()+6,point.Y()]
-        #draw.line(line,fill=color,width=1)
-        #line = [point.X()-3,point.Y(),point.X()-6,point.Y()]
-        #draw.line(line,fill=color,width=1)
-        #line = [point.X(),point.Y()+3,point.X(),point.Y()+6]
-        #draw.line(line,fill=color,width=1)
-        #line = [point.X(),point.Y()-3,point.X(),point.Y()-6]
-        #draw.line(line,fill=color,width=1)
         box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
         draw.ellipse(box,outline=color)
         del draw
@@ -260,25 +252,39 @@ class Image:
         '''
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
-        #line = [point.X()+3,point.Y(),point.X()+6,point.Y()]
-        #draw.line(line,fill=color,width=1)
-        #line = [point.X()-3,point.Y(),point.X()-6,point.Y()]
-        #draw.line(line,fill=color,width=1)
-        #line = [point.X(),point.Y()+3,point.X(),point.Y()+6]
-        #draw.line(line,fill=color,width=1)
-        #line = [point.X(),point.Y()-3,point.X(),point.Y()-6]
-        #draw.line(line,fill=color,width=1)
         box = [point.X()-radius,point.Y()-radius,point.X()+radius,point.Y()+radius]
         draw.ellipse(box,outline=color)
         del draw
         
     #------------------------------------------------------------------------
-    def annotateLabel(self,point,label,color='red'):
+    def annotateLabel(self,point,label,color='red',mark=False):
         '''
         Render text on the annotated image.
         '''
-        # TODO: annotateLabel
-        raise NotImplementedError()
+        
+        im = self.asAnnotated()
+        draw = PIL.ImageDraw.Draw(im)
+        tw,th = draw.textsize(label)
+        if mark in [True, 'right']:
+            draw.text([point.X()+5,point.Y()-th/2],label,fill=color)
+            box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
+            draw.ellipse(box,outline=color)
+        elif mark in ['left']:
+            draw.text([point.X()-tw-5,point.Y()-th/2],label,fill=color)
+            box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
+            draw.ellipse(box,outline=color)
+        elif mark in ['below']:
+            draw.text([point.X()-tw/2,point.Y()+5],label,fill=color)
+            box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
+            draw.ellipse(box,outline=color)
+        elif mark in ['above']:
+            draw.text([point.X()-tw/2,point.Y()-th-5],label,fill=color)
+            box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
+            draw.ellipse(box,outline=color)
+        else:
+            draw.text([point.X(),point.Y()],label,fill=color)
+
+        del draw
 
         
     #------------------------------------------------------------------------
