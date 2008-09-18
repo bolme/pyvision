@@ -86,6 +86,94 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 __all__ = ['analysis','edge','face','optimize','other','point','types','vector']
 
+##
+# The top level of this package contains some basic types used throughout 
+# link.PyVision.  Subpackages some of the more advanced functionality of the 
+# link.PyVision library.  These include:
+# <ul>
+# <li> Image Processing    pvi
+# <li> Detection           pvd
+# <li> Machine Learning    pvml
+# <li> Optimization/Search pvo
+# <li> Face Recognition    pvfr
+# <li> Analysis            pva
+# </ul>
+# <p>
+# Typically, all these types are used in a program.  A good convention is to 
+# import the pyvision library as "pv" and then prefix all function names with "pv." 
+# This will avoid possible namespace conflicts. For example:
+# <pre>
+# import pyvision as pv
+# im = pv.Image(filename)
+# im.annotateLabel(pv.Point(10,10),"Hello, World!")
+# im.show()
+# </pre>
+##
+
+#Import basic pyvision types
+
+from pyvision.types.Image import Image
+##
+# An link.Image class that translates between image formats such as numpy, PIL,
+# and OpenCV. <a href="pythondoc-Image.html">more...</a>
+Image = Image
+
+from pyvision.types.Point import Point
+##
+# A link.Point class used to represent a simple point in two or three
+# dimensional space. <a href="pythondoc-Point.html">more...</a>
+Point = Point
+
+# Import basic affine transformations.
+from pyvision.types.Affine import  AffineNormalizePoints, AffineTranslate, AffineScale, AffineNonUniformScale, AffineRotate, AffineFromRect, AffineFromTile, AffineFromPoints, AffineFromPointsLS, AffineFromPointsRANSAC, AffinePerturb, AffineTransform
+
+##
+# <a href="pythondoc-Affine.html#Affine.AffineNormalizePoints-function">more...</a>
+AffineNormalizePoints = AffineNormalizePoints
+
+##
+# <a href="pythondoc-Affine.html#Affine.AffineTranslate-function">more...</a>
+AffineTranslate = AffineTranslate
+
+##
+# <a href="pythondoc-Affine.html#Affine.AffineNonUniformScale-function">more...</a>
+AffineNonUniformScale = AffineNonUniformScale
+
+##
+# <a href="pythondoc-Affine.html#Affine.AffineRotate-function">more...</a>
+AffineRotate = AffineRotate
+
+##
+# <a href="pythondoc-Affine.html#Affine.AffineFromRect-function">more...</a>
+AffineFromRect = AffineFromRect
+
+##
+# <a href="pythondoc-Affine.html#Affine.AffineFromTile-function">more...</a>
+AffineFromTile = AffineFromTile
+
+##
+# <a href="pythondoc-Affine.html#Affine.AffineFromPoints-function">more...</a>
+AffineFromPoints = AffineFromPoints
+
+##
+# <a href="pythondoc-Affine.html#Affine.AffineFromPointsLS-function">more...</a>
+AffineFromPointsLS = AffineFromPointsLS
+
+##
+# <a href="pythondoc-Affine.html#Affine.AffineFromPointsRANSAC-function">more...</a>
+AffineFromPointsRANSAC = AffineFromPointsRANSAC
+
+##
+# <a href="pythondoc-Affine.html#Affine.AffinePerturb-function">more...</a>
+AffinePerturb = AffinePerturb
+
+##
+# The link.AffineTransform class.  Translates images and points between 
+# coordinate systems.
+# <a href="pythondoc-Affine.html#Affine.AffineTransform-class">more...</a>
+AffineTransform = AffineTransform
+
+
 # TODO: Features to be included in the initial release.
 #     analysis: 
 #         FaceRec(FERET,BioID) 

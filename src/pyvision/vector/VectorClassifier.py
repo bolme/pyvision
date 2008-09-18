@@ -31,14 +31,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''
-The purpose of this class is to provied common services 
-and a common interface to classifers.  For the most part
-this class provides normalization services.  Many 
-classification algorthms assume that the input values have 
-zero mean and a unit variance.  This class also provides 
-PCA based normalization that also reduces dimensionality.
-'''
+
 
 from numpy import array,mean,std
 import pyvision
@@ -60,14 +53,22 @@ TYPE_TWOCLASS="TWOCLASS"
 TYPE_MULTICLASS="MULTICLASS"
 TYPE_REGRESSION="REGRESSION"
 
+##
+# The purpose of this class is to provied common services 
+# and a common interface to classifers.  For the most part
+# this class provides normalization services.  Many 
+# classification algorthms assume that the input values have 
+# zero mean and a unit variance.  This class also provides 
+# PCA based normalization that also reduces dimensionality.
 class VectorClassifier:
+
+    
+    ##
+    # Configure some defaults for the classifier value normalizion.
+    #
+    # <p>This configures some defalts for the classifier such as the
+    # type of classifier, and how values are normalized.
     def __init__(self, classifer_type, normalization=NORM_AUTO, reg_norm=REG_NORM_VALUE, pca_basis=0.95, pca_drop=0):
-        '''
-        Configure some defaults for the classifier value normalizion.
-        
-        This configures some defalts for the classifier such as the
-        type of classifier, and how values are normalized.
-        '''
         
         # Setup basic configuration
         self.type = classifer_type
@@ -84,11 +85,10 @@ class VectorClassifier:
         self.reg_std  = 1.0
     
     
+    ##
+    # Learn the range of values that are expected for labels and data.
+    # Then setup for normalization.
     def trainNormalization(self):
-        '''
-        Learn the range of values that are expected for labels and data.
-        Then setup for normalization.
-        '''
         
         assert len(self.labels) >= 2
         
@@ -162,10 +162,9 @@ class VectorClassifier:
                 
         
     
+    ##
+    # Normalize the values in a data vector to be mean zero.
     def normalizeVector(self,data):
-        '''
-        Normalize the values in a data vector to be mean zero.
-        '''
         if self.norm == NORM_NONE:
             return data
         elif self.norm == NORM_VALUE:
@@ -176,10 +175,9 @@ class VectorClassifier:
             raise NotImplementedError("Could not determine nomalization type: "+ self.norm)
         
     
+    ##
+    # Add a training sample.  Data must be a vector of numbers.
     def addTraining(self,label,data):
-        '''
-        Add a training sample.  Data must be a vector of numbers.
-        '''
         if self.type == TYPE_REGRESSION:
             self.labels.append(float(label))
         else:
@@ -191,14 +189,14 @@ class VectorClassifier:
         
         self.vectors.append(data)
         
+    
+    ##
+    # Predict the class or the value for the input data.
+    #    
+    # <p>This function will perform value normalization and then 
+    # delegate to the subclass to perform classifiaction or 
+    # regression.
     def predict(self,data):
-        '''
-        Predict the class or the value for the input data.
-        
-        This function will perform value normalization and then 
-        delegate to the subclass to perform classifiaction or 
-        regression.
-        '''
         if isinstance(data,Image):
             data = data.asMatrix2D().flatten()   
         data = array(data,'d').flatten()
@@ -212,23 +210,23 @@ class VectorClassifier:
         if self.type == TYPE_REGRESSION:
             return self.invertReg(value)
         
+
+    ##
+    # Override this method in subclasses.
+    # Input should be a numpy array of doubles
+    #
+    # If classifer output is int
+    # If regression output is float
     def predictValue(self,data):
-        ''' 
-        Override this method in subclasses.
-        Input should be a numpy array of doubles
-        
-        If classifer output is int
-        If regression output is float
-        '''
         raise NotImplementedError("This is an abstract method")
         
+
+    ##
+    # Train the classifer on the training data.
+    #
+    # This normalizes the data and the labels, and then passes the 
+    # results to the subclass for training.
     def train(self,**kwargs):
-        '''
-        Train the classifer on the training data.
-        
-        This normalizes the data and the labels, and then passes the 
-        results to the subclass for training.
-        '''
         self.trainNormalization()
         
         self.trainClassifer(self.labels,self.vectors,**kwargs)
@@ -237,15 +235,28 @@ class VectorClassifier:
         del self.labels
         del self.vectors
     
-    def trainClassifer(self,labels,vectors):
+
+    ##
+    # This abstract method should be overridden by subclasses.
+    #
+    # <p> This method is called from {@link train}.  The vectors and values 
+    # passed to this method will have been normalized.  This method is should
+    # train a classifier or regression algorithm for that normalized data.
+    #
+    # <p> Any keyword arguments passed to train will also be passed on to train
+    # classifier.  This could allow variations in training or for verbose
+    # output.
+    def trainClassifer(self,labels,vectors, **kwargs):
         raise NotImplementedError("This is an abstract method")
     
-
+    ##
+    # Convert a normalized regression value back to the original scale
     def invertReg(self,value):
-        '''Convert the regression value back to the label scales'''
         return value*self.reg_std + self.reg_mean
          
     
+    ##
+    # Convert an integer class value back to the original label values.
     def invertClass(self,value):
         '''Map an integer back into a class label'''
         return self.class_inv[value]

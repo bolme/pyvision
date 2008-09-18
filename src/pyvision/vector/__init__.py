@@ -35,3 +35,5 @@
 Many vision algorithms use 'feature vectors' to represent information from
 images.  The vector
 '''
+
+__all__ = ['VectorClassifier','SVM']
