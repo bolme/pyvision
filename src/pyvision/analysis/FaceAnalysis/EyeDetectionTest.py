@@ -46,7 +46,7 @@ class EyeDetectionTest:
     BUGFIX: 20080813 Bailey Draper found a bug that the field dl in the full 
     report was really dl^2.
     '''
-    def __init__(self,name=None,threshold=0.25):
+    def __init__(self,name=None,threshold=0.25, test_detect=True):
         ''''''
         self.name = name
         self.table = Table()
@@ -69,6 +69,7 @@ class EyeDetectionTest:
         self.faces = 0
         self.start_time = time.time()
         self.stop_time = None
+        self.test_detect = test_detect
         
     def addSample(self, truth_eyes, detected_eyes, im=None, annotate=False):
         ''''''
@@ -126,7 +127,7 @@ class EyeDetectionTest:
             for pl,pr in detected_eyes:
                 dface = face_from_eyes(pl,pr)
                 
-                if is_success(tface,dface):
+                if not self.test_detect or is_success(tface,dface):
                     tl_x = tl.X()
                     tl_y = tl.Y()
                     tr_x = tr.X()
