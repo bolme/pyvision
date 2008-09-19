@@ -44,7 +44,6 @@ from numpy import array,ones,zeros,nonzero
 from scipy.ndimage import convolve
 from scipy.ndimage import maximum_filter
 
-from  opencv.adaptors import PIL2Ipl,Ipl2PIL,Ipl2NumPy
 
 def canny(im,threshold1=40.0,threshold2=100.0,aperture_size=3):
     '''
