@@ -39,10 +39,11 @@ from scipy.ndimage import convolve
 from scipy.ndimage import gaussian_filter,maximum_filter
 
 from numpy import array,ones,zeros,nonzero
+import numpy
 #from numpy.linalg import det
 
 import opencv
-from  opencv.adaptors import PIL2Ipl,Ipl2PIL,Ipl2NumPy
+#from  opencv.adaptors import PIL2Ipl,Ipl2PIL,Ipl2NumPy
 
 import pyvision
 from pyvision.point.DetectorROI import DetectorROI
@@ -71,9 +72,9 @@ class DetectorHarris(DetectorROI):
         opencv.cvCvtColor( cvim, gray, opencv.CV_BGR2GRAY );
     
         opencv.cvCornerHarris(gray,corners,self.block_size,self.aperture_size,self.k)
-        
-        corners = Ipl2NumPy(corners)
-        corners =  corners.reshape((cvim.height,cvim.width)).transpose()
+
+        buffer = corners.imageData
+        corners = numpy.frombuffer(buffer,numpy.float32).reshape(corners.height,corners.width).transpose()        
         
         footprint = ones((3,3))
         mx = maximum_filter(corners, footprint = footprint)
