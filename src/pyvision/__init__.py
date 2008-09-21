@@ -112,11 +112,21 @@ __all__ = ['analysis','edge','face','optimize','other','point','types','vector']
 
 #Import basic pyvision types
 
-from pyvision.types.Image import Image
+from pyvision.types.Image import Image,OpenCVToNumpy,NumpyToOpenCV
 ##
 # An link.Image class that translates between image formats such as numpy, PIL,
 # and OpenCV. <a href="pythondoc-Image.html">more...</a>
 Image = Image
+
+##
+# Convert an OpenCV 32bit matrix to a numpy matrix. 
+# <a href="pythondoc-Image.html">more...</a>
+OpenCVToNumpy = OpenCVToNumpy
+
+##
+# Convert an OpenCV 32bit matrix to a numpy matrix. 
+# <a href="pythondoc-Image.html">more...</a>
+NumpyToOpenCV = NumpyToOpenCV
 
 from pyvision.types.Point import Point
 ##
@@ -172,6 +182,20 @@ AffinePerturb = AffinePerturb
 # coordinate systems.
 # <a href="pythondoc-Affine.html#Affine.AffineTransform-class">more...</a>
 AffineTransform = AffineTransform
+
+
+# Import basic affine transformations.
+from pyvision.types.Perspective import  PerspectiveTransform, PerspectiveFromPoints
+
+##
+# The link.PerspectiveTransform class.  Translates images and points between 
+# coordinate systems.
+# <a href="pythondoc-Perspective.html#Perspective.PerspectiveTransform-class">more...</a>
+PerspectiveTransform = PerspectiveTransform
+
+##
+# <a href="pythondoc-Perspective.html#Perspective.PerspectiveFromPoints-function">more...</a>
+PerspectiveFromPoints = PerspectiveFromPoints
 
 
 # TODO: Features to be included in the initial release.

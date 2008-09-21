@@ -543,7 +543,33 @@ class Image:
         '''
         '''
         self.asAnnotated().show()
-            
+    
+##
+# Convert a 32bit opencv matrix to a numpy matrix
+def OpenCVToNumpy(cvmat):
+    assert cvmat.depth == 32
+    assert cvmat.nChannels == 1
+    
+    buffer = cvmat.imageData
+    mat = numpy.frombuffer(buffer,numpy.float32).reshape(cvmat.height,cvmat.width)        
+    return mat
+
+##
+# Convert a numpy matrix to a 32bit opencv matrix
+def NumpyToOpenCV(mat):
+    #assert cvmat.depth == 32
+    #assert cvmat.nChannels == 1
+    mat = mat.astype(numpy.float32)
+    buffer = mat.tostring()
+    #print "MAT:",dir(mat)
+    cvmat = opencv.cvCreateImage( opencv.cvSize(mat.shape[1],mat.shape[0]), opencv.IPL_DEPTH_32F, 1 );
+    #print len(cvmat.imageData)
+    #print len(buffer)
+    cvmat.imageData = buffer
+    #print mat
+    #print cvmat
+    return cvmat
+
 class _TestImage(unittest.TestCase):
     
     def setUp(self):

@@ -35,6 +35,7 @@
 import wx
 import os
 import os.path
+import pyvision as pv
 from pyvision.types.Image import Image
 from pyvision.types.Point import Point
 from pyvision.edge.canny import canny
@@ -97,8 +98,37 @@ class RenderFace:
         return im
 
 
+class RenderAffine:
+    
+    def __init__(self):
+        self.face = CascadeDetector()
+        
+    # --------------------------------------------
+    def __call__(self,im):
+        faces = self.face(im)
+        for face in faces:
+            im.annotateRect(face)
+        return im
 
-DEMO_DEFAULTS = {'Canny':canny,'Harris':RenderHarris(),'DOG':RenderDOG(),'Face':RenderFace()}
+class RenderPerspective:
+    
+    def __init__(self):
+        src = [pv.Point(0,0),pv.Point(639,0),pv.Point(639,479),pv.Point(0,479)]
+        dst = [pv.Point(50,25),pv.Point(620,120),pv.Point(610,300),pv.Point(40,460)]
+        self.transform = pv.PerspectiveFromPoints(src,dst,(640,480))
+        
+    # --------------------------------------------
+    def __call__(self,im):
+        return self.transform.transformImage(im)
+
+
+
+DEMO_DEFAULTS = {'Canny':canny,
+                 'Harris':RenderHarris(),
+                 'DOG':RenderDOG(),
+                 'Face':RenderFace(),
+                 'Perspective':RenderPerspective(),
+                }
 
 class LiveDemoFrame(wx.Frame):
     
