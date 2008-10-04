@@ -63,37 +63,40 @@ TYPE_OPENCV     = "TYPE_OPENCV"
 ##
 # Values used when converting color to gray-scale.
 LUMA = [0.299, 0.587, 0.114, 1.0]
+''' 
+Test Docstring 
+'''
 
-##
-# The primary purpose of the image class is to provide a structure that can
-# transform an image back and fourth for different python libraires such as
-# <a href="http://www.pythonware.com/products/pil">PIL</a>, 
-# <a href="http://sourceforge.net/projects/opencvlibrary">OpenCV</a>, and 
-# <a href="http://www.scipy.org">numpy/scipy</a>. Images also This also
-# allows some simple operations on the image such as annotation.
-# <p>
-# <b>Note:</b> When working with images in matrix format, they are transposed such
-# that x = col and y = row.  You can therefore still work with coords
-# such that im[x,y] = mat[x,y].
-# <p>
-# Images have the following attributes:
-# <ul>
-# <li> width = width of the image
-# <li> height = height of the image
-# <li> size = (width,height)
-# <li> channels = number of channels: 1(gray), 3(RGB)
-# <li> depth = bitdepth: 8(uchar), 32(float), 64(double)
-# </ul>
-#
-# @param data this can be a numpy array, PIL image, or opencv image.
-# @keyparam bw_annotate generate a black and white image to make color annotations show up better
-#
-# @return an Image object instance
 class Image:
+    '''
+    The primary purpose of the image class is to provide a structure that can
+    transform an image back and fourth for different python libraires such as
+    U{PIL<http://www.pythonware.com/products/pil>}, 
+    U{OpenCV <http://sourceforge.net/projects/opencvlibrary>}, and 
+    U{Scipy<http://www.scipy.org">} Images also This also
+    allows some simple operations on the image such as annotation.
+    
+    B{Note:} When working with images in matrix format, they are transposed such
+    that x = col and y = row.  You can therefore still work with coords
+    such that im[x,y] = mat[x,y].
+    
+    Images have the following attributes:
+      - width = width of the image
+      - height = height of the image
+      - size = (width,height)
+      - channels = number of channels: 1(gray), 3(RGB)
+      - depth = bitdepth: 8(uchar), 32(float), 64(double)
+    '''
  
  
     #------------------------------------------------------------------------
     def __init__(self,data,bw_annotate=False):
+        '''
+        @param data: this can be a numpy array, PIL image, or opencv image.
+        @param bw_annotate: generate a black and white image to make color annotations show up better
+        @return: an Image object instance
+        '''
+
         self.filename = None
         self.pil = None
         self.matrix2d = None
@@ -169,38 +172,43 @@ class Image:
         self.data = data
         
         
-    ##
-    # @return the gray-scale image data as a two dimensional numpy array
     def asMatrix2D(self):
+        '''
+        @return: the gray-scale image data as a two dimensional numpy array
+        '''
         if self.matrix2d == None:
             self._generateMatrix2D()
         return self.matrix2d
 
-    ##
-    # @return color image data as a 3D array with shape (3(rgb),w,h)
     def asMatrix3D(self):
+        '''
+        @return: color image data as a 3D array with shape (3(rgb),w,h)
+        '''
         if self.matrix3d == None:
             self._generateMatrix3D()
         return self.matrix3d
 
-    ##
-    # @return image data as a pil image
     def asPIL(self):
+        '''
+        @return: image data as a pil image
+        '''
         if self.pil == None:
             self._generatePIL()
         return self.pil
 
-    ##
-    # @return the image data in an OpenCV format
     def asOpenCV(self):
+        '''
+        @return: the image data in an OpenCV format
+        '''
         if self.opencv == None:
             self._generateOpenCV()
         return self.opencv
         
 
-    ##
-    # @return the PIL image used for annotation.
     def asAnnotated(self):
+        '''
+        @return: the PIL image used for annotation.
+        '''
         if self.annotated == None:
             if self.bw_annotate:
                 # Make a black and white image that can be annotated with color.
@@ -210,76 +218,82 @@ class Image:
                 self.annotated = self.asPIL().copy().convert("RGB")
         return self.annotated
             
-    ##
-    # Draws a rectangle on the annotation image
-    #
-    # @param rect a rectangle of type Rect
-    # @keyparam color defined as ('#rrggbb' or 'name') 
     def annotateRect(self,rect,color='red'):
+        '''
+        Draws a rectangle on the annotation image
+        
+        @param rect: a rectangle of type Rect
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
         box = [rect.x,rect.y,rect.x+rect.w,rect.y+rect.h]
         draw.rectangle(box,outline=color)
         del draw
 
-    ##
-    # Draws an ellipse on the annotation image
-    #
-    # @param rect the bounding box of the elipse of type Rect
-    # @keyparam color defined as ('#rrggbb' or 'name') 
     def annotateEllipse(self,rect,color='red'):
+        '''
+        Draws an ellipse on the annotation image
+        
+        @param rect: the bounding box of the elipse of type Rect
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
         box = [rect.x,rect.y,rect.x+rect.w,rect.y+rect.h]
         draw.ellipse(box,outline=color)
         del draw
                 
-    ##
-    # Draws a line from point1 to point2 on the annotation image
-    #
-    # @param point1 the starting point as type Point
-    # @param point2 the ending point as type Point
-    # @keyparam color defined as ('#rrggbb' or 'name') 
     def annotateLine(self,point1,point2,color='red'):
+        '''
+        Draws a line from point1 to point2 on the annotation image
+    
+        @param point1: the starting point as type Point
+        @param point2: the ending point as type Point
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
         line = [point1.X(),point1.Y(),point2.X(),point2.Y()]
         draw.line(line,fill=color,width=1)
         del draw
         
-    ##
-    # Marks a point in the annotation image using a small circle
-    #
-    # @param point the point to mark as type Point
-    # @keyparam color defined as ('#rrggbb' or 'name') 
     def annotatePoint(self,point,color='red'):
+        '''
+        Marks a point in the annotation image using a small circle
+        
+        @param point: the point to mark as type Point
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
         box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
         draw.ellipse(box,outline=color)
         del draw
 
-    ##
-    # Marks a circle in the annotation image 
-    #
-    # @param point the center of the circle as type Point
-    # @keyparam radius the radius of the circle
-    # @keyparam color defined as ('#rrggbb' or 'name') 
     def annotateCircle(self,point, radius=3, color='red'):
+        '''
+        Marks a circle in the annotation image 
+        
+        @param point: the center of the circle as type Point
+        @param radius: the radius of the circle
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
         box = [point.X()-radius,point.Y()-radius,point.X()+radius,point.Y()+radius]
         draw.ellipse(box,outline=color)
         del draw
         
-    ##
-    # Marks a point in the image with text 
-    #
-    # @param point the point to mark as type Point
-    # @param label the text to use as a string
-    # @keyparam color defined as ('#rrggbb' or 'name') 
-    # @keyparam mark of True or ['right', 'left', 'below', or 'above'] then also mark the point with a small circle
     def annotateLabel(self,point,label,color='red',mark=False):        
+        '''
+        Marks a point in the image with text 
+        
+        @param point: the point to mark as type Point
+        @param label: the text to use as a string
+        @param color: defined as ('#rrggbb' or 'name') 
+        @param mark: of True or ['right', 'left', 'below', or 'above'] then also mark the point with a small circle
+        '''
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
         tw,th = draw.textsize(label)
@@ -305,13 +319,14 @@ class Image:
         del draw
 
         
-    ##
-    # Like <a href="#Image.Image.annotatePoint-method">annotatePoint</a> but only draws a point on the given pixel.
-    # This is useful to avoid clutter if many points are being annotated.
-    #
-    # @param point the point to mark as type Point
-    # @keyparam color defined as ('#rrggbb' or 'name') 
     def annotateDot(self,point,color='red'):
+        '''
+        Like L{annotatePoint} but only draws a point on the given pixel.
+        This is useful to avoid clutter if many points are being annotated.
+        
+        @param point: the point to mark as type Point
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
         draw.point([point.X(),point.Y()],fill=color)
@@ -524,10 +539,11 @@ class Image:
             TODO: Not yet implemented
         '''
 
-    ##
-    # Save the image to a file.  This is performed by converting to PIL and
-    # then saving to a file based on on the extension.
     def save(self,filename):
+        '''
+        Save the image to a file.  This is performed by converting to PIL and
+        then saving to a file based on on the extension.
+        '''
         if filename[-4:] == ".raw":
             # TODO: save as a matrix
             raise NotImplementedError("Cannot save as a matrix")
@@ -537,10 +553,9 @@ class Image:
         else:
             self.asPIL().save(filename)
             
-    ##
-    # Displays the annotated version of the image.
     def show(self):
         '''
+        Displays the annotated version of the image.
         '''
         self.asAnnotated().show()
     
