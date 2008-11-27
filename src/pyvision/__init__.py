@@ -121,10 +121,11 @@ from pyvision.types.Perspective import  PerspectiveTransform, PerspectiveFromPoi
 
 from pyvision.analysis.ImageLog import ImageLog
 
-
 from pyvision.analysis.Table import Table
 
 from pyvision.analysis.Timer import Timer
+
+from pyvision.fast_util import MaximumDetector
 
 
 # TODO: Features to be included in the initial release.
