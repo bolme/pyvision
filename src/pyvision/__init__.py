@@ -124,6 +124,8 @@ from pyvision.analysis.ImageLog import ImageLog
 
 from pyvision.analysis.Table import Table
 
+from pyvision.analysis.Timer import Timer
+
 
 # TODO: Features to be included in the initial release.
 #     analysis: 

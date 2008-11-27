@@ -70,6 +70,7 @@ class EyeDetectionTest:
         self.start_time = time.time()
         self.stop_time = None
         self.test_detect = test_detect
+        self.sample_id = 0
         
     def addSample(self, truth_eyes, detected_eyes, im=None, annotate=False):
         ''''''
@@ -85,6 +86,7 @@ class EyeDetectionTest:
         else:
             name = "%d"%self.sample_id
             self.pixels = None
+            self.sample_id += 1
             
         self.stop_time = time.time()
 

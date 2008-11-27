@@ -34,12 +34,25 @@
 import csv
 import StringIO
 
+def convertVal(val):
+    if val in ("True","False"):
+        return val == "True"
+    try:
+        flt = float(val)
+    except:
+        return val
+    
+    if '.' in val:
+        return flt
+    else: 
+        return int(round(flt))
+
 class Table:
     '''
     Store and manipulate table data
     '''
     
-    def __init__(self,default_value=None):
+    def __init__(self,filename=None,default_value=None):
         self.col_headers = []
         self.col_label = None
         self.row_headers = []
@@ -48,7 +61,38 @@ class Table:
         self.hlines = False
         self.default_value = default_value
         self.data = {}
-        self.rebuildTable
+        self.rebuildTable()
+        
+        if filename != None:
+            if isinstance(filename,str):
+                f = open(filename,'rb')
+                self.load(f)
+            else:
+                #Assume this is a file pointer
+                self.load(filename)
+        
+    def load(self,f):
+        reader = csv.reader(f)
+        header=None
+        #j = 0 
+        for data in reader:
+            if header == None:
+                header = data
+                assert header[0] == "row"
+                continue
+            assert len(header) == len(data)
+            
+            for i in range(1,len(header)):
+                row = convertVal(data[0])
+                col = convertVal(header[i])
+                val = convertVal(data[i])
+                #print type(row),row,type(col),col,type(val),val
+                self[row,col] = val
+            
+            #j += 1
+            #if j > 300:
+            #    break
+        
         
     def accumulateData(self,row,col,value):
         new_value = self.element(row,col) + value
@@ -63,6 +107,9 @@ class Table:
             # Set the formating for that column
             self.col_format[col] = format
             
+    def __setitem__(self,key,value):
+        return self.setElement(key[0],key[1],value)
+    
     def setElement(self,row,col,value,accumulate=False):
         self.setData(row,col,value,accumulate=accumulate)
         
@@ -94,7 +141,10 @@ class Table:
     def hasElement(self,row,col):
         return (self.data.has_key(row) and self.data[row].has_key(col))
 
-        
+     
+    def __getitem__(self,key):
+        return self.element(key[0],key[1])
+       
     def element(self,row,col):
         if self.hasElement(row,col):
             return self.data[row][col]

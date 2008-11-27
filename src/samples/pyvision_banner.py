@@ -36,14 +36,19 @@ import os.path
 from PIL.Image import composite,LINEAR
 import pyvision
 from pyvision.types.Image import Image
+from pyvision.types.Affine import AffineScale
 from pyvision.edge.canny import canny
 from pyvision.point.DetectorDOG import DetectorDOG
+from pyvision.analysis.ImageLog import ImageLog
 import sys
 
 if __name__ == '__main__':
+    ilog = ImageLog('../..')
     source_name = os.path.join(pyvision.__path__[0],'data','misc','p5240019.jpg')
     im = Image(source_name)
+    im = AffineScale(0.25,(320,240)).transformImage(im)
     im.show()
+    ilog.log(im)
     
     mat = im.asMatrix2D()
     high = mat > 180
@@ -51,16 +56,15 @@ if __name__ == '__main__':
     mask = high#+low
     
     edges = canny(im,100,200)
+    ilog.log(edges)
     
-    edges.show()
-    #Image(high).show()
-    #Image(low).show()
-    Image(mask).show()
+    ilog.log(Image(1.0*mask))
+    
     e = edges.asPIL().convert('RGB')
-    m = Image(mask).asPIL()
+    m = Image(1.0*mask).asPIL()
     i = im.asPIL()
     logo = Image(composite(i,e,m))
-    logo.show()
+    ilog.log(logo)
     #sys.exit()
     
     sm = Image(im.asPIL().resize((320,240),LINEAR))
@@ -69,8 +73,8 @@ if __name__ == '__main__':
     points = detector.detect(sm)
     for score,pt,radius in points:
         logo.annotateCircle(pt*4,radius*4)
-        
-    logo.show()
+    ilog.log(logo)
+    ilog.show()
 
     
     

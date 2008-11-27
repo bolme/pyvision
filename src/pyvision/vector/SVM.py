@@ -115,7 +115,7 @@ class SVM(VectorClassifier):
             self.__dict__[key] = value
             
     
-    def trainClassifer(self,labels,vectors,verbose=False):
+    def trainClassifer(self,labels,vectors,ilog=None,verbose=False):
         '''
         Do not call this function instead call train.
         '''
@@ -520,7 +520,7 @@ class SVM(VectorClassifier):
         self.svm = best_svm
 
         
-    def predictValue(self,data):
+    def predictValue(self,data,ilog=None):
         '''
         Please call predict instead.
         '''

@@ -115,7 +115,7 @@ def AffineTranslate(dx,dy,new_size,filter=BILINEAR):
     return AffineTransform(matrix,new_size,filter)
     
 
-def AffineScale(scale,new_size,filter=BILINEAR):
+def AffineScale(scale,new_size,center=None,filter=BILINEAR):
     '''
     Create a simple scale transform.
 
@@ -125,7 +125,11 @@ def AffineScale(scale,new_size,filter=BILINEAR):
     '''
     matrix = array([[scale,0,0],[0,scale,0],[0,0,1]],'d')
 
-    return AffineTransform(matrix,new_size,filter)
+    scale = AffineTransform(matrix,new_size,filter)
+    if center == None:
+        return scale
+    else:
+        return AffineTranslate(center.X(),center.Y(),new_size)*scale*AffineTranslate(-center.X(),-center.Y(),new_size)
     
 
 def AffineNonUniformScale(sx,sy,new_size,filter=BILINEAR):
@@ -142,7 +146,7 @@ def AffineNonUniformScale(sx,sy,new_size,filter=BILINEAR):
     return AffineTransform(matrix,new_size,filter)
     
 
-def AffineRotate(theta,new_size,filter=BILINEAR):
+def AffineRotate(theta,new_size,center=None,filter=BILINEAR):
     '''
     Create a rotation about the origin.
     
@@ -152,7 +156,11 @@ def AffineRotate(theta,new_size,filter=BILINEAR):
     '''
     matrix = array([[math.cos(theta),-math.sin(theta),0],[math.sin(theta),math.cos(theta),0],[0,0,1]],'d')
 
-    return AffineTransform(matrix,new_size,filter)
+    rotate = AffineTransform(matrix,new_size,filter)
+    if center == None:
+        return rotate
+    else:
+        return AffineTranslate(center.X(),center.Y(),new_size)*rotate*AffineTranslate(-center.X(),-center.Y(),new_size)
     
 def AffineFromRect(rect,new_size,filter=BILINEAR):
     ''' 

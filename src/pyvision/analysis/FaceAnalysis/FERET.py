@@ -2804,4 +2804,23 @@ class _FeretTest(unittest.TestCase):
         self.assertEquals(len(FERET_FC),194)
         self.assertEquals(len(FERET_DUP1),722)
         self.assertEquals(len(FERET_DUP2),234)
+        
+    def testEyeDetection(self):
+        self.assertEquals(len(FERET_EYE_TRAINING),1699)
+        self.assertEquals(len(FERET_EYE_TESTING),1669)
+        
+        train = {}
+        test = {}
+        for each in FERET_EYE_TRAINING:
+            person = each[:5]
+            train[person] = 0
+            
+        for each in FERET_EYE_TESTING:
+            person = each[:5]
+            self.assert_(not train.has_key(person)) # make sure there are no people in both sets
+            test[person] = 0
+        
+        self.assertEquals(len(train),602)
+        self.assertEquals(len(test),602)
+        
 

@@ -31,6 +31,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import Point as pt
 
 def BoundingRect(*points):
     '''
@@ -100,6 +101,9 @@ class Rect:
             return None
         
         return Rect(r3_x1,r3_y1,r3_w, r3_h)
+    
+    def center(self):
+        return pt.Point(self.x+0.5*self.w,self.y+0.5*self.h)
     
     def area(self):
         '''

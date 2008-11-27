@@ -177,7 +177,7 @@ class VectorClassifier:
     
     ##
     # Add a training sample.  Data must be a vector of numbers.
-    def addTraining(self,label,data):
+    def addTraining(self,label,data,ilog=None):
         if self.type == TYPE_REGRESSION:
             self.labels.append(float(label))
         else:
@@ -196,14 +196,14 @@ class VectorClassifier:
     # <p>This function will perform value normalization and then 
     # delegate to the subclass to perform classifiaction or 
     # regression.
-    def predict(self,data):
+    def predict(self,data,ilog=None):
         if isinstance(data,Image):
             data = data.asMatrix2D().flatten()   
         data = array(data,'d').flatten()
         
         data = self.normalizeVector(data)
         
-        value = self.predictValue(data)
+        value = self.predictValue(data,ilog=ilog)
         
         if self.type == TYPE_TWOCLASS or self.type == TYPE_MULTICLASS:
             return self.invertClass(value)
@@ -226,10 +226,10 @@ class VectorClassifier:
     #
     # This normalizes the data and the labels, and then passes the 
     # results to the subclass for training.
-    def train(self,**kwargs):
+    def train(self,ilog=None,**kwargs):
         self.trainNormalization()
         
-        self.trainClassifer(self.labels,self.vectors,**kwargs)
+        self.trainClassifer(self.labels,self.vectors,ilog=ilog,**kwargs)
         
         # remove training data
         del self.labels
@@ -246,7 +246,7 @@ class VectorClassifier:
     # <p> Any keyword arguments passed to train will also be passed on to train
     # classifier.  This could allow variations in training or for verbose
     # output.
-    def trainClassifer(self,labels,vectors, **kwargs):
+    def trainClassifer(self,labels,vectors,ilog=None, **kwargs):
         raise NotImplementedError("This is an abstract method")
     
     ##

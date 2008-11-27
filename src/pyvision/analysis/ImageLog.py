@@ -39,8 +39,13 @@ import pickle
 
 class ImageLog:
     
-    def __init__(self,topdir = "/tmp"):
-        self.dir = topdir + "/" + strftime("%Y%m%d_%H%M%S_pyvis_log")
+    def __init__(self,topdir = "/tmp",name=None):
+        self.date = strftime("%Y%m%d_%H%M%S")
+        self.name=name
+        if name:
+            self.dir = topdir+'/'+self.date+'_'+name
+        else: 
+            self.dir = topdir + "/" + self.date + "_pyvis_log"
         mkdir(self.dir)
         self.count = 0
         #print self.dir

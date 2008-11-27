@@ -453,7 +453,7 @@ class Image:
                 max_value = data.max()
                 min_value = data.min()
                 data_range = max_value - min_value
-                if max_value <= 255 and min_value >= 0 and data_range >= 50:
+                if max_value <= 255 and min_value >= 0 and data_range >= 150:
                     # assume the values are already in a good range for the
                     # 8 bit image
                     pass
