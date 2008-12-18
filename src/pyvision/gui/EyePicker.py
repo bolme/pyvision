@@ -285,9 +285,11 @@ class EyePickerFrame(wx.Frame):
         
 
 if __name__ == '__main__':
-    image_dir = "/Users/bolme/vision/data/ICE2005/Spring2004iris"
     app = wx.PySimpleApp()
-    frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=None,randomize=True,scale=1.5)
+    dir_dialog = wx.DirDialog(None, message = "Please select a directory that contains images.")
+    dir_dialog.ShowModal()
+    image_dir = dir_dialog.GetPath()
+    frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=None,randomize=False,scale=1.0)
     frame.Show(True)
     app.MainLoop()
     
