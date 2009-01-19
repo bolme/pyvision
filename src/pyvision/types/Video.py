@@ -64,7 +64,7 @@ class Webcam:
             channels = frame.nChannels
             w,h = self.size
             resized = opencv.cvCreateImage( opencv.cvSize(w,h), depth, channels )
-            opencv.cvResize( frame, resized, opencv.CV_INTER_LINEAR )
+            opencv.cvResize( frame, resized, opencv.CV_INTER_NN )
             return resized
 
 class Video:
