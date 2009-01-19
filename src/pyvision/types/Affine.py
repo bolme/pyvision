@@ -424,6 +424,7 @@ class AffineTransform:
         @param use_original: (True or False) attempts to find and use the original image as the source to avoid an accumulation of errors.
         @returns: the transformed image
         '''
+        #TODO: does not support opencv images.  see Perspective.py
         prev_im = im
         inverse = self.inverse
         
@@ -616,6 +617,14 @@ class _AffineTest(unittest.TestCase):
         pass
 
     def test_affine_mul(self):
+        # TODO: FIx this test
+        pass
+        
+    def test_affine_numpy(self):
+        # TODO: FIx this test
+        pass
+        
+    def test_affine_opencv(self):
         # TODO: FIx this test
         pass
         
