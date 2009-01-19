@@ -33,6 +33,7 @@
 
 
 from numpy import array
+import opencv as cv
 from math import sqrt
 
 class Point:
@@ -48,12 +49,20 @@ class Point:
         scale: scale selection
         rotation: rotation selection
         '''
-        self.x = float(x)
-        self.y = float(y)
-        self.z = float(z)
-        self.w = float(w)
-        self.scale = scale
-        self.rotation = rotation
+        if isinstance(x,cv.CvPoint):
+            self.x = float(x.x)
+            self.y = float(x.y)
+            self.z = 0.0
+            self.w = 1.0
+            self.scale = 1.0
+            self.rotation = 0.0
+        else:
+            self.x = float(x)
+            self.y = float(y)
+            self.z = float(z)
+            self.w = float(w)
+            self.scale = scale
+            self.rotation = rotation
         
     def X(self):
         return float(self.x)/self.w
@@ -71,6 +80,9 @@ class Point:
     def asVector3H(self):
         ''' Return a 3D homogenious vector [x,y,z,w] '''
         return array([[self.x],[self.y],[self.z],[self.w]])
+    
+    def asOpenCV(self):
+        return cv.cvPoint(int(round(self.X())),int(round(self.Y())))
     
     def l2(self,point):
         dx = self.X()-point.X()
