@@ -34,7 +34,7 @@
 from os.path import basename,splitext
 from pyvision.types.Point import Point
 from pyvision.types.Rect import *
-from pyvision.analysis.FaceAnalysis.FaceDetectionTest import is_success
+from pyvision.analysis.FaceAnalysis.FaceDetectionTest import is_success,face_from_eyes
 
 class EyesFile:
     '''

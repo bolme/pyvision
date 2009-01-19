@@ -32,7 +32,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import copy
-
+import numpy as np
     
 def buildPositiveNegativeLists(names,matrix,class_equal):
     positive = []
@@ -73,60 +73,96 @@ def readCsuDistanceMatrix(directory):
         
     return filenames,matrix
 
-class ROCAnalysis:
-    def __init__(self,positives,negatives):
-        self._computeRoc(positives,negatives)
+class ROCPoint:
+    def __init__(self,nscore,nidx,n,far,mscore,midx,m,frr):
+        self.nscore,self.nidx,self.n,self.far,self.mscore,self.midx,self.m,self.frr = nscore,nidx,n,far,mscore,midx,m,frr
+
+ROC_LOG_SAMPLED = 1
+ROC_MATCH_SAMPLED = 2
+ROC_PRECISE_SAMPLED = 2
+
+class ROC:
+    def __init__(self,match,nonmatch,is_distance=True):
+        self.match = np.array(match).copy()
+        self.nonmatch = np.array(nonmatch).copy()
+        self.is_distance = is_distance
         
-    def _computeRoc(self, positive, negative):
-        '''
-        input: similarity scores for positive examples and negitive examples.
-        output: the ROC curve [(fp rate 1,tp rate 1, threshold 1), ... ,(tp rate n,fp rate n, threshold n)] 
-        '''
+        if not is_distance:
+            self.match    = -self.match
+            self.nonmatch = -self.nonmatch
         
-        # Create a copy so this method does not mess up the originals
-        positive = copy.deepcopy(positive)
-        negative = copy.deepcopy(negative)
         
-        # Sort the lists from high to low.
-        positive.sort()
-        positive.reverse()
-        negative.sort()
-        negative.reverse()
+        self.match.sort()
+        self.nonmatch.sort()
         
-        p_index = 0
-        n_index = 0
-        p_count = len(positive)
-        n_count = len(negative)
-    
-        curve = []
-        while p_index < p_count:
-            threshold = positive[p_index]
-    
-            while p_index < p_count and positive[p_index] >= threshold:
-                p_index += 1
-    
-            while n_index < n_count and negative[n_index] >= threshold:
-                n_index += 1
+        
+    def getCurve(self,method=ROC_LOG_SAMPLED):
+        10**np.arange(-6,0.000001,0.1)
             
-            tp = float(p_index)/float(p_count)
-            fp = float(n_index)/float(n_count)
+    def getFAR(self,far):
+        match = self.match
+        nonmatch = self.nonmatch
+        
+        m = len(match)
+        n = len(nonmatch)
+        
+        nidx = int(round(far*n))
+        far = float(nidx)/n
+        if nidx >= len(nonmatch):
+            nscore = None
+        else:
+            nscore = nonmatch[nidx-1]
+        
+        midx = np.searchsorted(match,nscore)+1    
+             
+        frr = 1.0 - float(midx)/m
+        if midx > len(match):
+            mscore = None
+        else:
+            mscore = match[midx-1]
+        
+        assert mscore == None or mscore >= nscore
+        
+        if self.is_distance:
+            return ROCPoint(nscore,nidx,n,far,mscore,midx,m,frr)
+        else:
+            if nscore != None:
+                nscore = -nscore
+            if mscore != None:
+                mscore = -mscore
+            return ROCPoint(nscore,nidx,n,far,mscore,midx,m,frr)
 
-            curve.append( (fp,tp,threshold) )
-            
-        self.curve = curve
-
-
-    def findFalsePositiveRate(self,fpr=0.01):
-        i = 1
-        while i < len(self.curve) and self.curve[i][0]<fpr:
-            i+=1
-        return self.curve[i-1]
+    def getFRR(self,frr):
+        match = self.match
+        nonmatch = self.nonmatch
+        
+        m = len(match)
+        n = len(nonmatch)
+        
+        midx = int(round((1.0-frr)*m))
+        frr = 1.0 - float(midx)/m
+        if midx >= len(match):
+            mscore = None
+        else:
+            mscore = match[midx-1]
     
-    def findEqualError(self):
-        i = 1
-        while i < len(self.curve) and (1.0-self.curve[i][1]) > self.curve[i][0]:
-            i+=1
-        return self.curve[i-1]
+        nidx = np.searchsorted(nonmatch,mscore)
+        far = float(nidx)/n
+        if nidx-1 < 0:
+            nscore = None
+        else:
+            nscore = nonmatch[nidx-1]
+                
+        assert nscore == None or mscore >= nscore
+        
+        if self.is_distance:
+            return ROCPoint(nscore,nidx,n,far,mscore,midx,m,frr)
+        else:
+            if nscore != None:
+                nscore = -nscore
+            if mscore != None:
+                mscore = -mscore
+
     
         
 
