@@ -75,6 +75,11 @@ class EyesFile:
         names.sort()
         return names
     
+    def hasFile(self,filename):
+        '''@returns True if filename is in index or False otherwise'''
+        fname = self._parseName(filename)
+        return self.images.has_key(fname)
+    
     ##
     # Returns the eye coordinates given a face detection rectangle.  This is 
     # useful if you have a face detector and want to simulate eye detection
