@@ -1,6 +1,6 @@
 # PyVision License
 #
-# Copyright (c) 2006-2008 David S. Bolme
+# Copyright (c) 2006-2009 David S. Bolme
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -166,7 +166,7 @@ class Image:
             self.depth = data.depth   
 
         else:
-            raise TypeError("Could not create from type: %s"%type(data))
+            raise TypeError("Could not create from type: %s %s"%(data,type(data)))
         
         self.size = (self.width,self.height)
         self.data = data
@@ -203,6 +203,23 @@ class Image:
         if self.opencv == None:
             self._generateOpenCV()
         return self.opencv
+        
+    def asOpenCVBW(self):
+        '''
+        @return: the image data in an OpenCV one channel format
+        '''
+        cvim = self.asOpenCV()
+        
+        if cvim.nChannels == 1:
+            return cvim
+        
+        elif cvim.nChannels == 3:
+            cvimbw = opencv.cvCreateImage(opencv.cvGetSize(cvim), opencv.IPL_DEPTH_8U, 1);
+            opencv.cvCvtColor(cvim, cvimbw, opencv.CV_BGR2GRAY);
+            return cvimbw
+        
+        else:
+            raise ValueError("Unsupported opencv image format: nChannels=%d"%cvim.nChannels)
         
 
     def asAnnotated(self):
@@ -720,6 +737,8 @@ class _TestImage(unittest.TestCase):
                 for c in range(3):
                     self.assertAlmostEqual(ord(buffer[i*3+j*im.width*3+c]),ord(cv.imageData[i*3+j*im.width*3+2-c]))
         
-        
+     
+    def test_asOpenCVBW(self):
+        assert 0 #TODO: Create tests for this method.
         
 
