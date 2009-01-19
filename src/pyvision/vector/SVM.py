@@ -38,7 +38,7 @@ import unittest
 import csv 
 import pickle
 
-from numpy import array
+import numpy as np
 
 from svm import *
 
@@ -71,6 +71,7 @@ class SVM(VectorClassifier):
         also passes keyword args to VectorClassifier
         '''
         #TODO: Document constructor
+        #TODO: Add an option to specify SVM parameters directly and disable automatic tuning.
         self.svm = None
         self.svm_type = type
         self.kernel = kernel
@@ -115,7 +116,7 @@ class SVM(VectorClassifier):
             self.__dict__[key] = value
             
     
-    def trainClassifer(self,labels,vectors,ilog=None,verbose=False):
+    def trainClassifer(self,labels,vectors,ilog=None,verbose=False,callback=None, C_range = 2.0**np.arange(-5,16,1), G_range = 2.0**np.arange(-15,4,1)):
         '''
         Do not call this function instead call train.
         '''
@@ -136,21 +137,21 @@ class SVM(VectorClassifier):
         
         if self.svm_type in (TYPE_C_SVC,TYPE_NU_SVC) and self.kernel == KERNEL_RBF:
             if verbose: print "TRAINING SVC RBF"
-            self.train_SVC_RBF(labels,vectors,verbose)
+            self.train_SVC_RBF(labels,vectors,verbose,C_range,G_range,callback=callback)
         elif self.svm_type in (TYPE_C_SVC,TYPE_NU_SVC) and self.kernel == KERNEL_LINEAR:
             if verbose: print "TRAINING SVC Linear"
-            self.train_SVC_Linear(labels,vectors,verbose)
+            self.train_SVC_Linear(labels,vectors,verbose,C_range,callback=callback)
         elif self.svm_type in (TYPE_NU_SVR,TYPE_EPSILON_SVR) and self.kernel == KERNEL_RBF:
             if verbose: print "TRAINING SVC RBF"
-            self.train_SVR_RBF(labels,vectors,verbose)
+            self.train_SVR_RBF(labels,vectors,verbose,C_range,G_range,callback=callback)
         elif self.svm_type in (TYPE_NU_SVR,TYPE_EPSILON_SVR) and self.kernel == KERNEL_LINEAR:
             if verbose: print "TRAINING SVC Linear"
-            self.train_SVR_Linear(labels,vectors,verbose)
+            self.train_SVR_Linear(labels,vectors,verbose,C_range,callback=callback)
         else:
             raise NotImplementedError("Unknown SVM type or kernel")
                     
         
-    def train_SVC_RBF(self,labels,vectors, verbose):
+    def train_SVC_RBF(self,labels,vectors, verbose, C_range, G_range, callback=None):
         '''Private use only'''
         # combine the labels and vectors into one set.
         data = []
@@ -188,10 +189,8 @@ class SVM(VectorClassifier):
         training_table = Table()
         self.training_table = training_table
         i=0
-        for c in range(-5,16,1):
-            for g in range(-15,4,1):
-                C = pow(2,c)
-                G = pow(2,g)
+        for C in C_range:
+            for G in G_range:
                 
                 param = svm_parameter(svm_type=self.svm_type,kernel_type = RBF, C = C, gamma=G,p=self.epsilon,nu=self.nu)
                 
@@ -205,16 +204,17 @@ class SVM(VectorClassifier):
                         successes += 1
                 rate  = successes/total
  
-                if verbose: print c,g,rate
+                if verbose: print C,G,rate
                 training_svm.append(test_svm)
                 training_info.append([C,G,rate])
                 
-                training_table.setElement(i,'c',c)
                 training_table.setElement(i,'C',C)
-                training_table.setElement(i,'g',g)
                 training_table.setElement(i,'G',G)
                 training_table.setElement(i,'rate',rate)
                 i+=1
+                
+            if callback != None:
+                callback(int(100*float(i)/(len(C_range)*len(G_range))))
                 
         if verbose: print 
         if verbose: print "------------------------------"
@@ -246,7 +246,7 @@ class SVM(VectorClassifier):
         self.svm = best_svm
         
         
-    def train_SVR_RBF(self,labels,vectors,verbose):
+    def train_SVR_RBF(self,labels,vectors,verbose, C_range, G_range, callback=None):
         '''Private use only'''
         # combine the labels and vectors into one set.
         data = []
@@ -284,11 +284,9 @@ class SVM(VectorClassifier):
         training_table=Table()
         self.training_table = training_table
         i = 0
-        for c in range(-5,16,1):
-            for g in range(-15,4,1):
-                if verbose: print "Testing: %5d %5d"%(c,g),
-                C = pow(2,c)
-                G = pow(2,g)
+        for C in C_range:
+            for G in G_range:
+                if verbose: print "Testing: %5d %5d"%(C,G),
                 
                 param = svm_parameter(svm_type=self.svm_type,kernel_type = RBF, C = C, gamma=G,p=self.epsilon,nu=self.nu)
                 
@@ -305,12 +303,13 @@ class SVM(VectorClassifier):
                 if verbose: print "%15.8e"%mse
                 training_svm.append(test_svm)
                 training_info.append([C,G,mse])
-                training_table.setElement(i,'c',c)
                 training_table.setElement(i,'C',C)
-                training_table.setElement(i,'g',g)
                 training_table.setElement(i,'G',G)
                 training_table.setElement(i,'mse',mse)
                 i+=1
+
+            if callback != None:
+                callback(int(100*float(i)/(len(C_range)*len(G_range))))
                 
         if verbose: print 
         if verbose: print "------------------------------"
@@ -342,7 +341,7 @@ class SVM(VectorClassifier):
         self.svm = best_svm
         
 
-    def train_SVC_Linear(self,labels,vectors,verbose):
+    def train_SVC_Linear(self,labels,vectors,verbose, C_range, callback=None):
         '''Private use only.'''
         # combine the labels and vectors into one set.
         data = []
@@ -380,8 +379,7 @@ class SVM(VectorClassifier):
         training_table = Table()
         self.training_table = training_table
         i=0
-        for c in range(-5,16,1):
-            C = pow(2,c)
+        for C in C_range:
                 
             param = svm_parameter(svm_type=self.svm_type,kernel_type = LINEAR, C = C, p=self.epsilon,nu=self.nu)
                 
@@ -397,10 +395,12 @@ class SVM(VectorClassifier):
  
             training_svm.append(test_svm)
             training_info.append([C,rate])
-            training_table.setElement(i,'c',c)
             training_table.setElement(i,'C',C)
             training_table.setElement(i,'rate',rate)
             i+=1
+
+            if callback != None:
+                callback(int(100*float(i)/len(C_range)))
                 
         if verbose: print 
         if verbose: print "------------------------------"
@@ -431,7 +431,7 @@ class SVM(VectorClassifier):
         self.svm = best_svm
         
         
-    def train_SVR_Linear(self,labels,vectors,verbose):
+    def train_SVR_Linear(self,labels,vectors,verbose, C_range, callback=None):
         '''Private use only'''
         # combine the labels and vectors into one set.
         data = []
@@ -469,8 +469,7 @@ class SVM(VectorClassifier):
         training_table = Table()
         self.training_table = training_table
         i=0
-        for c in range(-5,16,1):
-            C = pow(2,c)
+        for C in C_range:
                 
             param = svm_parameter(svm_type=self.svm_type,kernel_type = LINEAR, C = C, p=self.epsilon,nu=self.nu)
                 
@@ -486,10 +485,12 @@ class SVM(VectorClassifier):
  
             training_svm.append(test_svm)
             training_info.append([C,mse])
-            training_table.setElement(i,'c',c)
             training_table.setElement(i,'C',C)
             training_table.setElement(i,'mse',mse)
             i+=1
+
+            if callback != None:
+                callback(int(100*float(i)/len(C_range)))
                 
         if verbose: print 
         if verbose: print "------------------------------"
