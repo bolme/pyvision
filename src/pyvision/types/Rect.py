@@ -32,6 +32,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import Point as pt
+import opencv as cv
 
 def BoundingRect(*points):
     '''
@@ -102,6 +103,12 @@ class Rect:
         
         return Rect(r3_x1,r3_y1,r3_w, r3_h)
     
+    def containsPoint(self,point):
+        x = point.X()
+        y = point.Y()
+        
+        return x >= self.x and x <= self.x+self.w and y >= self.y and y <= self.y + self.h
+        
     def center(self):
         return pt.Point(self.x+0.5*self.w,self.y+0.5*self.h)
     
@@ -118,6 +125,8 @@ class Rect:
         '''bounding box as expected by many PIL functions'''
         return int(round(self.x)), int(round(self.y)), int(round(self.x+self.w)), int(round(self.y+self.h))
 
+    def asOpenCV(self):
+        return cv.cvRect(int(round(self.x)),int(round(self.y)),int(round(self.w)),int(round(self.h)))
 
 def test():
     '''
