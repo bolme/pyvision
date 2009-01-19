@@ -115,6 +115,8 @@ from pyvision.types.Image import Image,OpenCVToNumpy,NumpyToOpenCV
 
 from pyvision.types.Point import Point
 
+from pyvision.types.Rect import Rect
+
 from pyvision.types.Affine import  AffineNormalizePoints, AffineTranslate, AffineScale, AffineNonUniformScale, AffineRotate, AffineFromRect, AffineFromTile, AffineFromPoints, AffineFromPointsLS, AffineFromPointsRANSAC, AffinePerturb, AffineTransform
 
 from pyvision.types.Perspective import  PerspectiveTransform, PerspectiveFromPoints
@@ -125,7 +127,7 @@ from pyvision.analysis.Table import Table
 
 from pyvision.analysis.Timer import Timer
 
-from pyvision.fast_util import MaximumDetector
+from pyvision.util.fast_util import LocalMaximumDetector
 
 
 # TODO: Features to be included in the initial release.
