@@ -36,6 +36,7 @@ from os import mkdir,system
 from os.path import join
 import csv
 import pickle
+import sys
 
 class ImageLog:
     
@@ -81,7 +82,11 @@ class ImageLog:
         self.count += 1
     
     def show(self):
-        system("open %s/*.png"%self.dir)
-        pass
+        if sys.platform.startswith("darwin"):
+            system("open %s/*.png"%self.dir)
+        elif sys.platform.startswith("linux"):
+            system("gqview %s/*.png"%self.dir)
+        elif sys.platform.startswith("windows"):
+            pass
         
         
