@@ -46,15 +46,32 @@ class Webcam:
         self.size = size
     
     def query(self):
+        '''
+        The returned image also include a field named orig_frame which returns 
+        the original image returned before rescaling.
+        
+        @returns: the frame rescaled to a given size.
+        '''
         frame = opencv.highgui.cvQueryFrame( self.cv_capture );
-        return Image(self.resize(frame))
+        im = Image(self.resize(frame))
+        im.orig_frame = Image(frame)
+        im.capture_time = time.time()
+        return im
     
     def grab(self):
         return opencv.highgui.cvGrabFrame( self.cv_capture );
     
     def retrieve(self):
+        '''
+        The returned image also include a field named orig_frame which returns 
+        the original image returned before rescaling.
+        
+        @returns: the frame rescaled to a given size.
+        '''
         frame = opencv.highgui.cvRetrieveFrame( self.cv_capture );
-        return Image(self.resize(frame))
+        im = Image(self.resize(frame))
+        im.orig_frame = Image(frame)
+        return im
         
     def resize(self,frame):
         if self.size == None:
