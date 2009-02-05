@@ -13,11 +13,11 @@ class Cache:
     The Cache is used like a simple dictionary. An object (obj) is stored in 
     the cache using a simple key (key) using the following command:
     
-    cache[key] = obj
+    C{cache[key] = obj}
     
     The object can be retrieved using the command:
     
-    obj = cache[key]
+    C{obj = cache[key]}
     
     Each of these commands will reset that objects last access time.
     
@@ -32,4 +32,4 @@ class Cache:
         @param purge: when the  number of items exceeds this size the
                       oldest items in the cache will be purged.
         '''
-        raise NotImplementedError("This function is not yet implemented.")
+        raise NotImplementedError("TODO: This function is not yet implemented.")

@@ -31,9 +31,12 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-##
-# 
-##
+'''
+
+'''
+__author__ = "$Author$"
+__version__ = "$Revision$"
+
 import PIL.ImageDraw
 import PIL.Image
 import numpy
@@ -47,25 +50,21 @@ import os.path
 
 import pyvision
 
-##
-# Image was created using a 2D "gray-scale" numpy array
 TYPE_MATRIX_2D  = "TYPE_MATRIX2D" 
-##
-# Image was created using a 3D "color" numpy array
-TYPE_MATRIX_RGB = "TYPE_MATRIX_RGB" 
-##
-# Image was created using a PIL image instance
-TYPE_PIL        = "TYPE_PIL" 
-##
-# Image was created using a OpenCV image instance
-TYPE_OPENCV     = "TYPE_OPENCV"
+'''Image was created using a 2D "gray-scale" numpy array'''
 
-##
-# Values used when converting color to gray-scale.
+TYPE_MATRIX_RGB = "TYPE_MATRIX_RGB" 
+'''Image was created using a 3D "color" numpy array'''
+
+TYPE_PIL        = "TYPE_PIL" 
+'''Image was created using a PIL image instance'''
+
+TYPE_OPENCV     = "TYPE_OPENCV"
+'''Image was created using a OpenCV image instance'''
+
 LUMA = [0.299, 0.587, 0.114, 1.0]
-''' 
-Test Docstring 
-'''
+'''Values used when converting color to gray-scale.'''
+
 
 class Image:
     '''
@@ -92,6 +91,8 @@ class Image:
     #------------------------------------------------------------------------
     def __init__(self,data,bw_annotate=False):
         '''
+        Create an image from a file or a PIL Image, OpenCV Image, or numpy array.
+         
         @param data: this can be a numpy array, PIL image, or opencv image.
         @param bw_annotate: generate a black and white image to make color annotations show up better
         @return: an Image object instance
