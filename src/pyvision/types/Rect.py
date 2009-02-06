@@ -128,6 +128,15 @@ class Rect:
     def asOpenCV(self):
         return cv.cvRect(int(round(self.x)),int(round(self.y)),int(round(self.w)),int(round(self.h)))
 
+    def __mul__(self,val):
+        if isinstance(val,float) or isinstance(val,int): 
+            return Rect(self.x*val,self.y*val,self.w*val,self.h*val)
+
+    def __rmul__(self,val):
+        if isinstance(val,float) or isinstance(val,int): 
+            return Rect(self.x*val,self.y*val,self.w*val,self.h*val)
+
+
 def test():
     '''
     '''
