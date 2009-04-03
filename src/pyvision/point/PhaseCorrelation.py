@@ -39,12 +39,14 @@ __copyright__ = "Copyright 2006 David S Bolme"
 from numpy import *
 from numpy.fft import fft2, ifft2
 from numpy.linalg import lstsq
+import numpy as np
+import pyvision as pv
 
 from pyvision.types.Image import Image
 from pyvision.other.normalize import meanUnit
 
 
-def PhaseCorrelation(tile1, tile2):
+def PhaseCorrelation(tile1, tile2, phase_only=True, ilog=None):
     '''
     Uses phase correlation to estimate the best integer displacement to align the images.
     Also fits a quadradic to the correltaion surface to determine a sub pixel estimate of 
@@ -84,11 +86,20 @@ def PhaseCorrelation(tile1, tile2):
     Ia = fft2(tile1)
     Ib = conjugate(fft2(tile2))
 
+    if phase_only:
+        Ia = Ia/np.abs(Ia)
+        Ib = Ib/np.abs(Ib)
+
     # build the normalized cross-power spectrum
     ncs = Ia*Ib
 
     # build the power spectrum
     pc = real(ifft2(ncs))
+    
+    if ilog != None:
+        ilog.log(pv.Image(tile1),label="Tile1")
+        ilog.log(pv.Image(tile2),label="Tile2")
+        ilog.log(pv.Image(np.fft.fftshift(pc)),label="Correlation")
 
     max_corr = pc.max()
     max_elem = (pc == max_corr).nonzero()
@@ -175,7 +186,27 @@ import unittest
 
 class _TestPhaseCorrelation(unittest.TestCase):
     
-    def test_Registration1(self):
+    def test_Correlation(self):
+        import os.path
+        import pyvision
+        from pyvision.types.Image import Image
+
+        filename_a = os.path.join(pyvision.__path__[0],'data','test','registration1a.jpg')
+        filename_b = os.path.join(pyvision.__path__[0],'data','test','registration1b.jpg')
+        
+        im_a = Image(filename_a)
+        im_b = Image(filename_b)
+
+        out = PhaseCorrelation(im_a,im_b,phase_only=False)
+        
+        self.assertAlmostEqual(out[0],0.87382160686468002)
+        self.assertEqual(out[1][0],20)
+        self.assertEqual(out[1][1],20)
+        self.assertAlmostEqual(out[2],0.87388092414032315)
+        self.assertAlmostEqual(out[3][0],19.978881341260816)
+        self.assertAlmostEqual(out[3][1],19.986396178942329)
+        
+    def test_PhaseCorrelation(self):
         import os.path
         import pyvision
         from pyvision.types.Image import Image
