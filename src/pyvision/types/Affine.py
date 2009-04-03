@@ -54,7 +54,8 @@ import random
 import pyvision
 import pyvision as pv
 import numpy as np
-from pyvision.types.Image import Image, TYPE_PIL, TYPE_MATRIX_2D
+import opencv as cv
+from pyvision.types.Image import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_OPENCV
 from pyvision.types.Point import Point
 from pyvision.types.Rect import Rect
 from pyvision.vector.RANSAC import RANSAC
@@ -460,6 +461,13 @@ class AffineTransform:
 
             mat = affine_transform(mat, self.inverse[:2,:2], offset=self.inverse[:2,2])
             result = Image(mat)
+        elif im.getType() == TYPE_OPENCV:
+            matrix = pv.NumpyToOpenCV(self.matrix)
+            src = im.asOpenCV()
+            dst = cv.cvCreateImage( cv.cvSize(self.size[0],self.size[1]), cv.IPL_DEPTH_8U, src.nChannels );
+            cv.cvWarpPerspective( src, dst, matrix)                    
+            result = pv.Image(dst)
+
         else:
             raise NotImplementedError("Unhandled image type for affine transform.")
 
@@ -621,7 +629,7 @@ class _AffineTest(unittest.TestCase):
         pass
         
     def test_affine_numpy(self):
-        # TODO: FIx this test
+        # TODO: FIx this  test
         pass
         
     def test_affine_opencv(self):
