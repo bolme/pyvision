@@ -54,7 +54,14 @@ import pyvision as pv
 # G H 1   w1  =  w2
 #
 
-def PerspectiveFromPoints(source, dest, new_size):
+def PerspectiveFromPointsOld(source, dest, new_size):
+    '''
+    Python/Scipy implementation implementation which finds a perspective 
+    transform between points.
+    
+    Most users should use PerspectiveFromPoints instead.  This method
+    may be eliminated in the future.
+    '''
     assert len(source) == len(dest)
     
     src_nrm = pv.AffineNormalizePoints(source)
@@ -79,6 +86,36 @@ def PerspectiveFromPoints(source, dest, new_size):
     H = Vt[8,:].reshape(3,3)
 
     matrix = np.dot(dst_nrm.inverse,np.dot(H,src_nrm.matrix))
+
+    return PerspectiveTransform(matrix,new_size)
+
+
+def PerspectiveFromPoints(source, dest, new_size, method=0, ransacReprojThreshold=2.0):
+    '''
+    Calls the OpenCV function: cvFindHomography.  This method has
+    additional options to use the CV_RANSAC or CV_LMEDS methods to
+    find a robust homography.  Method=0 appears to be similar to 
+    PerspectiveFromPoints.  
+    '''
+    assert len(source) == len(dest)
+    
+    n_points = len(source)
+    
+    s = cv.cvCreateMat(n_points,2,cv.CV_32F)
+    d = cv.cvCreateMat(n_points,2,cv.CV_32F)
+    p = cv.cvCreateMat(3,3,cv.CV_32F)
+    
+    for i in range(n_points):
+        s[i,0] = source[i].X()
+        s[i,1] = source[i].Y()
+    
+        d[i,0] = dest[i].X()
+        d[i,1] = dest[i].Y()
+        
+    results = cv.cvFindHomography(s,d,p)
+    
+    matrix = pv.OpenCVToNumpy(p)
+
     return PerspectiveTransform(matrix,new_size)
 
 
@@ -194,7 +231,7 @@ class _PerspectiveTest(unittest.TestCase):
         #self.im_b.show()
             
     def test_four_points_a(self):
-        p = PerspectiveFromPoints(self.corners_a,self.corners_t)
+        p = PerspectiveFromPoints(self.corners_a,self.corners_t,(640,480))
         pts = p.transformPoints(self.corners_a)
         #for pt in pts:
         #    print "Point: %7.2f %7.2f"%(pt.X(), pt.Y())
@@ -203,7 +240,7 @@ class _PerspectiveTest(unittest.TestCase):
         #im.show()
 
     def test_four_points_b(self):
-        p = PerspectiveFromPoints(self.corners_b,self.corners_t)
+        p = PerspectiveFromPoints(self.corners_b,self.corners_t,(640,480))
         pts = p.transformPoints(self.corners_b)
         #for pt in pts:
         #    print "Point: %7.2f %7.2f"%(pt.X(), pt.Y())
@@ -212,14 +249,15 @@ class _PerspectiveTest(unittest.TestCase):
         #im.show()
         
     def test_four_points_ab(self):
-        p = PerspectiveFromPoints(self.corners_a,self.corners_b)
+        p = PerspectiveFromPoints(self.corners_a,self.corners_b,(640,480))
         #pts = p.transformPoints(self.corners_b)
         #for pt in pts:
         #    print "Point: %7.2f %7.2f"%(pt.X(), pt.Y())
             
         im = p.transformImage(self.im_a)
-        im.show()
-        self.im_b.show()
+        #im.show()
+        #self.im_b.show()
+        
         
         
         
