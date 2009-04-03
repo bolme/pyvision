@@ -32,7 +32,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from time import *
-from os import mkdir,system
+from os import makedirs,system
 from os.path import join
 import csv
 import pickle
@@ -47,7 +47,7 @@ class ImageLog:
             self.dir = topdir+'/'+self.date+'_'+name
         else: 
             self.dir = topdir + "/" + self.date + "_pyvis_log"
-        mkdir(self.dir)
+        makedirs(self.dir)
         self.count = 0
         #print self.dir
         
