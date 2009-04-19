@@ -41,6 +41,7 @@ from pyvision.types.Point import Point
 from pyvision.edge.canny import canny
 from pyvision.point.DetectorHarris import DetectorHarris
 from pyvision.point.DetectorDOG import DetectorDOG
+from pyvision.point.DetectorSURF import DetectorSURF
 from pyvision.face.CascadeDetector import CascadeDetector
 from pyvision.types.Video import Webcam
 import opencv
@@ -65,7 +66,10 @@ class RenderHarris:
         self.harris = DetectorHarris()
         
     def __call__(self,im):
+        start = time.time()
         points = self.harris.detect(im)
+        stop = time.time()
+        print "Harris Time:",stop-start
         for score,pt,radius in points:
             im.annotatePoint(pt)
         return im
@@ -84,11 +88,30 @@ class RenderDOG:
             im.annotateCircle(pt,radius*4)
         return im
 
+class RenderSURF:
+    def __init__(self):
+        self.surf = DetectorSURF(n=1000,min_hessian=500)
+        
+    def __call__(self,im):
+        tmp = im.asPIL()
+        tmp = tmp.resize((160,120))
+        tmp = Image(tmp)
+        points = self.surf.detect(tmp)
+        for score,pt,radius in points:
+            score = score - 500.0
+            if score > 500.0:
+                score = 500.0
+            score = int(255*score/500.0)
+            color = "#%02x0000"%score
+            pt = Point(pt.X()*4,pt.Y()*4)
+            im.annotateCircle(pt,radius,color=color)
+        return im
+
 
 class RenderFace:
     
     def __init__(self):
-        self.face = CascadeDetector()
+        self.face = CascadeDetector(image_scale=0.4)
         
     # --------------------------------------------
     def __call__(self,im):
@@ -126,6 +149,7 @@ class RenderPerspective:
 DEMO_DEFAULTS = {'Canny':canny,
                  'Harris':RenderHarris(),
                  'DOG':RenderDOG(),
+                 'SURF':RenderSURF(),
                  'Face':RenderFace(),
                  'Perspective':RenderPerspective(),
                 }
