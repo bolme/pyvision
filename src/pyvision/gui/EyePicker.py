@@ -122,6 +122,9 @@ class EyePickerFrame(wx.Frame):
         wx.EVT_LISTBOX(self, self.list.GetId(), self.onSelect)
         wx.EVT_SIZE(self.static_bitmap, self.onBitmapResize)
         wx.EVT_LEFT_DOWN(self.static_bitmap, self.onClick)
+        wx.EVT_LEFT_UP(self.static_bitmap, self.onRelease)
+        wx.EVT_MOTION(self.static_bitmap, self.onMotion)
+        self.moving = None
         
         wx.EVT_MENU(self,wx.ID_OPEN,self.onOpen)
         wx.EVT_MENU(self,wx.ID_SAVE,self.onSave)
@@ -133,6 +136,7 @@ class EyePickerFrame(wx.Frame):
 
 
     def openCSVFile(self,path):
+        # TODO: For some reason loading a file does not work
         #f = open(path,'r')
         
         reader = csv.reader(open(path, "rb"))
@@ -234,6 +238,15 @@ class EyePickerFrame(wx.Frame):
         
         if not self.image_name: return
         
+        # Adjust a point
+        for i in range(len(self.coords[self.image_name])):
+            px,py = self.coords[self.image_name][i]
+            if abs(px - x) < 4 and abs(py - y) < 4:
+                self.coords[self.image_name][i] = (x,y,)
+                self.moving = i
+                self.DisplayImage()
+                return
+        
         # Allow the user to enter new points if the image was just loaded.
         if self.first_click:
             self.coords[self.image_name] = []
@@ -241,9 +254,29 @@ class EyePickerFrame(wx.Frame):
             
         if len(self.coords[self.image_name]) < self.n_points or self.n_points == None:
             self.coords[self.image_name].append((x,y,))
+            self.moving = len(self.coords[self.image_name]) - 1
             self.DisplayImage()
            
-                
+    def onMotion(self,event):
+        x = event.GetX()/self.scale
+        y = event.GetY()/self.scale
+
+        if self.moving != None:
+            self.coords[self.image_name][self.moving] = (x,y,)
+            self.DisplayImage()
+
+        
+    
+    def onRelease(self,event):
+        x = event.GetX()/self.scale
+        y = event.GetY()/self.scale
+
+        if self.moving != None:
+            self.coords[self.image_name][self.moving] = (x,y,)
+            self.DisplayImage()
+        
+        self.moving = None
+                    
     def onAbout(self,event):
         self.Close()
         
@@ -289,7 +322,7 @@ if __name__ == '__main__':
     dir_dialog = wx.DirDialog(None, message = "Please select a directory that contains images.")
     dir_dialog.ShowModal()
     image_dir = dir_dialog.GetPath()
-    frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=None,randomize=False,scale=1.0)
+    frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=None,randomize=False,scale=2.0)
     frame.Show(True)
     app.MainLoop()
     
