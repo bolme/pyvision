@@ -38,7 +38,6 @@ import os.path
 import csv
 import random
 '''
-TODO:
 This program is a simple gui for selecting eye coordinates for a 
 set of images.
 
@@ -129,34 +128,40 @@ class EyePickerFrame(wx.Frame):
         wx.EVT_MENU(self,wx.ID_OPEN,self.onOpen)
         wx.EVT_MENU(self,wx.ID_SAVE,self.onSave)
         wx.EVT_MENU(self,wx.ID_SAVEAS,self.onSaveAs)
-        
+
+        wx.EVT_MENU(self,wx.ID_ABOUT,self.onAbout)        
+        #wx.EVT_MENU(self,wx.ID_EXIT,self.onExit)
+
         wx.EVT_CLOSE(self,self.onClose)
-        #wx.EVT_MENU(self,id_exit,self.onExit)
-        #wx.EVT_PAINT(self.static_bitmap,self.onPaint)
 
 
     def openCSVFile(self,path):
-        # TODO: For some reason loading a file does not work
-        #f = open(path,'r')
         
         reader = csv.reader(open(path, "rb"))
         first = True
         eyes = False
         coords = {}
         for row in reader:
-            skip = False
-            if first:
-                if row == ['image','left_x','left_y','right_x','right_y','bounds_x','bounds_y','bounds_w','bounds_h']:
-                    skip = True
-                    eyes = True
-                    # Do not automatically save over the top.
-                    self.filename = None
-            if not skip:
-                if eyes:
-                    coords[row[0]] = [(float(row[1]),float(row[2])),(float(row[3]),float(row[4]))]
-                    
-            first = False
-                    
+            filename = row[0]
+            row = row[1:]
+            
+            if len(row)%2 == 0:
+                print "Error Loading File"
+                raise TypeError("Odd number of values in this row")
+            
+            points = []
+            for i in range(0,len(row),2):
+                point = (float(row[i]),float(row[i+1]))
+                points.append(point)
+            
+            coords[filename] = points
+                
+                
+            
+            
+            
+        print "CSV File Data: ", coords
+           
         self.coords = coords
         
     def save(self,path):
@@ -265,7 +270,6 @@ class EyePickerFrame(wx.Frame):
             self.coords[self.image_name][self.moving] = (x,y,)
             self.DisplayImage()
 
-        
     
     def onRelease(self,event):
         x = event.GetX()/self.scale
@@ -278,13 +282,16 @@ class EyePickerFrame(wx.Frame):
         self.moving = None
                     
     def onAbout(self,event):
-        self.Close()
+        dlg = wx.MessageDialog(self,message="For more information visit:\n\nhttp://pyvision.sourceforge.net",style = wx.OK )
+        result = dlg.ShowModal()
         
         
     def onOpen(self,event):
+        print "Open"
         fd = wx.FileDialog(self,style=wx.FD_OPEN)
         fd.ShowModal()
         self.filename = fd.GetPath()
+        print "On Open...",self.filename
         
         self.openCSVFile(self.filename)
         
@@ -322,7 +329,10 @@ if __name__ == '__main__':
     dir_dialog = wx.DirDialog(None, message = "Please select a directory that contains images.")
     dir_dialog.ShowModal()
     image_dir = dir_dialog.GetPath()
-    frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=None,randomize=False,scale=2.0)
+    
+    scale = 1.0
+        
+    frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=None,randomize=False,scale=scale)
     frame.Show(True)
     app.MainLoop()
     
