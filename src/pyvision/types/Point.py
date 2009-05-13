@@ -35,6 +35,7 @@
 from numpy import array
 import opencv as cv
 from math import sqrt
+import numpy as np
 
 class Point:
     def __init__(self,x=0.0,y=0.0,z=0.0,w=1.0,scale=1.0,rotation=0.0):
@@ -73,6 +74,19 @@ class Point:
     def Z(self):
         return float(self.z)/self.w
     
+    def asArray(self,homogenious=False):
+        '''
+        returns the point data as a 4 element numpy array.
+        
+        if 'homogenious' == True: returns x,y,z,w
+        else: return x,y,z,1.0
+        '''
+        if homogenious:
+            return array([self.X(),self.Y(),self.Z(),1.0])
+        else:
+            return array([self.X(),self.Y(),self.Z(),1.0])
+        
+    
     def asVector2H(self):
         ''' Return a 2D homogenious vector [x,y,w] '''
         return array([[self.x],[self.y],[self.w]])
@@ -84,6 +98,26 @@ class Point:
     def asOpenCV(self):
         return cv.cvPoint(int(round(self.X())),int(round(self.Y())))
     
+    def asSpherical(self):
+        ''' 
+        Computes and returns a representation of this point in spherical coordinates: (r,phi,theta). 
+        
+        r = radius or distance of the point from the origin.
+        phi = is the angle of the projection on the xy plain and the x axis
+        theta = is the angle with the z axis.
+        
+        x = r*cos(phi)*sin(theta)
+        y = r*sin(phi)*sin(theta)
+        z = r*cos(theta)
+        '''
+        x,y,z,w = self.asArray()
+        
+        r = np.sqrt(x**2+y**2+z**2)
+        phi = np.arctan2(y,x)
+        theta = np.arctan2(np.sqrt(x**2+y**2),z)
+        
+        return r,phi,theta
+
     def l2(self,point):
         dx = self.X()-point.X()
         dy = self.Y()-point.Y()
