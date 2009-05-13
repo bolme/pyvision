@@ -46,6 +46,9 @@ import opencv as cv
 import math
 import struct
 import array
+import os.path
+import pyvision as pv
+import numpy as np
 
 __author__ = "David S. Bolme - Colorado State Univeristy"
 __version__ = "$Revision: 729 $"
@@ -92,7 +95,7 @@ def saveFilterEyeLocator(filename, el, comment="",copyright=""):
     f.write(el.right_filter.imageData)    
     
 
-def loadFilterEyeLocator(filename):
+def loadFilterEyeLocator(filename,ilog=None):
     '''
     Loads the eye locator from a file.'
     '''
@@ -148,6 +151,32 @@ def loadFilterEyeLocator(filename):
     # Copy data into the left and right filters
     left_filter.imageData  = lf.tostring()
     right_filter.imageData = rf.tostring()
+    
+    tmp = pv.OpenCVToNumpy(left_filter)
+    t1 = tmp.mean()
+    t2 = tmp.std()
+    cv.cvScale(left_filter,left_filter,1.0/t2,-t1*1.0/t2)
+
+    tmp = pv.OpenCVToNumpy(right_filter)
+    t1 = tmp.mean()
+    t2 = tmp.std()
+    cv.cvScale(right_filter,right_filter,1.0/t2,-t1*1.0/t2)
+
+    #tmp = pv.OpenCVToNumpy(left_filter)
+    #print tmp.mean(),tmp.std()
+    
+    if ilog != None:
+        #lf = cv.cvCreateMat(r,c,cv.CV_8U)
+        #rf = cv.cvCreateMat(r,c,cv.CV_8U)
+        
+        lf = pv.OpenCVToNumpy(left_filter)
+        rf = pv.OpenCVToNumpy(right_filter)
+        
+        lf = np.fft.fftshift(lf).transpose()
+        rf = np.fft.fftshift(rf).transpose()
+        
+        ilog.log(pv.Image(lf),label="LeftEyeFilter")
+        ilog.log(pv.Image(rf),label="RightEyeFilter")
     
     # Return the eye locator
     return OpenCVFilterEyeLocator(left_filter,right_filter,left_rect,right_rect)
@@ -282,19 +311,19 @@ class FilterEyeLocator:
     This class provides a PyVision interface to the ASEF eye locator.
     '''
     
-    def __init__(self,filename=None):
+    def __init__(self,filename=None,ilog=None):
         '''
         Load the eye detector from the file.
         '''
         if filename == None:
             filename = os.path.join(pv.__path__[0],"config","EyeLocatorASEF128x128.fel")
             
-        self.fel = loadFilterEyeLocator(filename)
+        self.fel = loadFilterEyeLocator(filename,ilog=ilog)
         
         self.bwtile = cv.cvCreateMat(128,128,cv.CV_8U)
             
         
-    def locateEyes(self,im,face_rects):
+    def locateEyes(self,im,face_rects,ilog=None):
         '''
         Finds the eyes in the image.  
         
@@ -314,14 +343,27 @@ class FilterEyeLocator:
             #cv.cvCvtColor( self.cvtile, self.bwtile, cv.CV_BGR2GRAY )
             
             leye,reye,lcp,rcp = self.fel.locateEyes(self.bwtile)
-            leye = pv.Point(leye)
-            reye = pv.Point(reye)
+            le = pv.Point(leye)
+            re = pv.Point(reye)
             
-            leye = affine.invertPoint(leye)
-            reye = affine.invertPoint(reye)
+            leye = affine.invertPoint(le)
+            reye = affine.invertPoint(re)
             
             faces.append([rect,leye,reye])
             
+            if ilog != None:
+                ilog.log(pv.Image(self.bwtile),label="FaceDetection")
+                lcp = pv.OpenCVToNumpy(lcp).transpose()
+                lcp = lcp*(lcp > 0.0)
+                rcp = pv.OpenCVToNumpy(rcp).transpose()
+                rcp = rcp*(rcp > 0.0)
+                ilog.log(pv.Image(lcp),label="Left_Corr")
+                ilog.log(pv.Image(rcp),label="Right_Corr")
+                tmp = pv.Image(self.bwtile)
+                tmp.annotatePoint(le)
+                tmp.annotatePoint(re)
+                ilog.log(tmp,"EyeLocations")
+                
         return faces
         
 
