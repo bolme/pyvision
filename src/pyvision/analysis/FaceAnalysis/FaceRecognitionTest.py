@@ -32,7 +32,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from pyvision.analysis import Table
-from pyvision.analysis.roc import ROCAnalysis
+from pyvision.analysis.roc import ROC
 from pyvision.analysis.stats import cibinom
 
 
@@ -77,7 +77,7 @@ class FaceRecognitionTest:
         self.negatives = []
         
     def getROCAnalysis(self):
-        return ROCAnalysis(self.positives,self.negatives)
+        return ROC(self.positives,self.negatives)
     
     def addSample(self,probe_id,scores):
         '''

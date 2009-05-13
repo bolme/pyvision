@@ -29,7 +29,45 @@ class FaceDatabase:
     def __getitem__(self,key):
         pass
     
+class ScrapShotsDatabase(FaceDatabase):    
+
+    def __init__(self,image_path=None, image_ext=".pgm", coord_file=None):
+        ''' Create an object that manages a FERET face database. '''
+        self.image_path = image_path
+        self.image_ext = image_ext
+        
+        if coord_file == None:
+            coord_name = os.path.join(pv.__path__[0],'data','csuScrapShots','coords.txt')
+            self.eyes_file = EyesFile(coord_name)
+        else:
+            self.eyes_file = EyesFile(coord_name)
+            
+        if image_path == None:
+            self.image_path = os.path.join(pv.__path__[0],'data','csuScrapShots')
+        else:
+            self.image_path = image_path
+            
+
+    def keys(self):
+        return self.eyes_file.files()
     
+    def __getitem__(self,key):
+        assert self.eyes_file.hasFile(key)
+        
+        face_obj = FaceDatabase.FaceObject()
+        face_obj.key = key
+        face_obj.person_id = key[:5]
+        
+        leye,reye = self.eyes_file.getEyes(key)[0]
+        face_obj.left_eye = leye
+        face_obj.right_eye = reye
+        
+        im_name = os.path.join(self.image_path,key+self.image_ext)
+        im = pv.Image(im_name)
+        face_obj.image = im
+        
+        return face_obj
+
 class FERETDatabase(FaceDatabase):
     
     def __init__(self,image_path, image_ext=".pgm", coord_file=None):
@@ -135,6 +173,92 @@ class PIE_ILLUM_Database(FaceDatabase):
         face_obj.image = pv.Image(filename)
         
         key = (month,sub,pose)
+        
+        if self.eyes.has_key(key):
+            leye,reye = self.eyes[key]
+                    
+            face_obj.left_eye = leye
+            face_obj.right_eye = reye
+        
+        return face_obj
+
+
+class PIE_ILLUM_Database_c27(FaceDatabase):
+    
+    def __init__(self,image_path, image_ext=".jpg", coord_file=None):
+        ''' Create an object that manages a FERET face database. '''
+        self.image_path = image_path
+        self.image_ext = image_ext
+        
+        coord_name = os.path.join(pv.__path__[0], 'analysis', 'FaceAnalysis', 'data', 'pie_illum_c27.txt')
+        pie_months =['oct_2000-nov_2000','nov_2000-dec_2000']
+        #pie_pose   = [27,5,29,9,7]
+        #pie_illum  = [19,20,21,5,6,11,12,10,7,8,9]
+        #pie_illum  = [19,20,21,6,11,12,7,8,9]
+        
+        # Read in PIE Eyes File
+        eyes = {}
+        for line in open(coord_name):
+            #print line
+            data = line.split()
+            if len(data) != 5:
+                print "Warning: expected 5 values: <", data, ">"
+                print "    in file:",coord_name
+                continue
+            sub,lx,ly,rx,ry = data
+            
+            lx = float(lx)
+            ly = float(ly)
+            rx = float(rx)
+            ry = float(ry)
+            
+            key = sub
+            #label = "%s %s %s"%key
+            
+            eyes[key] = (pv.Point(lx,ly),pv.Point(rx,ry))
+            
+        self.eyes = eyes
+
+
+        keys = []
+        # Generate PIE keys
+        for month in pie_months:
+            month_dir = os.path.join(self.image_path,month)
+            for sub in os.listdir(month_dir):
+                if sub[0] != '0' or len(sub) != 5:
+                    continue
+                illum_dir = os.path.join(month_dir,sub,"ILLUM")
+                for filename in os.listdir(illum_dir):
+                    pose,illum = filename.split('.')[0].split('_')
+                    pose = int(pose)
+                    illum = int(illum)
+                    if pose != 27:
+                        continue
+                    key = (month,sub,pose,illum)
+                    keys.append(key)
+        
+        self.key_list = keys
+            
+
+    def keys(self):
+        return self.key_list
+    
+    def __getitem__(self,key):
+        assert key in self.key_list
+        
+        face_obj = FaceDatabase.FaceObject()
+        month,sub,pose,illum = key
+        pose = int(pose)
+        illum = int(illum)
+        
+        face_obj.key = key
+        face_obj.person_id = key[1]
+        
+        filename = os.path.join(self.image_path,month,sub,"ILLUM","%02d_%02d"%(pose,illum)+self.image_ext)
+        
+        face_obj.image = pv.Image(filename)
+        
+        key = sub
         
         if self.eyes.has_key(key):
             leye,reye = self.eyes[key]
