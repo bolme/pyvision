@@ -47,8 +47,10 @@ import opencv as cv
 
 from scipy import weave
 
+# TODO: The default camera on linux appears to be zero and 1 on MacOS
+
 class Webcam:
-    def __init__(self,camera_num=1,size=(640,480)):
+    def __init__(self,camera_num=0,size=(640,480)):
 
         self.cv_capture = opencv.highgui.cvCreateCameraCapture( camera_num )        
         
@@ -61,6 +63,7 @@ class Webcam:
         
         @returns: the frame rescaled to a given size.
         '''
+        # TODO: Video capture is unreliable under linux.  This may just be a timing issue when running under parallels.
         frame = opencv.highgui.cvQueryFrame( self.cv_capture );
         im = Image(self.resize(frame))
         im.orig_frame = Image(frame)
