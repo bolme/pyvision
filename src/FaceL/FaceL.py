@@ -478,8 +478,12 @@ class VideoWindow(wx.Frame):
         self.ids_text.SetLabel("%d"%(self.face_rec.n_labels,))
         self.faces_text.SetLabel("%d"%(self.face_rec.n_faces,))
         
-
-        self.timer.Start(milliseconds = 1, oneShot = 1)
+        sleep_time = 1
+        if sys.platform.startswith("linux"):
+            sleep_time = 10 
+        # TODO: For macosx milliseconds should be 1
+        # TODO: For linux milliseconds may need to be set to a higher value 10
+        self.timer.Start(milliseconds = sleep_time, oneShot = 1)
 
 
     
