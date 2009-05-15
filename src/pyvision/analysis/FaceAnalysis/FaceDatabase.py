@@ -31,21 +31,24 @@ class FaceDatabase:
     
 class ScrapShotsDatabase(FaceDatabase):    
 
-    def __init__(self,image_path=None, image_ext=".pgm", coord_file=None):
+    def __init__(self):
         ''' Create an object that manages a FERET face database. '''
-        self.image_path = image_path
-        self.image_ext = image_ext
+        self.image_ext = ".pgm"
         
-        if coord_file == None:
-            coord_name = os.path.join(pv.__path__[0],'data','csuScrapShots','coords.txt')
-            self.eyes_file = EyesFile(coord_name)
-        else:
-            self.eyes_file = EyesFile(coord_name)
+        coord_name = os.path.join(pv.__path__[0],'data','csuScrapShots','coords.txt')
+        self.eyes_file = EyesFile(coord_name)
+
+        gender_file = os.path.join(pv.__path__[0],'data','csuScrapShots','gender.txt')
+        f = open(gender_file)
+        self.gender = {}
+        for line in f:
+            name,gender = line.split()
+            name = name.split('.')[0]
+            self.gender[name] = gender
             
-        if image_path == None:
-            self.image_path = os.path.join(pv.__path__[0],'data','csuScrapShots')
-        else:
-            self.image_path = image_path
+        self.image_path = os.path.join(pv.__path__[0],'data','csuScrapShots')
+            
+    
             
 
     def keys(self):
@@ -65,6 +68,8 @@ class ScrapShotsDatabase(FaceDatabase):
         im_name = os.path.join(self.image_path,key+self.image_ext)
         im = pv.Image(im_name)
         face_obj.image = im
+        
+        face_obj.gender = self.gender[key]
         
         return face_obj
 
@@ -100,9 +105,7 @@ class FERETDatabase(FaceDatabase):
         im = pv.Image(im_name)
         face_obj.image = im
         
-        return face_obj
-
-
+        return face_ob
 
 class PIE_ILLUM_Database(FaceDatabase):
     
@@ -181,7 +184,6 @@ class PIE_ILLUM_Database(FaceDatabase):
             face_obj.right_eye = reye
         
         return face_obj
-
 
 class PIE_ILLUM_Database_c27(FaceDatabase):
     
@@ -267,8 +269,6 @@ class PIE_ILLUM_Database_c27(FaceDatabase):
             face_obj.right_eye = reye
         
         return face_obj
-
-
-
+    
 # TODO: Needs unit tests.
         
