@@ -323,6 +323,10 @@ class FilterEyeLocator:
         self.bwtile = cv.cvCreateMat(128,128,cv.CV_8U)
             
         
+    def __call__(self,im,face_rects,ilog=None):
+        return self.locateEyes(im,face_rects,ilog=ilog)
+        
+        
     def locateEyes(self,im,face_rects,ilog=None):
         '''
         Finds the eyes in the image.  

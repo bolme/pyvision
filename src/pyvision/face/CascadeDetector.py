@@ -65,6 +65,12 @@ CELEB2_CASCADE=os.path.join(pyvision.__path__[0],"config","facedetector_celebdb2
 
 DEFAULT_NEGATIVE=os.path.join(pyvision.__path__[0],"data","nonface")
 
+# These are the average left and right eye locations relative to the face detection rectangle for the 
+# haarcascade_frontalface_alt cascade file.  Estimated using the first 1000 images from FERET.
+# To find the expected left eye location for a 64X64 detection rectangle: 64*AVE_LEFT_EYE
+AVE_LEFT_EYE = pyvision.Point(0.300655,0.381525,0.000000)
+AVE_RIGHT_EYE = pyvision.Point(0.708847,0.379736,0.000000)
+
 class CascadeDetector:
     ''' This class is a wrapper around the OpenCV cascade detectior. '''
     
