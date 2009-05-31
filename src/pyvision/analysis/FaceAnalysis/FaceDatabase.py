@@ -105,7 +105,7 @@ class FERETDatabase(FaceDatabase):
         im = pv.Image(im_name)
         face_obj.image = im
         
-        return face_ob
+        return face_obj
 
 class PIE_ILLUM_Database(FaceDatabase):
     
