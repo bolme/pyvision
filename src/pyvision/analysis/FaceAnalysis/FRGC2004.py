@@ -157,6 +157,12 @@ class FRGC_Exp4(FaceDatabase):
     def training(self):
         return copy.copy(self.training_keys)
     
+    def getMetadata(self,key):
+        meta = self.metadata[key]
+        sig = self.orig_sigset_map[key]
+        return key,sig[0],sig[1][0]['file-name'],meta.right_eye,meta.left_eye,meta.nose,meta.mouth
+
+    
     def __getitem__(self,key):
         entry = self.orig_sigset_map[key]
         
@@ -295,5 +301,17 @@ def reduce_exp4(source_dir,dest_dir):
     print "Copying metadata."
     shutil.copy(frgc.metadata_path,        os.path.join(dest_dir,'sigsets'))
 
-
+if __name__ == "__main__":
+    import csv
+    f = open('data/FRGC_Exp4_query_flat.csv','wb')
+    writer = csv.writer(f)
+    db = FRGC_Exp4("/Users/bolme/vision/data/FRGC_Metadata")
+    keys = db.query()
+    writer.writerow(['rec_id','sub_id','filename','eye1_x','eye1_y','eye2_x','eye2_y','nose_x','nose_y','mouth_x','mouth_y'])
+    for key in keys:
+        #print key
+        rec_id,sub_id,filename,left_eye,right_eye,nose,mouth = db.getMetadata(key)
+        #print "   ",rec_id,sub_id,filename,left_eye,right_eye,nose,mouth
+        writer.writerow([rec_id,sub_id,filename,left_eye.X(),left_eye.Y(),right_eye.X(),right_eye.Y(),nose.X(),nose.Y(),mouth.X(),mouth.Y()])
+    print "done"
         
