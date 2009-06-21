@@ -53,17 +53,17 @@ class ImageLog:
         
         
     def log(self,image,message=None,label="NOLABEL"):
-        image.asAnnotated().save(self.dir+'/%012d_%s.png'%(self.count,label))
+        image.asAnnotated().save(self.dir+'/%06d_%s.png'%(self.count,label))
         self.count += 1
         #print message
     
     def table(self,table,label="NOLABEL"):
-        filename = join(self.dir,'%012d_%s.csv'%(self.count,label))
+        filename = join(self.dir,'%06d_%s.csv'%(self.count,label))
         table.save(filename)
         self.count += 1
         
     def csv(self,data,headers=None,label="NOLABEL"):
-        filename = join(self.dir,'%012d_%s.csv'%(self.count,label))
+        filename = join(self.dir,'%06d_%s.csv'%(self.count,label))
         writer = csv.writer(open(filename, "wb"))
         if headers:
             writer.writerow(headers)
@@ -75,7 +75,7 @@ class ImageLog:
         '''
         Pickle an object to the log directory.
         '''
-        filename = join(self.dir,'%012d_%s.pkl'%(self.count,label))
+        filename = join(self.dir,'%06d_%s.pkl'%(self.count,label))
         f = open(filename,'wr')
         pickle.dump(object, f)
         f.close()
