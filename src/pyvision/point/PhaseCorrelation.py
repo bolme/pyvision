@@ -217,7 +217,7 @@ class _TestPhaseCorrelation(unittest.TestCase):
         im_a = Image(filename_a)
         im_b = Image(filename_b)
 
-        out = PhaseCorrelation(im_a,im_b)
+        out = PhaseCorrelation(im_a,im_b,phase_only=False)
         
         self.assertAlmostEqual(out[0],0.87382160686468002)
         self.assertEqual(out[1][0],20)
