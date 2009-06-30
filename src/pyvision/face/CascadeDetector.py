@@ -343,20 +343,6 @@ BAD_CASCADE=os.path.join(pyvision.__path__[0],"config","not_there.xml")
 class _TestCascadeDetector(unittest.TestCase):
     ''' Unit tests for the Cascade Detector '''
     
-    def setUp(self):
-        self.images = []
-        self.names = []
-        
-        
-        
-        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
-        for filename in self.eyes.files():
-            img = Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
-            self.images.append(img)
-            self.names.append(filename)
-        
-        self.assert_( len(self.images) == 173 )
-
     
     def test_detect_bad_file(self):
         '''
@@ -374,7 +360,9 @@ class _TestCascadeDetector(unittest.TestCase):
         buffer = pickle.dumps(fd)
         fd = pickle.loads(buffer)
         
-        for img in self.images:
+        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
+        for filename in self.eyes.files():
+            img = Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
             rects = fd(img)
             truth = self.eyes.getFaces(img.filename)
             fdt.addSample(truth,rects,im=img)
@@ -387,7 +375,9 @@ class _TestCascadeDetector(unittest.TestCase):
         fd = CascadeDetector(OPENCV_CASCADE)
         fdt = FaceDetectionTest(name='scraps')
         
-        for img in self.images:
+        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
+        for filename in self.eyes.files():
+            img = Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
             rects = fd(img)
             truth = self.eyes.getFaces(img.filename)
             fdt.addSample(truth,rects,im=img)
@@ -398,7 +388,9 @@ class _TestCascadeDetector(unittest.TestCase):
         fd = CascadeDetector(CELEB1_CASCADE)
         fdt = FaceDetectionTest(name='scraps')
 
-        for img in self.images:
+        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
+        for filename in self.eyes.files():
+            img = Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
             rects = fd(img)
             truth = self.eyes.getFaces(img.filename)
             fdt.addSample(truth,rects,im=img)
@@ -410,7 +402,9 @@ class _TestCascadeDetector(unittest.TestCase):
         fd = CascadeDetector(CELEB2_CASCADE)
         fdt = FaceDetectionTest(name='scraps')
         
-        for img in self.images:
+        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
+        for filename in self.eyes.files():
+            img = Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
             rects = fd(img)
             truth = self.eyes.getFaces(img.filename)
             fdt.addSample(truth,rects,im=img)
@@ -420,9 +414,11 @@ class _TestCascadeDetector(unittest.TestCase):
 
     def test_detector_train(self):
 
-        n = len(self.images)    
         positives = []    
-        for img in self.images[:n/2]:
+        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
+        n = len(self.eyes.files())    
+        for filename in self.eyes.files()[:n/2]:
+            img = Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
             faces = self.eyes.getFaces(img.filename)
             positives.append([os.path.join(SCRAPS_FACE_DATA,img.filename),faces])   
             
@@ -434,7 +430,9 @@ class _TestCascadeDetector(unittest.TestCase):
         fd = trainHaarClassifier(positives,neg_files,nstages=6,maxtreesplits=0,max_run_time=300)
         fdt = FaceDetectionTest(name='scraps')
         
-        for img in self.images:
+        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
+        for filename in self.eyes.files():
+            img = Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
             rects = fd(img)
             truth = self.eyes.getFaces(img.filename)
             fdt.addSample(truth,rects,im=img)
