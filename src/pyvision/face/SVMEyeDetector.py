@@ -463,7 +463,7 @@ class _TestSVMEyeDetector(unittest.TestCase):
         '''
         This trains the FaceFinder on the scraps database.
         '''
-        import cProfile
+        #import cProfile
 
         # Load an eyes file
         eyes_filename = join(pyvision.__path__[0],'data','csuScrapShots','coords.txt')
@@ -495,15 +495,12 @@ class _TestSVMEyeDetector(unittest.TestCase):
             edt.addSample(truth_eyes, pred_eyes, im=img, annotate=False)
         
         #print edt.createSummary()
-        #print edt
-        #self.assertAlmostEqual( edt.elapse_time , 49.7727022171, places = 3 )
-        #self.assertAlmostEqual( edt.face_rate , 0.9249, places = 3 )
-        #self.assertAlmostEqual( edt.both25_rate , 0.8960, places = 3 )
-        #self.assertAlmostEqual( edt.both10_rate , 0.7861, places = 3 )
-        #self.assertAlmostEqual( edt.both05_rate , 0.3873, places = 3 )
-
-        #self.assert_(False) # remove training output
-        # self.assert_(False) # add a test
+        self.assertAlmostEqual( edt.face_rate ,   0.924855491329, places = 3 )
+        
+        #TODO: Randomization is causing issues with getting the eye detector to perform consistently
+        #self.assertAlmostEqual( edt.both25_rate , 0.907514450867, places = 3 )
+        #self.assertAlmostEqual( edt.both10_rate , 0.745664739884, places = 3 )
+        #self.assertAlmostEqual( edt.both05_rate , 0.277456647399, places = 3 )
         
         
       
