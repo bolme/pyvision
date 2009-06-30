@@ -388,6 +388,55 @@ class FilterEyeLocator:
         return faces
         
 
+#############################################################################
+# Unit Tests
+#############################################################################
+import unittest
+import pyvision.face.CascadeDetector as cd
+from pyvision.analysis.FaceAnalysis.FaceDatabase import ScrapShotsDatabase
+from pyvision.analysis.FaceAnalysis.EyeDetectionTest import EyeDetectionTest
+
+class _TestFilterEyeLocator(unittest.TestCase):
+    
+    def test_ASEFEyeLocalization(self):
+        '''
+        This trains the FaceFinder on the scraps database.
+        '''
+        # Load a face database
+        ssdb = ScrapShotsDatabase()
+                
+        # Create a face detector 
+        face_detector = cd.CascadeDetector()
+
+        # Create an eye locator
+        eye_locator = FilterEyeLocator()
+        
+        # Create an eye detection test
+        edt = EyeDetectionTest(name='asef_scraps')
+
+        #print "Testing..."
+        for face_id in ssdb.keys():
+            face = ssdb[face_id]
+            im = face.image
+
+            # Detect the faces
+            faces = face_detector.detect(im)
+            
+            # Detect the eyes
+            pred_eyes = eye_locator(im,faces)
+            
+            truth_eyes = [[face.left_eye,face.right_eye]]
+            pred_eyes = [ [leye,reye] for rect,leye,reye in pred_eyes]
+            
+            # Add to eye detection test
+            edt.addSample(truth_eyes, pred_eyes, im=im, annotate=False)
+        
+        edt.createSummary()
+        self.assertAlmostEqual( edt.face_rate ,   0.953757225434, places = 3 )
+        
+        self.assertAlmostEqual( edt.both25_rate , 0.797687861272, places = 3 )
+        self.assertAlmostEqual( edt.both10_rate , 0.445086705202, places = 3 )
+        self.assertAlmostEqual( edt.both05_rate , 0.346820809249, places = 3 )
 
         
     
