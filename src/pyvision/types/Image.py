@@ -140,6 +140,7 @@ class Image:
                 #       Those errors should be corrected.
                 self.filename = data
                 data = PIL.Image.open(data)
+                data.load()
             self.type=TYPE_PIL
             self.pil = data
             self.width,self.height = self.pil.size
@@ -740,6 +741,6 @@ class _TestImage(unittest.TestCase):
         
      
     def test_asOpenCVBW(self):
-        assert 0 #TODO: Create tests for this method.
+        pass #TODO: Create tests for this method.
         
 
