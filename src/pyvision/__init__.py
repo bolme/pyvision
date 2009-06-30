@@ -243,7 +243,7 @@ class _VersionTest(unittest.TestCase):
         import sys
         import opencv
         major,minor,sub = opencv.CV_VERSION.split('.')[:3]
-        rmajor,rminor,rsub = 1,0,0 # 2008/03/20
+        rmajor,rminor,rsub = 1,1,0 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
         print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
         sys.stderr.flush()
@@ -328,8 +328,12 @@ def test():
     from pyvision.face.PCA import _TestFacePCA
     fpca_suite = unittest.TestLoader().loadTestsFromTestCase(_TestFacePCA)
     
-    from pyvision.face.SVMEyeDetector import _TestSVMEyeDetector 
-    svmed_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSVMEyeDetector)
+    from pyvision.face.FilterEyeLocator import _TestFilterEyeLocator
+    asefed_suite = unittest.TestLoader().loadTestsFromTestCase(_TestFilterEyeLocator)
+
+    # Replaced by ASEF work
+    # from pyvision.face.SVMEyeDetector import _TestSVMEyeDetector 
+    # svmed_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSVMEyeDetector)
     
     from pyvision.edge.canny import _TestCanny
     canny_suite = unittest.TestLoader().loadTestsFromTestCase(_TestCanny)
@@ -342,6 +346,7 @@ def test():
     
     from pyvision.analysis.classifier.ConfusionMatrix import _TestConfusionMatrix
     cm_suite = unittest.TestLoader().loadTestsFromTestCase(_TestConfusionMatrix)
+    
     
     test_suites = [
                    version_suite,
@@ -357,7 +362,8 @@ def test():
                    ga_suite,
                    cd_suite,
                    fpca_suite,
-                   svmed_suite,
+                   asefed_suite,
+                   #svmed_suite,
                    canny_suite,
                    stats_suite,
                    table_suite,
