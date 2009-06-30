@@ -68,6 +68,7 @@ Genetic Algorithm     optimization        pyvision.optimize.GeneticAlgorithm
 '''
 
 import unittest
+import sys
 
 __version__ = "$Rev$"
 __info__ = "$Id$"
@@ -220,8 +221,8 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = sys.version.split(' ')[0].split('.')[:3]
         rmajor,rminor,rsub = 2,3,0 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
-        sys.stdout.flush()
+        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        sys.stderr.flush()
         self.assert_(major > rmajor 
                      or major == rmajor and minor >= rminor 
                      or major == rmajor and minor == rminor and sub >= sub)
@@ -232,8 +233,8 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = PIL.Image.VERSION.split('.')[:3]
         rmajor,rminor,rsub = 1,1,5 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
-        sys.stdout.flush()
+        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        sys.stderr.flush()
         self.assert_(major > rmajor 
                      or major == rmajor and minor >= rminor 
                      or major == rmajor and minor == rminor and sub >= sub)
@@ -244,8 +245,8 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = opencv.CV_VERSION.split('.')[:3]
         rmajor,rminor,rsub = 1,0,0 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
-        sys.stdout.flush()
+        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        sys.stderr.flush()
         self.assert_(major > rmajor 
                      or major == rmajor and minor >= rminor 
                      or major == rmajor and minor == rminor and sub >= sub)
@@ -256,8 +257,8 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = scipy.__version__.split('.')[:3]
         rmajor,rminor,rsub = 0,7,0 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
-        sys.stdout.flush()
+        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        sys.stderr.flush()
         self.assert_(major > rmajor 
                      or major == rmajor and minor >= rminor 
                      or major == rmajor and minor == rminor and sub >= sub)
@@ -268,8 +269,8 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = numpy.__version__.split('.')[:3]
         rmajor,rminor,rsub = 1,0,4 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
-        sys.stdout.flush()
+        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        sys.stderr.flush()
         self.assert_(major > rmajor 
                      or major == rmajor and minor >= rminor 
                      or major == rmajor and minor == rminor and sub >= sub)
@@ -281,8 +282,8 @@ class _VersionTest(unittest.TestCase):
         rmajor,rminor,rsub = 2,86,0 # 2008/03/20
         #major,minor,sub = int(major),int(minor),int(sub)
         #print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
-        print "No way to get version numbers >= %d.%d "%(rmajor,rminor),
-        sys.stdout.flush()
+        print >> sys.stderr, "No way to get version numbers >= %d.%d "%(rmajor,rminor),
+        sys.stderr.flush()
         #self.assert_(major > rmajor 
         #             or major == rmajor and minor >= rminor 
         #             or major == rmajor and minor == rminor and sub >= sub)

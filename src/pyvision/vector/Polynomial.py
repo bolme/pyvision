@@ -46,7 +46,7 @@ class Polynomial2D(VectorClassifier):
         VectorClassifier.__init__(self,TYPE_REGRESSION,**kwargs)
         
         
-    def trainClassifer(self,labels,vectors):
+    def trainClassifer(self,labels,vectors,ilog=None):
         '''
         Train the polynomial.  Do not call this function
         manually, instead call the train function on the super
@@ -85,7 +85,7 @@ class Polynomial2D(VectorClassifier):
                 row.append(float(x)**i*float(y)**(o-i))
         return row
 
-    def predictValue(self,data):
+    def predictValue(self,data,ilog=None):
         '''
         Method for private use only.  Call super class predict.
         '''

@@ -286,7 +286,7 @@ class SVM(VectorClassifier):
         i = 0
         for C in C_range:
             for G in G_range:
-                if verbose: print "Testing: %5d %5d"%(C,G),
+                if verbose: print "Testing: %10.5f %10.5f"%(C,G),
                 
                 param = svm_parameter(svm_type=self.svm_type,kernel_type = RBF, C = C, gamma=G,p=self.epsilon,nu=self.nu)
                 
