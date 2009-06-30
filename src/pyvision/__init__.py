@@ -104,10 +104,41 @@ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Warning: Some parts of PyVision may link to libraries using more 
+restrictive licenses and some algorithms in PyVision by be covered 
+under patents.  In these cases PyVision should display a warning
+for commercial use.  If you believe this a warning should be added
+for any algorithm or interface please contact me at
+bolme@cs.colostate.edu
 '''
 
 __all__ = ['analysis','edge','face','optimize','other','point','types','vector']
 
+WARN_COMMERCIAL_USE = True
+
+def disableCommercialUseWarnings():
+    '''
+    Most of PyVision is released under the BSD license and
+    can therefore be used free of charge in commercial 
+    projects. In some limited cases PyVision uses algorithms
+    that are covered by patents or source code released under
+    copy left open source licenses such as GPL which may make
+    software produced using those components unsuitable for 
+    commercial distribution. 
+    
+    When a PyVision module contains or links to  non-commercial 
+    code a warning message will be printed to stdout.  If you
+    would like to disable these warning simply call this function
+    before importing the offending module.  The users PyVision are 
+    responsible for determining if their use of those components 
+    respects all applicable licenses and patents.
+    
+    If you believe this a warning should be added for any algorithm 
+    or interface please contact me at bolme@cs.colostate.edu 
+    '''
+    global WARN_COMMERCIAL_USE
+    WARN_COMMERCIAL_USE = False
 
 #Import basic pyvision types
 
@@ -129,6 +160,7 @@ from pyvision.analysis.Timer import Timer
 
 from pyvision.util.fast_util import LocalMaximumDetector
 
+from pyvision.other.normalize import meanStd, meanUnit, unit
 
 # TODO: Features to be included in the initial release.
 #     analysis: 

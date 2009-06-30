@@ -49,11 +49,28 @@ import array
 import os.path
 import pyvision as pv
 import numpy as np
+import sys
 
 __author__ = "David S. Bolme - Colorado State Univeristy"
 __version__ = "$Revision: 729 $"
 
-#TODO: Unknown error
+if pv.WARN_COMMERCIAL_USE:
+    warning = '''
+    WARNING: A patent protection is anticipated for ASEF and 
+             similar filters by the Colorado State University 
+             Research Foundation (CSURF). 
+       
+             This module, "FilterEyeLocator.py", my not be 
+             suitable for commercial use.
+    
+             Commercial and government users should contact 
+             CSURF for additional details:
+             http://www.csurf.org/tto/pdfs/ncs_forms/09-017_csurf_ncs.pdf
+    '''
+    sys.stderr.write(warning)
+    print pv.WARN_COMMERCIAL_USE
+
+#TODO: Unknown error - THis may be related version 1.0.0 of opencv
 #Traceback (most recent call last):
 #  File "/home/dbolme/ASEFFilters/python/csu/tools/face_scan.py", line 117, in ?
 #    results = processFaces(im,face_detect,locate_eyes)
