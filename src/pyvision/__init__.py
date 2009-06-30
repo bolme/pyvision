@@ -290,6 +290,8 @@ class _VersionTest(unittest.TestCase):
         self.assert_(True)        
         
 def test():
+    disableCommercialUseWarnings()
+    
     version_suite = unittest.TestLoader().loadTestsFromTestCase(_VersionTest)
 
     from pyvision.types.Affine import _AffineTest
