@@ -68,9 +68,8 @@ if pv.WARN_COMMERCIAL_USE:
              http://www.csurf.org/tto/pdfs/ncs_forms/09-017_csurf_ncs.pdf
     '''
     sys.stderr.write(warning)
-    print pv.WARN_COMMERCIAL_USE
 
-#TODO: Unknown error - THis may be related version 1.0.0 of opencv
+#TODO: Unknown error - This may be related version 1.0.0 of opencv
 #Traceback (most recent call last):
 #  File "/home/dbolme/ASEFFilters/python/csu/tools/face_scan.py", line 117, in ?
 #    results = processFaces(im,face_detect,locate_eyes)
