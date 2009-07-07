@@ -33,6 +33,8 @@
 
 from math import *
 from pyvision.types.Image import Image
+import scipy as sp
+import numpy as np
 
 def normalizeMeanStd(matrix):
     ''' TODO: deprecated please use meanStd.'''
@@ -77,4 +79,47 @@ def unit(matrix):
         return Image(matrix)
     return matrix
 
+def selfQuotient(tile, ilog=None):
+    '''
+    Compute a 3x3 Norm quotient image.
+    
+    This was found in Pinto et.al. CVPR 2009.  It may also be related
+    to Wang et.al. "Self Quotient Image for Face Recognition" ICIP 2004
+    '''
+    # get the matrix
+    is_image = False
+    if isinstance(tile,Image):
+        mat = tile.asMatrix2D()
+        is_image = True
+    else:
+        # assume this is a matrix
+        mat = tile
+    
+    
+    # compute the 3x3 square
+    mat2 = mat*mat #square
+    
+    # compute the 3x3 sums
+    weights = sp.array([[1.0,1.0,1.0],[1.0,1.0,1.0],[1.0,1.0,1.0]])
+    mat2sum = sp.ndimage.convolve(mat2,weights)
+    
+    # take the sqrt for the norm
+    matnorm = np.sqrt(mat2sum)
+    
+    # elementwize division
+    normed = mat/matnorm
+    
+    # if ilog, save out data
+    if ilog != None:
+        gray = mat/mat.max()
+        ilog.log(pv.Image(gray),label="PintoV1_Norm3x3_Grayscale")
+        #ilog.log(pv.Image(mat2),label="Norm3x3_Squared")
+        #ilog.log(pv.Image(mat2sum),label="Norm3x3_Sum")
+        #ilog.log(pv.Image(matnorm),label="Norm3x3_Sqrt")
+        ilog.log(pv.Image(normed),label="PintoV1_Norm3x3_Normed")
+        
+    # return the result
+    if is_image:
+        return Image(normed)
+    return normed
 
