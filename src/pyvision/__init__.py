@@ -161,7 +161,7 @@ from pyvision.analysis.Timer import Timer
 
 from pyvision.util.fast_util import LocalMaximumDetector
 
-from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotient
+from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotient, selfQuotientPinto, lowPassFilter, highPassFilter, bandPassFilter
 
 from pyvision.vector.knn import PNorm,correlation
 

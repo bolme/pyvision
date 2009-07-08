@@ -79,12 +79,33 @@ def unit(matrix):
         return Image(matrix)
     return matrix
 
-def selfQuotient(tile, ilog=None):
+def selfQuotient(matrix,sigma=1.5):
+    '''
+    Compute a self quotient image.
+    
+    Based on work by Wang et.al. "Self Quotient Image for Face Recognition" ICIP 2004
+    '''
+    is_image = False
+    if isinstance(matrix,Image):
+        matrix = matrix.asMatrix2D()
+        is_image = True
+
+    denom = sp.ndimage.gaussian_filter(matrix,sigma)
+
+    matrix = matrix/denom
+
+    if is_image:
+        return Image(matrix)
+    return matrix
+
+
+def selfQuotientPinto(tile, ilog=None):
     '''
     Compute a 3x3 Norm quotient image.
     
     This was found in Pinto et.al. CVPR 2009.  It may also be related
-    to Wang et.al. "Self Quotient Image for Face Recognition" ICIP 2004
+    to Wang et.al. "Self Quotient Image for Face Recognition" ICIP 2004.
+    Code adapted from Yui Man Lui.
     '''
     # get the matrix
     is_image = False
@@ -122,4 +143,74 @@ def selfQuotient(tile, ilog=None):
     if is_image:
         return Image(normed)
     return normed
+
+def highPassFilter(matrix,sigma):
+    '''
+    This function computes a high and low pass filter.  This can be used 
+    to reduce the effect of lighting.
+    
+    A low pass image is first computed by convolving the image with a 
+    Gausian filter of radius sigma.  Second, a high pass image is computed
+    by subtracting the low pass image from the original image.  This means that 
+    the original image can be reconstructed by adding a low pass image and a high
+    pass image.
+    
+    @returns: high_pass_image
+    '''
+    is_image = False
+    if isinstance(matrix,Image):
+        matrix = matrix.asMatrix2D()
+        is_image = True
+
+    matrix = matrix - sp.ndimage.gaussian_filter(matrix,sigma)
+    
+    if is_image:
+        return Image(matrix)
+    return matrix
+
+def lowPassFilter(matrix,sigma):
+    '''
+    This function computes a low pass filter.  It basically smoothes the image 
+    by convolving with a Gaussian.  This is often used to reduce the effect of 
+    noise in images or to reduce the effect of small registration errors.  
+ 
+    @returns: an pv.Image set from a numpy matrix if input was an image or a numpy 
+                matrix otherwize. 
+    '''
+    is_image = False
+    if isinstance(matrix,Image):
+        matrix = matrix.asMatrix2D()
+        is_image = True
+
+    matrix = sp.ndimage.gaussian_filter(matrix,sigma)
+    
+    if is_image:
+        return Image(matrix)
+    return matrix
+
+
+def bandPassFilter(matrix,sigma_low, sigma_high):
+    '''
+    This function computes a high and low pass filter.  This can be used 
+    to reduce the effect of lighting.
+    
+    A low pass image is first computed by convolving the image with a 
+    Gausian filter of radius sigma.  Second, a high pass image is computed
+    by subtracting the low pass image from the original image.  This means that 
+    the original image can be reconstructed by adding a low pass image and a high
+    pass image.
+    
+    @returns: high_pass_image
+    '''
+    assert sigma_low > sigma_high
+    is_image = False
+    if isinstance(matrix,Image):
+        matrix = matrix.asMatrix2D()
+        is_image = True
+
+    matrix = sp.ndimage.gaussian_filter(matrix,sigma_high) - sp.ndimage.gaussian_filter(matrix,sigma_low)
+    
+    if is_image:
+        return Image(matrix)
+    return matrix
 
