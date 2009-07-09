@@ -504,9 +504,8 @@ class Image:
             tmp[2,:] = mat
             buffer = mat.tostring()            
         elif self.type == TYPE_MATRIX_RGB:
-            mat = self.matrix3d
-            mat = LUMA[0]*mat[0] + LUMA[1]*mat[1] + LUMA[2]*mat[2]
-            buffer = mat.transpose().tostring()
+            mat = self.matrix3d.transpose()
+            buffer = mat.tostring()
         elif self.type == TYPE_OPENCV:
             w,h = self.width,self.height
             if self.channels == 3:
