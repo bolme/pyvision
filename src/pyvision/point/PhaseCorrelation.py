@@ -86,12 +86,11 @@ def PhaseCorrelation(tile1, tile2, phase_only=True, ilog=None):
     Ia = fft2(tile1)
     Ib = conjugate(fft2(tile2))
 
-    if phase_only:
-        Ia = Ia/np.abs(Ia)
-        Ib = Ib/np.abs(Ib)
-
     # build the normalized cross-power spectrum
     ncs = Ia*Ib
+
+    if phase_only:
+        ncs = ncs/np.abs(ncs)
 
     # build the power spectrum
     pc = real(ifft2(ncs))
