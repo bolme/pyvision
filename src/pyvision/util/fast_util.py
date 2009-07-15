@@ -8,7 +8,7 @@ class LocalMaximumDetector:
         self.maxes = np.zeros((max_length,2),dtype=np.int)
         self.vals = np.zeros((max_length,),dtype=np.float)
     
-    def __call__(self, mat, threshold = None):
+    def __call__(self, mat, threshold = None, sorted = True):
         '''
         All any local maximum that are greater than threshhold up to a total of 
         max_length.
@@ -17,6 +17,10 @@ class LocalMaximumDetector:
         once and reused for each call.  This means that local maximum detection
         is not thread safe. If using this class with threads create an instance
         for each thread.
+        
+        @param mat: 2d Real Matrix input.
+        @keyparam threshold: Mininum value of local maxima.
+        @keyparam sorted: set to False to save time and return an unorderd list.
         
         @returns maxes,vals
         '''
@@ -100,6 +104,18 @@ class LocalMaximumDetector:
                 arg_names=['mat','maxes','vals','max_length','r','c'],
                 type_converters=weave.converters.blitz,
             )
-            
-        return maxes[:count,:].copy(),vals[:count].copy()
+        
+        if sorted == False:
+            return maxes[:count,:].copy(),vals[:count].copy()
+        
+        order = np.argsort(vals[:count])[::-1]
+        maxes = maxes[order]
+        vals = vals[order]
+        
+        #print vals
+        #print maxes
+        
+        return maxes,vals
+        
+        
 
