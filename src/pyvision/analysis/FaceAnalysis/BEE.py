@@ -31,12 +31,15 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-##
-# This module contains functions for parsing and writing files
-# for the Biometrics Evaluation Environment (BEE).
-#
-# <p>see: <a href="http://www.bee-biometrics.org">http://www.bee-biometrics.org</a>
-##
+'''
+This module contains functions for reading and writing files
+for the Biometrics Evaluation Environment (BEE) including distance
+matricies and sigsets.
+
+@authors  David S. Bolme (CSU) and C.J. Carey (NIST)
+
+<p>see: <a href="http://www.bee-biometrics.org">http://www.bee-biometrics.org</a>
+'''
 
 import xml.etree.cElementTree as ET
 import os.path
@@ -162,29 +165,42 @@ def fastROC(sorted_positives, sorted_negatives):
     
     assert len(positives) < len(negatives)
     
-    timer.mark("Starting search sorted")
+    #timer.mark("Starting search sorted")
     indexes = np.searchsorted(negatives,positives)
-    timer.mark("Search time")
-    print "Searched:", len(indexes)
+    #timer.mark("Search time")
+    #print "Searched:", len(indexes)
     
     
     tp = (1.0/n_pos) * np.arange(n_pos)
     fn = (1.0/n_neg) * indexes
     
-    timer.mark("ROC computed")
+    #timer.mark("ROC computed")
     
     curve = np.array([tp,fn]).transpose()
     
-    print "Curve:",curve.shape
-    print curve
+    #print "Curve:",curve.shape
+    #print curve
 
     return curve
                
 class BEEDistanceMatrix:
-    
-    def __init__(self,filename,sigset_dir=None):
+
+    def __init__(self, *args, **kwargs):
         '''
-        Reads a BEE distance matrix
+        Creates a BEE distance matrix
+        '''
+        if isinstance(args[0],str):
+            self.loadFile(*args,**kwargs)
+            
+        elif isinstance(args[0],np.ndarray):
+            self.loadMatrix(*args,**kwargs)
+            
+        else:
+            raise TypeError("Cannot create a BEEDistanceMatrix from an object of type: %s"%type(args[0]))
+        
+    def loadFile(self,filename,sigset_dir=None):
+        '''
+        Loads a BEE matrix from a file.
         '''
         self.filename = filename
         self.shortname = os.path.basename(filename)
@@ -249,8 +265,7 @@ class BEEDistanceMatrix:
         except:
             print "Warning: cound not read the query sigset for distance matrix %s"%self.shortname
             print "         SigSet File:",ss_name
-            #print "         Len: %d != %d"%(len(self.queries), self.n_queries)
-            #raise
+            print "         Expected:",self.n_queries,"Read:",len(self.queries)
         
         self.targets = None
         try:
@@ -261,8 +276,53 @@ class BEEDistanceMatrix:
         except:
             print "Warning: cound not read the target sigset for distance matrix %s"%self.shortname
             print "         SigSet File:",ss_name
-            #print "         Len: %d != %d"%(len(self.targets), self.n_targets)
-            #raise
+            print "         Expected:",self.n_targets,"Read:",len(self.targets)
+        
+        
+    def loadMatrix(self, mat, query_filename, target_filename, sigset_dir=None, is_distance=True):
+        '''
+        Loads a BEE matrix from a file.
+        '''
+        #read the distance matrix header (first four lines of the file)
+        # select distance or similarity
+        self.is_distance = is_distance
+
+        # read and process line 2 (target sigset)
+        self.target_filename = target_filename
+
+        # read and process line 3 (query sigset)
+        self.query_filename = query_filename
+
+        # read and process line 4 (MF n_queries n_targets magic_number)        
+        self.n_queries = mat.shape[0]
+        self.n_targets = mat.shape[1]
+        self.magic_number = 0x12345678
+        
+        # Read the matrix data
+        self.matrix = mat
+            
+        # Try to read the sigsets.
+        self.queries = None
+        self.targets = None
+        if sigset_dir != None:
+            try:
+                ss_name = os.path.join(sigset_dir,self.query_filename)
+                self.queries = parseSigSet(ss_name)
+                assert len(self.queries) == self.n_queries
+            except:
+                print "Warning: cound not read the query sigset for distance matrix"
+                print "         SigSet File:",ss_name
+                print "         Expected:",self.n_queries,"Read:",len(self.queries)
+        
+            try:
+                ss_name = os.path.join(sigset_dir,self.target_filename)
+                self.targets = parseSigSet(ss_name)
+    
+                assert len(self.targets) == self.n_targets
+            except:
+                print "Warning: cound not read the target sigset for distance matrix"
+                print "         SigSet File:",ss_name
+                print "         Expected:",self.n_targets,"Read:",len(self.targets)
         
         
     def getMatchScores(self,mask=None):
@@ -417,7 +477,28 @@ class BEEDistanceMatrix:
         #print "    <matrix sample> :",self.matrix[1,0:4]
         #print "    <matrix sample> :",self.matrix[2,0:4]
         #print "    <matrix sample> :",self.matrix[3,0:4]
-    
+        
+    def write(self,filename):
+        '''
+        Writes the BEE distance matrix to file. WARNING: DOES NOT HANDLE MASK MATRICES CORRECTLY!
+        '''
+        #maybe check for overwrite? and add param for allowing overwrite
+        file = open(filename, "w")
+        # write line 1 : type and version
+        if self.is_distance:
+            file.write('D') #doesn't handle mask matrices!
+        else:
+            file.write('S') #doesn't handle mask matrices!
+            
+        file.write("2\n")
+        # write lines 2 and 3 (target and query sigsets)
+        file.writelines([self.target_filename+"\n", self.query_filename+"\n"])
+        # write line 4 (MF n_queries n_targets magic_number)
+        file.write("MF %d %d %s\n" %(self.n_queries, self.n_targets, struct.pack("L", self.magic_number)))
+        # write the data
+        file.write(self.matrix)
+        file.close()
+
     def histogram(self,value_range=None,bins=100,type="ALL",normed=False):
         if type == "ALL":
             scores = self.matrix
@@ -427,7 +508,7 @@ class BEEDistanceMatrix:
             scores = self.getNonMatchScores()
         else:
             raise ValueError("Histogram of type %s is not supported use 'ALL', 'MATCH', or 'NONMATCH'.")
-        
+
         counts,vals = np.histogram(scores,range=value_range,bins=bins,normed=normed)
                 
         hist = pv.Table()
@@ -454,5 +535,4 @@ class BEEDistanceMatrix:
         '''
         type = {True:"Distance",False:"Similarity"}[self.is_distance]
         return "BEE[file=%s;type=%s]"%(self.shortname,type)
-    
     
