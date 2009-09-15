@@ -145,7 +145,7 @@ def disableCommercialUseWarnings():
 
 from pyvision.types.Image import Image,OpenCVToNumpy,NumpyToOpenCV
 
-from pyvision.types.Point import Point
+from pyvision.types.Point import Point,readPointsFile
 
 from pyvision.types.Rect import Rect
 
@@ -161,7 +161,7 @@ from pyvision.analysis.Timer import Timer
 
 from pyvision.util.fast_util import LocalMaximumDetector
 
-from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotient, selfQuotientPinto, lowPassFilter, highPassFilter, bandPassFilter
+from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotient, lowPassFilter, highPassFilter, bandPassFilter
 
 from pyvision.vector.knn import PNorm,correlation
 
