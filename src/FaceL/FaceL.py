@@ -15,7 +15,7 @@ import traceback
 
 
 
-ABOUT_MESSAGE = '''Welcome to Facile Face Labeling (FaceL)
+ABOUT_MESSAGE = '''Welcome to Facile Face Labeling (FaceL) Version 1.0.1
                   
 FaceL is a simple application that detects, registers, and labels faces.
 
@@ -113,10 +113,11 @@ else:
     FACEL_LOGO = "LogoFaceL.png"
     CSU_LOGO = "ColoStateLogo.png"
 
+import pyvision as pv
+pv.disableCommercialUseWarnings()
 from pyvision.types.Video import Webcam
 from pyvision.face.CascadeDetector import CascadeDetector
 from pyvision.analysis.FaceAnalysis.FaceDetectionTest import is_success
-import pyvision as pv
 import pickle
 import wx
 import wx.lib.plot as plot
@@ -125,7 +126,7 @@ from PIL.Image import FLIP_LEFT_RIGHT
 import PIL
 import PIL.ImageFont
 from pyvision.face.SVMFaceRec import SVMFaceRec
-from pyvision.face.FilterEyeLocator import loadFilterEyeLocator
+from pyvision.face.FilterEyeLocator import FilterEyeLocator
 import opencv as cv
 import math
 
@@ -159,7 +160,7 @@ class VideoWindow(wx.Frame):
         
         # ------------- Face Processing -----------------
         self.face_detector = CascadeDetector(cascade_name=CASCADE_NAME,image_scale=0.5)
-        self.fel = loadFilterEyeLocator(FEL_NAME)
+        self.fel = FilterEyeLocator(FEL_NAME)
         self.face_rec = SVMFaceRec()
         
         self.svm_mode  = SVM_AUTOMATIC
@@ -520,33 +521,15 @@ class VideoWindow(wx.Frame):
                 
 
     def findFaces(self,im):
-        faces = []
         
         self.detect_time = time.time()
         rects = self.face_detector.detect(im)
         self.detect_time = time.time() - self.detect_time
-
-        cvim = im.asOpenCV()
-        cvtile = cv.cvCreateMat(128,128,cv.CV_8UC3)
-        bwtile = cv.cvCreateMat(128,128,cv.CV_8U)
         
         self.eye_time = time.time()
-        for rect in rects:
-            faceim = cv.cvGetSubRect(cvim, rect.asOpenCV())
-            cv.cvResize(faceim,cvtile)
-            
-            affine = pv.AffineFromRect(rect,(128,128))
-
-            cv.cvCvtColor( cvtile, bwtile, cv.CV_BGR2GRAY )
-            
-            leye,reye,lcp,rcp = self.fel.locateEyes(bwtile)
-            leye = pv.Point(leye)
-            reye = pv.Point(reye)
-            
-            leye = affine.invertPoint(leye)
-            reye = affine.invertPoint(reye)
-            
-            faces.append([rect,leye,reye])
+        
+        faces = self.fel.locateEyes(im, rects)
+        
         self.eye_time = time.time() - self.eye_time
 
         self.current_faces = faces
@@ -881,6 +864,8 @@ if __name__ == '__main__':
         sys.stderr.write("FaceL Error: an unknown error occurred.  Details follow.\n\n")
         sys.stderr.write(trace)
         sys.exit(UNKNOWN_ERROR_CODE)
+    
+    
         
         
         

@@ -11,6 +11,7 @@ APP = ['FaceL.py']
 DATA_FILES = ["haarcascade_frontalface_alt.xml","EyeLocatorASEF128x128.fel","Arial Black.ttf","LogoFaceL.png","ColoStateLogo.png"]
 OPTIONS = {'argv_emulation': True,
            'iconfile':'FaceLIcon.icns',
+           'packages':['wx'],
            'site_packages':True,
            'plist':dict(
                        CFBundleName               = "FaceL",
