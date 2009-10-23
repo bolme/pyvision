@@ -66,10 +66,10 @@ class DetectorHarris(DetectorROI):
         void cvCornerHarris( const CvArr* image, CvArr* harris_responce,
                          int block_size, int aperture_size=3, double k=0.04 );
         '''
-        cvim = im.asOpenCV()
-        gray = opencv.cvCreateImage( opencv.cvGetSize(cvim), 8, 1 );
-        corners = opencv.cvCreateImage( opencv.cvGetSize(cvim), 32, 1 );
-        opencv.cvCvtColor( cvim, gray, opencv.CV_BGR2GRAY );
+        gray = im.asOpenCVBW()
+        #gray = opencv.cvCreateImage( opencv.cvGetSize(cvim), 8, 1 );
+        corners = opencv.cvCreateImage( opencv.cvGetSize(gray), 32, 1 );
+        #opencv.cvCvtColor( cvim, gray, opencv.CV_BGR2GRAY );
     
         opencv.cvCornerHarris(gray,corners,self.block_size,self.aperture_size,self.k)
 
