@@ -140,7 +140,6 @@ class Image:
                 #       Those errors should be corrected.
                 self.filename = data
                 data = PIL.Image.open(data)
-                data.load()
             self.type=TYPE_PIL
             self.pil = data
             self.width,self.height = self.pil.size
@@ -263,7 +262,7 @@ class Image:
         draw.ellipse(box,outline=color)
         del draw
                 
-    def annotateLine(self,point1,point2,color='red'):
+    def annotateLine(self,point1,point2,color='red',width=1):
         '''
         Draws a line from point1 to point2 on the annotation image
     
@@ -274,7 +273,7 @@ class Image:
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
         line = [point1.X(),point1.Y(),point2.X(),point2.Y()]
-        draw.line(line,fill=color,width=1)
+        draw.line(line,fill=color,width=width)
         del draw
         
     def annotatePoint(self,point,color='red'):
@@ -290,7 +289,7 @@ class Image:
         draw.ellipse(box,outline=color)
         del draw
 
-    def annotateCircle(self,point, radius=3, color='red'):
+    def annotateCircle(self,point, radius=3, color='red',fill=None):
         '''
         Marks a circle in the annotation image 
         
@@ -301,7 +300,7 @@ class Image:
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
         box = [point.X()-radius,point.Y()-radius,point.X()+radius,point.Y()+radius]
-        draw.ellipse(box,outline=color)
+        draw.ellipse(box,outline=color,fill=fill)
         del draw
         
     def annotateLabel(self,point,label,color='red',mark=False):        

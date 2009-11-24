@@ -48,6 +48,9 @@ import opencv as cv
 from scipy import weave
 
 # TODO: The default camera on linux appears to be zero and 1 on MacOS
+# Video capture is an alterative for windows http://videocapture.sourceforge.net/
+# An option for linux http://code.google.com/p/python-video4linux2/
+# On linux it may be possible to use something like v4lctl to capture in a seperate process.
 
 class Webcam:
     def __init__(self,camera_num=0,size=(640,480)):

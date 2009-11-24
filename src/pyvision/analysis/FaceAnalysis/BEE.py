@@ -139,6 +139,22 @@ def sigset2xml(ss):
     tree = ET.ElementTree(root)
     return tree
     
+def sigset2array(ss):
+    result = []
+    for signature in ss:
+        sub_id = signature[0]
+        if len(signature[1]) != 1:
+            raise TypeError("This function only handles simple sigsets.")
+        #print signature[1][0]
+        
+        mode = signature[1][0]['modality']
+        format = signature[1][0]['file-format']
+        rec_id = signature[1][0]['name']
+        filename = signature[1][0]['file-name']
+        result.append([sub_id,mode,format,rec_id,filename])
+    return result
+        
+    
 def formatSigset(ss,n=None):
     c = 0
     for name,data in ss:
@@ -263,9 +279,10 @@ class BEEDistanceMatrix:
             self.queries = parseSigSet(ss_name)
             assert len(self.queries) == self.n_queries
         except:
-            print "Warning: cound not read the query sigset for distance matrix %s"%self.shortname
-            print "         SigSet File:",ss_name
-            print "         Expected:",self.n_queries,"Read:",len(self.queries)
+            pass
+            #print "Warning: cound not read the query sigset for distance matrix %s"%self.shortname
+            #print "         SigSet File:",ss_name
+            #print "         Expected:",self.n_queries,"Read:",len(self.queries)
         
         self.targets = None
         try:
@@ -274,9 +291,10 @@ class BEEDistanceMatrix:
 
             assert len(self.targets) == self.n_targets
         except:
-            print "Warning: cound not read the target sigset for distance matrix %s"%self.shortname
-            print "         SigSet File:",ss_name
-            print "         Expected:",self.n_targets,"Read:",len(self.targets)
+            pass
+            #print "Warning: cound not read the target sigset for distance matrix %s"%self.shortname
+            #print "         SigSet File:",ss_name
+            #print "         Expected:",self.n_targets,"Read:",len(self.targets)
         
         
     def loadMatrix(self, mat, query_filename, target_filename, sigset_dir=None, is_distance=True):
@@ -326,13 +344,14 @@ class BEEDistanceMatrix:
         
         
     def getMatchScores(self,mask=None):
-        assert self.queries != None
-        assert self.targets != None
+        #assert self.queries != None
+        #assert self.targets != None
         
         matches = []
-        queries = np.array([ name for name,sig in self.queries ])
-        targets = np.array([ name for name,sig in self.targets ])
-        for i in range(len(queries)):
+        if self.queries != None and self.targets != None:
+            queries = np.array([ name for name,sig in self.queries ])
+            targets = np.array([ name for name,sig in self.targets ])
+        for i in range(self.matrix.shape[0]):
             #print i, len(matches)
             if mask != None:
                 matches.append(self.matrix[i,mask.matrix[i,:] == -1])
@@ -380,13 +399,14 @@ class BEEDistanceMatrix:
             
     
     def getNonMatchScores(self,mask=None):
-        assert self.queries != None
-        assert self.targets != None
+        #assert self.queries != None
+        #assert self.targets != None
         
         matches = []
-        queries = np.array([ name for name,sig in self.queries ])
-        targets = np.array([ name for name,sig in self.targets ])
-        for i in range(len(queries)):
+        if self.queries != None and self.targets != None:
+            queries = np.array([ name for name,sig in self.queries ])
+            targets = np.array([ name for name,sig in self.targets ])
+        for i in range(self.matrix.shape[0]):
             if mask != None:
                 matches.append(self.matrix[i,mask.matrix[i,:] == 127])
             else:

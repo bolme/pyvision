@@ -332,7 +332,7 @@ if __name__ == '__main__':
     
     scale = 1.0
         
-    frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=None,randomize=False,scale=scale)
+    frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=None,randomize=True,scale=scale)
     frame.Show(True)
     app.MainLoop()
     

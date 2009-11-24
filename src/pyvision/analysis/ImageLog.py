@@ -32,37 +32,65 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from time import *
-from os import makedirs,system
+from os import makedirs,system,listdir
 from os.path import join
 import csv
 import pickle
 import sys
+import pyvision as pv
 
 class ImageLog:
+    '''
+    An image log is used to collect data about an experiment.   This data can be
+    images, tables, pickled python objects.
+    '''
     
-    def __init__(self,topdir = "/tmp",name=None):
+    def __init__(self,topdir = "/tmp",name="pyvis_log"):
+        '''
+        Create an image log.  By default a log is created in the /tmp dir.  
+        The name of the log directory start with the date and time the log
+        was created and ends with 'name'.
+        
+        @param topdir - The location where the log directory will be created.
+        @param name - a name to append to the directory name.
+        '''
         self.date = strftime("%Y%m%d_%H%M%S")
         self.name=name
-        if name:
-            self.dir = topdir+'/'+self.date+'_'+name
-        else: 
-            self.dir = topdir + "/" + self.date + "_pyvis_log"
+        self.dir = topdir+'/'+self.date+'_'+name
         makedirs(self.dir)
         self.count = 0
         #print self.dir
         
+    def __call__(self,item,**kwargs):
+        if isinstance(item,pv.Image):
+            self.log(item,**kwargs) 
+        elif isinstance(item,pv.Timer):
+            self.table(item.table,**kwargs) 
+        elif isinstance(item,pv.Table):
+            self.table(item,**kwargs) 
+        else:
+            self.pickle(item,**kwargs) 
         
-    def log(self,image,message=None,label="NOLABEL"):
-        image.asAnnotated().save(self.dir+'/%06d_%s.png'%(self.count,label))
+    def log(self,image,message=None,label="NOLABEL",format='png'):
+        '''
+        Save a pyvision image to the log.
+        '''
+        image.asAnnotated().save(self.dir+'/%06d_%s.%s'%(self.count,label,format),quality=95)
         self.count += 1
         #print message
     
     def table(self,table,label="NOLABEL"):
+        '''
+        Save a pyvision table to the log as a csv file.
+        '''
         filename = join(self.dir,'%06d_%s.csv'%(self.count,label))
         table.save(filename)
         self.count += 1
         
     def csv(self,data,headers=None,label="NOLABEL"):
+        '''
+        Save a list of lists or matrix to the log as a csv file.
+        '''
         filename = join(self.dir,'%06d_%s.csv'%(self.count,label))
         writer = csv.writer(open(filename, "wb"))
         if headers:
@@ -73,7 +101,9 @@ class ImageLog:
     
     def pickle(self,object,label="NOLABEL"):
         '''
-        Pickle an object to the log directory.
+        Pickle a python object to the log directory.  This may not be supported 
+        by all objects. 
+        
         '''
         filename = join(self.dir,'%06d_%s.pkl'%(self.count,label))
         f = open(filename,'wr')
@@ -82,11 +112,27 @@ class ImageLog:
         self.count += 1
     
     def show(self):
+        '''
+        Show any images that are in the directory.
+        '''
+        files = listdir(self.dir)
+        file_list = ""
+        for each in files:
+            if len(file_list) > 30000:
+                sys.stderr.write("<ImageLog> Warning can't display all images.\n")
+                break
+            if each.split('.')[-1].upper() in ['JPG','PNG','TIFF','TIF','GIF']:
+                file_list += " %s/%s"%(self.dir,each)
+
+        if file_list == "":
+            sys.stderr.write('<ImageLog> No images to show.\n')
+            return
+            
         if sys.platform.startswith("darwin"):
-            system("open %s/*.png"%self.dir)
+            system("open %s"%file_list)
         elif sys.platform.startswith("linux"):
-            system("gqview %s/*.png"%self.dir)
+            system("gqview %s"%file_list)
         elif sys.platform.startswith("windows"):
-            pass
+            print "ImageLog.show() is not supported on windows."
         
         

@@ -46,6 +46,30 @@ import numpy as np
 import numpy.linalg as la
 import pyvision as pv
 
+
+def logPolar(im,center=None,radius=None,M=None,size=(64,128)):
+    '''
+    Produce a log polar transform of the image.  See OpenCV for details.
+    The scale space is calculated based on radius or M.  If both are given 
+    M takes priority.
+    '''
+    #M=1.0
+    w,h = im.size
+    if radius == None:
+        radius = 0.5*min(w,h)
+        
+    if M == None:
+        #rho=M*log(sqrt(x2+y2))
+        #size[0] = M*log(r)
+        M = size[0]/np.log(radius)
+
+    if center == None:
+        center = pv.Point(0.5*w,0.5*h)
+    src = im.asOpenCV()
+    dst = cv.cvCreateImage( cv.cvSize(size[0],size[1]), 8, 3 );
+    cv.cvLogPolar( src, dst, center.asOpenCV(), M, cv.CV_INTER_LINEAR+cv.CV_WARP_FILL_OUTLIERS )
+    return pv.Image(dst)
+    
 ##
 # Create a transform or homography that optimally maps one set of points to 
 # the other set of points.  Requires at least four points.
@@ -53,7 +77,6 @@ import pyvision as pv
 # D E F   y1  =  y2
 # G H 1   w1  =  w2
 #
-
 def PerspectiveFromPointsOld(source, dest, new_size):
     '''
     Python/Scipy implementation implementation which finds a perspective 
@@ -207,7 +230,7 @@ class PerspectiveTransform:
     # @return a single link.AffineTransform which is the the same as 
     #         both affine transforms.
     def __mul__(self,affine):
-        return AffineTransform(dot(self.matrix,affine.matrix),self.size,self.filter)
+        return PerspectiveTransform(dot(self.matrix,affine.matrix),self.size,self.filter)
 
 # TODO: Add unit tests
 class _PerspectiveTest(unittest.TestCase):

@@ -46,10 +46,33 @@ import copy
 import pyvision as pv
 import xml.etree.cElementTree as et
 import shutil
+import time
+from pyvision.analysis.FaceAnalysis.BEE import BEEDistanceMatrix
 
 REDUCED_LEYE = pv.Point(128+64,256-20)
 REDUCED_REYE = pv.Point(256+128-64,256-20)
 REDUCED_SIZE = (512,512)
+
+'''
+This is a training set that does not include any overlap with the good bad and ugly.
+'''
+GOOD_BAD_UGLY_TRAINING = ['nd1S04201','nd1S04207','nd1S04211','nd1S04212','nd1S04213','nd1S04217','nd1S04219','nd1S04222',
+                          'nd1S04226','nd1S04227','nd1S04228','nd1S04229','nd1S04243','nd1S04256','nd1S04265','nd1S04273',
+                          'nd1S04274','nd1S04279','nd1S04282','nd1S04288','nd1S04295','nd1S04300','nd1S04305','nd1S04308',
+                          'nd1S04315','nd1S04316','nd1S04320','nd1S04322','nd1S04323','nd1S04326','nd1S04331','nd1S04335',
+                          'nd1S04337','nd1S04339','nd1S04344','nd1S04352','nd1S04358','nd1S04360','nd1S04361','nd1S04365',
+                          'nd1S04366','nd1S04367','nd1S04368','nd1S04369','nd1S04371','nd1S04372','nd1S04374','nd1S04376',
+                          'nd1S04378','nd1S04380','nd1S04381','nd1S04382','nd1S04386','nd1S04388','nd1S04392','nd1S04395',
+                          'nd1S04402','nd1S04403','nd1S04409','nd1S04410','nd1S04411','nd1S04412','nd1S04414','nd1S04415',
+                          'nd1S04418','nd1S04423','nd1S04424','nd1S04425','nd1S04428','nd1S04430','nd1S04431','nd1S04432',
+                          'nd1S04433','nd1S04435','nd1S04437','nd1S04442','nd1S04444','nd1S04454','nd1S04460','nd1S04467',
+                          'nd1S04471','nd1S04479','nd1S04487','nd1S04489','nd1S04495','nd1S04500','nd1S04513','nd1S04515',
+                          'nd1S04516','nd1S04519','nd1S04520','nd1S04522','nd1S04523','nd1S04524','nd1S04525','nd1S04527',
+                          'nd1S04529','nd1S04530','nd1S04533','nd1S04539','nd1S04540','nd1S04545','nd1S04548','nd1S04549',
+                          'nd1S04551','nd1S04558','nd1S04559','nd1S04561','nd1S04563','nd1S04564','nd1S04572','nd1S04573',
+                          'nd1S04577','nd1S04579','nd1S04582','nd1S04584','nd1S04585','nd1S04589','nd1S04598','nd1S04599',
+                          'nd1S04600','nd1S04610','nd1S04618','nd1S04619','nd1S04624','nd1S04637','nd1S04638','nd1S04641',
+                          'nd1S04644','nd1S04657','nd1S04675',]
 
 class FRGCMetadata:
     def __init__(self):
@@ -203,6 +226,8 @@ class FRGC_Exp4_Reduced(FaceDatabase):
         
         
     def readSigsets(self):
+        self.sigset_dir = os.path.join(self.location,"sigsets")
+        
         self.orig_sigset_path     = os.path.join(self.location,"sigsets","FRGC_Exp_2.0.4_Orig.xml")
         self.query_sigset_path    = os.path.join(self.location,"sigsets","FRGC_Exp_2.0.4_Query.xml")
         self.target_sigset_path   = os.path.join(self.location,"sigsets","FRGC_Exp_2.0.4_Target.xml")
@@ -301,17 +326,79 @@ def reduce_exp4(source_dir,dest_dir):
     print "Copying metadata."
     shutil.copy(frgc.metadata_path,        os.path.join(dest_dir,'sigsets'))
 
-if __name__ == "__main__":
-    import csv
-    f = open('data/FRGC_Exp4_query_flat.csv','wb')
-    writer = csv.writer(f)
-    db = FRGC_Exp4("/Users/bolme/vision/data/FRGC_Metadata")
-    keys = db.query()
-    writer.writerow(['rec_id','sub_id','filename','eye1_x','eye1_y','eye2_x','eye2_y','nose_x','nose_y','mouth_x','mouth_y'])
-    for key in keys:
-        #print key
-        rec_id,sub_id,filename,left_eye,right_eye,nose,mouth = db.getMetadata(key)
-        #print "   ",rec_id,sub_id,filename,left_eye,right_eye,nose,mouth
-        writer.writerow([rec_id,sub_id,filename,left_eye.X(),left_eye.Y(),right_eye.X(),right_eye.Y(),nose.X(),nose.Y(),mouth.X(),mouth.Y()])
-    print "done"
+
+def FRGCExp4Test(database, algorithm, face_detector=None, eye_locator=None, n=None,verbose=10.0,ilog=None):
+    ''' 
+    Run the FRGC Experiment 4 Test 
+    
+    On completion this will produce a BEE distance matrix.
+    '''
+    message_time = time.time()
+    timer = pv.Timer()
+
+    # Produce face records for each image in the query set
+    query_keys = database.query()
+    if n != None:
+        query_keys = query_keys[:n]
+    query_recs = []
+    timer.mark("QueryStart")
+    i = 0
+    for key in query_keys:
+        i += 1
+        face = database[key]
         
+        face_rec = algorithm.getFaceRecord(face.image,None,face.left_eye,face.right_eye)
+        query_recs.append(face_rec)    
+        if verbose:
+            if time.time() - message_time > verbose:
+                message_time = time.time()
+                print "Processed query image %d of %d"%(i,len(query_keys))
+                
+    timer.mark("QueryStop",notes="Processed %d images."%len(query_keys))
+    
+    
+    # Produce face records for each image in the target set
+    message_time = time.time()
+    target_keys = database.target()
+    if n != None:
+        target_keys = target_keys[:n]
+    target_recs = []
+    timer.mark("TargetStart")
+    i = 0
+    for key in target_keys:
+        i += 1
+        face = database[key]
+        
+        face_rec = algorithm.getFaceRecord(face.image,None,face.left_eye,face.right_eye)
+        target_recs.append(face_rec)    
+        if verbose:
+            if time.time() - message_time > verbose:
+                message_time = time.time()
+                print "Processed target image %d of %d"%(i,len(target_keys))
+                
+    timer.mark("TargetStop",notes="Processed %d images."%len(target_keys))
+    
+    print "Finished processing FaceRecs (%d query, %d target)"%(len(query_keys),len(target_keys))
+    
+    # Compute the  matrix
+    print "Computing similarity matrix..."
+    timer.mark("SimilarityStart")
+    mat = algorithm.similarityMatrix(query_recs,target_recs)
+    timer.mark("SimilarityStop",notes="Processed %d comparisons."%(mat.shape[0]*mat.shape[1],))
+
+    print "Completing task..."
+    print mat.shape
+    
+    bee_mat = BEEDistanceMatrix(mat,"FRGC_Exp_2.0.4_Query.xml", "FRGC_Exp_2.0.4_Target.xml", sigset_dir=database.sigset_dir, is_distance=False)
+    
+    if ilog != None:
+        ilog(timer)
+        
+    return bee_mat, timer
+    
+    
+    
+    
+    
+    
+    

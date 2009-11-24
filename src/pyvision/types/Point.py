@@ -36,6 +36,7 @@ from numpy import array
 import opencv as cv
 from math import sqrt
 import numpy as np
+import csv
 
 class Point:
     def __init__(self,x=0.0,y=0.0,z=0.0,w=1.0,scale=1.0,rotation=0.0):
@@ -146,3 +147,40 @@ class Point:
         return "Point(%f,%f,%f)"%(self.X(),self.Y(),self.Z())
         
         return "Point(%f,%f,%f)"%(self.X(),self.Y(),self.Z())
+    
+    
+def readPointsFile(filename):
+    '''
+    This function reads a points file that was created by the EyePicker 
+    application. EyePicker produces a csv file where each line corresponds
+    to a file and can contain a number of points.
+    
+    This function returns a dictionary where the key is the filename and
+    each entry contains a list of points. 
+    '''
+    f = csv.reader(open(filename,'rb'))
+    
+    result = {}
+    
+    for row in f:
+        fname = row[0]
+        
+        row = row[1:]
+        
+        # Make sure the number of values is even
+        assert len(row) % 2 == 0
+        
+        points = []
+        for i in range(0,len(row),2):
+            x = float(row[i])
+            y = float(row[i+1])
+            points.append(Point(x,y))
+        
+        result[fname] = points
+        
+    return result
+    
+    
+    
+    
+    

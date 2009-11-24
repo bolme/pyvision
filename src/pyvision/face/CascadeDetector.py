@@ -62,6 +62,9 @@ DEFAULT_CASCADE=os.path.join(pyvision.__path__[0],"config","haarcascade_frontalf
 OPENCV_CASCADE=os.path.join(pyvision.__path__[0],"config","haarcascade_frontalface_alt.xml")
 CELEB1_CASCADE=os.path.join(pyvision.__path__[0],"config","facedetector_celebdb1.xml")
 CELEB2_CASCADE=os.path.join(pyvision.__path__[0],"config","facedetector_celebdb2.xml")
+FULLBODY_CASCADE=os.path.join(pyvision.__path__[0],"config","haarcascade_fullbody.xml")
+UPPERBODY_CASCADE=os.path.join(pyvision.__path__[0],"config","haarcascade_upperbody.xml")
+LOWERBODY_CASCADE=os.path.join(pyvision.__path__[0],"config","haarcascade_lowerbody.xml")
 
 DEFAULT_NEGATIVE=os.path.join(pyvision.__path__[0],"data","nonface")
 
@@ -95,6 +98,7 @@ class CascadeDetector:
             
             self.cascade_data = open(cascade_name).read()
             self.cascade = cvLoadHaarClassifierCascade( cascade_name, orig_size )
+            #self.orig_size=orig_size
             self.storage = cvCreateMemStorage(0)
             self.trained = True
         
@@ -186,7 +190,9 @@ def trainHaarClassifier(pos_rects,
                         minhitrate=0.9990,
                         maxfalsealarm=0.50,
                         max_run_time=72*3600,
-                        verbose=False
+                        verbose=False,
+                        createsamples='/usr/local/bin/opencv-createsamples',
+                        haartraining='/usr/local/bin/opencv-haartraining',
                         ):
     '''
     Train the detector.
@@ -225,7 +231,7 @@ def trainHaarClassifier(pos_rects,
     
     # Create positives vec.
     proc = subprocess.Popen(
-          ('/usr/local/bin/opencv-createsamples',
+          (createsamples,
            '-info',pos_name,
            '-vec',pos_vec_name,
            '-num',str(num_pos),
@@ -247,7 +253,7 @@ def trainHaarClassifier(pos_rects,
     
     if verbose:
         proc = subprocess.Popen(
-              ('/usr/local/bin/opencv-haartraining',
+              (haartraining,
                '-data',cascade_name,
                '-vec',pos_vec_name,
                '-bg',neg_name,
@@ -268,7 +274,7 @@ def trainHaarClassifier(pos_rects,
                )
     else:
         proc = subprocess.Popen(
-              ('/usr/local/bin/opencv-haartraining',
+              (haartraining,
                '-data',cascade_name,
                '-vec',pos_vec_name,
                '-bg',neg_name,

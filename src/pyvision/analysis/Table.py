@@ -274,6 +274,11 @@ class Table:
             
                 
                 
+    def nRows(self):
+        return len(self.row_headers)
+
+    def nCols(self):
+        return len(self.col_headers)
             
     
     def asTex(self):

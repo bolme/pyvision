@@ -56,15 +56,19 @@ def BoundingRect(*points):
 
 
 class Rect:
+    '''
+    This is a simple structure that represents a rectangle.
+    '''
+    
     def __init__(self,x=0.0,y=0.0,w=0.0,h=0.0):
         ''' 
-        Create a point.
+        Initialize a rectangle instance.
         
         Arguments:
-        x: x coordinate
-        y: y coordinate
-        w: width
-        h: height
+        @param x: top left x coordinate
+        @param y: top left y coordinate
+        @param w: width
+        @param h: height
         '''
         self.x = float(x)
         self.y = float(y)
@@ -72,6 +76,11 @@ class Rect:
         self.h = float(h)
         
     def intersect(self, rect):
+        '''
+        Compute the intersection of two rectangles.
+        
+        @returns: a rectangle representing the intersection.
+        '''
         r1 = self
         r2 = rect
         
@@ -104,35 +113,62 @@ class Rect:
         return Rect(r3_x1,r3_y1,r3_w, r3_h)
     
     def containsPoint(self,point):
+        '''
+        Determine if a point is within a rectangle.
+        
+        @param point: an object of type pv.Point.
+        @returns: True if the point is withen the Rect.
+        '''
         x = point.X()
         y = point.Y()
         
         return x >= self.x and x <= self.x+self.w and y >= self.y and y <= self.y + self.h
         
     def center(self):
+        '''
+        Compute and return a point at the center of the rectangle
+        
+        @returns: a pv.Point at the center.
+        '''
         return pt.Point(self.x+0.5*self.w,self.y+0.5*self.h)
     
     def area(self):
         '''
-        return the area of the rect
+        @returns: the area of the rect
         '''
         return self.w*self.h
     
     def __str__(self):
+        '''
+        @returns: a string representing this rectangle
+        '''
         return "Rect(%f,%f,%f,%f)"%(self.x,self.y,self.w,self.h)
     
     def box(self):
-        '''bounding box as expected by many PIL functions'''
+        '''
+        Get this rectangle as a bounding box as expected by many PIL functions.
+        
+        @returns: tuple of (left,top,right,bottom)
+        '''
         return int(round(self.x)), int(round(self.y)), int(round(self.x+self.w)), int(round(self.y+self.h))
 
     def asOpenCV(self):
+        '''
+        Returns a representation compatible with opencv.
+        '''
         return cv.cvRect(int(round(self.x)),int(round(self.y)),int(round(self.w)),int(round(self.h)))
 
     def __mul__(self,val):
+        '''
+        Multiply the rectangle by a constant.
+        '''
         if isinstance(val,float) or isinstance(val,int): 
             return Rect(self.x*val,self.y*val,self.w*val,self.h*val)
 
     def __rmul__(self,val):
+        '''
+        Multiply the rectangle by a constant.
+        '''
         if isinstance(val,float) or isinstance(val,int): 
             return Rect(self.x*val,self.y*val,self.w*val,self.h*val)
 

@@ -405,7 +405,7 @@ class AffineTransform:
         '''
         self.matrix = matrix
         self.inverse = inv(matrix)
-        self.size = new_size
+        self.size = int(new_size[0]),int(new_size[1])
         self.filter = filter
     
     def transformImage(self,im, use_orig=True):
@@ -465,7 +465,7 @@ class AffineTransform:
             matrix = pv.NumpyToOpenCV(self.matrix)
             src = im.asOpenCV()
             dst = cv.cvCreateImage( cv.cvSize(self.size[0],self.size[1]), cv.IPL_DEPTH_8U, src.nChannels );
-            cv.cvWarpPerspective( src, dst, matrix)                    
+            cv.cvWarpPerspective( src, dst, matrix, cv.CV_INTER_LINEAR+cv.CV_WARP_FILL_OUTLIERS,cv.cvScalarAll(128))                    
             result = pv.Image(dst)
 
         else:

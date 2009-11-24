@@ -76,6 +76,11 @@ def readCsuDistanceMatrix(directory):
 class ROCPoint:
     def __init__(self,nscore,nidx,n,far,mscore,midx,m,frr):
         self.nscore,self.nidx,self.n,self.far,self.mscore,self.midx,self.m,self.frr = nscore,nidx,n,far,mscore,midx,m,frr
+        self.tar = 1.0 - self.frr
+        self.trr = 1.0 - self.far
+    
+    def __str__(self):
+        return "ROCPoint %f FRR at %f FAR"%(self.frr,self.far)
 
 ROC_LOG_SAMPLED = 1
 ROC_MATCH_SAMPLED = 2
@@ -97,11 +102,24 @@ class ROC:
         
         
     def getCurve(self,method=ROC_LOG_SAMPLED):
-        10**np.arange(-6,0.000001,0.1)
+        """
+        returns header,rows
+        """
+        header = ["score","frr","far","trr","tar"]
+        rows = []
+        for far in 10**np.arange(-6,0.0000001,0.01):
+            point = self.getFAR(far)
+            
+            row = [point.nscore,point.frr,point.far,point.trr,point.tar]
+            rows.append(row)
+            
+        return header,rows
+        
             
     def getFAR(self,far):
         match = self.match
         nonmatch = self.nonmatch
+        orig_far = far
         
         m = len(match)
         n = len(nonmatch)
@@ -110,19 +128,28 @@ class ROC:
         far = float(nidx)/n
         if nidx >= len(nonmatch):
             nscore = None
+        #elif nidx == 0:
+        #    nscore = nonmatch[nidx]
         else:
-            nscore = nonmatch[nidx-1]
+            nscore = nonmatch[nidx]
         
-        midx = np.searchsorted(match,nscore)+1    
+        if nscore != None:
+            midx = np.searchsorted(match,nscore,side='left')    
+        else:
+            midx = m
              
-        frr = 1.0 - float(midx)/m
-        if midx > len(match):
+        frr = 1.0-float(midx)/m
+        if midx >= len(match):
             mscore = None
         else:
-            mscore = match[midx-1]
+            mscore = match[midx]
+
+        #assert mscore == None or mscore <= nscore
         
-        assert mscore == None or mscore >= nscore
-        
+        #if nidx == 0:
+        #print "Zero:",orig_far,nscore,nidx,n,far,mscore,midx,m,frr
+        #print nonmatch
+        #print match
         if self.is_distance:
             return ROCPoint(nscore,nidx,n,far,mscore,midx,m,frr)
         else:

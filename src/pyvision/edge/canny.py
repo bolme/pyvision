@@ -45,20 +45,17 @@ from scipy.ndimage import convolve
 from scipy.ndimage import maximum_filter
 
 
-def canny(im,threshold1=40.0,threshold2=100.0,aperture_size=3):
+def canny(im,threshold1=40.0,threshold2=100.0,aperture_size=3,sigma=None):
     '''
     void cvCanny( const CvArr* image, CvArr* edges, double threshold1,
               double threshold2, int aperture_size=3 );
     '''
-    cvim = im.asOpenCV()
-    edges = opencv.cvCreateImage( opencv.cvGetSize(cvim), 8, 1 );
+    gray = im.asOpenCVBW()
+    edges = opencv.cvCreateImage( opencv.cvGetSize(gray), 8, 1 );
 
-    if cvim.nChannels == 3:
-        gray = opencv.cvCreateImage( opencv.cvGetSize(cvim), 8, 1 );
-        opencv.cvCvtColor( cvim, gray, opencv.CV_BGR2GRAY );
-    else:
-        gray = cvim
-
+    if sigma!=None:
+        opencv.cvSmooth(gray,gray,opencv.CV_GAUSSIAN,int(sigma)*4+1,int(sigma)*4+1,sigma,sigma)
+    
     opencv.cvCanny(gray,edges,threshold1,threshold2,aperture_size)
     
     return Image(edges)

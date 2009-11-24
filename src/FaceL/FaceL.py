@@ -116,7 +116,7 @@ else:
 import pyvision as pv
 pv.disableCommercialUseWarnings()
 from pyvision.types.Video import Webcam
-from pyvision.face.CascadeDetector import CascadeDetector
+from pyvision.face.CascadeDetector import CascadeDetector,AVE_LEFT_EYE,AVE_RIGHT_EYE
 from pyvision.analysis.FaceAnalysis.FaceDetectionTest import is_success
 import pickle
 import wx
@@ -215,6 +215,7 @@ class VideoWindow(wx.Frame):
 
         self.options_menu = wx.Menu();
         self.face_menuitem = self.options_menu.AppendCheckItem( face_id, "Face Processing" )
+        self.eye_menuitem = self.options_menu.AppendCheckItem( face_id, "Eye Detection" )
         self.mirror_menuitem = self.options_menu.AppendCheckItem( mirror_id, "Mirror Video" )
         self.options_menu.AppendSeparator()
         self.options_menu.Append( svm_tune_id, "SVM Tuning..." )
@@ -238,6 +239,7 @@ class VideoWindow(wx.Frame):
         
         # Set up menu checks
         self.face_menuitem.Check(True)
+        self.eye_menuitem.Check(True)
         self.mirror_menuitem.Check(True)
         
         
@@ -360,6 +362,7 @@ class VideoWindow(wx.Frame):
         img = self.webcam.query()
         
         face_processing = self.face_menuitem.IsChecked()
+        eye_processing = self.eye_menuitem.IsChecked()
         
         names = []
         
@@ -372,14 +375,16 @@ class VideoWindow(wx.Frame):
                     if (success == None) and is_success(self.enrolling,rect):
                         success = rect
                         img.annotateRect(rect,color='blue')
-                        img.annotatePoint(leye,color='blue')
-                        img.annotatePoint(reye,color='blue')
+                        if eye_processing:
+                            img.annotatePoint(leye,color='blue')
+                            img.annotatePoint(reye,color='blue')
                         self.enroll_list.append([img,rect,leye,reye])
 
                     else:
                         img.annotateRect(rect,color='red')
-                        img.annotatePoint(leye,color='red')
-                        img.annotatePoint(reye,color='red')
+                        if eye_processing:
+                            img.annotatePoint(leye,color='red')
+                            img.annotatePoint(reye,color='red')
                         img.annotateLine(pv.Point(rect.x,rect.y),pv.Point(rect.x+rect.w,rect.y+rect.h), color='red')
                         img.annotateLine(pv.Point(rect.x+rect.w,rect.y),pv.Point(rect.x,rect.y+rect.h), color='red')
 
@@ -393,8 +398,9 @@ class VideoWindow(wx.Frame):
             else:
                 for rect,leye,reye in faces:
                     img.annotateRect(rect,color='blue')
-                    img.annotatePoint(leye,color='blue')
-                    img.annotatePoint(reye,color='blue')
+                    if eye_processing:
+                        img.annotatePoint(leye,color='blue')
+                        img.annotatePoint(reye,color='blue')
                     
             
             if self.face_rec.isTrained():
@@ -521,14 +527,23 @@ class VideoWindow(wx.Frame):
                 
 
     def findFaces(self,im):
+        eye_processing = self.eye_menuitem.IsChecked()
         
         self.detect_time = time.time()
         rects = self.face_detector.detect(im)
         self.detect_time = time.time() - self.detect_time
+ 
         
-        self.eye_time = time.time()
-        
-        faces = self.fel.locateEyes(im, rects)
+        self.eye_time = time.time()       
+        if eye_processing:
+            faces = self.fel.locateEyes(im, rects)
+        else:
+            faces = []
+            for rect in rects:
+                affine = pv.AffineFromRect(rect,(1,1))
+                leye = affine.invertPoint(AVE_LEFT_EYE)
+                reye = affine.invertPoint(AVE_RIGHT_EYE)
+                faces.append([rect,leye,reye])
         
         self.eye_time = time.time() - self.eye_time
 
