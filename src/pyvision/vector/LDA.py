@@ -46,13 +46,16 @@
 import unittest
 from numpy import *
 from scipy import *
+import scipy as sp
+import numpy as np
+import scipy.linalg
 
 ### 
 ### train the fisher linear discriminant using the training data X
 ### with the class labels Y
 ###
 
-def trainLDA(X, Y):
+def trainLDA(X, Y, reg="AUTO"):
     '''
     method trainLDA(X, Y) obtains the fisher discriminant for multiple class dataset.
 
@@ -64,8 +67,12 @@ def trainLDA(X, Y):
 
     @param X: It is the input dataset with each row as a sample.
     @param Y: The labels for each sample of X
-    @return: Fisher discriminant
+    @keyparam reg: a regularization parameter
+    @return: a tuple containing the [Fisher discriminants , and eigenvalues]
     '''
+    
+    X = np.array(X)
+    Y = np.array(Y)
     
     classes = unique(Y)  # Unique classes
     p = size(X, axis=1)  # columns of training dataset
@@ -126,23 +133,61 @@ def trainLDA(X, Y):
     # decomposition of the equation 
     # (Sw^-1)*Sb* w = l * w
     
-    diagElements = diag(Sw)
-    meanDiag = diagElements.mean(axis=0)
-    delta = 0.001*meanDiag
-    deltaI = delta*eye(p)
-    Sw = Sw + deltaI
-    SwInv = Sw.I  # Inverse of the within class scatter matrix
+    # TODO: Figure out if regularization is needed. Sw is Sigular?
+    if reg == "AUTO":
+        # Automatically select the regulariazion parameter
+        # TODO: Many people suggest scaling the by the mean of the diagonal which may be a good way to select a regularization parameter. Why?
+        diagElements = diag(Sw)
+        meanDiag = diagElements.mean(axis=0)
+        delta = 0.001*meanDiag
+        deltaI = delta*eye(p)
+    elif isinstance(reg,float):
+        # This method is suggested by wikipedia
+        deltaI = reg*reg*eye(p)
+    else: 
+        deltaI = np.zeros((p,p))
+    print Sw
+    print sp.linalg.eig(Sw,left=False,right=False)
+    print "det:",sp.linalg.det(Sw)
+    if sp.linalg.det(Sw) < 0.000001:
+        print "regularizing"
+        Sw = Sw + deltaI
+    #SwInv = linalg.inv(Sw)  # Inverse of the within class scatter matrix
+    #print "SwInv",SwInv,Sw
+    #print "Sb",Sb
+    #val,vec = linalg.eigh(Sw)
+    #print val
+    #val,vec = linalg.eigh(SwInv)
+    #print val
+    #val,vec = linalg.eigh(Sb+deltaI)
+    #print val
 
-    A = dot(SwInv,Sb) # Matrix multiplication
-    e, w = linalg.eig(A) # Eigen value decomposition
+    #A = dot(SwInv,Sb+deltaI) # Matrix multiplication
+    #print "A",A
+    e, w = sp.linalg.eig(Sb,Sw) # Eigen value decomposition
+
+    print e
     
     # eigen vector corresponding to the largets eigen value
     #w = w[:,0]  
     #w = dot(Sw.I,meandiff) # Matrix multiplication
-
-    w = w[:,0:(K-1)]
-    e = e[0:(K-1)]
-    lda = w
+    #print np.abs(e)[:K-1]
+    #print np.abs(e)[K-1:]
+    #print w
+    #assert 0
+    #print e[0:-(K-1)],e[-(K-1):]
+    
+    order = e.argsort()
+    order = order[::-1]
+    
+    w = w[:,order]
+    e = e[order]
+    
+    w = w[:,:(K-1)].real
+    e = e[:(K-1)].real
+    lda = w,e
+    
+    #print dot(w.transpose(),w)  # This should be the identity
     return lda
 
 
