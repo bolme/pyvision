@@ -146,11 +146,11 @@ def trainLDA(X, Y, reg="AUTO"):
         deltaI = reg*reg*eye(p)
     else: 
         deltaI = np.zeros((p,p))
-    print Sw
-    print sp.linalg.eig(Sw,left=False,right=False)
-    print "det:",sp.linalg.det(Sw)
-    if sp.linalg.det(Sw) < 0.000001:
-        print "regularizing"
+    
+    e = sp.linalg.eigh(Sw,eigvals_only=True)
+    
+    # check if the smallest eigenvalue is close to zero and if so... regularize
+    if np.abs(e[0]) < 1e-7:
         Sw = Sw + deltaI
     #SwInv = linalg.inv(Sw)  # Inverse of the within class scatter matrix
     #print "SwInv",SwInv,Sw
