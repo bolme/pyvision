@@ -37,7 +37,7 @@ def testSVM():
     for i in iris_training:
         svm.addTraining(labels[i],iris_data[i,:])
         
-    svm.train(verbose = 5)
+    svm.train(verbose = 0)
     
     success = 0.0
     total = 0.0
@@ -56,5 +56,6 @@ def testLDA():
     print -3.5634683*w[:,0],-2.6365924*w[:,1],v/v.sum()
     
     
-
-testLDA()
+if __name__ == "__main__":
+    testLDA()
+    testSVM()
