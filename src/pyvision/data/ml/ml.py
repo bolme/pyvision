@@ -37,7 +37,7 @@ def testSVM():
     for i in iris_training:
         svm.addTraining(labels[i],iris_data[i,:])
         
-    svm.train(verbose = 0)
+    svm.train(verbose = 1)
     
     success = 0.0
     total = 0.0
