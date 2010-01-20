@@ -31,17 +31,13 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from scipy.stats import distributions
-from scipy.stats.stats import median
-from scipy.optimize import fsolve
-from numpy import array
-from math import sqrt
-
-from scipy.stats import binom
+import scipy as sp
+import scipy.stats.distributions
+import numpy as np
 
 def pbinom(q,size,prob):
     '''Binomial probabilites - measured from the left.'''
-    dist = binom(size,prob)
+    dist = sp.stats.binom(size,prob)
     return dist.cdf(q)
     
     
@@ -71,7 +67,7 @@ def qbinom(p,size,prob):
     return maxq
 
 def cibinom(size,success,alpha=0.05):
-
+    '''Confidence interval for a binomial distribution.'''
     goal = 0.5*alpha
         
     # find the upper limit
@@ -205,27 +201,27 @@ class SummaryStats:
 
         self.name = name
         
-        x = array(x,'d')
+        x = np.array(x,'d')
                 
         self.alpha  = alpha
         self.n      = len(x)
         self.mean   = x.mean()
         self.var    = ((x-self.mean)*(x-self.mean)).sum()/(self.n-1)
-        self.std    = sqrt(self.var)
-        self.ste    = self.std/sqrt(self.n)
+        self.std    = np.sqrt(self.var)
+        self.ste    = self.std/np.sqrt(self.n)
         self.df     = self.n - 1
         
-        tci = distributions.t.ppf(1-alpha/2,self.df)
+        tci = sp.stats.distributions.t.ppf(1-alpha/2,self.df)
         lcim = self.mean-tci*self.ste
         ucim = self.mean+tci*self.ste
         self.mean_ci = [lcim,ucim]
     
-        tci = distributions.t.ppf(1-alpha/2,self.df)
+        tci = sp.stats.distributions.t.ppf(1-alpha/2,self.df)
         lci = self.mean-tci*self.std
         uci = self.mean+tci*self.std
         self.ci = [lci,uci]
     
-        self.median = median(x)
+        self.median = np.median(x)
         
                 
     def __str__(self):
@@ -318,12 +314,6 @@ class SummaryStats:
         
         return data
     
-
-def rsquared():
-    #Normally: SSModel/SSTotal
-    #ZeroInt (sum(y_hat^2)/sum(y^2))
-    pass
-    # TODO: add sum of squared.
             
 
 import unittest
