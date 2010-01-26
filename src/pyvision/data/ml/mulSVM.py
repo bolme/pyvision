@@ -85,6 +85,35 @@ class multiSVM:
         
         data = train_data, train_labels, test_data
         return data
+    
+    def mahalanobisDist(self,group1,group2):
+        mean1 = group1.mean(axis=0)
+        mean2 = group2.mean(axis=0)
+        gp1Centered = group1-mean1
+        gp2Centered = group2-mean2
+        
+        n1 = np.size(gp1Centered,axis=0)
+        n2 = np.size(gp2Centered,axis=0)
+        cov1 = (np.dot(gp1Centered.T,gp1Centered)) / n1
+        cov2 = (np.dot(gp2Centered.T, gp2Centered)) / n2
+        
+        weighted1 = n1*cov1
+        weighted2 = n2*cov2
+        pooledCov = (np.add(weighted1,weighted2))/(n1+n2)
+        
+        meandiff = mean1-mean2
+        invpooledCov = np.linalg.inv(pooledCov)
+        prod1 = np.dot(meandiff,invpooledCov)
+        prod = np.dot(prod1,meandiff.T)
+        
+        dist = np.sqrt(prod)
+        
+        return dist
+    
+    def rbfKernel(self,vecA,vecB,sigma):
+        vec_diff = vecA-vecB
+        return exp(-dot(vec_diff,vec_diff.T)/(2*sigma**2))
+        
 
 class Node:
         def __init__(self):
@@ -123,7 +152,8 @@ class Tree:
                             parent.rightChild = newNode()
                             return
 
-                        
+        
+        
                         
                     
         
