@@ -81,7 +81,7 @@ def unit(matrix):
         return Image(matrix)
     return matrix
 
-def selfQuotient(matrix,sigma=1.5):
+def selfQuotientImage(matrix,sigma=5.0):
     '''
     Compute a self quotient image.
     
