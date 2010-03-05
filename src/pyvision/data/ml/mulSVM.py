@@ -9,7 +9,8 @@ import scipy as sp
 from pyvision.vector.SVM import SVM
 import csv
 import os.path
-
+import sys
+sys.setrecursionlimit(1500)
 
 
 
@@ -112,7 +113,7 @@ class multiSVM:
     
     def rbfKernel(self,vecA,vecB,sigma):
         vec_diff = vecA-vecB
-        return exp(-dot(vec_diff,vec_diff.T)/(2*sigma**2))
+        return np.exp(-np.dot(vec_diff,vec_diff.T)/(2*sigma**2))
         
 
 class Node:
@@ -120,8 +121,8 @@ class Node:
             self.classList = []
             self.classData = []
             self.pos = 0
-            self.leftChild = Node() 
-            self.rightChild = Node()
+            self.leftChild = None 
+            self.rightChild = None
  
 class Tree:
         root = Node()    
@@ -161,12 +162,23 @@ ms = multiSVM()
 trainingdata = ms.trainData()
 traininglabels = ms.trainLabels()
 testdata = ms.testData()
-                       
+
+#print 'training data:\n' + repr(traininglabels)
+#length = len(traininglabels)
+#rows,cols = np.shape(traininglabels)
+#print traininglabels[length-1]
+                     
 
 classes = np.unique(traininglabels)  # Unique classes
 num_classes = len(classes)
 num_features = np.size(trainingdata,axis=1)  # Columns of training Data
 num_samples = np.size(trainingdata,axis=0)  # Number of samples
+print '#classes: '+repr(num_classes)
+print '#num_features: ' + repr(num_features)
+print '#num_samples: ' + repr(num_samples)
+means = []
+covs = []
+class_data = []
 
 for i in np.arange(0,num_classes):
     print classes[i]
@@ -174,13 +186,18 @@ for i in np.arange(0,num_classes):
     numThisClass = sum(mask)
     print numThisClass
     trThisClass = trainingdata[mask,:]
+    class_data.append(trThisClass)    
     
-#    centerThisClass = trThisClass.mean(axis=0)
-#    print '**********************************************************************************'
-#    covThisClass = np.cov(trThisClass)
-#    print np.cov(trThisClass)
+    centerThisClass = trThisClass.mean(axis=0)
+    print centerThisClass
+    means.append(centerThisClass)
+    
+    print '**********************************************************************************'
+    covThisClass = np.cov(trThisClass)
+    
+    covs.append(covThisClass)
 #    print '**********************************************************************************'
 #    print np.shape(covThisClass)
-#    invCovMatThisClass = np.linalg.inv(covThisClass)
-#    print np.shape(invCovMatThisClass)
-    assert(0)
+    invCovMatThisClass = np.linalg.inv(covThisClass)
+    print np.shape(invCovMatThisClass)
+#    assert(0)

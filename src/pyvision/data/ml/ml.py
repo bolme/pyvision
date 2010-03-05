@@ -34,6 +34,7 @@ iris_testing = iris_training+1
 
 def testSVM():
     svm = SVM()
+        
     for i in iris_training:
         svm.addTraining(labels[i],iris_data[i,:])
         
