@@ -147,7 +147,7 @@ from pyvision.types.Image import Image,OpenCVToNumpy,NumpyToOpenCV
 
 from pyvision.types.Point import Point,readPointsFile
 
-from pyvision.types.Rect import Rect
+from pyvision.types.Rect import Rect,BoundingRect
 
 from pyvision.types.Affine import  AffineNormalizePoints, AffineTranslate, AffineScale, AffineNonUniformScale, AffineRotate, AffineFromRect, AffineFromTile, AffineFromPoints, AffineFromPointsLS, AffineFromPointsRANSAC, AffinePerturb, AffineTransform
 
@@ -161,7 +161,7 @@ from pyvision.analysis.Timer import Timer
 
 from pyvision.util.fast_util import LocalMaximumDetector
 
-from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotient, lowPassFilter, highPassFilter, bandPassFilter
+from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotientImage, lowPassFilter, highPassFilter, bandPassFilter
 
 from pyvision.vector.knn import PNorm,correlation
 
