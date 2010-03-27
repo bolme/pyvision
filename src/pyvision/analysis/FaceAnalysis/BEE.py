@@ -46,6 +46,7 @@ import os.path
 import struct
 import numpy as np
 import pyvision as pv
+import pyvision.analysis.roc
 
 BIOMETRIC_SIGNATURE = '{http://www.bee-biometrics.org/schemas/sigset/0.1}biometric-signature'
 PRESENTATION = '{http://www.bee-biometrics.org/schemas/sigset/0.1}presentation'
@@ -299,7 +300,7 @@ class BEEDistanceMatrix:
         
     def loadMatrix(self, mat, query_filename, target_filename, sigset_dir=None, is_distance=True):
         '''
-        Loads a BEE matrix from a file.
+        Creates a bee matrix from a numpy array.
         '''
         #read the distance matrix header (first four lines of the file)
         # select distance or similarity
@@ -342,7 +343,15 @@ class BEEDistanceMatrix:
                 print "         SigSet File:",ss_name
                 print "         Expected:",self.n_targets,"Read:",len(self.targets)
         
-        
+     
+    def znorm(self):
+        for i in range(self.matrix.shape[0]):
+            a = self.matrix[i,:]
+            mn = a.mean()
+            sd = a.std()
+            self.matrix[i,:] = (self.matrix[i,:]-mn)/sd
+            
+            
     def getMatchScores(self,mask=None):
         #assert self.queries != None
         #assert self.targets != None
@@ -499,6 +508,9 @@ class BEEDistanceMatrix:
         #print "    <matrix sample> :",self.matrix[3,0:4]
         
     def write(self,filename):
+        self.save(filename)
+  
+    def save(self,filename):
         '''
         Writes the BEE distance matrix to file. WARNING: DOES NOT HANDLE MASK MATRICES CORRECTLY!
         '''
@@ -519,15 +531,18 @@ class BEEDistanceMatrix:
         file.write(self.matrix)
         file.close()
 
-    def histogram(self,value_range=None,bins=100,type="ALL",normed=False):
+    def histogram(self,value_range=None,bins=100,type="ALL",normed=False,mask=None):
         if type == "ALL":
             scores = self.matrix
         elif type == 'MATCH':
-            scores = self.getMatchScores()
+            scores = self.getMatchScores(mask=mask)
         elif type == 'NONMATCH':
-            scores = self.getNonMatchScores()
+            scores = self.getNonMatchScores(mask=mask)
         else:
             raise ValueError("Histogram of type %s is not supported use 'ALL', 'MATCH', or 'NONMATCH'.")
+
+        if value_range == None:
+            value_range = (self.matrix.min(),self.matrix.max())
 
         counts,vals = np.histogram(scores,range=value_range,bins=bins,normed=normed)
                 
@@ -538,6 +553,13 @@ class BEEDistanceMatrix:
             hist[i,'max'] = vals[i+1]
             hist[i,'count'] = counts[i]
         return hist
+    
+    
+    def getROC(self,mask=None):
+        nonmatch = self.getNonMatchScores(mask=mask)
+        match = self.getMatchScores(mask=mask)
+        return pv.analysis.roc.ROC(match,nonmatch,is_distance=self.is_distance)
+        
 
 
     def stats(self):
