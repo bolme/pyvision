@@ -33,6 +33,7 @@
 
 import copy
 import numpy as np
+import pyvision as pv
     
 def buildPositiveNegativeLists(names,matrix,class_equal):
     positive = []
@@ -87,6 +88,7 @@ ROC_MATCH_SAMPLED = 2
 ROC_PRECISE_SAMPLED = 2
 
 class ROC:
+    
     def __init__(self,match,nonmatch,is_distance=True):
         self.match = np.array(match).copy()
         self.nonmatch = np.array(nonmatch).copy()
@@ -189,6 +191,24 @@ class ROC:
                 nscore = -nscore
             if mscore != None:
                 mscore = -mscore
+                
+                
+    def results(self):
+        table = pv.Table()
+        pt = self.getFAR(0.001)
+        #print pt
+        table[0,'FAR'] = 0.001
+        table[0,'TAR'] = pt.tar
+        pt = self.getFAR(0.01)
+        #print pt
+        table[1,'FAR'] = 0.01
+        table[1,'TAR'] = pt.tar
+        pt = self.getFAR(0.1)
+        #print pt
+        table[2,'FAR'] = 0.1
+        table[2,'TAR'] = pt.tar
+        
+        return table
 
     
         

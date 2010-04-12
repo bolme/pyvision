@@ -303,6 +303,7 @@ class BEEDistanceMatrix:
         Creates a bee matrix from a numpy array.
         '''
         #read the distance matrix header (first four lines of the file)
+        mat = mat.astype(np.float32)
         # select distance or similarity
         self.is_distance = is_distance
 
@@ -344,7 +345,7 @@ class BEEDistanceMatrix:
                 print "         Expected:",self.n_targets,"Read:",len(self.targets)
         
      
-    def znorm(self):
+    def cohort_norm(self):
         for i in range(self.matrix.shape[0]):
             a = self.matrix[i,:]
             mn = a.mean()
@@ -532,26 +533,27 @@ class BEEDistanceMatrix:
         file.close()
 
     def histogram(self,value_range=None,bins=100,type="ALL",normed=False,mask=None):
-        if type == "ALL":
-            scores = self.matrix
-        elif type == 'MATCH':
-            scores = self.getMatchScores(mask=mask)
-        elif type == 'NONMATCH':
-            scores = self.getNonMatchScores(mask=mask)
-        else:
-            raise ValueError("Histogram of type %s is not supported use 'ALL', 'MATCH', or 'NONMATCH'.")
+        match_scores = self.getMatchScores(mask=mask)
+        nonmatch_scores = self.getNonMatchScores(mask=mask)
+        value_range = (self.matrix.min(),self.matrix.max())
 
-        if value_range == None:
-            value_range = (self.matrix.min(),self.matrix.max())
-
-        counts,vals = np.histogram(scores,range=value_range,bins=bins,normed=normed)
+        match_counts,vals = np.histogram(match_scores,range=value_range,bins=bins,normed=normed)
+        nonmatch_counts,vals = np.histogram(nonmatch_scores,range=value_range,bins=bins,normed=normed)
+        
+        print self.matrix
+        print mask.matrix
+        print match_scores
+        print nonmatch_scores
+        print match_counts
+        print nonmatch_counts
                 
         hist = pv.Table()
-        for i in range(len(counts)):
+        for i in range(len(match_counts)):
             hist[i,'min'] = vals[i]
             hist[i,'center'] = 0.5*(vals[i]+vals[i+1])
             hist[i,'max'] = vals[i+1]
-            hist[i,'count'] = counts[i]
+            hist[i,'match_count'] = match_counts[i]
+            hist[i,'nonmatch_count'] = nonmatch_counts[i]
         return hist
     
     
