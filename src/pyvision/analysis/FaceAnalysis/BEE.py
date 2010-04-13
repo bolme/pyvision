@@ -532,21 +532,14 @@ class BEEDistanceMatrix:
         file.write(self.matrix)
         file.close()
 
-    def histogram(self,value_range=None,bins=100,type="ALL",normed=False,mask=None):
+    def histogram(self,value_range=None,bins=100,normed=False,mask=None):
         match_scores = self.getMatchScores(mask=mask)
         nonmatch_scores = self.getNonMatchScores(mask=mask)
         value_range = (self.matrix.min(),self.matrix.max())
 
         match_counts,vals = np.histogram(match_scores,range=value_range,bins=bins,normed=normed)
         nonmatch_counts,vals = np.histogram(nonmatch_scores,range=value_range,bins=bins,normed=normed)
-        
-        print self.matrix
-        print mask.matrix
-        print match_scores
-        print nonmatch_scores
-        print match_counts
-        print nonmatch_counts
-                
+                       
         hist = pv.Table()
         for i in range(len(match_counts)):
             hist[i,'min'] = vals[i]
