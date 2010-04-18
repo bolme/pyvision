@@ -248,6 +248,26 @@ class Image:
         box = [rect.x,rect.y,rect.x+rect.w,rect.y+rect.h]
         draw.rectangle(box,outline=color)
         del draw
+        
+    def annotateThickRect(self,rect,color='red',width=5):
+        '''
+        Draws a rectangle on the annotation image
+        
+        @param rect: a rectangle of type Rect
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
+        im = self.asAnnotated()
+        draw = PIL.ImageDraw.Draw(im)
+        x,y,w,h = [rect.x,rect.y,rect.w,rect.h]
+        line = [x,y,x+w,y]
+        draw.line(line,fill=color,width=width)
+        line = [x,y,x,y+h]
+        draw.line(line,fill=color,width=width)
+        line = [x,y+h,x+w,y+h]
+        draw.line(line,fill=color,width=width)
+        line = [x+w,y,x+w,y+h]
+        draw.line(line,fill=color,width=width)
+        del draw
 
     def annotateEllipse(self,rect,color='red'):
         '''
