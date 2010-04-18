@@ -53,6 +53,21 @@ class PNorm:
                 dist_mat.append(row)
         
         return np.array(dist_mat)
+    
+def chisquared(points, data):
+        r,c = data.shape
+        
+        dist_mat = []
+        for pt in points:
+            pt = pt.reshape(1,c)
+            tmp1 = (data - pt)**2
+            tmp2 = data + pt + 0.00001
+            tmp3 = tmp1/tmp2
+            
+            row = np.sum(tmp3,axis=1)
+            dist_mat.append(row)
+        
+        return np.array(dist_mat)
         
         
 def correlation(points,data):
