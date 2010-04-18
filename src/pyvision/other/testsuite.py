@@ -10,6 +10,8 @@ import unittest
 
 import pyvision as pv
 import numpy as np
+from optic_flow import *
+from distance import *
 
 import os.path
 
@@ -147,7 +149,7 @@ class TestNormalize(unittest.TestCase):
         if 'ilog' in globals().keys():
             ilog = globals()['ilog']
             
-        norm = pv.selfQuotient(self.tile)
+        norm = pv.selfQuotientImage(self.tile)
         
         if ilog != None:
             ilog.log(norm,label="selfQuotient_Normalization")
@@ -156,21 +158,96 @@ class TestNormalize(unittest.TestCase):
         self.assertAlmostEqual(mat.mean(),0.99385333061218262,places=3)
         self.assertAlmostEqual(mat.std(),0.089332874756000477,places=3)
 
-    def test_9_selfQuotientPinto(self):
-        '''selfQuotientPinto Normalization: ................................'''
-        ilog = None
-        if 'ilog' in globals().keys():
-            ilog = globals()['ilog']
-            
-        norm = pv.selfQuotientPinto(self.tile)
-        
-        if ilog != None:
-            ilog.log(norm,label="selfQuotientPinto_Normalization")
-            
-        mat = norm.asMatrix2D()
-        self.assertAlmostEqual(mat.mean(),0.33063200116157532,places=3)
-        self.assertAlmostEqual(mat.std(),0.021874756737190897,places=3)
 
+
+class TestOpticFlow(unittest.TestCase):
+    
+    def setUp(self):
+        '''Initialize the tests'''
+        path1 = os.path.join(pv.__path__[0],"data","test","TAZ_0330.jpg")
+        path2 = os.path.join(pv.__path__[0],"data","test","TAZ_0331.jpg")
+        
+        prev = pv.Image(path1)
+        curr = pv.Image(path2)
+        
+        w,h = prev.size
+        scale = 2
+        
+        self.prev = pv.AffineScale(1.0/scale,(w/scale,h/scale)).transformImage(prev)
+        self.curr = pv.AffineScale(1.0/scale,(w/scale,h/scale)).transformImage(curr)
+        
+        self.prev.asOpenCVBW()
+        self.curr.asOpenCVBW()
+
+    
+    def test_1_goodFeaturesToTrack(self):
+        '''optic_flow::goodFeaturesToTrack..................................'''
+        points = goodFeaturesToTrack(self.prev,max_count=50)
+        self.assertEqual( len(points) , 50 )
+        
+            
+    def test_2_opticalFlowPyrLK(self):
+        '''optic_flow::opticalFlowPyrLK........  .............................'''
+        points = goodFeaturesToTrack(self.prev,max_count=50)
+        self.assertEqual( len(points) , 50 )
+        
+            
+         
+                    
+class TestDistance(unittest.TestCase):
+    
+    def setUp(self):
+        '''Initialize the tests'''
+
+    
+    def test_1_bool2Ubyte(self):
+        '''distance::boolToUbyte ...........................................'''
+        a = np.random.randint(2,size=16) > 0
+        b = boolToUbyte(a)
+        c = ubyteToBool(b)
+        d = boolToUbyte(c)
+
+        self.assert_((a == c).sum() == 16)
+        self.assert_((b == d).sum() == 2)
+        
+        a = np.random.randint(2,size=5000) > 0
+        b = boolToUbyte(a)
+        c = ubyteToBool(b)
+        d = boolToUbyte(c)
+
+        self.assert_((a == c).sum() == 5000)
+        self.assert_((b == d).sum() == 625)
+        
+        
+        
+
+    def test_2_hamming(self):
+        '''distance::hamming 1..............................................'''
+        a = np.random.randint(2,size=16) > 0
+        b = np.random.randint(2,size=16) > 0
+        
+        bin_hamming = hamming(a,b)
+
+        a = boolToUbyte(a)
+        b = boolToUbyte(b)
+        
+        byte_hamming = hamming(a,b)
+        
+        self.assertEquals(bin_hamming,byte_hamming)
+
+    def test_3_hamming(self):
+        '''distance::hamming 2..............................................'''
+        a = np.random.randint(2,size=1769472) > 0
+        b = np.random.randint(2,size=1769472) > 0
+        
+        bin_hamming = hamming(a,b)
+
+        a = boolToUbyte(a)
+        b = boolToUbyte(b)
+        
+        byte_hamming = hamming(a,b)
+        
+        self.assertEquals(bin_hamming,byte_hamming)
         
         
             
