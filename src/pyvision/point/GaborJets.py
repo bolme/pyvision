@@ -96,7 +96,7 @@ class GaborWavelet:
 
 class FilterBank:
     '''
-    This class uses the FFT to quickly compute autocorelations and convolutions
+    This class uses the FFT to quickly compute corelations and convolutions
     for an image.  The algorithm precomputes the filters in frequency space
     and uses only one FFT to to transform the image into frequency space.  
     '''
