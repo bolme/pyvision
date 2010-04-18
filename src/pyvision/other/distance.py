@@ -33,7 +33,64 @@
 
 
 from math import sqrt
+import numpy as np
 
+
+# Create a table that can look up the hamming distance for each byte
+hamming_table = np.zeros(256,dtype=np.int32)
+for i in range(256):
+    bits = (i&1>0) + (i&2>0) + (i&4>0) + (i&8>0) + (i&16>0) + (i&32>0) + (i&64>0) + (i&128>0)
+    hamming_table[i] = bits  
+    
+
+def boolToUbyte(x):
+    "Convert a boolean vector to a ubyte vector which is much more space efficient."
+    assert isinstance(x,np.ndarray)
+    assert x.dtype in [np.bool]
+    assert len(x.shape) == 1
+    assert x.shape[0] % 8 == 0
+    
+    out =   1*x[7::8] + \
+            2*x[6::8] + \
+            4*x[5::8] + \
+            8*x[4::8] + \
+           16*x[3::8] + \
+           32*x[2::8] + \
+           64*x[1::8] + \
+          128*x[0::8]
+    
+    out = out.astype(np.ubyte)
+    return out
+
+def ubyteToBool(x):
+    "Convert a byte vector to a bool vector."
+    assert isinstance(x,np.ndarray)
+    assert x.dtype in [np.ubyte]
+    assert len(x.shape) == 1
+    
+    out = np.zeros(x.shape[0]*8,dtype=np.bool)
+    
+    out[7::8] = 1&x > 0
+    out[6::8] = 2&x > 0
+    out[5::8] = 4&x > 0
+    out[4::8] = 8&x > 0
+    out[3::8] = 16&x > 0
+    out[2::8] = 32&x > 0
+    out[1::8] = 64&x > 0
+    out[0::8] = 128&x > 0
+    
+    return out
+          
+    
+    
+
+def hamming(a,b):
+    if a.dtype == np.bool and b.dtype == bool:
+        return (a ^ b).sum()
+    elif a.dtype == np.ubyte and b.dtype == np.ubyte:
+        return hamming_table[a^b].sum()
+    else:
+        raise NotImplementedError("Unsupported array types %s and %s",a.dtype,b.dtype)
 
 def l1(a,b):
     ''' Compute the l1 distance measure '''
