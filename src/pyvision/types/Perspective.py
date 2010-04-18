@@ -113,7 +113,7 @@ def PerspectiveFromPointsOld(source, dest, new_size):
     return PerspectiveTransform(matrix,new_size)
 
 
-def PerspectiveFromPoints(source, dest, new_size, method=0, ransacReprojThreshold=2.0):
+def PerspectiveFromPoints(source, dest, new_size, method=0, ransacReprojThreshold=1.5):
     '''
     Calls the OpenCV function: cvFindHomography.  This method has
     additional options to use the CV_RANSAC or CV_LMEDS methods to
@@ -135,7 +135,7 @@ def PerspectiveFromPoints(source, dest, new_size, method=0, ransacReprojThreshol
         d[i,0] = dest[i].X()
         d[i,1] = dest[i].Y()
         
-    results = cv.cvFindHomography(s,d,p)
+    results = cv.cvFindHomography(s,d,p,method,ransacReprojThreshold)
     
     matrix = pv.OpenCVToNumpy(p)
 
