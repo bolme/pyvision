@@ -58,6 +58,13 @@ class Point:
             self.w = 1.0
             self.scale = 1.0
             self.rotation = 0.0
+        elif isinstance(x,cv.CvPoint2D32f):
+            self.x = float(x.x)
+            self.y = float(x.y)
+            self.z = 0.0
+            self.w = 1.0
+            self.scale = 1.0
+            self.rotation = 0.0
         else:
             self.x = float(x)
             self.y = float(y)
