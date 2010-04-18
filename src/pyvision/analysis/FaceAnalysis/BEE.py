@@ -554,6 +554,27 @@ class BEEDistanceMatrix:
         nonmatch = self.getNonMatchScores(mask=mask)
         match = self.getMatchScores(mask=mask)
         return pv.analysis.roc.ROC(match,nonmatch,is_distance=self.is_distance)
+    
+    def getRank1(self,mask=None):
+        rows,cols = self.matrix.shape
+        
+        queries = np.array([ name for name,sig in self.queries ])
+        targets = np.array([ name for name,sig in self.targets ])
+
+        success = 0.0
+        count = 0.0
+        for i in range(rows):
+            row = self.matrix[i]
+            if self.is_distance:
+                j = row.argmin()
+            else:
+                j = row.argmax()
+            if queries[i] == targets[j]:
+                success += 1
+            count += 1
+        
+        #print success, count, success/count
+        return success/count
         
 
 
