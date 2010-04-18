@@ -159,11 +159,15 @@ from pyvision.analysis.Table import Table
 
 from pyvision.analysis.Timer import Timer
 
-from pyvision.util.fast_util import LocalMaximumDetector
-
 from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotientImage, lowPassFilter, highPassFilter, bandPassFilter
 
-from pyvision.vector.knn import PNorm,correlation
+from pyvision.other.distance import boolToUbyte, ubyteToBool, hamming
+
+from pyvision.vector.knn import PNorm,correlation,chisquared
+
+from pyvision.util.fast_util import LocalMaximumDetector
+
+from pyvision.util.windows import cosineWindow, hammingWindow, hannWindow
 
 # TODO: Features to be included in the initial release.
 #     analysis: 
