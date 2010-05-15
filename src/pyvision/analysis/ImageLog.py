@@ -61,17 +61,17 @@ class ImageLog:
         self.count = 0
         #print self.dir
         
-    def __call__(self,item,**kwargs):
+    def __call__(self,item,*args, **kwargs):
         if isinstance(item,pv.Image):
-            self.log(item,**kwargs) 
+            self.log(item,*args,**kwargs) 
         elif isinstance(item,pv.Timer):
-            self.table(item.table,**kwargs) 
+            self.table(item.table,*args,**kwargs) 
         elif isinstance(item,pv.Table):
-            self.table(item,**kwargs) 
+            self.table(item,*args,**kwargs) 
         else:
-            self.pickle(item,**kwargs) 
+            self.pickle(item,*args,**kwargs) 
         
-    def log(self,image,message=None,label="NOLABEL",format='png'):
+    def log(self,image,label="NOLABEL",format='png'):
         '''
         Save a pyvision image to the log.
         '''
@@ -87,7 +87,7 @@ class ImageLog:
         table.save(filename)
         self.count += 1
         
-    def csv(self,data,headers=None,label="NOLABEL"):
+    def csv(self,data,label="NOLABEL",headers=None):
         '''
         Save a list of lists or matrix to the log as a csv file.
         '''
