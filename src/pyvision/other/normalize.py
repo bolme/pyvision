@@ -92,8 +92,11 @@ def selfQuotientImage(matrix,sigma=5.0):
         matrix = matrix.asMatrix2D()
         is_image = True
 
+    assert matrix.min() >= 0 
+    matrix = matrix + 0.01*matrix.max()
     denom = sp.ndimage.gaussian_filter(matrix,sigma)
 
+    # make sure there are no divide by zeros
     matrix = matrix/denom
 
     if is_image:
