@@ -407,8 +407,44 @@ class AffineTransform:
         self.inverse = inv(matrix)
         self.size = int(new_size[0]),int(new_size[1])
         self.filter = filter
+        
+    def __call__(self,data):
+        '''
+        This is a simple interface to transform images or points.  Simply
+        call the affine transform like a function and it will try to automatically 
+        transform the argument.
+        
+        @param data: an image, point, or list of points.
+        '''
+        if isinstance(data,pv.Image):
+            return self.transformImage(data)
+        elif isinstance(data,pv.Point):
+            return self.transformPoint(data)
+        else: # assume this is a list of points
+            return self.transformPoints(data)
     
-    def transformImage(self,im, use_orig=True):
+    def invert(self,data):
+        '''
+        This is a simple interface to transform images or points.  Simply
+        call invert with the points or list of points and it will automatically
+        call the correct function.
+        
+        @param data: an image, point, or list of points.
+        '''
+        if isinstance(data,pv.Image):
+            return self.invertImage(data)
+        elif isinstance(data,pv.Point):
+            return self.invertPoint(data)
+        else: # assume this is a list of points
+            return self.invertPoints(data)
+    
+    def invertImage(self,im, use_orig=True):
+        '''
+        Perform the inverse affine transformation on the image.
+        '''
+        return self.transformImage(im,use_orig=use_orig,inverse=True)
+
+    def transformImage(self,im, use_orig=True, inverse=False):
         ''' 
         Transforms an image into the new coordinate system.
         
@@ -427,7 +463,11 @@ class AffineTransform:
         '''
         #TODO: does not support opencv images.  see Perspective.py
         prev_im = im
-        inverse = self.inverse
+        
+        if inverse:
+            inverse = self.matrix
+        else:
+            inverse = self.inverse
         
         if use_orig:
             # Find the oldest image used to produce this one by following week 
