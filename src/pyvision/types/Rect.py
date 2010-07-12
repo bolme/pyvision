@@ -32,8 +32,11 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import Point as pt
-import opencv as cv
 
+try:
+    import opencv as cv
+except:
+    import cv
 def BoundingRect(*points):
     '''
     Create a rectangle that includes all of the points.
@@ -156,7 +159,7 @@ class Rect:
         '''
         Returns a representation compatible with opencv.
         '''
-        return cv.cvRect(int(round(self.x)),int(round(self.y)),int(round(self.w)),int(round(self.h)))
+        return (int(round(self.x)),int(round(self.y)),int(round(self.w)),int(round(self.h)))
 
     def __mul__(self,val):
         '''

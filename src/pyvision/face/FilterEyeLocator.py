@@ -42,7 +42,7 @@ up the interface and provides a bridge to many of the PyVision data
 structures.
 '''
 
-import opencv as cv
+import cv
 import math
 import struct
 import array
@@ -133,11 +133,11 @@ def loadFilterEyeLocator(filename,ilog=None):
     
     # read in the left bounding rectangle
     x,y,w,h = f.readline().split()
-    left_rect = cv.cvRect(int(x),int(y),int(w),int(h))
+    left_rect = (int(x),int(y),int(w),int(h))
     
     # read in the right bounding rectangle
     x,y,w,h = f.readline().split()
-    right_rect = cv.cvRect(int(x),int(y),int(w),int(h))
+    right_rect = (int(x),int(y),int(w),int(h))
     
     # read the magic number
     magic_number = f.readline().strip()
@@ -161,22 +161,22 @@ def loadFilterEyeLocator(filename,ilog=None):
         raise ValueError("Bad Magic Number: Unknown byte ordering in file")
     
     # Create the left and right filters
-    left_filter  = cv.cvCreateMat(r,c,cv.CV_32F)
-    right_filter = cv.cvCreateMat(r,c,cv.CV_32F)
+    left_filter  = cv.CreateMat(r,c,cv.CV_32F)
+    right_filter = cv.CreateMat(r,c,cv.CV_32F)
     
     # Copy data into the left and right filters
-    left_filter.imageData  = lf.tostring()
-    right_filter.imageData = rf.tostring()
+    cv.SetData(left_filter, lf.tostring())
+    cv.SetData(right_filter, rf.tostring())
     
     tmp = pv.OpenCVToNumpy(left_filter)
     t1 = tmp.mean()
     t2 = tmp.std()
-    cv.cvScale(left_filter,left_filter,1.0/t2,-t1*1.0/t2)
+    cv.Scale(left_filter,left_filter,1.0/t2,-t1*1.0/t2)
 
     tmp = pv.OpenCVToNumpy(right_filter)
     t1 = tmp.mean()
     t2 = tmp.std()
-    cv.cvScale(right_filter,right_filter,1.0/t2,-t1*1.0/t2)
+    cv.Scale(right_filter,right_filter,1.0/t2,-t1*1.0/t2)
 
     #tmp = pv.OpenCVToNumpy(left_filter)
     #print tmp.mean(),tmp.std()
@@ -239,35 +239,35 @@ class OpenCVFilterEyeLocator:
         
         assert left_filter.width == right_filter.width
         assert left_filter.height == right_filter.height
-        assert left_filter.nChannels == 1
-        assert right_filter.nChannels == 1
+        assert left_filter.channels == 1
+        assert right_filter.channels == 1
         
         # Create the arrays needed for the computation
-        self.left_filter      = cv.cvCreateMat(r,c,cv.CV_32F)
-        self.right_filter     = cv.cvCreateMat(r,c,cv.CV_32F)
-        self.left_filter_dft  = cv.cvCreateMat(r,c,cv.CV_32F)
-        self.right_filter_dft = cv.cvCreateMat(r,c,cv.CV_32F)
-        self.image            = cv.cvCreateMat(r,c,cv.CV_32F)
-        self.left_corr        = cv.cvCreateMat(r,c,cv.CV_32F)
-        self.right_corr       = cv.cvCreateMat(r,c,cv.CV_32F)
+        self.left_filter      = cv.CreateMat(r,c,cv.CV_32F)
+        self.right_filter     = cv.CreateMat(r,c,cv.CV_32F)
+        self.left_filter_dft  = cv.CreateMat(r,c,cv.CV_32F)
+        self.right_filter_dft = cv.CreateMat(r,c,cv.CV_32F)
+        self.image            = cv.CreateMat(r,c,cv.CV_32F)
+        self.left_corr        = cv.CreateMat(r,c,cv.CV_32F)
+        self.right_corr       = cv.CreateMat(r,c,cv.CV_32F)
         
         # Populate the spatial filters
-        cv.cvConvertScale(left_filter,  self.left_filter)
-        cv.cvConvertScale(right_filter, self.right_filter)
+        cv.ConvertScale(left_filter,  self.left_filter)
+        cv.ConvertScale(right_filter, self.right_filter)
 
         # Compute the filters in the Fourier domain
-        cv.cvDFT(self.left_filter,  self.left_filter_dft,  cv.CV_DXT_FORWARD)
-        cv.cvDFT(self.right_filter, self.right_filter_dft, cv.CV_DXT_FORWARD)
+        cv.DFT(self.left_filter,  self.left_filter_dft,  cv.CV_DXT_FORWARD)
+        cv.DFT(self.right_filter, self.right_filter_dft, cv.CV_DXT_FORWARD)
         
         # Set up correlation region of interest
         self.left_rect = left_rect
         self.right_rect = right_rect
 
-        self.left_roi = cv.cvGetSubRect(self.left_corr,self.left_rect)
-        self.right_roi = cv.cvGetSubRect(self.right_corr,self.right_rect)
+        self.left_roi = cv.GetSubRect(self.left_corr,self.left_rect)
+        self.right_roi = cv.GetSubRect(self.right_corr,self.right_rect)
         
         # Create the look up table for the log transform
-        self.lut = cv.cvCreateMat(256,1,cv.CV_32F)
+        self.lut = cv.CreateMat(256,1,cv.CV_32F)
         
         for i in range(256):
             self.lut[i,0] = math.log(i+1)
@@ -287,11 +287,11 @@ class OpenCVFilterEyeLocator:
         '''
         self.correlate(image_tile)
         
-        leye = cv.cvMinMaxLoc(self.left_roi)[3]
-        leye = cv.cvPoint(self.left_rect.x+leye.x,self.left_rect.y+leye.y)
+        leye = cv.MinMaxLoc(self.left_roi)[3]
+        leye = (self.left_rect[0]+leye[0],self.left_rect[1]+leye[1])
 
-        reye = cv.cvMinMaxLoc(self.right_roi)[3]
-        reye = cv.cvPoint(self.right_rect.x+reye.x,self.right_rect.y+reye.y)
+        reye = cv.MinMaxLoc(self.right_roi)[3]
+        reye = (self.right_rect[0]+reye[0],self.right_rect[1]+reye[1])
         
         return leye,reye,self.left_corr,self.right_corr
 
@@ -300,7 +300,7 @@ class OpenCVFilterEyeLocator:
         '''
         preprocess an image tile.
         '''
-        cv.cvLUT(image_tile,self.image,self.lut)
+        cv.LUT(image_tile,self.image,self.lut)
         
         return self.image
         
@@ -311,13 +311,13 @@ class OpenCVFilterEyeLocator:
         '''
         self._preprocess(image_tile)
         
-        cv.cvDFT(self.image,  self.image,  cv.CV_DXT_FORWARD)
+        cv.DFT(self.image,  self.image,  cv.CV_DXT_FORWARD)
         
-        cv.cvMulSpectrums( self.image, self.left_filter_dft, self.left_corr, cv.CV_DXT_MUL_CONJ )
-        cv.cvMulSpectrums( self.image, self.right_filter_dft, self.right_corr, cv.CV_DXT_MUL_CONJ )
+        cv.MulSpectrums( self.image, self.left_filter_dft, self.left_corr, cv.CV_DXT_MUL_CONJ )
+        cv.MulSpectrums( self.image, self.right_filter_dft, self.right_corr, cv.CV_DXT_MUL_CONJ )
         
-        cv.cvDFT(self.left_corr,self.left_corr,cv.CV_DXT_INV_SCALE)
-        cv.cvDFT(self.right_corr,self.right_corr,cv.CV_DXT_INV_SCALE)
+        cv.DFT(self.left_corr,self.left_corr,cv.CV_DXT_INV_SCALE)
+        cv.DFT(self.right_corr,self.right_corr,cv.CV_DXT_INV_SCALE)
         
         return self.left_corr,self.right_corr
 
@@ -336,7 +336,7 @@ class FilterEyeLocator:
             
         self.fel = loadFilterEyeLocator(filename,ilog=ilog)
         
-        self.bwtile = cv.cvCreateMat(128,128,cv.CV_8U)
+        self.bwtile = cv.CreateMat(128,128,cv.CV_8U)
             
         
     def __call__(self,im,face_rects,ilog=None):
@@ -355,8 +355,8 @@ class FilterEyeLocator:
         faces = []
         
         for rect in face_rects:
-            faceim = cv.cvGetSubRect(cvim, rect.asOpenCV())
-            cv.cvResize(faceim,self.bwtile)
+            faceim = cv.GetSubRect(cvim, rect.asOpenCV())
+            cv.Resize(faceim,self.bwtile)
             
             affine = pv.AffineFromRect(rect,(128,128))
 
@@ -431,11 +431,10 @@ class _TestFilterEyeLocator(unittest.TestCase):
             edt.addSample(truth_eyes, pred_eyes, im=im, annotate=False)
         
         edt.createSummary()
-        self.assertAlmostEqual( edt.face_rate ,   0.953757225434, places = 3 )
-        
-        self.assertAlmostEqual( edt.both25_rate , 0.797687861272, places = 3 )
-        self.assertAlmostEqual( edt.both10_rate , 0.445086705202, places = 3 )
-        self.assertAlmostEqual( edt.both05_rate , 0.346820809249, places = 3 )
+        self.assertAlmostEqual( edt.face_rate ,   0.97109826589595372, places = 3 ) # Updated numbers for OpenCV 2.0
+        self.assertAlmostEqual( edt.both25_rate , 0.82658959537572252, places = 3 )
+        self.assertAlmostEqual( edt.both10_rate , 0.47976878612716761, places = 3 )
+        self.assertAlmostEqual( edt.both05_rate , 0.30635838150289019, places = 3 )
 
         
     

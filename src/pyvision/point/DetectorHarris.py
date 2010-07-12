@@ -38,17 +38,16 @@ import os.path
 from scipy.ndimage import convolve
 from scipy.ndimage import gaussian_filter,maximum_filter
 
-from numpy import array,ones,zeros,nonzero
+from numpy import array,ones,zeros,nonzero #TODO: Remove This
 import numpy
-#from numpy.linalg import det
 
-import opencv
-#from  opencv.adaptors import PIL2Ipl,Ipl2PIL,Ipl2NumPy
+try:
+    import opencv as cv
+except:
+    import cv
 
-import pyvision
+import pyvision as pv
 from pyvision.point.DetectorROI import DetectorROI
-from pyvision.types.Image import Image
-from pyvision.types.Point import Point
 
 
 class DetectorHarris(DetectorROI):
@@ -68,12 +67,12 @@ class DetectorHarris(DetectorROI):
         '''
         gray = im.asOpenCVBW()
         #gray = opencv.cvCreateImage( opencv.cvGetSize(cvim), 8, 1 );
-        corners = opencv.cvCreateImage( opencv.cvGetSize(gray), 32, 1 );
+        corners = cv.CreateImage( cv.GetSize(gray), 32, 1 );
         #opencv.cvCvtColor( cvim, gray, opencv.CV_BGR2GRAY );
     
-        opencv.cvCornerHarris(gray,corners,self.block_size,self.aperture_size,self.k)
+        cv.CornerHarris(gray,corners,self.block_size,self.aperture_size,self.k)
 
-        buffer = corners.imageData
+        buffer = corners.tostring()
         corners = numpy.frombuffer(buffer,numpy.float32).reshape(corners.height,corners.width).transpose()        
         
         footprint = ones((3,3))
@@ -99,8 +98,8 @@ class _HarrisTest(unittest.TestCase):
         
     def testDetectorHarris1(self):
         detector = DetectorHarris()
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_1.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_1.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
         for score,pt,radius in points:
@@ -111,8 +110,8 @@ class _HarrisTest(unittest.TestCase):
 
     def testDetectorHarris2(self):
         detector = DetectorHarris()
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_19.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_19.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
         for score,pt,radius in points:
@@ -123,8 +122,8 @@ class _HarrisTest(unittest.TestCase):
 
     def testDetectorHarris3(self):
         detector = DetectorHarris()
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_22.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_22.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
         for score,pt,radius in points:
@@ -135,8 +134,8 @@ class _HarrisTest(unittest.TestCase):
 
     def testDetectorHarris4(self):
         detector = DetectorHarris()
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_37.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
         for score,pt,radius in points:
@@ -147,8 +146,8 @@ class _HarrisTest(unittest.TestCase):
 
     def testDetectorHarris5(self):
         detector = DetectorHarris(selector='best')
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_37.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
         for score,pt,radius in points:
@@ -159,8 +158,8 @@ class _HarrisTest(unittest.TestCase):
         
     def testDetectorHarris6(self):
         detector = DetectorHarris(selector='all')
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_37.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
         for score,pt,radius in points:

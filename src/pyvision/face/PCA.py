@@ -41,7 +41,7 @@ from pyvision.face.FaceRecognizer import FaceRecognizer
 from pyvision.analysis.FaceAnalysis import FaceRecognitionTest
 import pyvision.vector.PCA
 from pyvision.other.normalize import *
-from pyvision.types.Image import Image
+from pyvision.types.img import Image
 from pyvision.types.Point import Point
 from pyvision.analysis.face import EyesFile
 from pyvision.analysis.roc import *

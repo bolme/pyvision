@@ -39,11 +39,11 @@ __version__ = "$Revision$"
 
 import PIL.ImageDraw
 import PIL.Image
+    
 import numpy
-try:
-    import opencv
-except:
-    print "Warning: Could not import opencv."
+import numpy as np
+import cv
+
 import unittest
 import os.path
 
@@ -153,7 +153,7 @@ class Image:
             
             self.depth = 8
                         
-        elif isinstance(data,opencv.cv.CvMat):
+        elif isinstance(data,cv.iplimage):
             self.type=TYPE_OPENCV
             self.opencv=data 
             
@@ -215,8 +215,8 @@ class Image:
             return cvim
         
         elif cvim.nChannels == 3:
-            cvimbw = opencv.cvCreateImage(opencv.cvGetSize(cvim), opencv.IPL_DEPTH_8U, 1);
-            opencv.cvCvtColor(cvim, cvimbw, opencv.CV_BGR2GRAY);
+            cvimbw = cv.CreateImage(cv.GetSize(cvim), cv.IPL_DEPTH_8U, 1);
+            cv.CvtColor(cvim, cvimbw, cv.CV_BGR2GRAY);
             return cvimbw
         
         else:
@@ -432,16 +432,16 @@ class Image:
         
         w,h = self.size
         if self.channels == 1:
-            gray = opencv.cvCreateImage(opencv.cvSize(w,h),opencv.IPL_DEPTH_8U,1)
-            gray.imageData = self.toBufferGray(8)
+            gray = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,1)
+            cv.SetData(gray,self.toBufferGray(8))
             self.opencv = gray
         elif self.channels == 3:
-            rgb = opencv.cvCreateImage(opencv.cvSize(w,h),opencv.IPL_DEPTH_8U,3)
-            #bgr = opencv.cvCreateImage(opencv.cvSize(w,h),opencv.IPL_DEPTH_8U,3)
-            rgb.imageData = self.toBufferRGB(8)
+            rgb = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
+            bgr = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
+            cv.SetData(rgb, self.toBufferRGB(8))
             # convert from RGB to BGR
-            #opencv.cvCvtColor(rgb,bgr,opencv.CV_RGB2BGR)
-            self.opencv=rgb
+            cv.CvtColor(rgb,bgr,cv.CV_RGB2BGR)
+            self.opencv=bgr
         else:
             raise NotImplementedError("Cannot convert image from type: %s"%self.type)
                 
@@ -464,12 +464,12 @@ class Image:
             buffer = mat.transpose().tostring()
         elif self.type == TYPE_OPENCV:
             if self.channels == 1:
-                buffer = self.opencv.imageData
+                buffer = self.opencv.tostring()
             elif self.channels == 3:
                 w,h = self.width,self.height
-                gray = opencv.cvCreateImage(opencv.cvSize(w,h),opencv.IPL_DEPTH_8U,1)
-                opencv.cvCvtColor( self.opencv, gray, opencv.CV_BGR2GRAY );
-                buffer = gray.imageData
+                gray = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,1)
+                cv.CvtColor( self.opencv, gray, cv.CV_BGR2GRAY );
+                buffer = gray.tostring()
             else:
                 raise TypeError("Operation not supported for image type.")
         else:
@@ -528,13 +528,13 @@ class Image:
         elif self.type == TYPE_OPENCV:
             w,h = self.width,self.height
             if self.channels == 3:
-                rgb = opencv.cvCreateImage(opencv.cvSize(w,h),opencv.IPL_DEPTH_8U,3)
-                opencv.cvCvtColor( self.opencv, rgb, opencv.CV_BGR2RGB );
-                buffer = rgb.imageData
+                rgb = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
+                cv.CvtColor( self.opencv, rgb, cv.CV_BGR2RGB );
+                buffer = rgb.tostring()
             elif self.channels == 1:
-                rgb = opencv.cvCreateImage(opencv.cvSize(w,h),opencv.IPL_DEPTH_8U,3)
-                opencv.cvCvtColor( self.opencv, rgb, opencv.CV_GRAY2RGB );
-                buffer = rgb.imageData
+                rgb = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
+                cv.CvtColor( self.opencv, rgb, cv.CV_GRAY2RGB );
+                buffer = rgb.tostring()
             else:
                 raise TypeError("Operation not supported for image type.")
         else:
@@ -599,28 +599,28 @@ class Image:
 ##
 # Convert a 32bit opencv matrix to a numpy matrix
 def OpenCVToNumpy(cvmat):
-    assert cvmat.depth == 32
-    assert cvmat.nChannels == 1
+    #assert cvmat.depth == 32
+    #assert cvmat.nChannels == 1
     
-    buffer = cvmat.imageData
-    mat = numpy.frombuffer(buffer,numpy.float32).reshape(cvmat.height,cvmat.width)        
-    return mat
+    #buffer = cvmat.imageData
+    #mat = numpy.frombuffer(buffer,numpy.float32).reshape(cvmat.height,cvmat.width)        
+    return np.asarray(cvmat,dtype=np.float64)
 
 ##
 # Convert a numpy matrix to a 32bit opencv matrix
 def NumpyToOpenCV(mat):
     #assert cvmat.depth == 32
     #assert cvmat.nChannels == 1
-    mat = mat.astype(numpy.float32)
-    buffer = mat.tostring()
+    #mat = mat.astype(numpy.float32)
+    #buffer = mat.tostring()
     #print "MAT:",dir(mat)
-    cvmat = opencv.cvCreateImage( opencv.cvSize(mat.shape[1],mat.shape[0]), opencv.IPL_DEPTH_32F, 1 );
+    #cvmat = opencv.cvCreateImage( opencv.cvSize(mat.shape[1],mat.shape[0]), opencv.IPL_DEPTH_32F, 1 );
     #print len(cvmat.imageData)
     #print len(buffer)
-    cvmat.imageData = buffer
+    #cvmat.imageData = buffer
     #print mat
     #print cvmat
-    return cvmat
+    return cv.fromarray(mat)
 
 class _TestImage(unittest.TestCase):
     
@@ -715,7 +715,7 @@ class _TestImage(unittest.TestCase):
         for i in range(im.width):
             for j in range(im.height):
                 for c in range(3):
-                    self.assertAlmostEqual(pil.getpixel((i,j))[c],ord(cv.imageData[i*3+j*im.width*3+2-c]))
+                    self.assertAlmostEqual(pil.getpixel((i,j))[c],ord(cv.tostring()[i*3+j*im.width*3+2-c]))
         
     def test_OpenCVToPIL(self):
         pil = self.im.asPIL().resize((180,120))
@@ -726,7 +726,7 @@ class _TestImage(unittest.TestCase):
         for i in range(im.width):
             for j in range(im.height):
                 for c in range(3):
-                    self.assertAlmostEqual(pil.getpixel((i,j))[c],ord(cv.imageData[i*3+j*im.width*3+2-c]))
+                    self.assertAlmostEqual(pil.getpixel((i,j))[c],ord(cv.tostring()[i*3+j*im.width*3+2-c]))
         
     def test_OpenCVToPILGray(self):
         pil = self.im.asPIL().resize((180,120)).convert('L')
@@ -749,14 +749,13 @@ class _TestImage(unittest.TestCase):
     def test_BufferToOpenCV(self):
         pil = self.im.asPIL().resize((180,120))
         im = Image(pil)
-        cv = im.asOpenCV()
+        cvim = im.asOpenCV()
         buffer = im.toBufferRGB(8)
 
         for i in range(im.width):
             for j in range(im.height):
                 for c in range(3):
-                    self.assertAlmostEqual(ord(buffer[i*3+j*im.width*3+c]),ord(cv.imageData[i*3+j*im.width*3+2-c]))
-        
+                    self.assertAlmostEqual(ord(buffer[i*3+j*im.width*3+c]),ord(cvim.tostring()[i*3+j*im.width*3+2-c]))
      
     def test_asOpenCVBW(self):
         pass #TODO: Create tests for this method.

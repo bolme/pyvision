@@ -45,7 +45,11 @@ import math
 import copy
 import weakref
 
-from PIL.Image import AFFINE,NEAREST,BILINEAR,BICUBIC
+try:
+    from PIL.Image import AFFINE,NEAREST,BILINEAR,BICUBIC
+except:
+    from Image import AFFINE,NEAREST,BILINEAR,BICUBIC
+    
 from numpy import array,dot,sqrt
 from numpy.linalg import inv,solve,lstsq
 from scipy.ndimage import affine_transform
@@ -54,11 +58,15 @@ import random
 import pyvision
 import pyvision as pv
 import numpy as np
-import opencv as cv
-from pyvision.types.Image import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_OPENCV
+try:
+    import opencv as cv
+except:
+    import cv
+    
+from pyvision.types.img import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_OPENCV
 from pyvision.types.Point import Point
 from pyvision.types.Rect import Rect
-from pyvision.vector.RANSAC import RANSAC
+from pyvision.vector.RANSAC import RANSAC,LMeDs
 
 
 def AffineNormalizePoints(points):
@@ -292,7 +300,7 @@ def AffineFromPointsLS(src,dst,new_size,filter=BILINEAR, normalize=True):
     return AffineTransform(matrix,new_size,filter)
 
 
-def AffineFromPointsRANSAC(src,dst,new_size,filter=BILINEAR, normalize=True,tol=1.0):
+def AffineFromPointsRANSAC(src,dst,new_size,filter=BILINEAR, normalize=True,tol=0.15):
     '''
     An affine transform that will rotate, translate, and scale to map one 
     set of points to the other. For example, to align eye coordinates in face images.
@@ -331,7 +339,60 @@ def AffineFromPointsRANSAC(src,dst,new_size,filter=BILINEAR, normalize=True,tol=
     A = array(A)
     b = array(b)
         
-    result = RANSAC(A,b,tol=tol)
+    result = RANSAC(A,b,tol=tol,group=2)
+    
+    #print result,resids,rank,s 
+    
+    a,b,tx,ty = result    
+    # Create the transform matrix
+    matrix = array([[a,-b,tx],[b,a,ty],[0,0,1]],'d')
+    
+    if normalize:
+        matrix = dot(dst_norm.inverse,dot(matrix,src_norm.matrix))
+
+    return AffineTransform(matrix,new_size,filter)
+
+
+def AffineFromPointsLMeDs(src,dst,new_size,filter=BILINEAR, normalize=True):
+    '''
+    An affine transform that will rotate, translate, and scale to map one 
+    set of points to the other. For example, to align eye coordinates in face images.
+     
+    Find a transform (a,b,tx,ty) such that it maps the source points to the 
+    destination points::
+        
+        a*x1-b*y1+tx = x2
+        b*x1+a*y1+ty = y2
+     
+    This method minimizes the squared error to find an optimal fit between the 
+    points.  Instead of a LS solver the RANSAC solver is used to
+    produce a transformation that is robust to outliers.
+    
+    @param src: a list of link.Points in the source image.
+    @param dst: a list of link.Points in the destination image.
+    @param new_size: new size for the image.
+    @param filter: PIL filter to use.
+    '''
+    if normalize:
+        # Normalize Points
+        src_norm = AffineNormalizePoints(src)
+        src = src_norm.transformPoints(src)
+        dst_norm = AffineNormalizePoints(dst)
+        dst = dst_norm.transformPoints(dst)
+    
+    # Compute the transformation parameters
+    A = []
+    b = []
+    for i in range(len(src)):
+        A.append([src[i].X(),-src[i].Y(),1,0])
+        A.append([src[i].Y(), src[i].X(),0,1])
+        b.append(dst[i].X())
+        b.append(dst[i].Y())
+         
+    A = array(A)
+    b = array(b)
+        
+    result = LMeDs(A,b)
     
     #print result,resids,rank,s 
     
@@ -504,8 +565,8 @@ class AffineTransform:
         elif im.getType() == TYPE_OPENCV:
             matrix = pv.NumpyToOpenCV(self.matrix)
             src = im.asOpenCV()
-            dst = cv.cvCreateImage( cv.cvSize(self.size[0],self.size[1]), cv.IPL_DEPTH_8U, src.nChannels );
-            cv.cvWarpPerspective( src, dst, matrix, cv.CV_INTER_LINEAR+cv.CV_WARP_FILL_OUTLIERS,cv.cvScalarAll(128))                    
+            dst = cv.CreateImage( (self.size[0],self.size[1]), cv.IPL_DEPTH_8U, src.nChannels );
+            cv.WarpPerspective( src, dst, matrix, cv.CV_INTER_LINEAR+cv.CV_WARP_FILL_OUTLIERS,cv.ScalarAll(128))                    
             result = pv.Image(dst)
 
         else:

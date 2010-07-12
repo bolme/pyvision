@@ -143,13 +143,13 @@ def disableCommercialUseWarnings():
 
 #Import basic pyvision types
 
-from pyvision.types.Image import Image,OpenCVToNumpy,NumpyToOpenCV
+from pyvision.types.img import Image,OpenCVToNumpy,NumpyToOpenCV
 
 from pyvision.types.Point import Point,readPointsFile
 
 from pyvision.types.Rect import Rect,BoundingRect
 
-from pyvision.types.Affine import  AffineNormalizePoints, AffineTranslate, AffineScale, AffineNonUniformScale, AffineRotate, AffineFromRect, AffineFromTile, AffineFromPoints, AffineFromPointsLS, AffineFromPointsRANSAC, AffinePerturb, AffineTransform
+from pyvision.types.Affine import  AffineNormalizePoints, AffineTranslate, AffineScale, AffineNonUniformScale, AffineRotate, AffineFromRect, AffineFromTile, AffineFromPoints, AffineFromPointsLS, AffineFromPointsRANSAC, AffineFromPointsLMeDs, AffinePerturb, AffineTransform
 
 from pyvision.types.Perspective import  PerspectiveTransform, PerspectiveFromPoints
 
@@ -168,6 +168,8 @@ from pyvision.vector.knn import PNorm,correlation,chisquared
 from pyvision.util.fast_util import LocalMaximumDetector
 
 from pyvision.util.windows import cosineWindow, hammingWindow, hannWindow
+
+from pyvision.analysis.stats import pbinom, qbinom, cibinom, mcnemar_test, SummaryStats
 
 # TODO: Features to be included in the initial release.
 #     analysis: 
@@ -247,15 +249,9 @@ class _VersionTest(unittest.TestCase):
 
     def test_opencv_version(self):
         import sys
-        import opencv
-        major,minor,sub = opencv.CV_VERSION.split('.')[:3]
-        rmajor,rminor,rsub = 1,1,0 # 2008/03/20
-        major,minor,sub = int(major),int(minor),int(sub)
-        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
-        sys.stderr.flush()
-        self.assert_(major > rmajor 
-                     or major == rmajor and minor >= rminor 
-                     or major == rmajor and minor == rminor and sub >= sub)
+        import cv
+        ver = int(cv.__version__.split()[1])
+        self.assert_(ver >= 3051) 
 
     def test_scipy__version(self):
         import sys
@@ -303,14 +299,14 @@ def test():
     from pyvision.types.Affine import _AffineTest
     affine_suite = unittest.TestLoader().loadTestsFromTestCase(_AffineTest)
     
-    from pyvision.types.Image import _TestImage
+    from pyvision.types.img import _TestImage
     image_suite = unittest.TestLoader().loadTestsFromTestCase(_TestImage)
 
     from pyvision.vector.VectorClassifier import _TestVectorClassifier
     vc_suite = unittest.TestLoader().loadTestsFromTestCase(_TestVectorClassifier)
     
-    from pyvision.vector.SVM import _TestSVM
-    svm_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSVM)
+    #from pyvision.vector.SVM import _TestSVM
+    #svm_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSVM)
 
     from pyvision.vector.Polynomial import _PolyTest
     poly_suite = unittest.TestLoader().loadTestsFromTestCase(_PolyTest)
@@ -361,7 +357,7 @@ def test():
                    affine_suite,
                    image_suite,
                    vc_suite,
-                   svm_suite,
+                   #svm_suite, #TODO: uncomment
                    poly_suite,
                    corner_suite,
                    dog_suite,

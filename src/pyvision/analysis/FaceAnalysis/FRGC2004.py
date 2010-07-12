@@ -208,6 +208,105 @@ class FRGC_Exp4(FaceDatabase):
         return face_obj
 
 
+class FRGC_V1(FaceDatabase):
+    '''
+    FRGC Experiment 4 is a controled to uncontrolled scenario
+    
+    Note:  The left and right eye in the metadata is relative to the 
+           person.  For the face structure this is reversed and follows 
+           the pyvision convention which is relative to the image.
+    '''
+    
+    def __init__(self,location):
+        self.location = location
+        
+        self.data_path            = os.path.join(location,"nd1")
+        self.metadata_path        = os.path.join(location,"BEE_DIST","FRGC1.0","metadata","FRGC_1.0_Metadata.xml")
+                
+        self.readSigsets()
+        self.readEyeData()
+        
+        
+    def readSigsets(self):
+        self.orig_sigset_path     = os.path.join(self.location,"BEE_DIST","FRGC1.0","signature_sets","all.xml")
+
+        self.orig_sigset     = BEE.parseSigSet(self.orig_sigset_path)
+        #print self.orig_sigset
+        
+        self.orig_sigset = filter(lambda x: len(x[1]) > 0, self.orig_sigset)
+
+        self.orig_sigset_map     = dict([ (data[0]['name'],[key,data]) for key,data in self.orig_sigset ])
+        
+        self.orig_keys     = [ data[0]['name'] for key,data in self.orig_sigset ]
+        
+
+    def readEyeData(self):
+        f = open(self.metadata_path,'rb')
+        xml = et.parse(f)
+        
+        self.metadata = {}
+        
+        for recording in xml.findall('Recording'):
+            md = FRGCMetadata()
+            md.rec_id = recording.get('recording_id')
+            md.sub_id = recording.get('subject_id')
+            md.capture_date = recording.get('capturedate')
+            
+            md.left_eye  = None
+            md.right_eye = None
+            md.nose      = None
+            md.mouth     = None
+            
+            for leye_center in recording.findall('LeftEyeCenter'):
+                x,y = float(leye_center.get('x')),float(leye_center.get('y'))
+                md.left_eye = pv.Point(x,y)
+                
+            for leye_center in recording.findall('RightEyeCenter'):
+                x,y = float(leye_center.get('x')),float(leye_center.get('y'))
+                md.right_eye = pv.Point(x,y)
+                
+            for leye_center in recording.findall('Nose'):
+                x,y = float(leye_center.get('x')),float(leye_center.get('y'))
+                md.nose = pv.Point(x,y)
+                
+            for leye_center in recording.findall('Mouth'):
+                x,y = float(leye_center.get('x')),float(leye_center.get('y'))
+                md.mouth = pv.Point(x,y)
+                
+            self.metadata[md.rec_id] = md
+
+
+    def keys(self):
+        return copy.copy(self.orig_keys)
+        
+    def getMetadata(self,key):
+        meta = self.metadata[key]
+        sig = self.orig_sigset_map[key]
+        return key,sig[0],sig[1][0]['file-name'],meta.right_eye,meta.left_eye,meta.nose,meta.mouth
+
+    
+    def __getitem__(self,key):
+        entry = self.orig_sigset_map[key]
+        
+        face_obj = FaceDatabase.FaceObject()
+        
+        face_obj.key = key
+        face_obj.person_id = entry[0]
+        face_obj.entry = entry
+        face_obj.metadata = self.metadata[key]
+        
+        # The left_eye and right_eye in the metadata is relative to the subject
+        # This needs to be reversed because pyvision used image left and image right.
+        face_obj.left_eye  = face_obj.metadata.right_eye
+        face_obj.right_eye = face_obj.metadata.left_eye
+        
+        im_name = os.path.join(self.location,entry[1][0]['file-name'])
+        im = pv.Image(im_name)
+        face_obj.image = im
+        
+        return face_obj
+
+
 class FRGC_Exp4_Reduced(FaceDatabase):
     '''
     FRGC Experiment 4 is a controled to uncontrolled scenario

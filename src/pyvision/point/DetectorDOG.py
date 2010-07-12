@@ -49,7 +49,7 @@ from pyvision.point.DetectorROI import DetectorROI
 import unittest
 import os.path
 import pyvision
-from pyvision.types.Image import Image
+from pyvision.types.img import Image
 from pyvision.types.Point import Point
 from scipy.ndimage.interpolation import zoom
 from scipy.ndimage.filters import gaussian_filter,maximum_filter,minimum_filter

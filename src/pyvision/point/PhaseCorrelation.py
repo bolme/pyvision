@@ -36,14 +36,8 @@ __version__ = "$Rev: 625 $"
 __info__ = "$Id: PhaseCorrelation.py 625 2008-03-24 20:24:37Z bolme $"
 __copyright__ = "Copyright 2006 David S Bolme"
 
-from numpy import *
-from numpy.fft import fft2, ifft2
-from numpy.linalg import lstsq
 import numpy as np
 import pyvision as pv
-
-from pyvision.types.Image import Image
-from pyvision.other.normalize import meanUnit
 
 
 def PhaseCorrelation(tile1, tile2, phase_only=True, ilog=None):
@@ -60,16 +54,16 @@ def PhaseCorrelation(tile1, tile2, phase_only=True, ilog=None):
     
     see http://en.wikipedia.org/wiki/Phase_correlation
     '''
-    if isinstance(tile1,Image):
+    if isinstance(tile1,pv.Image):
         tile1 = tile1.asMatrix2D()
     else:
-        tile1 = Image(tile1).asMatrix2D()
+        tile1 = pv.Image(tile1).asMatrix2D()
         raise TypeError("Please pass in a numpy array or a pyvision image.")
 
-    if isinstance(tile2,Image):
+    if isinstance(tile2,pv.Image):
         tile2 = tile2.asMatrix2D()
     else:
-        tile2 = Image(tile2).asMatrix2D()    
+        tile2 = pv.Image(tile2).asMatrix2D()    
     
     if tile1.shape != tile2.shape:
         raise ValueError("Image tiles must have the same shape. [tile1 %s] != [tile2 %s]"%(tile1.shape,tile2.shape))
@@ -79,12 +73,12 @@ def PhaseCorrelation(tile1, tile2, phase_only=True, ilog=None):
     tile2 = tile2.copy()
 
     # normalize the image tiles
-    tile1 = meanUnit(tile1)
-    tile2 = meanUnit(tile2)
+    tile1 = pv.meanUnit(tile1)
+    tile2 = pv.meanUnit(tile2)
 
     # compute the fft
-    Ia = fft2(tile1)
-    Ib = conjugate(fft2(tile2))
+    Ia = np.fft.fft2(tile1)
+    Ib = np.conjugate(np.fft.fft2(tile2))
 
     # build the normalized cross-power spectrum
     ncs = Ia*Ib
@@ -93,7 +87,7 @@ def PhaseCorrelation(tile1, tile2, phase_only=True, ilog=None):
         ncs = ncs/np.abs(ncs)
 
     # build the power spectrum
-    pc = real(ifft2(ncs))
+    pc = np.real(np.fft.ifft2(ncs))
     
     if ilog != None:
         ilog.log(pv.Image(tile1),label="Tile1")
@@ -156,10 +150,10 @@ def QuadradicEstimation(pc, max_point):
     A.append(create_row(x,y))
     b.append([pc[x,y]])
 
-    A = array(A)
-    b = array(b)
+    A = np.array(A)
+    b = np.array(b)
 
-    lss = lstsq(A,b)
+    lss = np.linalg.lstsq(A,b)
     assert lss[2] == 5 #make sure the matrix was of full rank
     x = lss[0]
 
@@ -187,43 +181,39 @@ class _TestPhaseCorrelation(unittest.TestCase):
     
     def test_Correlation(self):
         import os.path
-        import pyvision
-        from pyvision.types.Image import Image
 
-        filename_a = os.path.join(pyvision.__path__[0],'data','test','registration1a.jpg')
-        filename_b = os.path.join(pyvision.__path__[0],'data','test','registration1b.jpg')
+        filename_a = os.path.join(pv.__path__[0],'data','test','registration1a.jpg')
+        filename_b = os.path.join(pv.__path__[0],'data','test','registration1b.jpg')
         
-        im_a = Image(filename_a)
-        im_b = Image(filename_b)
+        im_a = pv.Image(filename_a)
+        im_b = pv.Image(filename_b)
 
         out = PhaseCorrelation(im_a,im_b,phase_only=False)
         
-        self.assertAlmostEqual(out[0],0.87382160686468002)
+        self.assertAlmostEqual(out[0],0.87382160686468002,places=3)
         self.assertEqual(out[1][0],20)
         self.assertEqual(out[1][1],20)
-        self.assertAlmostEqual(out[2],0.87388092414032315)
-        self.assertAlmostEqual(out[3][0],19.978881341260816)
-        self.assertAlmostEqual(out[3][1],19.986396178942329)
+        self.assertAlmostEqual(out[2],0.87388092414032315,places=3)
+        self.assertAlmostEqual(out[3][0],19.978881341260816,places=3)
+        self.assertAlmostEqual(out[3][1],19.986396178942329,places=3)
         
     def test_PhaseCorrelation(self):
         import os.path
-        import pyvision
-        from pyvision.types.Image import Image
 
-        filename_a = os.path.join(pyvision.__path__[0],'data','test','registration1a.jpg')
-        filename_b = os.path.join(pyvision.__path__[0],'data','test','registration1b.jpg')
+        filename_a = os.path.join(pv.__path__[0],'data','test','registration1a.jpg')
+        filename_b = os.path.join(pv.__path__[0],'data','test','registration1b.jpg')
         
-        im_a = Image(filename_a)
-        im_b = Image(filename_b)
+        im_a = pv.Image(filename_a)
+        im_b = pv.Image(filename_b)
 
         out = PhaseCorrelation(im_a,im_b,phase_only=False)
         
-        self.assertAlmostEqual(out[0],0.87382160686468002)
+        self.assertAlmostEqual(out[0],0.87382160686468002,places=3)
         self.assertEqual(out[1][0],20)
         self.assertEqual(out[1][1],20)
-        self.assertAlmostEqual(out[2],0.87388092414032315)
-        self.assertAlmostEqual(out[3][0],19.978881341260816)
-        self.assertAlmostEqual(out[3][1],19.986396178942329)
+        self.assertAlmostEqual(out[2],0.87388092414032315,places=3)
+        self.assertAlmostEqual(out[3][0],19.978881341260816,places=3)
+        self.assertAlmostEqual(out[3][1],19.986396178942329,places=3)
         
 
 

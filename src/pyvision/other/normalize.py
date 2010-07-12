@@ -32,9 +32,9 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from math import *
-from pyvision.types.Image import Image
 import scipy as sp
 import numpy as np
+import pyvision as pv
 
 def normalizeMeanStd(matrix):
     ''' TODO: deprecated please use meanStd.'''
@@ -44,20 +44,20 @@ def normalizeMeanStd(matrix):
 def meanStd(matrix):
     ''' zero mean, one standard deviation '''
     is_image = False
-    if isinstance(matrix,Image):
+    if isinstance(matrix,pv.Image):
         matrix = matrix.asMatrix2D()
         is_image = True
     # Otherwize, assume it is a numpy matrix
     matrix = matrix - matrix.mean()
     matrix = (1.0/matrix.std()) * matrix
     if is_image:
-        return Image(matrix)
+        return pv.Image(matrix)
     return matrix
 
 def meanUnit(matrix):
     ''' zero mean, unit length '''
     is_image = False
-    if isinstance(matrix,Image):
+    if isinstance(matrix,pv.Image):
         matrix = matrix.asMatrix2D()
         is_image = True
     matrix = matrix - matrix.mean()
@@ -66,19 +66,19 @@ def meanUnit(matrix):
         matrix = (1.0/length) * matrix
         
     if is_image:
-        return Image(matrix)
+        return pv.Image(matrix)
     return matrix
 
 def unit(matrix):
     ''' unit length '''
     is_image = False
-    if isinstance(matrix,Image):
+    if isinstance(matrix,pv.Image):
         matrix = matrix.asMatrix2D()
         is_image = True
     length = sqrt( (matrix*matrix).sum() )
     matrix = (1.0/length) * matrix
     if is_image:
-        return Image(matrix)
+        return pv.Image(matrix)
     return matrix
 
 def selfQuotientImage(matrix,sigma=5.0):
@@ -88,7 +88,7 @@ def selfQuotientImage(matrix,sigma=5.0):
     Based on work by Wang et.al. "Self Quotient Image for Face Recognition" ICIP 2004
     '''
     is_image = False
-    if isinstance(matrix,Image):
+    if isinstance(matrix,pv.Image):
         matrix = matrix.asMatrix2D()
         is_image = True
 
@@ -100,7 +100,7 @@ def selfQuotientImage(matrix,sigma=5.0):
     matrix = matrix/denom
 
     if is_image:
-        return Image(matrix)
+        return pv.Image(matrix)
     return matrix
 
 
@@ -120,14 +120,14 @@ def highPassFilter(matrix,sigma):
     @returns: high_pass_image
     '''
     is_image = False
-    if isinstance(matrix,Image):
+    if isinstance(matrix,pv.Image):
         matrix = matrix.asMatrix2D()
         is_image = True
 
     matrix = matrix - sp.ndimage.gaussian_filter(matrix,sigma)
     
     if is_image:
-        return Image(matrix)
+        return pv.Image(matrix)
     return matrix
 
 def lowPassFilter(matrix,sigma):
@@ -140,14 +140,14 @@ def lowPassFilter(matrix,sigma):
                 matrix otherwize. 
     '''
     is_image = False
-    if isinstance(matrix,Image):
+    if isinstance(matrix,pv.Image):
         matrix = matrix.asMatrix2D()
         is_image = True
 
     matrix = sp.ndimage.gaussian_filter(matrix,sigma)
     
     if is_image:
-        return Image(matrix)
+        return pv.Image(matrix)
     return matrix
 
 
@@ -166,13 +166,13 @@ def bandPassFilter(matrix,sigma_low, sigma_high):
     '''
     assert sigma_low > sigma_high
     is_image = False
-    if isinstance(matrix,Image):
+    if isinstance(matrix,pv.Image):
         matrix = matrix.asMatrix2D()
         is_image = True
 
     matrix = sp.ndimage.gaussian_filter(matrix,sigma_high) - sp.ndimage.gaussian_filter(matrix,sigma_low)
     
     if is_image:
-        return Image(matrix)
+        return pv.Image(matrix)
     return matrix
 

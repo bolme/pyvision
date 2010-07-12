@@ -31,20 +31,13 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import opencv
-import opencv.highgui
+
+# TODO: This will probably not yet work with OpenCV 2.0
+
 import time
-import subprocess
 import os
-#import highgui
-
-from pyvision.types.Image import Image
-from pyvision.edge.canny import canny
-from pyvision.analysis.ImageLog import ImageLog
-
 import pyvision as pv
-import opencv as cv
-
+import cv
 from scipy import weave
 
 # TODO: The default camera on linux appears to be zero and 1 on MacOS
@@ -55,7 +48,7 @@ from scipy import weave
 class Webcam:
     def __init__(self,camera_num=0,size=(640,480)):
 
-        self.cv_capture = opencv.highgui.cvCreateCameraCapture( camera_num )        
+        self.cv_capture = cv.CreateCameraCapture( camera_num )        
         
         self.size = size
     
@@ -67,14 +60,14 @@ class Webcam:
         @returns: the frame rescaled to a given size.
         '''
         # TODO: Video capture is unreliable under linux.  This may just be a timing issue when running under parallels.
-        frame = opencv.highgui.cvQueryFrame( self.cv_capture );
-        im = Image(self.resize(frame))
-        im.orig_frame = Image(frame)
+        frame = cv.QueryFrame( self.cv_capture )
+        im = pv.Image(self.resize(frame))
+        im.orig_frame = pv.Image(frame)
         im.capture_time = time.time()
         return im
     
     def grab(self):
-        return opencv.highgui.cvGrabFrame( self.cv_capture );
+        return cv.GrabFrame( self.cv_capture );
     
     def retrieve(self):
         '''
@@ -83,9 +76,9 @@ class Webcam:
         
         @returns: the frame rescaled to a given size.
         '''
-        frame = opencv.highgui.cvRetrieveFrame( self.cv_capture );
-        im = Image(self.resize(frame))
-        im.orig_frame = Image(frame)
+        frame = cv.RetrieveFrame( self.cv_capture );
+        im = pv.Image(self.resize(frame))
+        im.orig_frame = pv.Image(frame)
         return im
         
     def resize(self,frame):
@@ -95,61 +88,75 @@ class Webcam:
             depth = frame.depth
             channels = frame.nChannels
             w,h = self.size
-            resized = opencv.cvCreateImage( opencv.cvSize(w,h), depth, channels )
-            opencv.cvResize( frame, resized, opencv.CV_INTER_NN )
+            resized = cv.CreateImage( (w,h), depth, channels )
+            cv.Resize( frame, resized, cv.CV_INTER_NN )
             return resized
 
 class Video:
     def __init__(self,filename,size=None):
         self.filename = filename
-        self.cv_capture = opencv.highgui.cvCreateFileCapture( filename );
+        self.cv_capture = cv.CaptureFromFile( filename );
+        #print self.cv_capture, self.cv_capture.__hash__, dir(self.cv_capture), repr(self.cv_capture)
         self.size = size
-        self.n_frames = opencv.highgui.cvGetCaptureProperty(self.cv_capture,opencv.highgui.CV_CAP_PROP_FRAME_COUNT)
+        #print filename
+        #print self.size
+        #self.n_frames = cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
+        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH)
+        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT)
+        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_FRAMES)
+        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
+        #while True:
+        #    print cv.QueryFrame(self.cv_capture)
+        #    print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_FRAMES),
+        #    print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_AVI_RATIO),
+        #    print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
+        #print self.n_frames
         self.current_frame = 0
         
-    def __del__(self):
+    #def __del__(self):
         #opencv.highgui.cvReleaseCapture(self.cv_capture)
         
 
         # cvReleaseCapture interface does not work so use weave this may be fixed in release 1570
         # TODO: This should be removed when the opencv bug is fixed
-        capture = self.cv_capture.__int__()
-        weave.inline(
-            '''
-            CvCapture* tmp = (CvCapture*) capture;
-            cvReleaseCapture(&tmp);
-            ''',
-            arg_names=['capture'],
-            type_converters=weave.converters.blitz,
-            include_dirs=['/usr/local/include'],
-            headers=['<opencv/cv.h>','<opencv/highgui.h>'],
-            library_dirs=['/usr/local/lib'],
-            libraries=['cv','highgui']
-        )
+        #capture = self.cv_capture.__int__()
+        #cv.ReleaseCapture(self.cv_capture)
+        #weave.inline(
+        #    '''
+        #    CvCapture* tmp = (CvCapture*) capture;
+        #    cvReleaseCapture(&tmp);
+        #    ''',
+        #    arg_names=['capture'],
+        #    type_converters=weave.converters.blitz,
+        #    include_dirs=['/usr/local/include'],
+        #    headers=['<opencv/cv.h>','<opencv/highgui.h>'],
+        #    library_dirs=['/usr/local/lib'],
+        #    libraries=['cv','highgui']
+        #)
 
     def query(self):
-        if self.current_frame >= self.n_frames:
+        if self.current_frame > 0 and cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_AVI_RATIO) == 1.0:
             return None
         self.current_frame += 1
-        frame = opencv.highgui.cvQueryFrame( self.cv_capture );
-        return Image(self.resize(frame))
+        frame = cv.QueryFrame( self.cv_capture );
+        return pv.Image(self.resize(frame))
     
-    def grab(self):
-        return opencv.highgui.cvGrabFrame( self.cv_capture );
+    #def grab(self):
+    #    return cv.GrabFrame( self.cv_capture );
     
-    def retrieve(self):
-        frame = opencv.highgui.cvRetrieveFrame( self.cv_capture );
-        return Image(self.resize(frame))
+    #def retrieve(self):
+    #    frame = cv.RetrieveFrame( self.cv_capture );
+    #    return pv.Image(self.resize(frame))
         
     def resize(self,frame):
         if self.size == None:
             return frame
         else:
             depth = frame.depth
-            channels = frame.nChannels
+            channels = frame.channels
             w,h = self.size
-            resized = opencv.cvCreateImage( opencv.cvSize(w,h), depth, channels )
-            opencv.cvResize( frame, resized, opencv.CV_INTER_LINEAR )
+            resized = cv.CreateImage( (w,h), depth, channels )
+            cv.Resize( frame, resized, cv.CV_INTER_LINEAR )
             return resized
     
     def __iter__(self):
@@ -207,18 +214,18 @@ class FfmpegIn:
         
         self.size = size
         
-        self.frame_y = cv.cvCreateImage( cv.cvSize(self.w,self.h), cv.IPL_DEPTH_8U, 1 )
-        self.frame_u2 = cv.cvCreateImage( cv.cvSize(self.w/2,self.h/2), cv.IPL_DEPTH_8U, 1 )
-        self.frame_v2 = cv.cvCreateImage( cv.cvSize(self.w/2,self.h/2), cv.IPL_DEPTH_8U, 1 )
+        self.frame_y = cv.CreateImage( (self.w,self.h), cv.IPL_DEPTH_8U, 1 )
+        self.frame_u2 = cv.CreateImage( (self.w/2,self.h/2), cv.IPL_DEPTH_8U, 1 )
+        self.frame_v2 = cv.CreateImage( (self.w/2,self.h/2), cv.IPL_DEPTH_8U, 1 )
 
-        self.frame_u = cv.cvCreateImage( cv.cvSize(self.w,self.h), cv.IPL_DEPTH_8U, 1 )
-        self.frame_v = cv.cvCreateImage( cv.cvSize(self.w,self.h), cv.IPL_DEPTH_8U, 1 )
-        self.frame_col = cv.cvCreateImage( cv.cvSize(self.w,self.h), cv.IPL_DEPTH_8U, 3 )
+        self.frame_u = cv.CreateImage( (self.w,self.h), cv.IPL_DEPTH_8U, 1 )
+        self.frame_v = cv.CreateImage( (self.w,self.h), cv.IPL_DEPTH_8U, 1 )
+        self.frame_col = cv.CreateImage( (self.w,self.h), cv.IPL_DEPTH_8U, 3 )
 
         
         if self.size != None:
             w,h = self.size
-            self.frame_resized = cv.cvCreateImage(cv.cvSize(w,h),cv.IPL_DEPTH_8U,3)
+            self.frame_resized = cv.CreateImage( (w,h),cv.IPL_DEPTH_8U,3)
 
         
         
@@ -236,16 +243,16 @@ class FfmpegIn:
         self.frame_u2.imageData=u
         self.frame_v2.imageData=v
 
-        cv.cvResize(self.frame_u2,self.frame_u)
-        cv.cvResize(self.frame_v2,self.frame_v)
+        cv.Resize(self.frame_u2,self.frame_u)
+        cv.Resize(self.frame_v2,self.frame_v)
         
-        cv.cvMerge(self.frame_y,self.frame_u,self.frame_v,None,self.frame_col)
-        cv.cvCvtColor(self.frame_col,self.frame_col,cv.CV_YCrCb2RGB)
+        cv.Merge(self.frame_y,self.frame_u,self.frame_v,None,self.frame_col)
+        cv.CvtColor(self.frame_col,self.frame_col,cv.CV_YCrCb2RGB)
         
         out = self.frame_col
         
         if self.size != None:
-            cv.cvResize(self.frame_col,self.frame_resized)
+            cv.Resize(self.frame_col,self.frame_resized)
             out = self.frame_resized
 
         return pv.Image(self.frame_y),pv.Image(self.frame_u),pv.Image(self.frame_v),pv.Image(out)

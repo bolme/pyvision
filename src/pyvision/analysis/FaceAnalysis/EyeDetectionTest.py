@@ -35,10 +35,7 @@ import copy
 import time
 import math
 
-from pyvision.types.Rect import Rect,BoundingRect
-from pyvision.types.Image import Image
-from pyvision.analysis.Table import Table
-from pyvision.analysis.stats import cibinom
+import pyvision as pv
 from pyvision.analysis.FaceAnalysis.FaceDetectionTest import face_from_eyes,is_success
 
 class EyeDetectionTest:
@@ -49,8 +46,8 @@ class EyeDetectionTest:
     def __init__(self,name=None,threshold=0.25, test_detect=True):
         ''''''
         self.name = name
-        self.table = Table()
-        self.summary_table = Table()
+        self.table = pv.Table()
+        self.summary_table = pv.Table()
         self.face_successes = 0
         self.both25_successes = 0
         self.left25_successes = 0
@@ -76,7 +73,7 @@ class EyeDetectionTest:
         ''''''
         self.images += 1
         
-        if isinstance(im,Image):
+        if isinstance(im,pv.Image):
             name = im.filename
             if self.pixels != None:
                 self.pixels += im.asPIL().size[0] * im.asPIL().size[1]
@@ -228,25 +225,25 @@ class EyeDetectionTest:
 
     def finish(self):
             self.face_rate    = float(self.face_successes)/self.faces
-            self.face_ci      = cibinom(self.faces,self.face_successes,alpha=0.05)
+            self.face_ci      = pv.cibinom(self.faces,self.face_successes,alpha=0.05)
             self.both25_rate  = float(self.both25_successes)/self.faces
-            self.both25_ci    = cibinom(self.faces,self.both25_successes,alpha=0.05)
+            self.both25_ci    = pv.cibinom(self.faces,self.both25_successes,alpha=0.05)
             self.both10_rate  = float(self.both10_successes)/self.faces
-            self.both10_ci    = cibinom(self.faces,self.both10_successes,alpha=0.05)
+            self.both10_ci    = pv.cibinom(self.faces,self.both10_successes,alpha=0.05)
             self.both05_rate  = float(self.both05_successes)/self.faces
-            self.both05_ci    = cibinom(self.faces,self.both05_successes,alpha=0.05)
+            self.both05_ci    = pv.cibinom(self.faces,self.both05_successes,alpha=0.05)
             self.left25_rate  = float(self.left25_successes)/self.faces
-            self.left25_ci    = cibinom(self.faces,self.left25_successes,alpha=0.05)
+            self.left25_ci    = pv.cibinom(self.faces,self.left25_successes,alpha=0.05)
             self.left10_rate  = float(self.left10_successes)/self.faces
-            self.left10_ci    = cibinom(self.faces,self.left10_successes,alpha=0.05)
+            self.left10_ci    = pv.cibinom(self.faces,self.left10_successes,alpha=0.05)
             self.left05_rate  = float(self.left05_successes)/self.faces
-            self.left05_ci    = cibinom(self.faces,self.left05_successes,alpha=0.05)
+            self.left05_ci    = pv.cibinom(self.faces,self.left05_successes,alpha=0.05)
             self.right25_rate  = float(self.right25_successes)/self.faces
-            self.right25_ci    = cibinom(self.faces,self.right25_successes,alpha=0.05)
+            self.right25_ci    = pv.cibinom(self.faces,self.right25_successes,alpha=0.05)
             self.right10_rate  = float(self.right10_successes)/self.faces
-            self.right10_ci    = cibinom(self.faces,self.right10_successes,alpha=0.05)
+            self.right10_ci    = pv.cibinom(self.faces,self.right10_successes,alpha=0.05)
             self.right05_rate  = float(self.right05_successes)/self.faces
-            self.right05_ci    = cibinom(self.faces,self.right05_successes,alpha=0.05)
+            self.right05_ci    = pv.cibinom(self.faces,self.right05_successes,alpha=0.05)
             if self.face_successes > 0:
                 self.bothrmse = math.sqrt(self.bothsse/(2*self.face_successes))
                 self.leftrmse = math.sqrt(self.leftsse/self.face_successes)
@@ -299,10 +296,14 @@ class EyeDetectionTest:
         self.summary_table.setElement('ImageCount','Estimate',self.images)
         self.summary_table.setElement('FaceCount','Estimate',self.faces)
         return self.summary_table  
+    
+    def getTable(self):
+        return self.table
 
     def __str__(self):
         ''' One line summary of the test '''
-        return "EyeDetectionTest(name:%s,FaceRate:%0.4f,Both25Rate:%0.4f,Both10Rate:%0.4f,Both05Rate:%0.4f,NFaces:%d,Time:%0.2f)"%(self.name,self.face_rate,self.both25_rate,self.both10_rate,self.both05_rate,self.faces,self.elapse_time)
+        self.finish()
+        return "EyeDetectionTest(name:%s,FaceRate:%0.4f,Both10Rate:%0.4f,Left10Rate:%0.4f,Right10Rate:%0.4f,BothRMSE:%0.4f,NFaces:%d,Time:%0.2f)"%(self.name,self.face_rate,self.both10_rate,self.left10_rate,self.right10_rate,self.bothrmse,self.faces,self.elapse_time)
 
 #############################################################################
 def summarizeEyeDetectionTests(tests):

@@ -34,8 +34,8 @@
 
 
 from numpy import array,mean,std
-import pyvision
-from pyvision.types.Image import Image
+import pyvision as pv
+
 from pyvision.vector.PCA import PCA
 import unittest
 import os.path
@@ -183,7 +183,7 @@ class VectorClassifier:
         else:
             self.labels.append(label)
             
-        if isinstance(data,Image):
+        if isinstance(data,pv.Image):
             data = data.asMatrix2D().flatten()   
         data = array(data,'d').flatten()
         
@@ -197,7 +197,7 @@ class VectorClassifier:
     # delegate to the subclass to perform classifiaction or 
     # regression.
     def predict(self,data,ilog=None):
-        if isinstance(data,Image):
+        if isinstance(data,pv.Image):
             data = data.asMatrix2D().flatten()   
         data = array(data,'d').flatten()
         
@@ -284,7 +284,7 @@ class _TestVectorClassifier(unittest.TestCase):
         
         # synthetic linear regression
         rega = VectorClassifier(TYPE_REGRESSION)
-        filename = os.path.join(pyvision.__path__[0],'data','synthetic','regression.dat')
+        filename = os.path.join(pv.__path__[0],'data','synthetic','regression.dat')
         reg_file = open(filename,'r')
         for line in reg_file:
             datapoint = line.split()
@@ -293,13 +293,13 @@ class _TestVectorClassifier(unittest.TestCase):
         
         # image classification
         gender = VectorClassifier(TYPE_TWOCLASS)
-        filename = os.path.join(pyvision.__path__[0],'data','csuScrapShots','gender.txt')
+        filename = os.path.join(pv.__path__[0],'data','csuScrapShots','gender.txt')
         f = open(filename,'r')
         for line in f:
             im_name, class_name = line.split()
-            im_name = os.path.join(pyvision.__path__[0],'data','csuScrapShots',im_name)
-            im = Image(im_name)
-            im = Image(im.asPIL().resize((200,200)))
+            im_name = os.path.join(pv.__path__[0],'data','csuScrapShots',im_name)
+            im = pv.Image(im_name)
+            im = pv.Image(im.asPIL().resize((200,200)))
             gender.addTraining(class_name,im)
         self.gender = gender
     

@@ -45,7 +45,7 @@ from numpy.linalg import det
 
 import pyvision
 from pyvision.point.DetectorROI import DetectorROI
-from pyvision.types.Image import Image
+from pyvision.types.img import Image
 from pyvision.types.Point import Point
 
 

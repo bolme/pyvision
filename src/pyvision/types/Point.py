@@ -33,7 +33,10 @@
 
 
 from numpy import array
-import opencv as cv
+try:
+    import opencv as cv
+except:
+    import cv
 from math import sqrt
 import numpy as np
 import csv
@@ -51,20 +54,29 @@ class Point:
         scale: scale selection
         rotation: rotation selection
         '''
-        if isinstance(x,cv.CvPoint):
-            self.x = float(x.x)
-            self.y = float(x.y)
+        #if isinstance(x,cv.Point):
+        #    self.x = float(x.x)
+        #    self.y = float(x.y)
+        #    self.z = 0.0
+        #    self.w = 1.0
+        #    self.scale = 1.0
+        #    self.rotation = 0.0
+        if isinstance(x,tuple):
+            self.x = float(x[0])
+            self.y = float(x[1])
             self.z = 0.0
             self.w = 1.0
-            self.scale = 1.0
-            self.rotation = 0.0
-        elif isinstance(x,cv.CvPoint2D32f):
-            self.x = float(x.x)
-            self.y = float(x.y)
-            self.z = 0.0
-            self.w = 1.0
-            self.scale = 1.0
-            self.rotation = 0.0
+            if len(x) > 2:
+                self.z = x[3]
+            if len(x) > 3:
+                self.w = x[4]
+        #elif isinstance(x,cv.Point2D32f):
+        #    self.x = float(x.x)
+        #    self.y = float(x.y)
+        #    self.z = 0.0
+        #    self.w = 1.0
+        #    self.scale = 1.0
+        #    self.rotation = 0.0
         else:
             self.x = float(x)
             self.y = float(y)

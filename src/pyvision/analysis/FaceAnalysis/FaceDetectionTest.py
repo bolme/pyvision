@@ -35,7 +35,7 @@ import copy
 import time
 
 from pyvision.types.Rect import Rect,BoundingRect
-from pyvision.types.Image import Image
+from pyvision.types.img import Image
 from pyvision.analysis import Table
 from pyvision.analysis.stats import cibinom
 

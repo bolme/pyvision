@@ -32,7 +32,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import logging
-from pyvision.types.Image import Image
+import pyvision as pv
 import numpy
 from numpy.linalg import svd
 
@@ -78,7 +78,7 @@ class PCA:
     
     #----------------------------------------------------------------
     def toVector(self,feature):
-        if isinstance(feature,Image):
+        if isinstance(feature,pv.Image):
             feat = feature.asMatrix2D().flatten()
             return feat
         if isinstance(feature,numpy.ndarray):

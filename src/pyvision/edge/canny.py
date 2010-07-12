@@ -34,13 +34,11 @@
 import unittest
 import os.path
 
-import opencv
+import cv
 
-import pyvision
-from pyvision.types.Image import Image
-from pyvision.analysis.ImageLog import ImageLog
+import pyvision as pv
 
-from numpy import array,ones,zeros,nonzero
+import numpy as np
 from scipy.ndimage import convolve
 from scipy.ndimage import maximum_filter
 
@@ -51,14 +49,14 @@ def canny(im,threshold1=40.0,threshold2=100.0,aperture_size=3,sigma=None):
               double threshold2, int aperture_size=3 );
     '''
     gray = im.asOpenCVBW()
-    edges = opencv.cvCreateImage( opencv.cvGetSize(gray), 8, 1 );
+    edges = cv.CreateImage( cv.GetSize(gray), 8, 1 );
 
     if sigma!=None:
-        opencv.cvSmooth(gray,gray,opencv.CV_GAUSSIAN,int(sigma)*4+1,int(sigma)*4+1,sigma,sigma)
+        cv.Smooth(gray,gray,cv.CV_GAUSSIAN,int(sigma)*4+1,int(sigma)*4+1,sigma,sigma)
     
-    opencv.cvCanny(gray,edges,threshold1,threshold2,aperture_size)
+    cv.Canny(gray,edges,threshold1,threshold2,aperture_size)
     
-    return Image(edges)
+    return pv.Image(edges)
     
     
 class _TestCanny(unittest.TestCase):
@@ -72,9 +70,9 @@ class _TestCanny(unittest.TestCase):
         '''
         This will run the code, but what is a good test for canny?
         '''
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_46.jpg')
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_46.jpg')
                         
-        img = Image(filename)
+        img = pv.Image(filename)
         out = canny(img)
         if self.show_results: out.show()
         
@@ -83,9 +81,9 @@ class _TestCanny(unittest.TestCase):
         '''
         This will run the code, but what is a good test for canny?
         '''
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_10.jpg')
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_10.jpg')
                         
-        img = Image(filename)
+        img = pv.Image(filename)
         out = canny(img)
         if self.show_results: out.show()
         
@@ -94,9 +92,9 @@ class _TestCanny(unittest.TestCase):
         '''
         This will run the code, but what is a good test for canny?
         '''
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_22.jpg')
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_22.jpg')
                         
-        img = Image(filename)
+        img = pv.Image(filename)
         out = canny(img)
         if self.show_results: out.show()
         
@@ -105,9 +103,9 @@ class _TestCanny(unittest.TestCase):
         '''
         This will run the code, but what is a good test for canny?
         '''
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_44.jpg')
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_44.jpg')
                         
-        img = Image(filename)
+        img = pv.Image(filename)
         out = canny(img)
         if self.show_results: out.show()
 
@@ -115,9 +113,9 @@ class _TestCanny(unittest.TestCase):
         '''
         This will run the code, but what is a good test for canny?
         '''
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_37.jpg')
                         
-        img = Image(filename)
+        img = pv.Image(filename)
         out = canny(img)
         if self.show_results: out.show()
         

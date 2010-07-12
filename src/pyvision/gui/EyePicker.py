@@ -145,7 +145,7 @@ class EyePickerFrame(wx.Frame):
             filename = row[0]
             row = row[1:]
             
-            if len(row)%2 == 0:
+            if len(row)%2 != 0:
                 print "Error Loading File"
                 raise TypeError("Odd number of values in this row")
             
