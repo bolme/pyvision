@@ -109,11 +109,21 @@ class ROC:
         """
         header = ["score","frr","far","trr","tar"]
         rows = []
-        for far in 10**np.arange(-6,0.0000001,0.01):
-            point = self.getFAR(far)
-            
-            row = [point.nscore,point.frr,point.far,point.trr,point.tar]
-            rows.append(row)
+        
+        if method == ROC_LOG_SAMPLED:
+            for far in 10**np.arange(-6,0.0000001,0.01):
+                point = self.getFAR(far)
+                
+                row = [point.nscore,point.frr,point.far,point.trr,point.tar]
+                rows.append(row)
+        if method == ROC_MATCH_SAMPLED:
+            for score in self.match:
+                if self.is_distance:
+                    point = self.getMatch(score)
+                else:
+                    point = self.getMatch(-score)
+                row = [point.nscore,point.frr,point.far,point.trr,point.tar]
+                rows.append(row)
             
         return header,rows
         
@@ -191,6 +201,39 @@ class ROC:
                 nscore = -nscore
             if mscore != None:
                 mscore = -mscore
+            return ROCPoint(nscore,nidx,n,far,mscore,midx,m,frr)
+
+                
+    def getMatch(self,mscore):
+        if not self.is_distance:
+            mscore = -mscore
+        match = self.match
+        nonmatch = self.nonmatch
+        
+        m = len(match)
+        n = len(nonmatch)
+        
+        midx = np.searchsorted(match,mscore)
+        #midx = int(round((1.0-frr)*m))
+        frr = 1.0 - float(midx)/m
+    
+        nidx = np.searchsorted(nonmatch,mscore)
+        far = float(nidx)/n
+        if nidx-1 < 0:
+            nscore = None
+        else:
+            nscore = nonmatch[nidx-1]
+                
+        assert nscore == None or mscore >= nscore
+        
+        if self.is_distance:
+            return ROCPoint(nscore,nidx,n,far,mscore,midx,m,frr)
+        else:
+            if nscore != None:
+                nscore = -nscore
+            if mscore != None:
+                mscore = -mscore
+            return ROCPoint(nscore,nidx,n,far,mscore,midx,m,frr)
                 
                 
     def results(self):

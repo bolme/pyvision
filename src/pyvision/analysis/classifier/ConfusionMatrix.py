@@ -83,15 +83,15 @@ class ConfusionMatrix(Table):
         self.total += weight
         
         
-    def rate(self):
+    def update_rate(self):
         '''Returns a point estimate of the probability of success'''
         return float(self.successes)/float(self.total)
     
     
     def confidenceInterval(self,alpha=0.05):
         '''
-        Returns the estimated a confidence interval for the success rate by 
-        modeling the success rate as a binomial distribution.
+        Returns the estimated a confidence interval for the success update_rate by 
+        modeling the success update_rate as a binomial distribution.
         '''
         return cibinom(self.total,self.successes,alpha=alpha)
 
@@ -128,8 +128,8 @@ class ConfusionMatrix(Table):
             rate = float(successes)/total
             self.setData('Total',col,"%0.4f"%rate)
         
-        self.setData('Total','Rate',self.rate())
-        self.setData('Total','Bar',"#"*int(10*self.rate()+0.5))
+        self.setData('Total','Rate',self.update_rate())
+        self.setData('Total','Bar',"#"*int(10*self.update_rate()+0.5))
         self.setData('Total','Lower',self.confidenceInterval(alpha)[0])
         self.setData('Total','Upper',self.confidenceInterval(alpha)[1])
         
@@ -179,12 +179,12 @@ class _TestConfusionMatrix(unittest.TestCase):
     def test_color(self):
         #print
         #print self.color
-        self.assertAlmostEquals(self.color.rate(),0.6842,places=4)
+        self.assertAlmostEquals(self.color.update_rate(),0.6842,places=4)
         self.assertAlmostEquals(self.color.confidenceInterval()[0],0.4345,places=4)
         self.assertAlmostEquals(self.color.confidenceInterval()[1],0.8742,places=4)
     
     def test_verification(self):
-        self.assertAlmostEquals(self.sim_face.rate(),0.99890100000000004,places=4)
+        self.assertAlmostEquals(self.sim_face.update_rate(),0.99890100000000004,places=4)
         self.assertAlmostEquals(self.sim_face.confidenceInterval()[0],0.99883409247930877,places=4)
         self.assertAlmostEquals(self.sim_face.confidenceInterval()[1],0.99896499025635421,places=4)
         

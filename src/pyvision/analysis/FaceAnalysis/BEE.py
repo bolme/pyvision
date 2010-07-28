@@ -250,7 +250,7 @@ class BEEDistanceMatrix:
         
         self.n_queries = int(line[1])
         self.n_targets = int(line[2])
-        self.magic_number = struct.unpack_from("L",line[3])[0]
+        self.magic_number = struct.unpack_from("I",line[3])[0]
         if self.magic_number == 0x12345678:
             byteswap = False
         elif self.magic_number == 0x78563412:
@@ -532,7 +532,7 @@ class BEEDistanceMatrix:
         file.write(self.matrix)
         file.close()
 
-    def histogram(self,value_range=None,bins=100,normed=False,mask=None):
+    def histogram(self,value_range=None,bins=100,normed=True,mask=None):
         match_scores = self.getMatchScores(mask=mask)
         nonmatch_scores = self.getNonMatchScores(mask=mask)
         if value_range == None:
