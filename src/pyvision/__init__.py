@@ -171,6 +171,8 @@ from pyvision.util.windows import cosineWindow, hammingWindow, hannWindow
 
 from pyvision.analysis.stats import pbinom, qbinom, cibinom, mcnemar_test, SummaryStats
 
+from pyvision.point.GaborJets import GaborFilters, GaborImage, GaborJet, FilterBank, GaborWavelet
+
 # TODO: Features to be included in the initial release.
 #     analysis: 
 #         FaceRec(FERET,BioID) 
