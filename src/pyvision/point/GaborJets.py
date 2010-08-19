@@ -100,10 +100,11 @@ class FilterBank:
     for an image.  The algorithm precomputes the filters in frequency space
     and uses only one FFT to to transform the image into frequency space.  
     '''
-    def __init__(self,tile_size=(128,128),window=None):
+    def __init__(self,tile_size=(128,128),window=None,preprocess=None):
         self.tile_size = tile_size
         self.filters = []
         self.window = None
+        self.preprocess = preprocess
         if window != None:
             self.window = window(tile_size)
     
@@ -139,6 +140,9 @@ class FilterBank:
         assert im.shape[0] == w
         assert im.shape[1] == h
         
+        if self.preprocess != None:
+            im = self.preprocess(im)
+            
         if self.window != None:
             im = self.window*im
             
@@ -173,9 +177,9 @@ def createGaborKernels():
 
 class GaborFilters:
     
-    def __init__(self, kernels=createGaborKernels(), tile_size=(128,128),window=None):
+    def __init__(self, kernels=createGaborKernels(), tile_size=(128,128),window=None,preprocess=None):
         self.kernels = kernels
-        self.bank = FilterBank(tile_size=tile_size,window=window)
+        self.bank = FilterBank(tile_size=tile_size,window=window,preprocess=preprocess)
         self.k = np.zeros((len(kernels),2),dtype=np.float64)
         for i in range(len(kernels)):
             wavelet = kernels[i]
@@ -467,7 +471,7 @@ class GaborJet:
 
     def simDisplace(self,gj,d=None):
         '''
-        Magnitude similarity measure.
+        Displacement similarity measure.
         '''        
         m1 = self.mag
         m2 = gj.mag
