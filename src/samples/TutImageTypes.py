@@ -90,7 +90,7 @@ if __name__ == "__main__":
     # The filename for the baboon image
     filename = os.path.join(pv.__path__[0],'data','misc','baboon.jpg')
     
-    # If a pv.Image is given a to the initializer it will assume that is a 
+    # If a string is passed a to the initializer it will assume that is a 
     # path and will read the image from that file.  The image is usually read
     # from disk using PIL and then stored as a PIL image.
     im = pv.Image(filename)
