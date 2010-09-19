@@ -34,19 +34,15 @@
 import os.path
 
 from PIL.Image import composite,LINEAR
-import pyvision
-from pyvision.types.Image import Image
-from pyvision.types.Affine import AffineScale
+import pyvision as pv
 from pyvision.edge.canny import canny
-from pyvision.point.DetectorDOG import DetectorDOG
-from pyvision.analysis.ImageLog import ImageLog
-import sys
+from pyvision.point.DetectorSURF import DetectorSURF
 
 if __name__ == '__main__':
-    ilog = ImageLog('../..')
-    source_name = os.path.join(pyvision.__path__[0],'data','misc','p5240019.jpg')
-    im = Image(source_name)
-    im = AffineScale(0.25,(320,240)).transformImage(im)
+    ilog = pv.ImageLog()
+    source_name = os.path.join(pv.__path__[0],'data','misc','p5240019.jpg')
+    im = pv.Image(source_name)
+    im = pv.AffineScale(0.25,(320,240)).transformImage(im)
     im.show()
     ilog.log(im)
     
@@ -58,21 +54,27 @@ if __name__ == '__main__':
     edges = canny(im,100,200)
     ilog.log(edges)
     
-    ilog.log(Image(1.0*mask))
+    ilog.log(pv.Image(1.0*mask))
     
     e = edges.asPIL().convert('RGB')
-    m = Image(1.0*mask).asPIL()
+    m = pv.Image(1.0*mask).asPIL()
     i = im.asPIL()
-    logo = Image(composite(i,e,m))
+    logo = pv.Image(composite(i,e,m))
     ilog.log(logo)
     #sys.exit()
     
-    sm = Image(im.asPIL().resize((320,240),LINEAR))
-    detector = DetectorDOG()
+    sm = pv.Image(im.asPIL().resize((320,240),LINEAR))
+    detector = DetectorSURF()
+ 
+    keypoints = detector.detect(sm)
     
-    points = detector.detect(sm)
-    for score,pt,radius in points:
-        logo.annotateCircle(pt*4,radius*4)
+    for (h, pt, radius) in keypoints:
+        logo.annotateCircle(pt*4, radius*4)
+        
+#    for (pt, laplacian, radius, dir, hessian) in points:
+#        logo.annotateCircle(pt*4,radius*4)
+    
+    
     ilog.log(logo)
     ilog.show()
 
