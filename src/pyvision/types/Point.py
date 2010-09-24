@@ -116,7 +116,7 @@ class Point:
         return array([[self.x],[self.y],[self.z],[self.w]])
     
     def asOpenCV(self):
-        return cv.cvPoint(int(round(self.X())),int(round(self.Y())))
+        return (self.X(), self.Y()) #cv.cvPoint(int(round(self.X())),int(round(self.Y())))
     
     def asSpherical(self):
         ''' 
