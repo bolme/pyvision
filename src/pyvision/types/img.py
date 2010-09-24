@@ -296,6 +296,19 @@ class Image:
         draw.line(line,fill=color,width=width)
         del draw
         
+    def annotatePolygon(self,points,color='red',width=1):
+        '''
+        Draws a line from point1 to point2 on the annotation image
+    
+        @param point1: the starting point as type Point
+        @param point2: the ending point as type Point
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
+        n = len(points)
+        for i in range(n):
+            j = (i+1)%n 
+            self.annotateLine(points[i],points[j],color=color,width=width)
+        
     def annotatePoint(self,point,color='red'):
         '''
         Marks a point in the annotation image using a small circle
@@ -599,28 +612,53 @@ class Image:
 ##
 # Convert a 32bit opencv matrix to a numpy matrix
 def OpenCVToNumpy(cvmat):
-    #assert cvmat.depth == 32
-    #assert cvmat.nChannels == 1
+    '''
+    Convert an OpenCV matrix to a numpy matrix
+    Based on code from: http://opencv.willowgarage.com/wiki/PythonInterface
+    '''
+    depth2dtype = {
+            cv.CV_8U: 'uint8',
+            cv.CV_8S: 'int8',
+            cv.CV_16U: 'uint16',
+            cv.CV_16S: 'int16',
+            cv.CV_32S: 'int32',
+            cv.CV_32F: 'float32',
+            cv.CV_64F: 'float64',
+        }
+    assert cvmat.channels == 1
+    r = cvmat.rows
+    c = cvmat.cols
     
-    #buffer = cvmat.imageData
-    #mat = numpy.frombuffer(buffer,numpy.float32).reshape(cvmat.height,cvmat.width)        
-    return np.asarray(cvmat,dtype=np.float64)
+    a = np.fromstring(
+             cvmat.tostring(),
+             dtype=depth2dtype[cvmat.type],
+             count=r*c)
+    a.shape = (r,c)
+    return a
 
 ##
 # Convert a numpy matrix to a 32bit opencv matrix
-def NumpyToOpenCV(mat):
-    #assert cvmat.depth == 32
-    #assert cvmat.nChannels == 1
-    #mat = mat.astype(numpy.float32)
-    #buffer = mat.tostring()
-    #print "MAT:",dir(mat)
-    #cvmat = opencv.cvCreateImage( opencv.cvSize(mat.shape[1],mat.shape[0]), opencv.IPL_DEPTH_32F, 1 );
-    #print len(cvmat.imageData)
-    #print len(buffer)
-    #cvmat.imageData = buffer
-    #print mat
-    #print cvmat
-    return cv.fromarray(mat)
+def NumpyToOpenCV(a):
+    '''
+    Based on code from: http://opencv.willowgarage.com/wiki/PythonInterface
+    '''
+    dtype2depth = {
+        'uint8':   cv.CV_8U,
+        'int8':    cv.CV_8S,
+        'uint16':  cv.CV_16U,
+        'int16':   cv.CV_16S,
+        'int32':   cv.CV_32S,
+        'float32': cv.CV_32F,
+        'float64': cv.CV_64F,
+    }
+  
+    assert len(a.shape) == 2
+        
+    r,c = a.shape
+    cv_im = cv.CreateMat(r,c,dtype2depth[str(a.dtype)])
+    cv.SetData(cv_im, a.tostring())
+    return cv_im
+
 
 class _TestImage(unittest.TestCase):
     
@@ -760,4 +798,32 @@ class _TestImage(unittest.TestCase):
     def test_asOpenCVBW(self):
         pass #TODO: Create tests for this method.
         
-
+    def test_MatConvertOpenCVToNumpy(self):
+        r,c = 10,20
+        cvmat = cv.CreateMat(r,c,cv.CV_32F)
+        for i in range(r):
+            for j in range(c):
+                cvmat[i,j] = i*j
+        mat = OpenCVToNumpy(cvmat)
+        self.assert_(mat.shape == (r,c))
+        for i in range(r):
+            for j in range(c):
+                self.assert_(mat[i,j] == cvmat[i,j])
+        
+        
+    def test_MatConvertNumpyToOpenCV(self):
+        r,c = 10,20
+        mat = np.zeros((r,c),dtype=np.float32)
+        for i in range(r):
+            for j in range(c):
+                mat[i,j] = i*j
+        cvmat = NumpyToOpenCV(mat)
+        self.assert_(mat.shape == (r,c))
+        for i in range(r):
+            for j in range(c):
+                self.assert_(mat[i,j] == cvmat[i,j])
+        
+        
+        
+        
+        
