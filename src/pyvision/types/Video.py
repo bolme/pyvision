@@ -38,7 +38,7 @@ import time
 import os
 import pyvision as pv
 import cv
-from scipy import weave
+#from scipy import weave
 
 # TODO: The default camera on linux appears to be zero and 1 on MacOS
 # Video capture is an alterative for windows http://videocapture.sourceforge.net/
@@ -237,7 +237,7 @@ class FfmpegIn:
         u = self.stdout.read(self.w*self.h/4)
         v = self.stdout.read(self.w*self.h/4)
         if len(y) < self.w*self.h:
-            raise EOF
+            raise EOFError
         
         self.frame_y.imageData=y
         self.frame_u2.imageData=u
