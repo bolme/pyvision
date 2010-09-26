@@ -257,3 +257,66 @@ class FfmpegIn:
 
         return pv.Image(self.frame_y),pv.Image(self.frame_u),pv.Image(self.frame_v),pv.Image(out)
         
+class VideoFromImages:
+    '''
+    This class allows the user to treat a directory of images as a video. It is assumed that
+    the files in the directory are named as follows:
+    {prefix}_{num}.{ext}
+    where
+     prefix is any string that is constant for all the files,
+     ext is the file extension/type like jpg, png, etc.
+     num is a zero-padded number like 0001, 0002, ...
+         note: the amount of padded zeros is the minimum required based on the length
+         (num frames) in the video. So if you only had 120 frames, then it would be 001, 002,...120.
+         We assume the frames are sequential with no gaps, and start at number startnum (with 
+         appropriate padding).
+    '''
+    def __init__(self,dirname,numframes,prefix="frame",ext="jpg", startnum=1, size=None):
+        self.dirname = dirname
+        self.numframes = numframes
+        self.prefix = prefix
+        self.ext = ext
+        self.size = size  #the optional width,height to resize the input frames
+        self.startnum = startnum
+        self.current_frame = startnum  #we start at frame 1 by default
+        
+        #check that directory exists
+        if not os.path.exists(dirname):
+            print "Error. Directory: %s does not exist."%dirname
+            raise IOError
+        
+    def query(self):      
+        if self.current_frame <= self.numframes:  
+            pad = len(str(self.numframes))
+            num = str(self.current_frame).zfill(pad)
+            filename = self.prefix + "_" + num + "." + self.ext
+            f = os.path.join(self.dirname, filename)
+            frame = pv.Image(f)
+            self.current_frame += 1
+            return(self.resize(frame))
+        else:
+            return None
+       
+    def resize(self,frame):
+        if self.size == None:
+            return frame
+        else:
+            depth = frame.depth
+            channels = frame.channels
+            w,h = self.size
+            resized = cv.CreateImage( (w,h), depth, channels )
+            cv.Resize( frame, resized, cv.CV_INTER_LINEAR )
+            return resized
+                
+    def next(self):
+        frame = self.query()
+        if frame == None:
+            raise StopIteration("End of video sequence")
+        return frame
+        
+    def __iter__(self):
+        ''' Return an iterator for this video '''
+        return VideoFromImages(self.dirname, self.numframes, self.prefix, self.ext, self.startnum, self.size) 
+        
+        
+    
