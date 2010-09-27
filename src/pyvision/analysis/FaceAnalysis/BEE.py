@@ -46,7 +46,7 @@ import os.path
 import struct
 import numpy as np
 import pyvision as pv
-import pyvision.analysis.roc
+import pyvision.analysis.roc as roc
 
 BIOMETRIC_SIGNATURE = '{http://www.bee-biometrics.org/schemas/sigset/0.1}biometric-signature'
 PRESENTATION = '{http://www.bee-biometrics.org/schemas/sigset/0.1}presentation'
@@ -554,7 +554,7 @@ class BEEDistanceMatrix:
     def getROC(self,mask=None):
         nonmatch = self.getNonMatchScores(mask=mask)
         match = self.getMatchScores(mask=mask)
-        return pv.analysis.roc.ROC(match,nonmatch,is_distance=self.is_distance)
+        return roc.ROC(match,nonmatch,is_distance=self.is_distance)
     
     def getRank1(self,mask=None):
         rows,cols = self.matrix.shape

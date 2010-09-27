@@ -31,13 +31,13 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import scipy as sp
-import scipy.stats.distributions
+#import scipy as sp
+import scipy.stats.distributions as distributions
 import numpy as np
 
 def pbinom(q,size,prob):
     '''Binomial probabilites - measured from the left.'''
-    dist = sp.stats.binom(size,prob)
+    dist = distributions.binom(size,prob)
     return dist.cdf(q)
     
     
@@ -211,12 +211,12 @@ class SummaryStats:
         self.ste    = self.std/np.sqrt(self.n)
         self.df     = self.n - 1
         
-        tci = sp.stats.distributions.t.ppf(1-alpha/2,self.df)
+        tci = distributions.t.ppf(1-alpha/2,self.df)
         lcim = self.mean-tci*self.ste
         ucim = self.mean+tci*self.ste
         self.mean_ci = [lcim,ucim]
     
-        tci = sp.stats.distributions.t.ppf(1-alpha/2,self.df)
+        tci = distributions.t.ppf(1-alpha/2,self.df)
         lci = self.mean-tci*self.std
         uci = self.mean+tci*self.std
         self.ci = [lci,uci]
