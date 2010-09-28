@@ -32,28 +32,43 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import os.path
-
 from PIL.Image import composite,LINEAR
 import pyvision as pv
 from pyvision.edge.canny import canny
 from pyvision.point.DetectorSURF import DetectorSURF
+import cv
 
 if __name__ == '__main__':
     ilog = pv.ImageLog()
     source_name = os.path.join(pv.__path__[0],'data','misc','p5240019.jpg')
     im = pv.Image(source_name)
     im = pv.AffineScale(0.25,(320,240)).transformImage(im)
-    im.show()
-    ilog.log(im)
+    #im.show()
+    ilog.log(im)    
+    
+    im.showCV('Input', True)
     
     mat = im.asMatrix2D()
     high = mat > 180
     low = mat < 50
     mask = high#+low
     
-    edges = canny(im,100,200)
-    ilog.log(edges)
+    #edges = canny(im,100,200)   #canny crashes in opencv2.1 on linux64...
+        
+    #sobel edge detector
+    #sobel requires a destination image with larger bit depth... 
+    #...so we have to convert it back to 8 bit for the pv Image...
+    cvim_bw = im.asOpenCVBW()
+    dst = cv.CreateImage((320,240), 8, 1)
+    dst32f = cv.CreateImage((320,240),cv.IPL_DEPTH_32F,1) 
+    cv.Sobel(cvim_bw, dst32f, 1, 0, 3)
+    cv.Convert(dst32f, dst)    
+    edges = pv.Image(dst)
     
+    #edges.show()
+    edges.showCV('Edges',True, (0,250))
+    
+    ilog.log(edges)    
     ilog.log(pv.Image(1.0*mask))
     
     e = edges.asPIL().convert('RGB')
@@ -61,22 +76,22 @@ if __name__ == '__main__':
     i = im.asPIL()
     logo = pv.Image(composite(i,e,m))
     ilog.log(logo)
-    #sys.exit()
+    
+    logo.showCV('Composite', True, (0,500) )
     
     sm = pv.Image(im.asPIL().resize((320,240),LINEAR))
-    detector = DetectorSURF()
- 
-    keypoints = detector.detect(sm)
+    detector = DetectorSURF()    
+    points = detector.detect(sm)
+    for score,pt,radius in points:
+        logo.annotateCircle(pt*4,radius*4)
     
-    for (h, pt, radius) in keypoints:
-        logo.annotateCircle(pt*4, radius*4)
-        
-#    for (pt, laplacian, radius, dir, hessian) in points:
-#        logo.annotateCircle(pt*4,radius*4)
+    #logo.show()
+    logo.showCV('Annotated',True,(0,750))
     
+    cv.WaitKey(0)
     
     ilog.log(logo)
-    ilog.show()
+    ilog.show()  #in linux, need a previewer that supports input list of images...
 
     
     
