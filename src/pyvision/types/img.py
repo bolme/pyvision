@@ -530,7 +530,7 @@ class Image:
             buffer = pil.tostring()
         elif self.type == TYPE_MATRIX_2D:
             mat = self.matrix2d.transpose()
-            tmp = zeros((3,self.height,self.width),numpy.float32)
+            tmp = np.zeros((3,self.height,self.width),numpy.float32)
             tmp[0,:] = mat
             tmp[1,:] = mat
             tmp[2,:] = mat
@@ -608,6 +608,23 @@ class Image:
         Displays the annotated version of the image.
         '''
         self.asAnnotated().show()
+        
+    def showCV(self, windowName, newWindow=False, pos=(0,0)):
+        '''
+        Displays the annotated version of the image using openCV highgui
+        @param windowName: the name of the highgui window to use, this should
+            already have been created using cv.NamedWindow or set newWindow=True
+        @param newWindow: If true, a new window will be created, else it assumes
+            a window by this name already exists.
+        @param pos: If newWindow, then pos is the (x,y) coordinate for the new window 
+        '''
+        if(newWindow):
+            cv.NamedWindow(windowName)
+            cv.MoveWindow(windowName, pos[0], pos[1])
+        
+        x = pyvision.Image(self.asAnnotated())        
+        cv.ShowImage(windowName, x.asOpenCV() )
+        del x
     
 ##
 # Convert a 32bit opencv matrix to a numpy matrix
