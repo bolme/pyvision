@@ -39,8 +39,10 @@ import csv
 import pickle
 
 import numpy as np
-
-from svm import *
+try:
+    from svm import *
+except:
+    from libsvm.svm import *
 
 import pyvision
 from pyvision.vector.VectorClassifier import *
