@@ -46,7 +46,7 @@ if __name__ == '__main__':
     #im.show()
     ilog.log(im)    
     
-    im.showCV('Input', True)
+    im.show(window='Input', pos=(0,0))
     
     mat = im.asMatrix2D()
     high = mat > 180
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     edges = pv.Image(dst)
     
     #edges.show()
-    edges.showCV('Edges',True, (0,250))
+    edges.show(window='Edges', pos=(360,0))
     
     ilog.log(edges)    
     ilog.log(pv.Image(1.0*mask))
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     logo = pv.Image(composite(i,e,m))
     ilog.log(logo)
     
-    logo.showCV('Composite', True, (0,500) )
+    logo.show(window='Composite', pos=(0,250) )
     
     sm = pv.Image(im.asPIL().resize((320,240),LINEAR))
     detector = DetectorSURF()    
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         logo.annotateCircle(pt*4,radius*4)
     
     #logo.show()
-    logo.showCV('Annotated',True,(0,750))
+    logo.show(window='Annotated',pos=(360,250))
     
     cv.WaitKey(0)
     

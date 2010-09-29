@@ -603,34 +603,32 @@ class Image:
         else:
             self.asPIL().save(filename)
             
-    def show(self):
+    def show(self, window="PyVisionImage", pos=None, delay=1):
         '''
-        Displays the annotated version of the image.
-        '''
-        self.asAnnotated().show()
-        
-    def showCV(self, windowName, newWindow=False, pos=(0,0)):
-        '''
-        Displays the annotated version of the image using openCV highgui
-        @param windowName: the name of the highgui window to use, this should
+        Displays the annotated version of the image using OpenCV highgui
+        @param window: the name of the highgui window to use, this should
             already have been created using cv.NamedWindow or set newWindow=True
-        @param newWindow: If true, a new window will be created, else it assumes
-            a window by this name already exists.
         @param pos: If newWindow, then pos is the (x,y) coordinate for the new window 
+        @param delay: A delay in milliseconds to wait for keyboard input (passed to cv.WaitKey).  
+            0 delays indefinatly, 1 is good for live updates and animations.  The window
+            will disappear after the program exits.  
         '''
-        if(newWindow):
-            cv.NamedWindow(windowName)
-            cv.MoveWindow(windowName, pos[0], pos[1])
+        cv.NamedWindow(window)
         
+        if pos != None:
+            cv.MoveWindow(window, pos[0], pos[1])
+            
         x = pyvision.Image(self.asAnnotated())        
-        cv.ShowImage(windowName, x.asOpenCV() )
+        cv.ShowImage(window, x.asOpenCV() )
+        cv.WaitKey(delay=delay)
         del x
     
 ##
 # Convert a 32bit opencv matrix to a numpy matrix
 def OpenCVToNumpy(cvmat):
     '''
-    Convert an OpenCV matrix to a numpy matrix
+    Convert an OpenCV matrix to a numpy matrix.
+    
     Based on code from: http://opencv.willowgarage.com/wiki/PythonInterface
     '''
     depth2dtype = {
@@ -657,6 +655,8 @@ def OpenCVToNumpy(cvmat):
 # Convert a numpy matrix to a 32bit opencv matrix
 def NumpyToOpenCV(a):
     '''
+    Convert a numpy matrix to an OpenCV matrix. 
+    
     Based on code from: http://opencv.willowgarage.com/wiki/PythonInterface
     '''
     dtype2depth = {
