@@ -92,8 +92,15 @@ class Table:
             #j += 1
             #if j > 300:
             #    break
+            
+    def sortByRowHeader(self,comp_func = cmp):
+        self.row_headers.sort(comp_func)
         
         
+    def sortByColHeader(self,comp_func = cmp):
+        self.col_headers.sort(comp_func)
+        
+                
     def accumulateData(self,row,col,value):
         new_value = self.element(row,col) + value
         self.setData(row,col,new_value)
@@ -189,7 +196,7 @@ class Table:
         col_widths = {}
         for col in self.col_headers:
             if print_col_headers:
-                col_widths[col] = len(col)
+                col_widths[col] = len(str(col))
             else:
                 col_widths[col] = 0
             for row in self.row_headers:
@@ -377,6 +384,16 @@ class _TestTable(unittest.TestCase):
         
     def test_verification(self):
         self.sim_face
+
+    def test_rowsort(self):
+        tab = Table()
         
-        #print self.sim_face.verificationAsText()
+        tab[2,1] = 'b'
+        tab[1,1] = 'a'
+        tab[3,1] = 'c'
+
+        #print tab        
+        tab.sortByRowHeader()
+        #print tab
+        
      
