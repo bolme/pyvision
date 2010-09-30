@@ -34,7 +34,7 @@
 import os.path
 from PIL.Image import composite,LINEAR
 import pyvision as pv
-from pyvision.edge.canny import canny
+#from pyvision.edge.canny import canny
 from pyvision.point.DetectorSURF import DetectorSURF
 import cv
 
