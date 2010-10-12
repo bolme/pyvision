@@ -273,6 +273,19 @@ class VideoFromImages:
          as part of the prefix string.
     '''
     def __init__(self,dirname,numframes,prefix="frame",ext="jpg", startnum=1, size=None):
+        '''
+        @param dirname: directory where the images comprising the video exist 
+        @param numframes: the number of frames in the video...0 to numframes will be read 
+        @param prefix: a string which remains as a constant prefix to all frames in video
+        @param ext: the extension of the images, like jpg, png, etc. Do not include the dot. 
+        @param startnum: the starting number of the first frame, defaults to 1
+        @param size: the optional width,height to resize the input frames
+        The file names are of the format {prefix}{zero-padded num}.{ext}, the amount of
+        zero-padding is determined automatically based on numframes. If there is additional
+        zero-padding required, put it in the prefix.
+        Example: a directory with images: vid_t1_s1_f001.jpg, ..., vid_t1_s1_f999.jpg
+        would have prefix="vid_t1_s1_f", startnum=1, numframes=999, ext="jpg"
+        '''
         self.dirname = dirname
         self.numframes = numframes
         self.prefix = prefix
@@ -306,8 +319,8 @@ class VideoFromImages:
             channels = frame.channels
             w,h = self.size
             resized = cv.CreateImage( (w,h), depth, channels )
-            cv.Resize( frame, resized, cv.CV_INTER_LINEAR )
-            return resized
+            cv.Resize( frame.asOpenCV(), resized, cv.CV_INTER_LINEAR )
+            return pv.Image(resized)
                 
     def next(self):
         frame = self.query()
