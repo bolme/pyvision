@@ -77,7 +77,7 @@ if __name__ == '__main__':
     logo = pv.Image(composite(i,e,m))
     ilog.log(logo)
     
-    logo.show(window='Composite', pos=(0,250) )
+    logo.show(window='Composite', pos=(0,300) )
     
     sm = pv.Image(im.asPIL().resize((320,240),LINEAR))
     detector = DetectorSURF()    
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         logo.annotateCircle(pt*4,radius*4)
     
     #logo.show()
-    logo.show(window='Annotated',pos=(360,250))
+    logo.show(window='Annotated',pos=(360,300))
     
     cv.WaitKey(0)
     

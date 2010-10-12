@@ -261,7 +261,7 @@ class VideoFromImages:
     '''
     This class allows the user to treat a directory of images as a video. It is assumed that
     the files in the directory are named as follows:
-    {prefix}_{num}.{ext}
+    {prefix}{num}.{ext}
     where
      prefix is any string that is constant for all the files,
      ext is the file extension/type like jpg, png, etc.
@@ -269,7 +269,8 @@ class VideoFromImages:
          note: the amount of padded zeros is the minimum required based on the length
          (num frames) in the video. So if you only had 120 frames, then it would be 001, 002,...120.
          We assume the frames are sequential with no gaps, and start at number startnum (with 
-         appropriate padding).
+         appropriate padding). If you have extra zero padding, then you can put the prefix zeros
+         as part of the prefix string.
     '''
     def __init__(self,dirname,numframes,prefix="frame",ext="jpg", startnum=1, size=None):
         self.dirname = dirname
@@ -289,7 +290,7 @@ class VideoFromImages:
         if self.current_frame <= self.numframes:  
             pad = len(str(self.numframes))
             num = str(self.current_frame).zfill(pad)
-            filename = self.prefix + "_" + num + "." + self.ext
+            filename = self.prefix + num + "." + self.ext
             f = os.path.join(self.dirname, filename)
             frame = pv.Image(f)
             self.current_frame += 1
