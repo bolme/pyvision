@@ -44,8 +44,7 @@ if __name__ == '__main__':
     im = pv.Image(source_name)
     im = pv.AffineScale(0.25,(320,240)).transformImage(im)
     #im.show()
-    ilog.log(im)    
-    
+    ilog.log(im, 'Input')    
     im.show(window='Input', pos=(0,0))
     
     mat = im.asMatrix2D()
@@ -68,15 +67,14 @@ if __name__ == '__main__':
     #edges.show()
     edges.show(window='Edges', pos=(360,0))
     
-    ilog.log(edges)    
-    ilog.log(pv.Image(1.0*mask))
+    ilog.log(edges, 'Edges')    
+    ilog.log(pv.Image(1.0*mask), 'Mask')
     
     e = edges.asPIL().convert('RGB')
     m = pv.Image(1.0*mask).asPIL()
     i = im.asPIL()
     logo = pv.Image(composite(i,e,m))
-    ilog.log(logo)
-    
+    ilog.log(logo, 'Composite')    
     logo.show(window='Composite', pos=(0,300) )
     
     sm = pv.Image(im.asPIL().resize((320,240),LINEAR))
@@ -87,11 +85,11 @@ if __name__ == '__main__':
     
     #logo.show()
     logo.show(window='Annotated',pos=(360,300))
-    
+    print "Have an image focused in UI and hit spacebar to continue..."
     cv.WaitKey(0)
     
-    ilog.log(logo)
-    ilog.show()  #in linux, need a previewer that supports input list of images...
+    ilog.log(logo, 'Annotated')
+    ilog.show()
 
     
     
