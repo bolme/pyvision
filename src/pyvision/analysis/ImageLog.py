@@ -131,8 +131,11 @@ class ImageLog:
         if sys.platform.startswith("darwin"):
             system("open %s"%file_list)
         elif sys.platform.startswith("linux"):
-            #system("gqview %s"%file_list)
-            print "ImageLog.show() is not supported on linux."
+            files.sort()
+            startfile = join(self.dir, files.pop(0))
+            system("gwenview %s"%startfile) #gwenview will show thumbnails for all files
+                                            #in same directory as startfile.
+            #print "ImageLog.show() is not supported on linux."
         elif sys.platform.startswith("windows"):
             print "ImageLog.show() is not supported on windows."
         
