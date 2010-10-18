@@ -34,6 +34,7 @@
 import os.path
 from PIL.Image import composite,LINEAR
 import pyvision as pv
+from pyvision.edge.sobel import sobel
 #from pyvision.edge.canny import canny
 from pyvision.point.DetectorSURF import DetectorSURF
 import cv
@@ -55,15 +56,8 @@ if __name__ == '__main__':
     #edges = canny(im,100,200)   #canny crashes in opencv2.1 on linux64...
         
     #sobel edge detector
-    #sobel requires a destination image with larger bit depth... 
-    #...so we have to convert it back to 8 bit for the pv Image...
-    cvim_bw = im.asOpenCVBW()
-    dst = cv.CreateImage((320,240), 8, 1)
-    dst32f = cv.CreateImage((320,240),cv.IPL_DEPTH_32F,1) 
-    cv.Sobel(cvim_bw, dst32f, 1, 0, 3)
-    cv.Convert(dst32f, dst)    
-    edges = pv.Image(dst)
-    
+    edges = sobel(im, 1, 0 , 3, 0)
+        
     #edges.show()
     edges.show(window='Edges', pos=(360,0))
     
