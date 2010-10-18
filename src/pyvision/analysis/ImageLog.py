@@ -68,6 +68,8 @@ class ImageLog:
             self.table(item.table,*args,**kwargs) 
         elif isinstance(item,pv.Table):
             self.table(item,*args,**kwargs) 
+        elif isinstance(item,pv.Plot):
+            self.plot(item,*args,**kwargs) 
         else:
             self.pickle(item,*args,**kwargs) 
         
@@ -76,6 +78,14 @@ class ImageLog:
         Save a pyvision image to the log.
         '''
         image.asAnnotated().save(self.dir+'/%06d_%s.%s'%(self.count,label,format),quality=95)
+        self.count += 1
+        #print message
+    
+    def plot(self,plot,label="NOLABEL",format='png'):
+        '''
+        Save a pyvision plot to the log.
+        '''
+        plot.asImage().asAnnotated().save(self.dir+'/%06d_%s.%s'%(self.count,label,format),quality=95)
         self.count += 1
         #print message
     

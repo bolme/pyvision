@@ -155,6 +155,8 @@ from pyvision.types.Perspective import  PerspectiveTransform, PerspectiveFromPoi
 
 from pyvision.analysis.ImageLog import ImageLog
 
+from pyvision.analysis.plot import Plot
+
 from pyvision.analysis.Table import Table
 
 from pyvision.analysis.Timer import Timer
