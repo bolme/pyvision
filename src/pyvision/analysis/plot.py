@@ -94,7 +94,7 @@ class Label:
         
 
 class Points:
-    def __init__(self,points,color='black',shape=0,size=2,label=None,lty=None,width=1):
+    def __init__(self,points,color='black',shape=0,size=3,label=None,lty=None,width=1):
         ''''''
         self.points = points
         self.color = color
@@ -469,10 +469,10 @@ class Plot:
         label = Label(point,label,**kwargs)
         self.graphics.append(label)
     
-    def points(self,points,**kwargs):
+    def points(self,points,color='black',shape=0,size=3,label=None,lty=None,width=1):
         ''' render multiple points'''
         points = self.convertPoints(points)
-        points = Points(points,**kwargs)
+        points = Points(points,color=color,shape=shape,size=size,label=label,lty=lty,width=width)
         self.graphics.append(points)
     
     def point(self,point,color='black',shape=0,size=3,label=None,lty=None,width=1):
