@@ -1,6 +1,6 @@
 # PyVision License
 #
-# Copyright (c) 2006-2008 David S. Bolme
+# Copyright (c) 2006-2008 David S. Bolme, Stephen O'Hara
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
