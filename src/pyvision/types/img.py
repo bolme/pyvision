@@ -172,7 +172,14 @@ class Image:
         self.size = (self.width,self.height)
         self.data = data
         
-        
+    def asBW(self):
+        '''
+        @return: a gray-scale version of this pyvision image
+        '''    
+        if self.matrix2d == None:
+            self._generateMatrix2D()
+        return Image(self.matrix2d)
+    
     def asMatrix2D(self):
         '''
         @return: the gray-scale image data as a two dimensional numpy array
