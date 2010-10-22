@@ -330,7 +330,7 @@ class VideoFromImages:
         
     def __iter__(self):
         ''' Return an iterator for this video '''
-        return VideoFromImages(self.dirname, self.numframes, self.prefix, self.ext, self.startnum, self.size) 
-        
+        #return VideoFromImages(self.dirname, self.numframes, self.prefix, self.ext, self.startnum, self.size) 
+        return self
         
     
