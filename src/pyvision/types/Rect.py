@@ -106,12 +106,8 @@ class Rect:
         r3_y2 = min(r1_y2,r2_y2)
 
         #print r3_x1,r3_x2,r3_y1,r3_y2
-        
-        #abs needed in the following because one rect can be completely inside the other
-        # If r1 is "inside" r2, we can get a negative number...but clearly there is a non-negative
-        # intersection. --SVO
-        r3_w = abs(r3_x2-r3_x1)  
-        r3_h = abs(r3_y2-r3_y1)
+        r3_w = r3_x2-r3_x1 
+        r3_h = r3_y2-r3_y1
         
         if r3_w < 0.0 or r3_h < 0.0:
             return None
