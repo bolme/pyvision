@@ -114,6 +114,21 @@ class Rect:
         
         return Rect(r3_x1,r3_y1,r3_w, r3_h)
     
+    def containsRect(self,rect):
+        '''
+        Determines if rect is entirely within (contained by) this rectangle.
+        @param rect: an object of type pv.Rect
+        @return: True if the rect is entirely within this rectangle's boundaries.
+        '''
+        t1 = (self.x <= rect.x) 
+        t2 = (self.y <= rect.y)
+        t3 = ( (self.x+self.w) >= (rect.x+rect.w) )
+        t4 = ( (self.y+self.h) >= (rect.y+rect.h) )
+        if( t1 and t2 and t3 and t4):
+            return True
+        else:
+            return False        
+    
     def containsPoint(self,point):
         '''
         Determine if a point is within a rectangle.
