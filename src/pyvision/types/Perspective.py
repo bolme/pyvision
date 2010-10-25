@@ -166,6 +166,23 @@ class PerspectiveTransform:
         self.size = new_size
         self.filter = filter
     
+    
+    def __call__(self,data):
+        '''
+        This is a simple interface to transform images or points.  Simply
+        call the affine transform like a function and it will try to automatically 
+        transform the argument.
+        
+        @param data: an image, point, or list of points.
+        '''
+        if isinstance(data,pv.Image):
+            return self.transformImage(data)
+        elif isinstance(data,pv.Point):
+            return self.transformPoint(data)
+        else: # assume this is a list of points
+            return self.transformPoints(data)
+    
+    
     ##
     # Transforms an image into the new coordinate system.
     #
@@ -174,8 +191,8 @@ class PerspectiveTransform:
         ''' Transform an image. '''
         matrix = pv.NumpyToOpenCV(self.matrix)
         src = im.asOpenCV()
-        dst = cv.cvCreateImage( cv.cvSize(self.size[0],self.size[1]), cv.IPL_DEPTH_8U, src.nChannels );
-        cv.cvWarpPerspective( src, dst, matrix)                    
+        dst = cv.CreateImage( (self.size[0],self.size[1]), cv.IPL_DEPTH_8U, src.nChannels );
+        cv.WarpPerspective( src, dst, matrix)                    
         return pv.Image(dst)
 
         

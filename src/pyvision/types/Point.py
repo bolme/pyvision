@@ -33,10 +33,7 @@
 
 
 from numpy import array
-try:
-    import opencv as cv
-except:
-    import cv
+import cv
 from math import sqrt
 import numpy as np
 import csv
@@ -118,6 +115,9 @@ class Point:
     def asOpenCV(self):
         return (self.X(), self.Y()) #cv.cvPoint(int(round(self.X())),int(round(self.Y())))
     
+    def asTuple(self):
+        return (self.X(),self.Y())
+    
     def asSpherical(self):
         ''' 
         Computes and returns a representation of this point in spherical coordinates: (r,phi,theta). 
@@ -160,12 +160,10 @@ class Point:
             return Point(self.X()*val,self.Y()*val,self.Z()*val)
     
     def __str__(self):
-        return "Point(%f,%f,%f)"%(self.X(),self.Y(),self.Z())
+        return "pv.Point(%f,%f,%f)"%(self.X(),self.Y(),self.Z())
     
     def __repr__(self):
-        return "Point(%f,%f,%f)"%(self.X(),self.Y(),self.Z())
-        
-        return "Point(%f,%f,%f)"%(self.X(),self.Y(),self.Z())
+        return "pv.Point(%f,%f,%f)"%(self.X(),self.Y(),self.Z())
     
     
 def readPointsFile(filename):

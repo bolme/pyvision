@@ -32,11 +32,8 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import Point as pt
+import cv
 
-try:
-    import opencv as cv
-except:
-    import cv
 def BoundingRect(*points):
     '''
     Create a rectangle that includes all of the points.
@@ -155,11 +152,38 @@ class Rect:
         '''
         return self.w*self.h
     
+    def overlap(self,rect2):
+        '''
+        Compute an overlap measure for two detection rectangles.
+        '''
+        i = self.intersect(rect2)   # Compute the intersection
+        if i == None:
+            return 0.0
+        u = self.area() + rect2.area() - i.area() # Compute the union
+        return i.area()/u
+
+    
+    def similarity(self,rect):
+        '''
+        Compute the similarity of the rectangles in terms of overlap.
+        '''
+        i = self.intersect(rect)
+        if i == None:
+            return 0.0
+        return i.area() / (0.5*self.area() + 0.5*rect.area())
+    
+    
     def __str__(self):
         '''
         @returns: a string representing this rectangle
         '''
-        return "Rect(%f,%f,%f,%f)"%(self.x,self.y,self.w,self.h)
+        return "pv.Rect(%f,%f,%f,%f)"%(self.x,self.y,self.w,self.h)
+    
+    def __repr__(self):
+        '''
+        @returns: a string representing this rectangle
+        '''
+        return "pv.Rect(%f,%f,%f,%f)"%(self.x,self.y,self.w,self.h)
     
     def box(self):
         '''
@@ -172,6 +196,12 @@ class Rect:
     def asOpenCV(self):
         '''
         Returns a representation compatible with opencv.
+        '''
+        return (int(round(self.x)),int(round(self.y)),int(round(self.w)),int(round(self.h)))
+
+    def asTuple(self):
+        '''
+        Returns a tuple (x,y,w,h).
         '''
         return (int(round(self.x)),int(round(self.y)),int(round(self.w)),int(round(self.h)))
 

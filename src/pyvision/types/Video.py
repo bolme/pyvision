@@ -49,6 +49,11 @@ class Webcam:
     def __init__(self,camera_num=0,size=(640,480)):
 
         self.cv_capture = cv.CreateCameraCapture( camera_num )        
+        #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH,1600.0)
+        #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT,1200.0)
+        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH)
+        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT)
+        
         
         self.size = size
     
