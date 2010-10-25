@@ -58,11 +58,8 @@ import random
 import pyvision
 import pyvision as pv
 import numpy as np
-try:
-    import opencv as cv
-except:
-    import cv
-    
+import cv
+
 from pyvision.types.img import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_OPENCV
 from pyvision.types.Point import Point
 from pyvision.types.Rect import Rect
@@ -778,7 +775,7 @@ class _AffineTest(unittest.TestCase):
         tmp4.annotateLabel(pv.Point(10,10), "This image should be blurry.")
         tmp4.show()
         
-    def test_prev_ref2(self):
+    def test_prev_ref3(self):
         fname = os.path.join(pv.__path__[0],'data','nonface','NONFACE_13.jpg')
         torig = tprev = taccu = im = Image(fname)
         #im.show()
