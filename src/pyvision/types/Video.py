@@ -101,6 +101,7 @@ class Video:
     def __init__(self,filename,size=None):
         self.filename = filename
         self.cv_capture = cv.CaptureFromFile( filename );
+        self._numframes = cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
         #print self.cv_capture, self.cv_capture.__hash__, dir(self.cv_capture), repr(self.cv_capture)
         self.size = size
         #print filename
@@ -294,7 +295,8 @@ class VideoFromImages:
         would have prefix="vid_t1_s1_f", startnum=1, numframes=999, ext="jpg"
         '''
         self.dirname = dirname
-        self.numframes = numframes
+        self.maxframes = numframes
+        self._numframes = numframes - startnum #number of frames to actually play
         self.prefix = prefix
         self.ext = ext
         self.size = size  #the optional width,height to resize the input frames
@@ -307,8 +309,8 @@ class VideoFromImages:
             raise IOError
         
     def query(self):      
-        if self.current_frame <= self.numframes:  
-            pad = len(str(self.numframes))
+        if self.current_frame <= self.maxframes:  
+            pad = len(str(self.maxframes))
             num = str(self.current_frame).zfill(pad)
             filename = self.prefix + num + "." + self.ext
             f = os.path.join(self.dirname, filename)
@@ -337,6 +339,6 @@ class VideoFromImages:
         
     def __iter__(self):
         ''' Return an iterator for this video '''
-        return VideoFromImages(self.dirname, self.numframes, self.prefix, self.ext, self.startnum, self.size) 
+        return VideoFromImages(self.dirname, self.maxframes, self.prefix, self.ext, self.startnum, self.size) 
         
     
