@@ -144,6 +144,8 @@ class Video:
             return None
         self.current_frame += 1
         frame = cv.QueryFrame( self.cv_capture );
+        if frame == None:
+            raise StopIteration("End of video sequence")
         return pv.Image(self.resize(frame))
     
     #def grab(self):
@@ -335,7 +337,6 @@ class VideoFromImages:
         
     def __iter__(self):
         ''' Return an iterator for this video '''
-        #return VideoFromImages(self.dirname, self.numframes, self.prefix, self.ext, self.startnum, self.size) 
-        return self
+        return VideoFromImages(self.dirname, self.numframes, self.prefix, self.ext, self.startnum, self.size) 
         
     
