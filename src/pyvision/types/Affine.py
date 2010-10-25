@@ -46,9 +46,9 @@ import copy
 import weakref
 
 try:
-    from PIL.Image import AFFINE,NEAREST,BILINEAR,BICUBIC
+    from PIL.Image import AFFINE,NEAREST,BILINEAR,BICUBIC,ANTIALIAS
 except:
-    from Image import AFFINE,NEAREST,BILINEAR,BICUBIC
+    from Image import AFFINE,NEAREST,BILINEAR,BICUBIC,ANTIALIAS
     
 from numpy import array,dot,sqrt
 from numpy.linalg import inv,solve,lstsq
