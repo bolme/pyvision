@@ -39,7 +39,9 @@ __version__ = "$Revision$"
 
 import PIL.ImageDraw
 import PIL.Image
-    
+
+from Image import BICUBIC, ANTIALIAS
+
 import numpy
 import numpy as np
 import cv
@@ -596,6 +598,22 @@ class Image:
             TODO: Not yet implemented
         '''
 
+    def resize(self, newSize):
+        ''' Returns a resized version of the image. This is a convenience function.
+        For more control, look at the Affine class for arbitrary transformations.
+        @param newSize: tuple (new_width, new_height)
+        @returns: a new pyvision image that is the resized version of this image.
+        ''' 
+        tmp = self.asPIL()
+        if newSize[0] < self.size[0] or newSize[1] < self.size[1]:
+            #because at least one dimension is being shrinked, we need to use ANTIALIAS filter
+            tmp = tmp.resize(newSize, ANTIALIAS)        
+        else:
+            #use bicubic interpolation
+            tmp = tmp.resize(newSize, BICUBIC)
+
+        return pyvision.Image(tmp)
+        
     def save(self,filename):
         '''
         Save the image to a file.  This is performed by converting to PIL and
