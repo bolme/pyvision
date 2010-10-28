@@ -71,10 +71,10 @@ LUMA = [0.299, 0.587, 0.114, 1.0]
 class Image:
     '''
     The primary purpose of the image class is to provide a structure that can
-    transform an image back and fourth for different python libraires such as
+    transform an image back and fourth for different python libraries such as
     U{PIL<http://www.pythonware.com/products/pil>}, 
     U{OpenCV <http://sourceforge.net/projects/opencvlibrary>}, and 
-    U{Scipy<http://www.scipy.org">} Images also This also
+    U{Scipy<http://www.scipy.org">} Images. This class also
     allows some simple operations on the image such as annotation.
     
     B{Note:} When working with images in matrix format, they are transposed such
