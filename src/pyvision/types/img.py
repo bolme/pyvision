@@ -51,6 +51,7 @@ import os.path
 
 
 import pyvision
+import pyvision as pv
 
 TYPE_MATRIX_2D  = "TYPE_MATRIX2D" 
 '''Image was created using a 2D "gray-scale" numpy array'''
@@ -613,6 +614,77 @@ class Image:
             tmp = tmp.resize(newSize, BICUBIC)
 
         return pyvision.Image(tmp)
+    
+    def crop(self, rect, size=None, interpolation=None, return_affine=False):
+        '''
+        Crops an image to the given rectangle. Rectangle parameters are rounded to nearest 
+        integer values.  High quality resampling.  The default behavior is to use cv.GetSubRect
+        to crop the image.  This returns a slice the OpenCV image so modifying the resulting
+        image data will also modify the data in this image.  If a size is provide a new OpenCV
+        image is created for that size and cv.Resize is used to copy the image data. If the 
+        bounds of the rectangle are outside the image, an affine transform (pv.AffineFromRect)
+        is used to produce the croped image to properly handle regions outside the image.
+        In this case the downsampling quality may not be as good. 
+        
+        @param rect: a Rectangle defining the region to be cropped.
+        @param size: a new size for the returned image.  If None the result is not resized.
+        @param interpolation: None = Autoselect or one of CV_INTER_AREA, CV_INTER_NN, CV_INTER_LINEAR, CV_INTER_BICUBIC
+        @param return_affine: If True, also return an affine transform that can be used to transform points.
+        @returns: a cropped version of the image or if return affine a tuple of (image,affine)
+        @rtype: pv.Image
+        '''
+        # Notes: pv.Rect(0,0,w,h) should return the entire image. Since pixel values
+        # are indexed by zero this means that upper limits are not inclusive: x from [0,w)
+        # and y from [0,h)
+        x,y,w,h = rect.asTuple()
+       
+        x = int(np.round(x))
+        y = int(np.round(y))
+        w = int(np.round(w))
+        h = int(np.round(h))
+        
+        if x < 0 or y < 0 or x+w > self.size[0] or y+h > self.size[1]:
+            if size == None:
+                size = (w,h)
+            
+            affine = pv.AffineFromRect(pv.Rect(x,y,w,h),size)
+            im = affine(self)
+            if return_affine:
+                return im,affine
+            else:
+                return im
+        
+        cvim = self.asOpenCV()
+                
+        subim = cv.GetSubRect(cvim,(x,y,w,h))
+        
+        affine = pv.AffineTranslate(-x,-y,(w,h))
+        
+        if size == None:
+            if return_affine:
+                return pv.Image(subim),affine
+            else:
+                return pv.Image(subim)
+        
+        new_image = cv.CreateImage(size,cvim.depth,cvim.nChannels)
+        
+        if interpolation == None:
+            
+            if size[0] < w or size[1] < y:
+                # Downsampling so use area interpolation
+                interpolation = cv.CV_INTER_AREA
+            else:
+                # Upsampling so use linear
+                interpolation = cv.CV_INTER_BICUBIC
+
+        cv.Resize(subim,new_image,interpolation)
+        
+        affine = pv.AffineNonUniformScale(float(size[0])/w,float(size[1])/h,size)*affine
+        
+        if return_affine: 
+            return pv.Image(new_image),affine
+        else:
+            return pv.Image(new_image)
         
     def save(self,filename):
         '''
