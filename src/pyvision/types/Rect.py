@@ -171,6 +171,21 @@ class Rect:
         if i == None:
             return 0.0
         return i.area() / (0.5*self.area() + 0.5*rect.area())
+        
+    
+    def rescale(self,scale):
+        ''' 
+        Expand or contract the size of the rectangle by a "scale" while
+        keeping the Rect centered at the same location.
+        
+        @param scale: the scale factor
+        @returns: the rescaled rect
+        '''
+        center = self.center()
+        cx,cy = center.X(),center.Y()
+        w = scale*self.w
+        h = scale*self.h
+        return Rect(cx-0.5*w,cy-0.5*h,w,h)
     
     
     def __str__(self):
