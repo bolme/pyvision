@@ -145,6 +145,8 @@ def disableCommercialUseWarnings():
 
 from pyvision.types.img import Image,OpenCVToNumpy,NumpyToOpenCV
 
+from pyvision.types.Video import Video, Webcam, VideoFromImages
+
 from pyvision.types.Point import Point,readPointsFile
 
 from pyvision.types.Rect import Rect,BoundingRect
@@ -160,6 +162,8 @@ from pyvision.analysis.plot import Plot
 from pyvision.analysis.Table import Table
 
 from pyvision.analysis.Timer import Timer
+
+from pyvision.analysis.roc import ROC,ROC_LOG_SAMPLED,ROC_MATCH_SAMPLED
 
 from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotientImage, lowPassFilter, highPassFilter, bandPassFilter
 
