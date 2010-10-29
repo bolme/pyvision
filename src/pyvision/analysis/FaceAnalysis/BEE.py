@@ -56,6 +56,10 @@ COMPLEX_PRESENTATION = '{http://www.bee-biometrics.org/schemas/sigset/0.1}comple
 COMPLEX_COMPONENT = '{http://www.bee-biometrics.org/schemas/sigset/0.1}presentation-component'
 COMPLEX_DATA = '{http://www.bee-biometrics.org/schemas/sigset/0.1}data'
 
+BEE_NONMATCH = 0x7f
+BEE_MATCH    = 0xff
+BEE_DONTCARE = 0x00
+
 ##
 # Parse a BEE sigset.
 def parseSigSet(source):
@@ -359,12 +363,12 @@ class BEEDistanceMatrix:
         
         matches = []
         if self.queries != None and self.targets != None:
-            queries = np.array([ name for name,sig in self.queries ])
-            targets = np.array([ name for name,sig in self.targets ])
+            queries = np.array([ name for name,_ in self.queries ])
+            targets = np.array([ name for name,_ in self.targets ])
         for i in range(self.matrix.shape[0]):
             #print i, len(matches)
             if mask != None:
-                matches.append(self.matrix[i,mask.matrix[i,:] == -1])
+                matches.append(self.matrix[i,mask.matrix[i,:] == BEE_MATCH])
             else:
                 query = queries[i]
                 matches.append(self.matrix[i,query==targets])
@@ -386,18 +390,18 @@ class BEEDistanceMatrix:
         assert self.targets != None
         
         matches = {}
-        queries = np.array([ name for name,sig in self.queries ])
-        targets = np.array([ name for name,sig in self.targets ])
+        queries = np.array([ name for name,_ in self.queries ])
+        targets = np.array([ name for name,_ in self.targets ])
         
         qnames = set(queries)
-        tnames = set(targets)
+        #tnames = set(targets)
         
         for name in qnames:
             rows = np.nonzero(name == queries)[0]
             cols = np.nonzero(name == targets)[0]
             tmp =  self.matrix[rows][:,cols]
             if mask != None:
-                m = mask.matrix[rows][:,cols] != 0x00
+                m = mask.matrix[rows][:,cols] == BEE_MATCH
                 matches[name] = tmp.flatten()[m.flatten()]
             else:
                 matches[name] = tmp.flatten()
@@ -414,11 +418,11 @@ class BEEDistanceMatrix:
         
         matches = []
         if self.queries != None and self.targets != None:
-            queries = np.array([ name for name,sig in self.queries ])
-            targets = np.array([ name for name,sig in self.targets ])
+            queries = np.array([ name for name,_ in self.queries ])
+            targets = np.array([ name for name,_ in self.targets ])
         for i in range(self.matrix.shape[0]):
             if mask != None:
-                matches.append(self.matrix[i,mask.matrix[i,:] == 127])
+                matches.append(self.matrix[i,mask.matrix[i,:] == BEE_NONMATCH])
             else:
                 query = queries[i]
                 matches.append(self.matrix[i,query!=targets])
@@ -435,62 +439,62 @@ class BEEDistanceMatrix:
         return scores
 
 
-    def getNonMatchScoresByPairs(self,mask=None):
-        assert self.queries != None
-        assert self.targets != None
-        
-        matches = {}
-        queries = np.array([ name for name,sig in self.queries ])
-        targets = np.array([ name for name,sig in self.targets ])
-        
-        rows = queries.argsort()
-        cols = targets.argsort()
-        #print rows
-        #print cols
-        qnames = list(set(queries))
-        tnames = list(set(targets))
-        
-        matrix = (self.matrix[rows,:][:,cols])
-        if mask != None:
-            mask = (mask.matrix[rows,:][:,cols])
-        queries = queries[rows]
-        targets = targets[cols]
-
-        q_blocks = {}
-        for qname in qnames:
-            rows = np.nonzero(qname == queries)[0]
-            q_blocks[qname] = (rows[0],rows[-1]+1)
-        
-        t_blocks = {}
-        for tname in tnames:
-            cols = np.nonzero(tname == targets)[0]
-            t_blocks[tname] = (cols[0],(cols[-1]+1))
-        
-        
-        total = len(qnames)*len(tnames)
-        
-        i = 0
-        for qname in qnames:
-            matches[qname]= {}
-            for tname in tnames:
-                
-                if qname == tname:
-                    continue
-
-                r1,r2 = q_blocks[qname]
-                c1,c2 = t_blocks[tname]
-
-                tmp = matrix[r1:r2,c1:c2]
-                if mask != None:
-                    m = mask[r1:r2,c1:c2] != 0x00
-                    matches[qname][tname] = tmp.flatten()[m.flatten()]
-                else:
-                    matches[qname][tname] = tmp.flatten()
-                
-                if len(matches[qname][tname]) == 0:
-                    del matches[qname][tname]
-            
-        return matches
+#    def getNonMatchScoresByPairs(self,mask=None):
+#        assert self.queries != None
+#        assert self.targets != None
+#        
+#        matches = {}
+#        queries = np.array([ name for name,sig in self.queries ])
+#        targets = np.array([ name for name,sig in self.targets ])
+#        
+#        rows = queries.argsort()
+#        cols = targets.argsort()
+#        print rows
+#        print cols
+#        qnames = list(set(queries))
+#        tnames = list(set(targets))
+#        
+#        matrix = (self.matrix[rows,:][:,cols])
+#        if mask != None:
+#            mask = (mask.matrix[rows,:][:,cols])
+#        queries = queries[rows]
+#        targets = targets[cols]
+#
+#        q_blocks = {}
+#        for qname in qnames:
+#            rows = np.nonzero(qname == queries)[0]
+#            q_blocks[qname] = (rows[0],rows[-1]+1)
+#        
+#        t_blocks = {}
+#        for tname in tnames:
+#            cols = np.nonzero(tname == targets)[0]
+#            t_blocks[tname] = (cols[0],(cols[-1]+1))
+#        
+#        
+#        total = len(qnames)*len(tnames)
+#        
+#        i = 0
+#        for qname in qnames:
+#            matches[qname]= {}
+#            for tname in tnames:
+#                
+#                if qname == tname:
+#                    continue
+#
+#                r1,r2 = q_blocks[qname]
+#                c1,c2 = t_blocks[tname]
+#
+#                tmp = matrix[r1:r2,c1:c2]
+#                if mask != None:
+#                    m = mask[r1:r2,c1:c2] != 0x00
+#                    matches[qname][tname] = tmp.flatten()[m.flatten()]
+#                else:
+#                    matches[qname][tname] = tmp.flatten()
+#                
+#                if len(matches[qname][tname]) == 0:
+#                    del matches[qname][tname]
+#            
+#        return matches
             
     
     def printInfo(self):
