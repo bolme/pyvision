@@ -62,8 +62,7 @@ class DetectorHarris(DetectorROI):
 
     def _detect(self,im):
         '''
-        void cvCornerHarris( const CvArr* image, CvArr* harris_responce,
-                         int block_size, int aperture_size=3, double k=0.04 );
+        void cvCornerHarris( const CvArr* image, CvArr* harris_responce, int block_size, int aperture_size=3, double k=0.04 );
         '''
         gray = im.asOpenCVBW()
         #gray = opencv.cvCreateImage( opencv.cvGetSize(cvim), 8, 1 );

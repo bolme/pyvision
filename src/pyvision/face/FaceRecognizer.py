@@ -75,16 +75,15 @@ class FaceRecognizer:
         raise NotImplementedError()
     
     
-    def computeFaceRecord(self,img,rect=None,eyes=None):
+    def computeFaceRecord(self,im,rect=None,eyes=None):
         '''
         Given an image and face location, compute a face record.
         
-        INPUTS:
-        im - image containing the face
-        face - specifies the location of the face in the image, and is 
+        @param im: image containing the face
+        @param rect: specifies the location of the face in the image, and is 
                typically defined as a detection rectangle or eye coordinates.
                
-        RETURNS: data that represents the identity of the face, such as
+        @returns: data that represents the identity of the face, such as
                  eigen coeffecients for PCA.
         '''
 

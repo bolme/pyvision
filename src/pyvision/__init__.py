@@ -45,7 +45,7 @@ PyVision library.  These include:
 
 Typically, all these types are used in a program.  A good convention is to 
 import the pyvision library as "pv" and then prefix all function names with "pv." 
-This will avoid possible namespace conflicts. For example:
+This will avoid possible namespace conflicts. For example::
 
     import pyvision as pv
     im = pv.Image(filename) 

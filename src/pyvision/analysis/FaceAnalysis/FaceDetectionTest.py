@@ -87,8 +87,8 @@ class FaceDetectionTest:
         Create a face detection test.
         
         INPUTS:
-            name      - Label for the test.
-            threshold - The fraction of joint area that counts as success.
+        @param name: Label for the test.
+        @param threshold: The fraction of joint area that counts as success.
         '''
         self.name = name
         self.threshold=threshold
@@ -118,11 +118,10 @@ class FaceDetectionTest:
         '''
         Adds a sample to face detection test.
         
-        Input:
-            truth_rects    - truth for an image.
-            detected_rects - output of the detector
-            im             - the image or filename to assciate with the sample.
-            annotate       - add diagnostic annotations to the images.
+        @param truth_rects:    truth for an image.
+        @param detected_rects: output of the detector
+        @param im:             the image or filename to assciate with the sample.
+        @param annotate:       add diagnostic annotations to the images.
         '''
         self.images += 1
         name = None

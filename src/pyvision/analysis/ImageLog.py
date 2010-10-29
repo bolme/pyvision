@@ -51,8 +51,8 @@ class ImageLog:
         The name of the log directory start with the date and time the log
         was created and ends with 'name'.
         
-        @param topdir - The location where the log directory will be created.
-        @param name - a name to append to the directory name.
+        @param topdir: The location where the log directory will be created.
+        @param name: a name to append to the directory name.
         '''
         self.date = strftime("%Y%m%d_%H%M%S")
         self.name=name

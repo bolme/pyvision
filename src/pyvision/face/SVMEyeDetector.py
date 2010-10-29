@@ -35,21 +35,19 @@ from os.path import join
 import unittest
 import random
 from math import pi
-import sys #TODO: Remove
+import os.path
 
-import pyvision
-from pyvision.types.Image import Image
+import pyvision as pv
+import numpy as np
+
 from pyvision.face.CascadeDetector import CascadeDetector
 from pyvision.analysis.face import EyesFile
-from pyvision.types.Point import Point
-from pyvision.types.Rect import Rect
 from pyvision.point.PointLocator import SVMLocator,KRRLocator
-from pyvision.types.Affine import *
 from pyvision.analysis.FaceAnalysis.FaceDetectionTest import face_from_eyes, is_success
 from pyvision.analysis.FaceAnalysis.EyeDetectionTest import EyeDetectionTest
 from pyvision.vector import VectorClassifier 
 from pyvision.vector import SVM 
-from pyvision.other.normalize import meanStd
+
 
 class SVMEyeDetector:
     ''' 
@@ -100,25 +98,25 @@ class SVMEyeDetector:
         for pred_rect in rects:
             if is_success(pred_rect,true_rect):
                 # Transform the face
-                affine = AffineFromRect(pred_rect,self.tile_size)
+                affine = pv.AffineFromRect(pred_rect,self.tile_size)
 
                 w,h = self.tile_size
                 
                 if self.perturbations:
                     # Randomly rotate, translate and scale the images
-                    center = AffineTranslate(-0.5*w,-0.5*h,self.tile_size)
-                    rotate = AffineRotate(random.uniform(-pi/8,pi/8),self.tile_size)
-                    scale = AffineScale(random.uniform(0.9,1.1),self.tile_size)
-                    translate = AffineTranslate(random.uniform(-0.05*w,0.05*w),
+                    center = pv.AffineTranslate(-0.5*w,-0.5*h,self.tile_size)
+                    rotate = pv.AffineRotate(random.uniform(-pi/8,pi/8),self.tile_size)
+                    scale = pv.AffineScale(random.uniform(0.9,1.1),self.tile_size)
+                    translate = pv.AffineTranslate(random.uniform(-0.05*w,0.05*w),
                                                random.uniform(-0.05*h,0.05*h),
                                                self.tile_size)
-                    inv_center = AffineTranslate(0.5*w,0.5*h,self.tile_size)
+                    inv_center = pv.AffineTranslate(0.5*w,0.5*h,self.tile_size)
                     
                     affine = inv_center*translate*scale*rotate*center*affine
                     #affine = affine*center*rotate*scale*translate*inv_center
                 
                 cropped = affine.transformImage(im)
-                cropped = meanStd(cropped)
+                cropped = pv.meanStd(cropped)
                 
                 # Mark the eyes
                 leye = affine.transformPoint(left_eye)
@@ -168,8 +166,7 @@ class SVMEyeDetector:
         
     def detect(self, im):
         '''
-        Returns a list of tuples where each tuple contains:
-            (registered_image, detection_rect, left_eye, right_eye) 
+        @returns: a list of tuples where each tuple contains (registered_image, detection_rect, left_eye, right_eye) 
         '''
         result = []
         
@@ -179,14 +176,14 @@ class SVMEyeDetector:
         for rect in rects:
             
             # Transform the face
-            affine = AffineFromRect(rect,self.tile_size)
+            affine = pv.AffineFromRect(rect,self.tile_size)
             cropped = affine.transformImage(im)
             
             for p in range(self.n_iter):
-                cropped = meanStd(cropped)
+                cropped = pv.meanStd(cropped)
                 # Find the eyes
                 data = cropped.asMatrix2D().flatten()   
-                data = array(data,'d').flatten()
+                data = np.array(data,'d').flatten()
         
                 data = self.normalize.normalizeVector(data)
       
@@ -197,7 +194,7 @@ class SVMEyeDetector:
                 preye = affine.invertPoint(preye)
                 
                 # Seccond Pass
-                affine = AffineFromPoints(pleye,preye,self.left_eye,self.right_eye,self.tile_size)
+                affine = pv.AffineFromPoints(pleye,preye,self.left_eye,self.right_eye,self.tile_size)
                 cropped = affine.transformImage(im)
             
             #affine = AffineFromPoints(pleye,preye,self.left_eye,self.right_eye,self.tile_size)
@@ -229,7 +226,7 @@ class RegressionEyeLocator2:
     the eye coordinates.
     '''
     
-    def __init__(self, face_detector=CascadeDetector(), tile_size=(128,128), subtile_size=(32,32), left_center=Point(39.325481787836871,50.756936769089975), right_center=Point(91.461135538006289,50.845357457309881), validate=None, n_iter=1, annotate=False,**kwargs):
+    def __init__(self, face_detector=CascadeDetector(), tile_size=(128,128), subtile_size=(32,32), left_center=pv.Point(39.325481787836871,50.756936769089975), right_center=pv.Point(91.461135538006289,50.845357457309881), validate=None, n_iter=1, annotate=False,**kwargs):
         ''' 
         Create an eye locator.  This default implentation uses a 
         cascade classifier for face detection and then SVR for eye
@@ -260,19 +257,19 @@ class RegressionEyeLocator2:
         
     def generateTransforms(self,detection):        
         # Transform the face
-        affine = AffineFromRect(detection,self.tile_size)
+        affine = pv.AffineFromRect(detection,self.tile_size)
 
         w,h = self.tile_size
         
         if self.perturbations:
             # Randomly rotate, translate and scale the images
-            center = AffineTranslate(-0.5*w,-0.5*h,self.tile_size)
-            rotate = AffineRotate(random.uniform(-pi/8,pi/8),self.tile_size)
-            scale = AffineScale(random.uniform(0.9,1.1),self.tile_size)
-            translate = AffineTranslate(random.uniform(-0.05*w,0.05*w),
+            center = pv.AffineTranslate(-0.5*w,-0.5*h,self.tile_size)
+            rotate = pv.AffineRotate(random.uniform(-pi/8,pi/8),self.tile_size)
+            scale = pv.AffineScale(random.uniform(0.9,1.1),self.tile_size)
+            translate = pv.AffineTranslate(random.uniform(-0.05*w,0.05*w),
                                        random.uniform(-0.05*h,0.05*h),
                                        self.tile_size)
-            inv_center = AffineTranslate(0.5*w,0.5*h,self.tile_size)
+            inv_center = pv.AffineTranslate(0.5*w,0.5*h,self.tile_size)
             
             affine = inv_center*translate*scale*rotate*center*affine
             #affine = affine*center*rotate*scale*translate*inv_center
@@ -282,8 +279,8 @@ class RegressionEyeLocator2:
         rx=self.right_center.X()-self.subtile_size[0]/2
         ry=self.right_center.Y()-self.subtile_size[1]/2
         
-        laffine = AffineFromRect(Rect(lx,ly,self.subtile_size[0],self.subtile_size[1]),self.subtile_size)*affine
-        raffine = AffineFromRect(Rect(rx,ry,self.subtile_size[0],self.subtile_size[1]),self.subtile_size)*affine
+        laffine = pv.AffineFromRect(pv.Rect(lx,ly,self.subtile_size[0],self.subtile_size[1]),self.subtile_size)*affine
+        raffine = pv.AffineFromRect(pv.Rect(rx,ry,self.subtile_size[0],self.subtile_size[1]),self.subtile_size)*affine
         return laffine,raffine
                 
 
@@ -306,8 +303,8 @@ class RegressionEyeLocator2:
                 rcropped = raffine.transformImage(im)
                 
                 #Normalize the images
-                lcropped = meanStd(lcropped)
-                rcropped = meanStd(rcropped)
+                lcropped = pv.meanStd(lcropped)
+                rcropped = pv.meanStd(rcropped)
                 
                 # Mark the eyes
                 leye = laffine.transformPoint(left_eye)
@@ -338,8 +335,7 @@ class RegressionEyeLocator2:
         
     def detect(self, im):
         '''
-        Returns a list of tuples where each tuple contains:
-            (registered_image, detection_rect, left_eye, right_eye) 
+        @returns: a list of tuples where each tuple contains (registered_image, detection_rect, left_eye, right_eye) 
         '''
         result = []
         
@@ -354,8 +350,8 @@ class RegressionEyeLocator2:
             rcropped = raffine.transformImage(im)
 
             #Normalize the images
-            lcropped = meanStd(lcropped)
-            rcropped = meanStd(rcropped)
+            lcropped = pv.meanStd(lcropped)
+            rcropped = pv.meanStd(rcropped)
                   
             pleye = self.left_locator.predict(lcropped)
             preye = self.right_locator.predict(rcropped)
@@ -364,7 +360,7 @@ class RegressionEyeLocator2:
             preye = raffine.invertPoint(preye)
                 
             
-            affine = AffineFromPoints(pleye,preye,self.left_eye,self.right_eye,self.tile_size)
+            affine = pv.AffineFromPoints(pleye,preye,self.left_eye,self.right_eye,self.tile_size)
             reg = affine.transformImage(im)
 
             if self.validate != None and not self.validate(reg):
@@ -430,7 +426,7 @@ def SVMEyeDetectorFromDatabase(eyes_file, image_dir, training_set = None, traini
         im_name = join(image_dir,filename+image_ext)
         
         # Detect faces
-        im = Image(im_name)
+        im = pv.Image(im_name)
         
         eyes = eyes_file.getEyes(filename)
         for left,right in eyes:
@@ -448,12 +444,12 @@ class _TestSVMEyeDetector(unittest.TestCase):
         self.images = []
         self.names = []
         
-        SCRAPS_FACE_DATA = os.path.join(pyvision.__path__[0],"data","csuScrapShots")
+        SCRAPS_FACE_DATA = os.path.join(pv.__path__[0],"data","csuScrapShots")
         
         
         self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
         for filename in self.eyes.files():
-            img = Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
+            img = pv.Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
             self.images.append(img)
             self.names.append(filename)
         
@@ -466,16 +462,16 @@ class _TestSVMEyeDetector(unittest.TestCase):
         #import cProfile
 
         # Load an eyes file
-        eyes_filename = join(pyvision.__path__[0],'data','csuScrapShots','coords.txt')
+        eyes_filename = join(pv.__path__[0],'data','csuScrapShots','coords.txt')
         #print "Creating eyes File."
         eyes_file = EyesFile(eyes_filename)
         
         # Create a face detector
-        cascade_file = join(pyvision.__path__[0],'config','facedetector_celebdb2.xml')
+        cascade_file = join(pv.__path__[0],'config','facedetector_celebdb2.xml')
         #print "Creating a face detector from:",cascade_file
         face_detector = CascadeDetector(cascade_file)
 
-        image_dir = join(pyvision.__path__[0],'data','csuScrapShots')
+        image_dir = join(pv.__path__[0],'data','csuScrapShots')
         
         ed = SVMEyeDetectorFromDatabase(eyes_file, image_dir, image_ext=".pgm", face_detector=face_detector,random_seed=0)
         edt = EyeDetectionTest(name='scraps')
@@ -487,7 +483,7 @@ class _TestSVMEyeDetector(unittest.TestCase):
 
             #faces = ed.detect(img)
             pred_eyes = []
-            for reg,rect,pleye,preye in faces:
+            for _,_,pleye,preye in faces:
                 #detections.append(rect)
                 pred_eyes.append((pleye,preye))
 

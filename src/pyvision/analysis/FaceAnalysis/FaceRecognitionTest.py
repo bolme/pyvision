@@ -41,9 +41,7 @@ def firstFive(im_id):
     Parses the identity from the image id using the first five 
     charicters.  This is a very common scheme for many face datasets.
     
-    This will work for:
-        FERET
-        CSU_Scraps
+    This will work for: FERET or CSU_Scraps
     '''
     return im_id[:5]
     

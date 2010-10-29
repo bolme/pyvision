@@ -38,15 +38,14 @@ import cv
 
 import pyvision as pv
 
-import numpy as np
-from scipy.ndimage import convolve
-from scipy.ndimage import maximum_filter
+#import numpy as np
+#from scipy.ndimage import convolve
+#from scipy.ndimage import maximum_filter
 
 
 def canny(im,threshold1=40.0,threshold2=100.0,aperture_size=3,sigma=None):
     '''
-    void cvCanny( const CvArr* image, CvArr* edges, double threshold1,
-              double threshold2, int aperture_size=3 );
+    void cvCanny( const CvArr* image, CvArr* edges, double threshold1, double threshold2, int aperture_size=3 );
     '''
     gray = im.asOpenCVBW()
     edges = cv.CreateImage( cv.GetSize(gray), 8, 1 );
@@ -120,5 +119,3 @@ class _TestCanny(unittest.TestCase):
         if self.show_results: out.show()
         
         
-
-  

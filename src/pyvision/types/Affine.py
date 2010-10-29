@@ -412,10 +412,12 @@ def AffinePerturb(Dscale, Drotate, Dtranslate, new_size, mirror=False, flip=Fals
     transform can also mirror the image in the left/right direction or flip the
     top and bottom as other ways to generate synthetic training images.
 
-    @param src: a list of link.Points in the source image.
-    @param dst: a list of link.Points in the destination image.
+    @param Dscale: the difference in scale  [1.0+Dscale, 1.0-Dscale].
+    @param Drotate: the range of difference in rotation [-Drotate,+Drotate] .
+    @param Dtranslate: the range of difference in translation [-Dtranslate,+Dtranslate] .
     @param new_size: new size for the image.
-    @param filter: PIL filter to use.
+    @param mirror: Include mirror perturbations.
+    @param flip: Include flipped perturbations
     '''
     tile_size = new_size
     w,h = tile_size
@@ -516,7 +518,7 @@ class AffineTransform:
         
         
         @param im: an Image object
-        @param use_original: (True or False) attempts to find and use the original image as the source to avoid an accumulation of errors.
+        @param use_orig: (True or False) attempts to find and use the original image as the source to avoid an accumulation of errors.
         @returns: the transformed image
         '''
         #TODO: does not support opencv images.  see Perspective.py

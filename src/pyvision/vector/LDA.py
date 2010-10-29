@@ -44,11 +44,9 @@
 ###########################################################
 
 import unittest
-from numpy import *
-from scipy import *
-import scipy as sp
 import numpy as np
-import scipy.linalg
+import scipy as sp
+#import scipy.linalg as la
 
 ### 
 ### train the fisher linear discriminant using the training data X
@@ -63,34 +61,34 @@ def trainLDA(X, Y, reg="AUTO"):
     X = matrix( [[1,1.5,1.2],[2.5,3,2.4],[1.2,1.6,1.0],[1,1.7,0.9],[1,3.1, 2.1] ])
     Y = array( [1,2,3,2,1] )  # class labels
     lda = trainLDA(X, Y)      # Train the classifier getting 
-                  # the discriminant lda
+    # the discriminant lda
 
     @param X: It is the input dataset with each row as a sample.
     @param Y: The labels for each sample of X
-    @keyparam reg: a regularization parameter
+    @param reg: a regularization parameter
     @return: a tuple containing the [Fisher discriminants , and eigenvalues]
     '''
     
     X = np.array(X)
     Y = np.array(Y)
     
-    classes = unique(Y)  # Unique classes
-    p = size(X, axis=1)  # columns of training dataset
+    classes = np.unique(Y)  # Unique classes
+    p = np.size(X, axis=1)  # columns of training dataset
     N = len(Y)         # Number of samples
     K = len(classes)     # Number of unique classes
     
-    priors = zeros(K)
-    means = tile(0.,(K,p)) # column means for each class
-    meanSum = tile(0.,(1,p)) # column means for each class
-    totalmean = tile(0.,(1,p)) # column means for each class
+    priors = np.zeros(K)
+    means = np.tile(0.,(K,p)) # column means for each class
+    meanSum = np.tile(0.,(1,p)) # column means for each class
+    totalmean = np.tile(0.,(1,p)) # column means for each class
     # within class covariance matrix
-    Sw = tile(0.,(p,p)) # sum of covariances of the classes
-    Sb = tile(0.,(p,p)) # Between class scatter matrix
+    Sw = np.tile(0.,(p,p)) # sum of covariances of the classes
+    Sb = np.tile(0.,(p,p)) # Between class scatter matrix
     #w = tile(0.,(p,K))    # fisher discriminant matrix
     ###
     ### Loop through the classes to obtain the class covariances 
     ###
-    for i in arange(0,K):
+    for i in np.arange(0,K):
 
         # Get the rows corresponding to a particular class
         mask = Y==classes[i]     
@@ -106,7 +104,7 @@ def trainLDA(X, Y, reg="AUTO"):
         Xmean = Xmat - means[i,]
 
         # Within class scatter matrix
-        Sw = Sw + dot(Xmean.T,Xmean)
+        Sw = Sw + np.dot(Xmean.T,Xmean)
 
     # Total mean 
     totalmean = meanSum / float(N)
@@ -115,7 +113,7 @@ def trainLDA(X, Y, reg="AUTO"):
     ### Loop through the classes to obtain the scatter matrix
     ### between classes
     ###
-    for i in arange(0,K):
+    for i in np.arange(0,K):
 
         # Get the rows corresponding to a particular class
         mask = Y==classes[i]     
@@ -126,7 +124,7 @@ def trainLDA(X, Y, reg="AUTO"):
         meanD = means[i,] - totalmean
 
         # Between class scatter matrix
-        Sb = Sb + numThisclass*dot(meanD.T,meanD)
+        Sb = Sb + numThisclass*np.dot(meanD.T,meanD)
 
 
     # Fisher discriminant w is obtained by eigen value
@@ -137,13 +135,13 @@ def trainLDA(X, Y, reg="AUTO"):
     if reg == "AUTO":
         # Automatically select the regulariazion parameter
         # TODO: Many people suggest scaling the by the mean of the diagonal which may be a good way to select a regularization parameter. Why?
-        diagElements = diag(Sw)
+        diagElements = np.diag(Sw)
         meanDiag = diagElements.mean(axis=0)
         delta = 0.001*meanDiag
-        deltaI = delta*eye(p)
+        deltaI = delta*np.eye(p)
     elif isinstance(reg,float):
         # This method is suggested by wikipedia
-        deltaI = reg*reg*eye(p)
+        deltaI = reg*reg*np.eye(p)
     else: 
         deltaI = np.zeros((p,p))
     

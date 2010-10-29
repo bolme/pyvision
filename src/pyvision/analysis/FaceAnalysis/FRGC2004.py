@@ -92,8 +92,8 @@ class FRGC_Exp4(FaceDatabase):
     FRGC Experiment 4 is a controled to uncontrolled scenario
     
     Note:  The left and right eye in the metadata is relative to the 
-           person.  For the face structure this is reversed and follows 
-           the pyvision convention which is relative to the image.
+    person.  For the face structure this is reversed and follows 
+    the pyvision convention which is relative to the image.
     '''
     
     def __init__(self,location):
@@ -213,8 +213,8 @@ class FRGC_V1(FaceDatabase):
     FRGC Experiment 4 is a controled to uncontrolled scenario
     
     Note:  The left and right eye in the metadata is relative to the 
-           person.  For the face structure this is reversed and follows 
-           the pyvision convention which is relative to the image.
+    person.  For the face structure this is reversed and follows 
+    the pyvision convention which is relative to the image.
     '''
     
     def __init__(self,location):
@@ -312,8 +312,8 @@ class FRGC_Exp4_Reduced(FaceDatabase):
     FRGC Experiment 4 is a controled to uncontrolled scenario
     
     Note:  The left and right eye in the metadata is relative to the 
-           person.  For the face structure this is reversed and follows 
-           the pyvision convention which is relative to the image.
+    person.  For the face structure this is reversed and follows 
+    the pyvision convention which is relative to the image.
     '''
     
     def __init__(self,location):

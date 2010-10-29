@@ -119,12 +119,8 @@ def mcnemar_test(sf,fs):
     From Zhoo and Chellappa. "Face Processining". Chapter 3.
     
     Compairs the output of two algorithms on the same set of trials.
-    Input to the function are two counts:
-        sf - the number of trials algorithm A succeeded and algorithm B failed.
-        fs - the number of trials algorithm A failed and algorithm B succeeded.
     Notice that trials where they both succeeded or both failed are ignored.
-    Output: The two-sided p-value for McNemar's Exact Test.  For one sided
-            divide by two.
+    Output: The two-sided p-value for McNemar's Exact Test.  For one sided divide by two.
     
     If sf+fs is large you may want to use the approximate test.
     
@@ -171,6 +167,10 @@ def mcnemar_test(sf,fs):
     
     > mcnemar_test(3,1) # Two-sided p-value
     0.625
+    
+    @param sf: the number of trials algorithm A succeeded and algorithm B failed.
+    @param fs: the number of trials algorithm A failed and algorithm B succeeded.
+
     '''
     def factorial(n):
         if n <= 1: return 1

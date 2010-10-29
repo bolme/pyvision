@@ -19,10 +19,10 @@ class LocalMaximumDetector:
         for each thread.
         
         @param mat: 2d Real Matrix input.
-        @keyparam threshold: Mininum value of local maxima.
-        @keyparam sorted: set to False to save time and return an unorderd list.
+        @param threshold: Mininum value of local maxima.
+        @param sorted: set to False to save time and return an unorderd list.
         
-        @returns maxes,vals
+        @returns: maxes,vals
         '''
         r,c = mat.shape
         maxes = self.maxes

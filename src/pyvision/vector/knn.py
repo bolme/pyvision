@@ -106,15 +106,13 @@ class KNearestNeighbors(object):
     """
 
     def __init__(self, data, p=2, is_distance=True):
-        """Construct a nearest neighbor algorithm.
+        """
+        Construct a nearest neighbor algorithm.
 
-        Parameters:
-        ===========
-
-        data : array of n points with dimensionality d, shape (n,d).
+        @param data : array of n points with dimensionality d, shape (n,d).
             The data points to be indexed. This array is not copied, and
             so modifying this data will result in bogus results.
-        p : float, 1<=p<=infinity
+        @param p : float, 1<=p<=infinity
             Which Minkowski p-norm to use. 
             1 is the sum-of-absolute-values "Manhattan" distance
             2 is the usual Euclidean distance
@@ -122,7 +120,7 @@ class KNearestNeighbors(object):
             Also accepts the keywords "Manhattan", "Euclidean", and 
             "Correlation", or p can also be a user defined function with will 
             compute a distance matrix between two sets of points. 
-        is_distance: True or False.  Determines if a user defined function is
+        @param is_distance: True or False.  Determines if a user defined function is
             treated as a distance (smaller is better) or a similarity (larger
             values are better).
         """
@@ -140,16 +138,14 @@ class KNearestNeighbors(object):
         
         
     def query(self, x, k=1, p=None, is_distance=True):
-        """query the instance for nearest neighbors
+        """
+        Query the instance for nearest neighbors
 
-        Parameters:
-        ===========
-
-        x : array-like, last dimension self.k
+        @param x : array-like, last dimension self.k
             An array of points to query.
-        k : integer
+        @param k : integer
             The number of nearest neighbors to return.
-        p : float, 1<=p<=infinity
+        @param p : float, 1<=p<=infinity
             Which Minkowski p-norm to use. 
             1 is the sum-of-absolute-values "Manhattan" distance
             2 is the usual Euclidean distance
@@ -158,20 +154,7 @@ class KNearestNeighbors(object):
             "Correlation", or p can also be a user defined function with will 
             compute a distance matrix between two sets of points. 
 
-        Returns:
-        ========
-        
-        d : array of floats
-            The distances to the nearest neighbors. 
-            If x has shape tuple+(self.k,), then d has shape tuple if 
-            k is one, or tuple+(k,) if k is larger than one.  Missing 
-            neighbors are indicated with infinite distances.  If k is None, 
-            then d is an object array of shape tuple, containing lists 
-            of distances. In either case the hits are sorted by distance 
-            (nearest first).
-        i : array of integers
-            The locations of the neighbors in self.data. i is the same
-            shape as d.
+        @returns: a tuple (distances, indexes) 
         """
         # check the input
         assert x.shape[-1] == self.data.shape[1]

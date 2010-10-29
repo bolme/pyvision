@@ -36,9 +36,9 @@ This module contains functions for reading and writing files
 for the Biometrics Evaluation Environment (BEE) including distance
 matricies and sigsets.
 
-@authors  David S. Bolme (CSU) and C.J. Carey (NIST)
+@authors:  David S. Bolme (CSU) and C.J. Carey (NIST)
 
-<p>see: <a href="http://www.bee-biometrics.org">http://www.bee-biometrics.org</a>
+see: <a href="http://www.bee-biometrics.org">http://www.bee-biometrics.org</a>
 '''
 
 import xml.etree.cElementTree as ET
@@ -64,7 +64,7 @@ BEE_DONTCARE = 0x00
 # Parse a BEE sigset.
 def parseSigSet(source):
     '''
-    the format of a sigset is:
+    the format of a sigset is::
         sigset = [ 
                     ("subject_id", #biometric-signature
                         [ # multiple presentations
@@ -81,8 +81,6 @@ def parseSigSet(source):
                         ]
                     )
                 ]   
-                        
-    
     '''
 
     sigset = ET.parse(source)

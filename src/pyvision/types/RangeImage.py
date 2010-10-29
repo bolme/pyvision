@@ -93,7 +93,7 @@ class RangeImage:
         
     def getRange(self):
         '''
-        @returns xmin,xmax,ymin,ymax,zmin,zmax
+        @returns: xmin,xmax,ymin,ymax,zmin,zmax
         '''
         
         flags = np.array(self.flags.flatten(),dtype=np.bool)
@@ -105,7 +105,9 @@ class RangeImage:
     
     
     def getXImage(self):
-        '''@returns the x coordinates.'''
+        '''
+        @returns: the x coordinates.
+        '''
         xmin,xmax,ymin,ymax,zmin,zmax = self.getRange()
         
         r,c = self.x.shape 
@@ -120,7 +122,9 @@ class RangeImage:
         
         
     def getYImage(self):
-        '''@returns the y coordinates.'''
+        '''
+        @returns: the y coordinates.
+        '''
         xmin,xmax,ymin,ymax,zmin,zmax = self.getRange()
         
         r,c = self.x.shape 
@@ -135,7 +139,9 @@ class RangeImage:
 
 
     def getZImage(self):
-        '''@returns the z coordinates.'''
+        '''
+        @returns: the z coordinates.
+        '''
         xmin,xmax,ymin,ymax,zmin,zmax = self.getRange()
         
         r,c = self.x.shape 
@@ -149,7 +155,9 @@ class RangeImage:
         return pv.Image(Z)
 
     def getMaskImage(self):
-        '''@returns the missing value mask.'''
+        '''
+        @returns: the missing value mask.
+        '''
         xmin,xmax,ymin,ymax,zmin,zmax = self.getRange()
         
         r,c = self.x.shape 

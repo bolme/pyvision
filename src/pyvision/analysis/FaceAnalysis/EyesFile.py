@@ -35,26 +35,16 @@ from os.path import basename,splitext
 from pyvision.types.Point import Point
 from pyvision.types.Rect import Rect,BoundingRect
 
-##
-# Parses and interfaces with an eyes file.  Eyes files can be comma separated 
-# (.csv) files or white space separated files.
-# 
-# <p>Each line of the file should have an image name and then the left X, 
-# left Y, right X, and right Y.  Extensions will be automatically striped from 
-# image filenames.
-# 
-# <p>Example for csv:
-# <pre>
-# IMG392.jpg,100,122,153,120
-# </pre>
-#
-# <p>Example for whitespace delemeted:
-# <pre>
-# IMG392.jpg 100 122 153 120
-# </pre>
-#
-# @param the filename for the eye coordinate file.
 class EyesFile:
+    '''
+    Parses and interfaces with an eyes file.  Eyes files can be comma separated 
+    (.csv) files or white space separated files.
+
+    Each line of the file should have an image name and then the left X, 
+    left Y, right X, and right Y.  Extensions will be automatically striped from 
+    image filenames.
+    
+    '''
     
     def __init__(self,filename):
         '''
@@ -65,30 +55,30 @@ class EyesFile:
         
         self._readEyesFile()
     
-    ##
-    # @return a list of all image filenames 
     def files(self):
         '''
-        Returns the list of file names.
+        @returns: a list of all image filenames
         '''
         names = self.images.keys()
         names.sort()
         return names
     
     def hasFile(self,filename):
-        '''@returns True if filename is in index or False otherwise'''
+        '''@returns: True if filename is in index or False otherwise'''
         fname = self._parseName(filename)
         return self.images.has_key(fname)
     
-    ##
-    # Returns the eye coordinates given a face detection rectangle.  This is 
-    # useful if you have a face detector and want to simulate eye detection
-    #
-    # @param filename image filename
-    # @param rect rectangle that bounds the face that you want eye coordinates.
-    # @return [image_name, leye, reye, face_rect] or None if the rectangle is
-    #         not near a face.
+
     def findFace(self,filename,rect):
+        '''
+        Returns the eye coordinates given a face detection rectangle.  This is 
+        useful if you have a face detector and want to simulate eye detection
+    
+        @param filename: image filename
+        @param rect: rectangle that bounds the face that you want eye coordinates.
+        @returns: [image_name, leye, reye, face_rect] or None if the rectangle is
+                 not near a face.
+        '''
         fname = self._parseName(filename)
         if self.images.has_key(fname):
             faces = self.images[fname]

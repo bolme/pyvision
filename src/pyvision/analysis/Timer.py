@@ -36,7 +36,7 @@ class Timer:
         '''
         
         @param event: a short text description of the event being marked.
-        @keyparam notes: additional notes for this event.
+        @param notes: additional notes for this event.
         @returns: 6-tuple of times in seconds: Wall Clock Time, Time since last mark, Time since creation, CPU time, CPU time since last mark, CPU time since creation
         '''
         current = time.time()

@@ -310,9 +310,9 @@ class Image:
         '''
         Draws a line from point1 to point2 on the annotation image
     
-        @param point1: the starting point as type Point
-        @param point2: the ending point as type Point
+        @param points: a list of pv points to be plotted
         @param color: defined as ('#rrggbb' or 'name') 
+        @param width: the line width
         '''
         n = len(points)
         for i in range(n):
@@ -449,8 +449,7 @@ class Image:
     def _generateOpenCV(self):
         '''
         Create a color opencv representation of the image.
-        TODO: The OpenCV databuffer seems to be automatically swapped from RGB
-              to BGR.  This is counter intuitive.
+        TODO: The OpenCV databuffer seems to be automatically swapped from RGB to BGR.  This is counter intuitive.
         '''
         
         w,h = self.size

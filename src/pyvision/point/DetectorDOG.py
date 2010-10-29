@@ -33,15 +33,15 @@
 
 '''
 Purpose: 
-    Find regions of interest using the multiscale differance of 
-    gaussians opereator.
+Find regions of interest using the multiscale differance of 
+gaussians opereator.
 
 Inspired by: 
-    M. Brown and D. Lowe. Invariant features from interest point groups. 
-    British Machine Vision Conference. 2002.
+M. Brown and D. Lowe. Invariant features from interest point groups. 
+British Machine Vision Conference. 2002.
 
 Contributed by: 
-    David Bolme 2008.
+David Bolme 2008.
 '''
 
 
