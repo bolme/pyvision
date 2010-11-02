@@ -674,7 +674,7 @@ class Image:
                 interpolation = cv.CV_INTER_AREA
             else:
                 # Upsampling so use linear
-                interpolation = cv.CV_INTER_BICUBIC
+                interpolation = cv.CV_INTER_CUBIC
 
         cv.Resize(subim,new_image,interpolation)
         
