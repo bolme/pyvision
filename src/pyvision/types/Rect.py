@@ -33,6 +33,7 @@
 
 import Point as pt
 import cv
+import numpy as np
 
 def BoundingRect(*points):
     '''
@@ -187,6 +188,15 @@ class Rect:
         h = scale*self.h
         return Rect(cx-0.5*w,cy-0.5*h,w,h)
     
+    def asInt(self):
+        '''
+        Return a dictionary representing the rectangle with integer values
+        '''
+        x = int(np.floor(self.x))
+        y = int(np.floor(self.y))
+        w = int(np.floor(self.w))
+        h = int(np.floor(self.h))
+        return {'x':x,'y':y,'w':w,'h':h}
     
     def __str__(self):
         '''
