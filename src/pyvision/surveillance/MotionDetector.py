@@ -56,18 +56,21 @@ class MotionDetector(object):
         '''
         self._fd = pv.FrameDifferencer(imageBuff, thresh)
         
-    def detect(self, minArea=400, annotateImg=None):
+    def detect(self, minArea=400, annotateImg=None, rectFilter=None):
         '''
         @param minArea: Any contours with less than this area in pixels will be dropped
         @param annotateImg: The pv.Image on which to annotate the detection, use None for
          no annotations.
+        @param rectFilter: A function to be applied to the list of rectangles to filter
+          out those that don't meet some specification, such as being too thin, etc. 
         '''
         binaryImg = self._fd.getDiffImage()
         cvBinary = binaryImg.asOpenCVBW()
         #cvdst = cv.CreateImage(binaryImg.size, cv.IPL_DEPTH_8U, 1)
         cv.Dilate(cvBinary, cvBinary, None, 3)
         cv.Erode(cvBinary, cvBinary, None, 1)
-    
+        self._filter = rectFilter
+        
         return self._getRects(cvBinary, annotateImg, minArea) 
         
     def _getRects(self, cvBinary, annotateImg, minArea=400):
@@ -87,13 +90,14 @@ class MotionDetector(object):
         if len(contours) < 1: return(annotateImg,rects)
         seq = contours
         while not (seq == None):
-            (x, y, w, h) = cv.BoundingRect(seq)
-            t1 = h > w  #filter out horizontal shapes (hack...unlikely to be pedestrians...but cars? crawling?
-            t2 = (cv.ContourArea(seq) > minArea)
-            if t1 and t2:
+            (x, y, w, h) = cv.BoundingRect(seq) 
+            if (cv.ContourArea(seq) > minArea):
                 r = pv.Rect(x,y,w,h)
                 rects.append(r)
             seq = seq.h_next()
+        
+        if self._filter != None:
+            rects = self._filter(rects)
         
         #print "Found %d rects"%len(rects)
         if annotateImg != None:
