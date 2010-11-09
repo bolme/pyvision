@@ -169,6 +169,8 @@ from pyvision.surveillance.ImageBuffer import ImageBuffer
 
 from pyvision.surveillance.FrameDifferencer import FrameDifferencer
 
+from pyvision.surveillance.MotionDetector import MotionDetector
+
 from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotientImage, lowPassFilter, highPassFilter, bandPassFilter
 
 from pyvision.other.distance import boolToUbyte, ubyteToBool, hamming

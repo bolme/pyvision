@@ -38,7 +38,6 @@ import time
 import os
 import pyvision as pv
 import cv
-import numpy as np
 #from scipy import weave
 
 # TODO: The default camera on linux appears to be zero and 1 on MacOS
@@ -53,7 +52,7 @@ class Webcam:
         #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH,1600.0)
         #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT,1200.0)
         #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH)
-        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT)
+        # print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT)
         
         
         self.size = size
@@ -97,28 +96,52 @@ class Webcam:
             resized = cv.CreateImage( (w,h), depth, channels )
             cv.Resize( frame, resized, cv.CV_INTER_NN )
             return resized
-        
 
 class Video:
     def __init__(self,filename,size=None):
         self.filename = filename
         self.cv_capture = cv.CaptureFromFile( filename );
-        
-        # TODO: CV_CAP_PROP_FRAME_COUNT does not work (returns zero)
-        #self._numframes = cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
-        
-        cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_AVI_RATIO,1.0)
-        self._numframes = int(np.ceil(cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_FRAMES)))
-        
-        # TODO: This next line corrects for an off by one error in the video frame count.  
-        # Without this the first frame is never returned.
-        cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_FRAMES,-1.0)
+        self._numframes = cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
+        #print self.cv_capture, self.cv_capture.__hash__, dir(self.cv_capture), repr(self.cv_capture)
         self.size = size
+        #print filename
+        #print self.size
+        #self.n_frames = cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
+        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH)
+        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT)
+        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_FRAMES)
+        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
+        #while True:
+        #    print cv.QueryFrame(self.cv_capture)
+        #    print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_FRAMES),
+        #    print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_AVI_RATIO),
+        #    print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
+        #print self.n_frames
         self.current_frame = 0
+        
+    #def __del__(self):
+        #opencv.highgui.cvReleaseCapture(self.cv_capture)
+        
 
+        # cvReleaseCapture interface does not work so use weave this may be fixed in release 1570
+        # TODO: This should be removed when the opencv bug is fixed
+        #capture = self.cv_capture.__int__()
+        #cv.ReleaseCapture(self.cv_capture)
+        #weave.inline(
+        #    '''
+        #    CvCapture* tmp = (CvCapture*) capture;
+        #    cvReleaseCapture(&tmp);
+        #    ''',
+        #    arg_names=['capture'],
+        #    type_converters=weave.converters.blitz,
+        #    include_dirs=['/usr/local/include'],
+        #    headers=['<opencv/cv.h>','<opencv/highgui.h>'],
+        #    library_dirs=['/usr/local/lib'],
+        #    libraries=['cv','highgui']
+        #)
 
     def query(self):
-        if self.current_frame >= self._numframes:
+        if self.current_frame > 0 and cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_AVI_RATIO) == 1.0:
             return None
         self.current_frame += 1
         frame = cv.QueryFrame( self.cv_capture );
@@ -147,7 +170,6 @@ class Video:
     def __iter__(self):
         ''' Return an iterator for this video '''
         return Video(self.filename,self.size)
-
         
     def next(self):
         frame = self.query()
@@ -155,8 +177,6 @@ class Video:
             raise StopIteration("End of video sequence")
         return frame
         
-    def __len__(self):
-        return self._numframes
                 
         
 class FfmpegIn:
