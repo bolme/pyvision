@@ -37,6 +37,12 @@ Created on Oct 22, 2010
 import scipy as sp
 import pyvision as pv
 
+#Constants used to identify a background subtraction method,
+# useful, for example, for specifying which method to use in the
+# MotionDetector class.
+BG_SUBTRACT_FD = 1  #frame differencer
+BG_SUBTRACT_MF = 2  #median filter
+
 class FrameDifferencer:
     '''
     This class is useful for simple N-frame differencing method of
@@ -63,10 +69,12 @@ class FrameDifferencer:
         self._threshold = thresh
         
         
-    def getDiffImage(self):
+    def getForegroundMask(self):
         '''
         @return: a version of imagebuffer.getMiddle() with background subtraction
-            via frame differencing first and last frames.
+            via frame differencing first and last frames. Note, one will likely
+            have to perform additional morphological operations on the foreground
+            mask prior to use.
         '''
         prevImg = self._imageBuffer[0].asMatrix2D()
         curImg = self._imageBuffer.getMiddle().asMatrix2D()
@@ -81,3 +89,61 @@ class FrameDifferencer:
         mask = sp.logical_and(delta1,delta2)
     
         return pv.Image(mask*255.0) 
+    
+class MedianFilter:
+    '''
+    Uses median pixel values of the images in a buffer to
+    approximate a background model.
+    '''
+    def __init__(self, imageBuffer, thresh=20):
+        '''
+        @param imageBuffer: An ImageBuffer object that has already been filled
+        with the appropriate number of images. (Provide a full buffer...so a few
+        frames of initialization will be required in most cases to fill up a
+        newly created buffer.)     
+        @param thresh: A noise threshold to remove very small differences from
+         the background model 
+        '''
+        self._imageBuffer = imageBuffer
+        self._threshold = thresh
+        
+    def _bufferToImageStack(self):
+        '''
+        We have an image buffer, but we'll need a 3D scipy array representing
+        the "stack" of images in the buffer.
+        '''
+        img0 = self._imageBuffer[0]        
+        (w,h) = img0.size
+        f = len(self._imageBuffer)
+        stack = sp.zeros((f,w,h))
+        for i,img in enumerate(self._imageBuffer):
+            mat = img.asMatrix2D()
+            stack[i,:,:] = mat
+            
+        self._imageStack = stack
+            
+    def getMedianVals(self):
+        '''
+        @return: A scipy matrix representing the gray-scale median values of the image stack.
+           If you want a pyvision image, just wrap the result in pv.Image(result).
+        '''
+        self._bufferToImageStack() #generate image stack
+        medians = sp.median(self._imageStack, axis=0) #median of each pixel jet in stack
+        return medians
+    
+    def getForegroundMask(self):
+        '''
+        @return: a version of imagebuffer.getLast() with background subtraction
+            via subtracting the median values from the buffer. Note, one will likely
+            have to perform additional morphological operations on the foreground
+            mask prior to use.
+        '''
+        imgGray = self._imageBuffer.getLast().asMatrix2D()
+        imgBG = self.getMedianVals()
+        diff = abs(imgGray - imgBG)
+        mask = (diff > self._threshold)
+        return pv.Image( mask * 255.0)    
+            
+            
+            
+    

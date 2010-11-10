@@ -85,6 +85,12 @@ class ImageBuffer:
     def getBuffer(self):
         return self._data
             
+    def getFirst(self):
+        return self._data[0]
+    
+    def getLast(self):
+        return self._data[-1]
+    
     def getMiddle(self):
         mid = int(self._count/2)
         return self._data[mid]

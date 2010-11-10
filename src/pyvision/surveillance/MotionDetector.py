@@ -36,6 +36,7 @@ Created on Nov 9, 2010
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import pyvision as pv
+from pyvision.surveillance.BackgroundSubtraction import BG_SUBTRACT_FD, BG_SUBTRACT_MF
 import cv
 
 class MotionDetector(object):
@@ -46,15 +47,20 @@ class MotionDetector(object):
     The general process is to update the image buffer and then
     call the MotionDetector's detect() method.
     '''
-
-    def __init__(self, imageBuff, thresh=20):
+    
+    def __init__(self, imageBuff, thresh=20, method=BG_SUBTRACT_FD):
         '''
         Constructor
         @param imageBuff: a pv.ImageBuffer object, already full, to be used
           in the background subtraction step of the motion detection.
         @param thresh: Used by the background subtraction to eliminate noise.  
         '''
-        self._fd = pv.FrameDifferencer(imageBuff, thresh)
+        if method==BG_SUBTRACT_FD:
+            self._bgSubtract = pv.FrameDifferencer(imageBuff, thresh)
+        elif method==BG_SUBTRACT_MF:
+            self._bgSubtract = pv.MedianFilter(imageBuff, thresh)
+        else:
+            raise ValueError("Unknown Background Subtraction Method specified.")
         
     def detect(self, minArea=400, annotateImg=None, rectFilter=None):
         '''
@@ -64,8 +70,8 @@ class MotionDetector(object):
         @param rectFilter: A function to be applied to the list of rectangles to filter
           out those that don't meet some specification, such as being too thin, etc. 
         '''
-        binaryImg = self._fd.getDiffImage()
-        cvBinary = binaryImg.asOpenCVBW()
+        mask = self._bgSubtract.getForegroundMask()
+        cvBinary = mask.asOpenCVBW()
         #cvdst = cv.CreateImage(binaryImg.size, cv.IPL_DEPTH_8U, 1)
         cv.Dilate(cvBinary, cvBinary, None, 3)
         cv.Erode(cvBinary, cvBinary, None, 1)
