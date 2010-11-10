@@ -167,7 +167,7 @@ from pyvision.analysis.roc import ROC,ROC_LOG_SAMPLED,ROC_MATCH_SAMPLED
 
 from pyvision.surveillance.ImageBuffer import ImageBuffer
 
-from pyvision.surveillance.BackgroundSubtraction import FrameDifferencer, MedianFilter
+from pyvision.surveillance.BackgroundSubtraction import *
 
 from pyvision.surveillance.MotionDetector import MotionDetector
 

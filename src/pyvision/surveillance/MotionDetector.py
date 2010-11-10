@@ -36,7 +36,7 @@ Created on Nov 9, 2010
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import pyvision as pv
-from pyvision.surveillance.BackgroundSubtraction import BG_SUBTRACT_FD, BG_SUBTRACT_MF
+from pyvision.surveillance.BackgroundSubtraction import *
 import cv
 
 class MotionDetector(object):
@@ -59,6 +59,8 @@ class MotionDetector(object):
             self._bgSubtract = pv.FrameDifferencer(imageBuff, thresh)
         elif method==BG_SUBTRACT_MF:
             self._bgSubtract = pv.MedianFilter(imageBuff, thresh)
+        elif method==BG_SUBTRACT_AMF:
+            self._bgSubtract = pv.ApproximateMedianFilter(imageBuff, thresh)
         else:
             raise ValueError("Unknown Background Subtraction Method specified.")
         

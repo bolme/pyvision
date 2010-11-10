@@ -42,6 +42,7 @@ import pyvision as pv
 # MotionDetector class.
 BG_SUBTRACT_FD = 1  #frame differencer
 BG_SUBTRACT_MF = 2  #median filter
+BG_SUBTRACT_AMF = 3 #approx median filter
 
 class FrameDifferencer:
     '''
@@ -122,7 +123,7 @@ class MedianFilter:
             
         self._imageStack = stack
             
-    def getMedianVals(self):
+    def _getMedianVals(self):
         '''
         @return: A scipy matrix representing the gray-scale median values of the image stack.
            If you want a pyvision image, just wrap the result in pv.Image(result).
@@ -139,11 +140,48 @@ class MedianFilter:
             mask prior to use.
         '''
         imgGray = self._imageBuffer.getLast().asMatrix2D()
-        imgBG = self.getMedianVals()
+        imgBG = self._getMedianVals()
         diff = abs(imgGray - imgBG)
         mask = (diff > self._threshold)
         return pv.Image( mask * 255.0)    
             
             
+class ApproximateMedianFilter(MedianFilter):
+    '''
+    Approximates the median pixels via an efficient recursive algorithm that
+    would converge to the true median in a perfect world. It initializes a
+    median image based on all the images in the initial image buffer, but
+    then only updates the median image using the last (newest) image in the
+    buffer.
+    '''
+    def __init__(self, imageBuffer, thresh=20):
+        '''
+        @param imageBuffer: An ImageBuffer object that has already been filled
+        with the appropriate number of images. (Provide a full buffer...so a few
+        frames of initialization will be required in most cases to fill up a
+        newly created buffer.)     
+        @param thresh: A noise threshold to remove very small differences from
+         the background model 
+        '''
+        if not imageBuffer.isFull():
+            raise ValueError("Image Buffer must be full before initializing Approx. Median Filter.")
+        MedianFilter.__init__(self, imageBuffer, thresh)
+        self._medians = self._getMedianVals()
+        
+    def _updateMedian(self):
+        curImg = self._imageBuffer.getLast()
+        curMat = curImg.asMatrix2D()
+        median = self._medians
+        up = (curMat > median)*1.0
+        down = (curMat < median)*1.0
+        self._medians = self._medians + up - down
             
+    def getForegroundMask(self):
+        self._updateMedian()
+        imgGray = self._imageBuffer.getLast().asMatrix2D()
+        imgBG = self._medians
+        diff = abs(imgGray - imgBG)
+        mask = (diff > self._threshold)
+        return pv.Image( mask * 255.0)  
+                 
     
