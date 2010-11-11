@@ -614,6 +614,17 @@ class Image:
 
         return pyvision.Image(tmp)
     
+    def copy(self):
+        '''
+        Returns a new pv.Image which is a copy of (only) the current image.
+        Other internal data stored by the current pv.Image will NOT be copied.
+        This method uses cv.CloneImage so that the underlying image data will be
+        disconnected from the original data. (Deep copy)
+        '''
+        imgdat = self.asOpenCV()
+        imgdat2 = cv.CloneImage(imgdat)
+        return pv.Image(imgdat2)
+    
     def crop(self, rect, size=None, interpolation=None, return_affine=False):
         '''
         Crops an image to the given rectangle. Rectangle parameters are rounded to nearest 
