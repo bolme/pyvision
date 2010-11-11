@@ -123,6 +123,26 @@ class MotionDetector(object):
         get the updated mask.
         '''
         return self._fgMask
+    
+    def getForegroundPixels(self):
+        '''
+        @return: The full color foreground pixels on a black background.
+        @note: You must call detect() before getForegroundPixels() to
+        get updated information.
+        '''
+        #binary mask selecting foreground regions
+        mask = self._fgMask.asOpenCVBW()
+        
+        #full color source image
+        image = self._annotateImg.copy().asOpenCV()
+        
+        #dest image, full color, but initially all zeros (black/background)
+        # we will copy the foreground areas from image to here.
+        dest = cv.CloneImage(image)
+        cv.SetZero(dest)
+        
+        cv.Copy(image,dest,mask) #copy only pixels from image where mask != 0
+        return pv.Image(dest)
             
     def getRects(self):
         '''
@@ -175,6 +195,27 @@ class MotionDetector(object):
         @note: You must call detect() prior to getForegroundTiles() to get
         updated information.
         '''
-        cvMask = self._fgMask.asOpenCVBW()
-        cvImg = self._annotateImg
-        return None
+        
+        #binary mask selecting foreground regions
+        mask = self._fgMask.asOpenCVBW()
+        
+        #full color source image
+        image = self._annotateImg.copy().asOpenCV()
+        
+        #dest image, full color, but initially all zeros (black/background)
+        # we will copy the foreground areas from image to here.
+        dest = cv.CloneImage(image)
+        cv.SetZero(dest)
+        
+        cv.Copy(image,dest,mask) #copy only pixels from image where mask != 0
+        dst = pv.Image(dest)
+        
+        rects = self.getRects()
+        
+        tiles = []
+        for r in rects:
+            #for every rectangle, crop from dest image
+            t = dst.crop(r)
+            tiles.append(t)
+            
+        return tiles
