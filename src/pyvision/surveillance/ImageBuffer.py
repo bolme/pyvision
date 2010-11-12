@@ -34,6 +34,7 @@ Created on Oct 22, 2010
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+import scipy as sp
 
 class ImageBuffer:
     '''
@@ -106,4 +107,39 @@ class ImageBuffer:
         if(self._count > self._max):
             self._count = self._max
             
+    def fillBuffer(self, vid):
+        '''
+        If buffer is empty, you can use this function to spool off the first
+        N frames of the video to initialize/fill the buffer.
+        @param vid: an iterator of images, typically a pv.Video object or similar.
+        @note: Will cause an assertion exception if buffer is already full.
+        '''
+        assert not self.isFull()
+        
+        while not self.isFull():
+            im = vid.getNext()
+            self.add(im)
+
+        return
+
+    def asStackBW(self):
+        '''
+        @return: a 3D array (stack) of the gray scale version of the images
+        in the buffer. The dimensions of the stack are (N,w,h), where N is
+        the number of images (buffer size), w and h are the width and height
+        of each image. It is assumed that the images in the buffer are of
+        equal dimension to use this function.
+        '''
+        #TODO: Add a size=(w,h) option to allow the user to return a stack
+        # with selected dimensions. Would also remove the constraint that
+        # all images in buffer are of equal size.
+        img0 = self[0]        
+        (w,h) = img0.size
+        f = self.getCount()
+        stack = sp.zeros((f,w,h))
+        for i,img in enumerate(self._data):
+            mat = img.asMatrix2D()
+            stack[i,:,:] = mat
+            
+        return stack
     

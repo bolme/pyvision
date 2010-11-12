@@ -48,11 +48,14 @@ class MotionDetector(object):
     call the MotionDetector's detect() method.
     '''
     
-    def __init__(self, imageBuff, thresh=20, method=BG_SUBTRACT_FD, minArea=400, rectFilter=None):
+    def __init__(self, imageBuff=None, thresh=20, method=BG_SUBTRACT_AMF, minArea=400, 
+                 rectFilter=None, buffSize=5):
         '''
         Constructor
-        @param imageBuff: a pv.ImageBuffer object, already full, to be used
-          in the background subtraction step of the motion detection.
+        @param imageBuff: a pv.ImageBuffer object to be used in the background subtraction
+            step of the motion detection. If None, then this object will create an empty
+            5-frame buffer, and until the buffer is full, the results of the motion detection
+            will be nothing.
         @param thresh: Used by the background subtraction to eliminate noise.  
         @param method: Select background subtraction method. See constants defined in
           BackgroundSubtraction module
@@ -61,34 +64,73 @@ class MotionDetector(object):
           returns a list filtered in some way. This allows the user to arbitrarily
           define rules to further limit motion detection results based on the geometry
           of the bounding boxes.
+        @param buffSize: Only used if imageBuff==None. This controls the size of the
+          internal image buffer.
+        @note: Until the image buffer is full, the result of the motion detection will be
+          nothing. See documentation on the detect(img) method of this class.
         '''
         #initialize object variables
         self._fgMask = None        
         self._minArea = minArea
         self._filter = rectFilter
-        self._imageBuff = imageBuff
-        self._method = method
+        self._threshold = 20
         
-        if method==BG_SUBTRACT_FD:
-            self._bgSubtract = pv.FrameDifferencer(imageBuff, thresh)
-            self._annotateImg = imageBuff.getMiddle()
-        elif method==BG_SUBTRACT_MF:
-            self._bgSubtract = pv.MedianFilter(imageBuff, thresh)
-            self._annotateImg = imageBuff.getLast()
-        elif method==BG_SUBTRACT_AMF:
-            self._bgSubtract = pv.ApproximateMedianFilter(imageBuff, thresh)
-            self._annotateImg = imageBuff.getLast()
+        if imageBuff == None:
+            self._imageBuff = pv.ImageBuffer(N=buffSize)
+        else:
+            self._imageBuff = imageBuff
+        
+        self._method = method      
+        self._bgSubtract = None  #can't initialize until buffer is full...so done in detect()  
+        
+    def _initBGSubtract(self):
+        if self._method==BG_SUBTRACT_FD:
+            self._bgSubtract = pv.FrameDifferencer(self._imageBuff, self._threshold)
+        elif self._method==BG_SUBTRACT_MF:
+            self._bgSubtract = pv.MedianFilter(self._imageBuff, self._threshold)
+        elif self._method==BG_SUBTRACT_AMF:
+            self._bgSubtract = pv.ApproximateMedianFilter(self._imageBuff, self._threshold)
         else:
             raise ValueError("Unknown Background Subtraction Method specified.")
-        
-    def detect(self):
+                  
+    def _computeContours(self):
+        cvMask = self._fgMask.asOpenCVBW()
+        cvdst = cv.CloneImage(cvMask)  #because cv.FindContours may alter source image
+        contours = cv.FindContours(cvdst, cv.CreateMemStorage(), cv.CV_RETR_EXTERNAL, cv.CV_CHAIN_APPROX_SIMPLE)
+        self._contours = contours
+            
+    def detect(self, img):
         '''
-        After an image has been added to the image buffer, you call this method
-        to update detection results. After updating detection results, use one
+        You call this method to update detection results, given the new
+        image in the stream. After updating detection results, use one
         of the getX() methods, such as getRects() to see the results in the
         appropriate format.
-        '''
         
+        @param img: A pv.Image() to be added to the buffer as the most recent image,
+        and that triggers the new motion detection. Note that, depending on the
+        background subtraction method, this may not be the "key frame" for the 
+        detection. The Frame Differencer returns a background model based on the
+        middle image, but Median and Approx. Median Filters return a background
+        model based on the most recent (last) image in the buffer. 
+        
+        @return: The number of detected components in the current image. To get
+        more details, use the various getX() methods, like getForegroundMask(),
+        after calling detect().
+        
+        @note: Until the image buffer is full, this method will make no detections.
+        In which case, the return value will be -1, indicating this status. Also,
+        the getKeyFrame() method should be used to retrieve the key frame from
+        the buffer, which is not always the most recent image, depending on background
+        subtraction method.
+        '''
+        self._imageBuff.add(img)
+        if not self._imageBuff.isFull():
+            return -1
+        
+        #initialize background subtraction object only after buffer is full.
+        if self._bgSubtract == None:
+            self._initBGSubtract()
+
         mask = self._bgSubtract.getForegroundMask()
         cvBinary = mask.asOpenCVBW()
         cv.Dilate(cvBinary, cvBinary, None, 3)
@@ -108,13 +150,18 @@ class MotionDetector(object):
             self._annotateImg = self._imageBuff.getLast()
         elif self._method==BG_SUBTRACT_AMF:
             self._annotateImg = self._imageBuff.getLast()
-       
-    def _computeContours(self):
-        cvMask = self._fgMask.asOpenCVBW()
-        cvdst = cv.CloneImage(cvMask)  #because cv.FindContours may alter source image
-        contours = cv.FindContours(cvdst, cv.CreateMemStorage(), cv.CV_RETR_EXTERNAL, cv.CV_CHAIN_APPROX_SIMPLE)
-        self._contours = contours
-        
+            
+        return len(self._contours)
+
+    def getKeyFrame(self):
+        '''
+        @return: The "key frame" of the motion detector's buffer. This is the image
+        upon which detected motion rectangles, for example, should be overlaid. This
+        is not always the last image in the buffer because some background subtraction
+        methods (notably N-Frame Differencer) use the middle frame of the buffer.
+        '''
+        return self._annotateImg  #computed already by the detect() method    
+    
     def getForegroundMask(self):
         '''
         @return: a binary pv.Image representing the foreground pixels

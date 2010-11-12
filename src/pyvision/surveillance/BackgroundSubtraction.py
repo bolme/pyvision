@@ -107,28 +107,13 @@ class MedianFilter:
         '''
         self._imageBuffer = imageBuffer
         self._threshold = thresh
-        
-    def _bufferToImageStack(self):
-        '''
-        We have an image buffer, but we'll need a 3D scipy array representing
-        the "stack" of images in the buffer.
-        '''
-        img0 = self._imageBuffer[0]        
-        (w,h) = img0.size
-        f = len(self._imageBuffer)
-        stack = sp.zeros((f,w,h))
-        for i,img in enumerate(self._imageBuffer):
-            mat = img.asMatrix2D()
-            stack[i,:,:] = mat
-            
-        self._imageStack = stack
             
     def _getMedianVals(self):
         '''
         @return: A scipy matrix representing the gray-scale median values of the image stack.
            If you want a pyvision image, just wrap the result in pv.Image(result).
         '''
-        self._bufferToImageStack() #generate image stack
+        self._imageStack = self._imageBuffer.asStackBW()
         medians = sp.median(self._imageStack, axis=0) #median of each pixel jet in stack
         return medians
     
@@ -148,9 +133,9 @@ class MedianFilter:
             
 class ApproximateMedianFilter(MedianFilter):
     '''
-    Approximates the median pixels via an efficient recursive algorithm that
+    Approximates the median pixels via an efficient incremental algorithm that
     would converge to the true median in a perfect world. It initializes a
-    median image based on all the images in the initial image buffer, but
+    median image based on the images in the initial image buffer, but
     then only updates the median image using the last (newest) image in the
     buffer.
     '''
