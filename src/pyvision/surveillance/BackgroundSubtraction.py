@@ -36,7 +36,7 @@ Created on Oct 22, 2010
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import scipy as sp
 import pyvision as pv
-
+import math
 #Constants used to identify a background subtraction method,
 # useful, for example, for specifying which method to use in the
 # MotionDetector class.
@@ -44,7 +44,48 @@ BG_SUBTRACT_FD = 1  #frame differencer
 BG_SUBTRACT_MF = 2  #median filter
 BG_SUBTRACT_AMF = 3 #approx median filter
 
-class FrameDifferencer:
+class AbstractBGModel:
+    def __init__(self, imageBuffer, thresh=20, soft_thresh=False):
+        '''
+        @param imageBuffer: An ImageBuffer object that has already been filled
+        with the appropriate number of images. (Provide a full buffer...so a few
+        frames of initialization will be required in most cases to fill up a
+        newly created buffer.)     
+        @param thresh: A noise threshold to remove very small differences.    
+        '''
+        self._imageBuffer = imageBuffer
+        self._threshold = thresh
+        self._softThreshold = soft_thresh
+        
+    def _computeBGDiff(self):
+        '''
+        This private method should be overridden by a concrete background subtraction
+        class to yield a difference image from the background model.
+        '''
+        raise NotImplemented
+    
+    def getForegroundMask(self):
+        '''
+        @return: A mask image indicating which pixels are considered foreground.
+          Depending on whether soft-thresholding is used, this may be a binary image
+          with values of [0 or 255], or image of weights [0.0-255.0], which will
+          have to be divided by 255 to get weights [0.0-1.0].         
+        @note: One may wish to perform additional morphological operations
+            on the foreground mask prior to use.
+        '''
+        diff = self._computeBGDiff()
+        if self._softThreshold:
+            mask = 1 - (math.e)**(-(1.0*diff)/self._threshold)  #element-wise exp weighting
+            #mask = (diff > self._threshold)   
+        else:
+            mask = (sp.absolute(diff) > self._threshold)    
+            #mu = sp.mean(diff)
+            #sigma = sp.std(diff)
+            #mask = sp.absolute((diff-mu)/sigma) > self._threshold
+        return pv.Image(mask*255.0) 
+        
+
+class FrameDifferencer(AbstractBGModel):
     '''
     This class is useful for simple N-frame differencing method of
     background subtraction. If you have a stationary camera, this can
@@ -58,55 +99,28 @@ class FrameDifferencer:
     abs(Middle-First) AND abs(Last-Middle).
     '''
 
-    def __init__(self, imageBuffer, thresh=20):
-        '''
-        @param imageBuffer: An ImageBuffer object that has already been filled
-        with the appropriate number of images. (Provide a full buffer...so a few
-        frames of initialization will be required in most cases to fill up a
-        newly created buffer.)     
-        @param thresh: A noise threshold to remove very small differences.    
-        '''
-        self._imageBuffer = imageBuffer
-        self._threshold = thresh
+    def __init__(self, imageBuffer, thresh=20, soft_thresh = False):
+        AbstractBGModel.__init__(self, imageBuffer, thresh, soft_thresh)
         
-        
-    def getForegroundMask(self):
-        '''
-        @return: a version of imagebuffer.getMiddle() with background subtraction
-            via frame differencing first and last frames. Note, one will likely
-            have to perform additional morphological operations on the foreground
-            mask prior to use.
-        '''
+    def _computeBGDiff(self):
         prevImg = self._imageBuffer[0].asMatrix2D()
         curImg = self._imageBuffer.getMiddle().asMatrix2D()
         nextImg = self._imageBuffer[-1].asMatrix2D()
         
-        delta1 = sp.absolute(curImg - prevImg)   #frame diff
-        delta1 = (delta1 > self._threshold)     #threshoopencv dilatelding to binary image
-            
-        delta2 = sp.absolute(nextImg - curImg)   #frame diff
-        delta2 = (delta2 > self._threshold)     #thresholding
+        delta1 = sp.absolute(curImg - prevImg)   #frame diff 1
+        delta2 = sp.absolute(nextImg - curImg)   #frame diff 2
         
-        mask = sp.logical_and(delta1,delta2)
-    
-        return pv.Image(mask*255.0) 
-    
-class MedianFilter:
+        #use element-wise minimum of the two difference images, which is what
+        # gets compared to threshold to yield foreground mask
+        return sp.minimum(delta1, delta2)
+        
+class MedianFilter(AbstractBGModel):
     '''
     Uses median pixel values of the images in a buffer to
     approximate a background model.
     '''
-    def __init__(self, imageBuffer, thresh=20):
-        '''
-        @param imageBuffer: An ImageBuffer object that has already been filled
-        with the appropriate number of images. (Provide a full buffer...so a few
-        frames of initialization will be required in most cases to fill up a
-        newly created buffer.)     
-        @param thresh: A noise threshold to remove very small differences from
-         the background model 
-        '''
-        self._imageBuffer = imageBuffer
-        self._threshold = thresh
+    def __init__(self, imageBuffer, thresh=20, soft_thresh = False):
+        AbstractBGModel.__init__(self, imageBuffer, thresh, soft_thresh)
             
     def _getMedianVals(self):
         '''
@@ -117,18 +131,10 @@ class MedianFilter:
         medians = sp.median(self._imageStack, axis=0) #median of each pixel jet in stack
         return medians
     
-    def getForegroundMask(self):
-        '''
-        @return: a version of imagebuffer.getLast() with background subtraction
-            via subtracting the median values from the buffer. Note, one will likely
-            have to perform additional morphological operations on the foreground
-            mask prior to use.
-        '''
+    def _computeBGDiff(self):
         imgGray = self._imageBuffer.getLast().asMatrix2D()
         imgBG = self._getMedianVals()
-        diff = abs(imgGray - imgBG)
-        mask = (diff > self._threshold)
-        return pv.Image( mask * 255.0)    
+        return (imgGray - imgBG) 
             
             
 class ApproximateMedianFilter(MedianFilter):
@@ -139,18 +145,10 @@ class ApproximateMedianFilter(MedianFilter):
     then only updates the median image using the last (newest) image in the
     buffer.
     '''
-    def __init__(self, imageBuffer, thresh=20):
-        '''
-        @param imageBuffer: An ImageBuffer object that has already been filled
-        with the appropriate number of images. (Provide a full buffer...so a few
-        frames of initialization will be required in most cases to fill up a
-        newly created buffer.)     
-        @param thresh: A noise threshold to remove very small differences from
-         the background model 
-        '''
+    def __init__(self, imageBuffer, thresh=20, soft_thresh=False):
         if not imageBuffer.isFull():
             raise ValueError("Image Buffer must be full before initializing Approx. Median Filter.")
-        MedianFilter.__init__(self, imageBuffer, thresh)
+        MedianFilter.__init__(self, imageBuffer, thresh, soft_thresh)
         self._medians = self._getMedianVals()
         
     def _updateMedian(self):
@@ -160,13 +158,10 @@ class ApproximateMedianFilter(MedianFilter):
         up = (curMat > median)*1.0
         down = (curMat < median)*1.0
         self._medians = self._medians + up - down
-            
-    def getForegroundMask(self):
+        
+    def _computeBGDiff(self):
         self._updateMedian()
         imgGray = self._imageBuffer.getLast().asMatrix2D()
         imgBG = self._medians
-        diff = abs(imgGray - imgBG)
-        mask = (diff > self._threshold)
-        return pv.Image( mask * 255.0)  
-                 
-    
+        return (imgGray - imgBG)  
+

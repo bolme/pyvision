@@ -49,7 +49,7 @@ class MotionDetector(object):
     '''
     
     def __init__(self, imageBuff=None, thresh=20, method=BG_SUBTRACT_AMF, minArea=400, 
-                 rectFilter=None, buffSize=5):
+                 rectFilter=None, buffSize=5, soft_thresh = False):
         '''
         Constructor
         @param imageBuff: a pv.ImageBuffer object to be used in the background subtraction
@@ -66,6 +66,10 @@ class MotionDetector(object):
           of the bounding boxes.
         @param buffSize: Only used if imageBuff==None. This controls the size of the
           internal image buffer.
+        @param soft_thresh: Specify if the background subtraction method should
+          use a soft threshold, in which case the returned mask is no longer a binary
+          image, but represents weighted values. NOTE: NOT CURRENTLY IMPLEMENTED. 
+          SOFT THRESHOLD WILL BE IGNORED, HARD THRESHOLD ONLY IN THIS VERSION.
         @note: Until the image buffer is full, the result of the motion detection will be
           nothing. See documentation on the detect(img) method of this class.
         '''
@@ -74,6 +78,7 @@ class MotionDetector(object):
         self._minArea = minArea
         self._filter = rectFilter
         self._threshold = 20
+        self._softThreshold = False #soft_thresh
         
         if imageBuff == None:
             self._imageBuff = pv.ImageBuffer(N=buffSize)
@@ -85,11 +90,14 @@ class MotionDetector(object):
         
     def _initBGSubtract(self):
         if self._method==BG_SUBTRACT_FD:
-            self._bgSubtract = pv.FrameDifferencer(self._imageBuff, self._threshold)
+            self._bgSubtract = pv.FrameDifferencer(self._imageBuff, self._threshold, 
+                                                   soft_thresh = self._softThreshold)
         elif self._method==BG_SUBTRACT_MF:
-            self._bgSubtract = pv.MedianFilter(self._imageBuff, self._threshold)
+            self._bgSubtract = pv.MedianFilter(self._imageBuff, self._threshold,
+                                               soft_thresh = self._softThreshold)
         elif self._method==BG_SUBTRACT_AMF:
-            self._bgSubtract = pv.ApproximateMedianFilter(self._imageBuff, self._threshold)
+            self._bgSubtract = pv.ApproximateMedianFilter(self._imageBuff, self._threshold,
+                                                          soft_thresh = self._softThreshold)
         else:
             raise ValueError("Unknown Background Subtraction Method specified.")
                   
@@ -99,7 +107,17 @@ class MotionDetector(object):
         contours = cv.FindContours(cvdst, cv.CreateMemStorage(), cv.CV_RETR_EXTERNAL, cv.CV_CHAIN_APPROX_SIMPLE)
         self._contours = contours
             
-    def detect(self, img):
+    def _computeConvexHulls(self):
+        hulls = []
+        seq = self._contours
+        while not (seq == None):
+            cvxHull = cv.ConvexHull2(seq, cv.CreateMemStorage(), return_points=True)
+            hulls.append(cvxHull)
+            seq = seq.h_next()           
+            
+        self._convexHulls = hulls
+            
+    def detect(self, img, ConvexHulls=False):
         '''
         You call this method to update detection results, given the new
         image in the stream. After updating detection results, use one
@@ -112,6 +130,10 @@ class MotionDetector(object):
         detection. The Frame Differencer returns a background model based on the
         middle image, but Median and Approx. Median Filters return a background
         model based on the most recent (last) image in the buffer. 
+        
+        @param ConvexHulls: If true, then the detected foreground pixels are
+        grouped into convex hulls, which can have the effect of removing internal
+        "holes" in the detect.
         
         @return: The number of detected components in the current image. To get
         more details, use the various getX() methods, like getForegroundMask(),
@@ -131,17 +153,6 @@ class MotionDetector(object):
         if self._bgSubtract == None:
             self._initBGSubtract()
 
-        mask = self._bgSubtract.getForegroundMask()
-        cvBinary = mask.asOpenCVBW()
-        cv.Dilate(cvBinary, cvBinary, None, 3)
-        cv.Erode(cvBinary, cvBinary, None, 1)
-        
-        #update the foreground mask
-        self._fgMask = pv.Image(cvBinary)
-        
-        #update the detected foreground contours
-        self._computeContours()
-        
         #update current annotation image from buffer, as appropriate for
         # the different methods
         if self._method==BG_SUBTRACT_FD:
@@ -150,6 +161,36 @@ class MotionDetector(object):
             self._annotateImg = self._imageBuff.getLast()
         elif self._method==BG_SUBTRACT_AMF:
             self._annotateImg = self._imageBuff.getLast()
+
+        mask = self._bgSubtract.getForegroundMask()
+#        if self._softThreshold:
+#            cvWeights = mask.asOpenCVBW()
+#            scale = (1.0/255.0)  #because weights are 0-255 in mask image
+#            cvCurImg = self._annotateImg.copy().asOpenCVBW()
+#            cvDst = cv.CreateImage(cv.GetSize(cvWeights), cv.IPL_DEPTH_8U, 1)
+#            cv.Mul(cvWeights, cvCurImg, cvDst, scale)
+#            cv.Smooth(cvDst, cvDst)
+#            #update the foreground mask
+#            self._fgMask = pv.Image(cvDst) 
+#        else:    
+
+        cvBinary = mask.asOpenCVBW()
+        cv.Smooth(cvBinary, cvBinary)
+        cv.Dilate(cvBinary, cvBinary, None, 3)
+        cv.Erode(cvBinary, cvBinary, None, 1)
+        
+        #update the foreground mask
+        self._fgMask = pv.Image(cvBinary)
+        
+        #update the detected foreground contours
+        self._computeContours()
+        self._computeConvexHulls()
+            
+        if ConvexHulls:
+            for hull in self._convexHulls:
+                cv.FillConvexPoly(cvBinary, hull, cv.RGB(255,255,255))
+            #k = cv.CreateStructuringElementEx(15, 15, 7, 7, cv.CV_SHAPE_RECT)
+            #cv.Dilate(mask, mask, element=k, iterations=1)
             
         return len(self._contours)
 
@@ -187,8 +228,8 @@ class MotionDetector(object):
         # we will copy the foreground areas from image to here.
         dest = cv.CloneImage(image)
         cv.SetZero(dest)
-        
-        cv.Copy(image,dest,mask) #copy only pixels from image where mask != 0
+
+        cv.Copy(image,dest,mask) #copy only pixels from image where mask != 0               
         return pv.Image(dest)
             
     def getRects(self):
@@ -212,7 +253,11 @@ class MotionDetector(object):
         
         return rects
     
-    def getAnnotatedImage(self, showContours=False):
+    def getConvexHulls(self):
+        return self._convexHulls
+        
+    
+    def getAnnotatedImage(self, showRects=True, showContours=False, showConvexHulls=False):
         '''
         @return: the annotation image with bounding boxes
         and optionally contours drawn upon it.
@@ -222,14 +267,22 @@ class MotionDetector(object):
         rects = self.getRects()
         outImg = self._annotateImg.copy()  #deep copy, so can freely modify the copy
         
-        #draw contours in green
-        if showContours:
+        
+        if showContours or showConvexHulls:
             cvimg = outImg.asOpenCV()
+        
+        #draw contours in green   
+        if showContours:
             cv.DrawContours(cvimg, self._contours, cv.RGB(0, 255, 0), cv.RGB(255,0,0), 2)
         
+        #draw hulls in cyan    
+        if showConvexHulls:
+            cv.PolyLine(cvimg, self._convexHulls, True, cv.RGB(0,255,255))
+        
         #draw bounding box in yellow
-        for r in rects:
-            outImg.annotateRect(r,"yellow")
+        if showRects:
+            for r in rects:
+                outImg.annotateRect(r,"yellow")
         
         return outImg        
         
@@ -237,8 +290,9 @@ class MotionDetector(object):
         '''
         @return: a list of "tiles", where each tile is a small pv.Image
         representing the clipped area of the annotationImg based on
-        the motion detection. The foreground mask will be used to show
-        only the foreground pixels within each tile.
+        the motion detection. Only the foreground pixels are copied, so
+        the result are tiles with a black background and full-color
+        foreground pixels.
         @note: You must call detect() prior to getForegroundTiles() to get
         updated information.
         '''
@@ -262,6 +316,7 @@ class MotionDetector(object):
         tiles = []
         for r in rects:
             #for every rectangle, crop from dest image
+            #TODO: The following pv.Image crop function raises a TypeError. Not sure why...
             t = dst.crop(r)
             tiles.append(t)
             
