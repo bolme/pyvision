@@ -657,6 +657,7 @@ class Image:
             if size == None:
                 size = (w,h)
             
+            print size
             affine = pv.AffineFromRect(pv.Rect(x,y,w,h),size)
             im = affine(self)
             if return_affine:
@@ -671,10 +672,11 @@ class Image:
         affine = pv.AffineTranslate(-x,-y,(w,h))
         
         if size == None:
-            if return_affine:
-                return pv.Image(subim),affine
-            else:
-                return pv.Image(subim)
+            size = (w,h)
+        #    if return_affine:
+        #        return pv.Image(subim),affine
+        #    else:
+        #        return pv.Image(subim)
         
         new_image = cv.CreateImage(size,cvim.depth,cvim.nChannels)
         
