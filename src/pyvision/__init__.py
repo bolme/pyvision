@@ -168,8 +168,9 @@ from pyvision.analysis.roc import ROC,ROC_LOG_SAMPLED,ROC_MATCH_SAMPLED
 from pyvision.surveillance.ImageBuffer import ImageBuffer
 
 from pyvision.surveillance.BackgroundSubtraction import AbstractBGModel,FrameDifferencer,MedianFilter,ApproximateMedianFilter
+from pyvision.surveillance.BackgroundSubtraction import BG_SUBTRACT_FD, BG_SUBTRACT_MF, BG_SUBTRACT_AMF
 
-from pyvision.surveillance.MotionDetector import MotionDetector
+from pyvision.surveillance.MotionDetector import MotionDetector, BOUNDING_RECTS, STANDARDIZED_RECTS
 
 from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotientImage, lowPassFilter, highPassFilter, bandPassFilter
 
