@@ -87,6 +87,8 @@ class MotionDetector(object):
         
         self._method = method      
         self._bgSubtract = None  #can't initialize until buffer is full...so done in detect()  
+        self._contours = []
+        self._annotateImg = None
         
     def _initBGSubtract(self):
         if self._method==BG_SUBTRACT_FD:
@@ -104,13 +106,13 @@ class MotionDetector(object):
     def _computeContours(self):
         cvMask = self._fgMask.asOpenCVBW()
         cvdst = cv.CloneImage(cvMask)  #because cv.FindContours may alter source image
-        contours = cv.FindContours(cvdst, cv.CreateMemStorage(), cv.CV_RETR_EXTERNAL, cv.CV_CHAIN_APPROX_SIMPLE)
+        contours = cv.FindContours(cvdst, cv.CreateMemStorage(), cv.CV_RETR_EXTERNAL , cv.CV_CHAIN_APPROX_SIMPLE)
         self._contours = contours
             
     def _computeConvexHulls(self):
         hulls = []
         seq = self._contours
-        while not (seq == None):
+        while not (seq == None) and len(seq) != 0:
             cvxHull = cv.ConvexHull2(seq, cv.CreateMemStorage(), return_points=True)
             hulls.append(cvxHull)
             seq = seq.h_next()           
@@ -121,7 +123,7 @@ class MotionDetector(object):
         '''
         You call this method to update detection results, given the new
         image in the stream. After updating detection results, use one
-        of the getX() methods, such as getRects() to see the results in the
+        of the get*() methods, such as getRects() to see the results in the
         appropriate format.
         
         @param img: A pv.Image() to be added to the buffer as the most recent image,
@@ -252,6 +254,34 @@ class MotionDetector(object):
             rects = self._filter(rects)
         
         return rects
+    
+    def asPolygons(self):
+        '''
+        @return: the bounding boxes of the external contours of the foreground mask.
+        @note: You must call detect() before getRects() to see updated results.
+        '''
+        #create a list of the top-level contours found in the contours (cv.Seq) structure
+        polys = []
+        if len(self._contours) < 1: return(polys)
+        seq = self._contours
+        while not (seq == None):
+            #(x, y, w, h) = cv.BoundingRect(seq) 
+            rect = pv.Rect(*cv.BoundingRect(seq))
+            print rect
+            if (cv.ContourArea(seq) > self._minArea):
+                #r = pv.Rect(x,y,w,h)
+                #rects.append(r)
+                poly = [ pv.Point(*each) for each in seq ]
+                poly.append(poly[0])
+                
+                print cv.ContourArea(seq)
+                print pv.polygonStats(poly)
+                #print poly
+                polys.append(poly)
+                
+            seq = seq.h_next()
+                
+        return polys
     
     def getConvexHulls(self):
         return self._convexHulls
