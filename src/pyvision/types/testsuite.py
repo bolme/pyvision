@@ -13,11 +13,16 @@ import os.path
 DATA_DIR = os.path.join(pv.__path__[0],'data','test')
 SYNC_VIDEO = 'video_sync.mov'
 SYNC_FRAMES = ['video_sync_0001.jpg', 'video_sync_0002.jpg', 'video_sync_0003.jpg', 'video_sync_0004.jpg', 'video_sync_0005.jpg',]
+
+
 class TestVideo(unittest.TestCase):
     '''Tests for the video class.'''
 
 
     def testSync(self):
+        """Video Sync Test"""
+        # Tests a kludge that makes sure the first frame of video is read properly.
+        
         # Uncomment next line to show image diagnostics
         ilog = None # pv.ImageLog()
         video_path = os.path.join(DATA_DIR,SYNC_VIDEO)
@@ -46,6 +51,7 @@ class TestVideo(unittest.TestCase):
             ilog.show()
         
     def testFrameCount(self):
+        """Frame Count Test"""
         video_path = os.path.join(DATA_DIR,SYNC_VIDEO)
         video = pv.Video(video_path)
         

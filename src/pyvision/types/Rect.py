@@ -32,7 +32,8 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import Point as pt
-import cv
+#import cv
+import pyvision as pv
 import numpy as np
 
 def BoundingRect(*points):
@@ -54,6 +55,9 @@ def BoundingRect(*points):
         miny = min(miny,each.Y())
         maxy = max(maxy,each.Y())
     return Rect(minx,miny,maxx-minx,maxy-miny)
+
+def CenteredRect(cx,cy,w,h):
+    return pv.Rect(cx-0.5*w,cy-0.5*h,w,h)
 
 
 class Rect:
@@ -220,15 +224,46 @@ class Rect:
 
     def asOpenCV(self):
         '''
-        Returns a representation compatible with opencv.
+        @returns a representation compatible with opencv.
         '''
         return (int(round(self.x)),int(round(self.y)),int(round(self.w)),int(round(self.h)))
 
     def asTuple(self):
         '''
-        Returns a tuple (x,y,w,h).
+        @returns a tuple (x,y,w,h).
         '''
-        return (int(round(self.x)),int(round(self.y)),int(round(self.w)),int(round(self.h)))
+        return (self.x,self.y,self.w,self.h)
+
+    def asCenteredTuple(self):
+        '''
+        @returns a tuple (cx,cy,w,h).
+        '''
+        return (self.x+0.5*self.w,self.y+0.5*self.h,self.w,self.h)
+    
+    def asCorners(self):
+        '''
+        Returns the four corners.  Can be used to transform this rect 
+        through an affine or perspective transformation.
+        '''
+        x,y,w,h = self.asTuple()
+        pt1 = pv.Point(x,y)
+        pt2 = pv.Point(x+w,y)
+        pt3 = pv.Point(x+w,y+h)
+        pt4 = pv.Point(x,y+h)
+        return [pt1,pt2,pt3,pt4]
+
+    def asPolygon(self):
+        '''
+        Returns the four corners with the upper left corner repeated twice.  
+        Can be used to transform this rect through an affine or perspective 
+        transformations. It can also be plotted with annotatePolygon.
+        '''
+        x,y,w,h = self.asTuple()
+        pt1 = pv.Point(x,y)
+        pt2 = pv.Point(x+w,y)
+        pt3 = pv.Point(x+w,y+h)
+        pt4 = pv.Point(x,y+h)
+        return [pt1,pt2,pt3,pt4,pt1]
 
     def __mul__(self,val):
         '''

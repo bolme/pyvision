@@ -147,9 +147,9 @@ from pyvision.types.img import Image,OpenCVToNumpy,NumpyToOpenCV
 
 from pyvision.types.Video import Video, Webcam, VideoFromImages
 
-from pyvision.types.Point import Point,readPointsFile
+from pyvision.types.Point import Point,readPointsFile,polygonStats
 
-from pyvision.types.Rect import Rect,BoundingRect
+from pyvision.types.Rect import Rect,BoundingRect,CenteredRect
 
 from pyvision.types.Affine import  AffineNormalizePoints, AffineTranslate, AffineScale, AffineNonUniformScale, AffineRotate, AffineFromRect, AffineFromTile, AffineFromPoints, AffineFromPointsLS, AffineFromPointsRANSAC, AffineFromPointsLMeDs, AffinePerturb, AffineTransform
 
@@ -167,7 +167,7 @@ from pyvision.analysis.roc import ROC,ROC_LOG_SAMPLED,ROC_MATCH_SAMPLED
 
 from pyvision.surveillance.ImageBuffer import ImageBuffer
 
-from pyvision.surveillance.BackgroundSubtraction import *
+from pyvision.surveillance.BackgroundSubtraction import AbstractBGModel,FrameDifferencer,MedianFilter,ApproximateMedianFilter
 
 from pyvision.surveillance.MotionDetector import MotionDetector
 
