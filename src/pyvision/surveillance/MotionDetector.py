@@ -142,7 +142,7 @@ class MotionDetector(object):
         
         @param ConvexHulls: If true, then the detected foreground pixels are
         grouped into convex hulls, which can have the effect of removing internal
-        "holes" in the detect.
+        "holes" in the detection.
         
         @return: The number of detected components in the current image. To get
         more details, use the various getX() methods, like getForegroundMask(),
@@ -242,7 +242,14 @@ class MotionDetector(object):
         return pv.Image(dest)
             
     def getRects(self): 
+        '''
+        @return: the bounding boxes of the external contours of the foreground mask. The
+        boxes will either be the bounding rectangles of the contours, or a box fitted to
+        the contours based on the center of mass and n-sigma deviations in x and y. This
+        preference is selected when initializing the MotionDetector object.
         
+        @note: You must call detect() before getRects() to see updated results.
+        '''
         if self._rect_type == BOUNDING_RECTS:
             return self.getBoundingRects()
         
@@ -256,7 +263,7 @@ class MotionDetector(object):
     def getBoundingRects(self):
         '''
         @return: the bounding boxes of the external contours of the foreground mask.
-        @note: You must call detect() before getRects() to see updated results.
+        @note: You must call detect() before getBoundingRects() to see updated results.
         '''
         #create a list of the top-level contours found in the contours (cv.Seq) structure
         rects = []
@@ -277,7 +284,7 @@ class MotionDetector(object):
     def getStandardizedRects(self):
         '''
         @return: the boxes centered on the target center of mass +- n_sigma*std
-        @note: You must call detect() before getRects() to see updated results.
+        @note: You must call detect() before getStandardizedRects() to see updated results.
         '''
         #create a list of the top-level contours found in the contours (cv.Seq) structure
         rects = []
@@ -312,7 +319,8 @@ class MotionDetector(object):
     def getPolygons(self,return_all=False):
         '''
         @param return_all: return all contours regardless of min area.
-        @return: the polygon contours of the foreground mask.
+        @return: the polygon contours of the foreground mask. The polygons are
+        compatible with pv.Image annotatePolygon() method.
         @note: You must call detect() before getPolygons() to see updated results.
         '''
         #create a list of the top-level contours found in the contours (cv.Seq) structure
@@ -332,15 +340,17 @@ class MotionDetector(object):
         return polys
     
     def getConvexHulls(self):
+        '''
+        @return: the convex hulls of the contours of the foreground mask.
+        @note: You must call detect() before getConvexHulls() to see updated results.
+        '''
         return self._convexHulls
         
     
     def getAnnotatedImage(self, showRects=True, showContours=False, showConvexHulls=False):
         '''
-        @return: the annotation image with bounding boxes
-        and optionally contours drawn upon it.
-        @note: You must call detect() prior to getAnnotatedImage()
-        to see updated results.
+        @return: the annotation image with bounding boxes and optionally contours drawn upon it.
+        @note: You must call detect() prior to getAnnotatedImage() to see updated results.
         '''
         rects = self.getRects()
         outImg = self._annotateImg.copy()  #deep copy, so can freely modify the copy
