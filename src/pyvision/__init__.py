@@ -147,7 +147,7 @@ from pyvision.types.img import Image,OpenCVToNumpy,NumpyToOpenCV
 
 from pyvision.types.Video import Video, Webcam, VideoFromImages
 
-from pyvision.types.Point import Point,readPointsFile,polygonStats
+from pyvision.types.Point import Point,readPointsFile
 
 from pyvision.types.Rect import Rect,BoundingRect,CenteredRect
 
