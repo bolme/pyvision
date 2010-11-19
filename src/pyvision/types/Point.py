@@ -200,51 +200,5 @@ def readPointsFile(filename):
     return result
     
 
-def polygonStats(poly):
-    '''
-    Compute statistics for a polygon including bounding box, area, center of mass, x_stdev, y_stdev
-    
-    @returns: bounding_box, area
-    '''
-    bounding_box = pv.BoundingRect(poly)
-    
-    # compute the area, center of mass using greens theorum y*x*dx
-    area = 0.0
-    cm_x = 0.0
-    cm_y = 0.0
-    prev_x,prev_y = poly[-1].asTuple()
-    for point in poly:
-        x,y = point.asTuple()
-        
-        # change in x and y
-        dy = y - prev_y
-        dx = x - prev_x
-        
-        # center point of this line segment
-        cx = 0.5*(x+prev_x)
-        cy = 0.5*(y+prev_y)
-        
-        # integrate to get the area and center of mass
-        area += cx*dy
-        cm_x += cx*cy*dx
-        cm_y += -cx*cy*dy
-        
-        prev_y = y
-        prev_x = x
-
-    # The area may be negative if the path integral goes in the wrong direction
-    area = abs(area)
-    
-    
-    cm_x = cm_x / area
-    cm_y = cm_y / area
-
-    print "Area",bounding_box,area,pv.Point(cm_x,cm_y)
-
-    
-    return bounding_box,area,pv.Point(cm_x,cm_y)
-    
-    
-    
     
     

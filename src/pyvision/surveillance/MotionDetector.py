@@ -38,6 +38,11 @@ Created on Nov 9, 2010
 import pyvision as pv
 from pyvision.surveillance.BackgroundSubtraction import *
 import cv
+import numpy as np
+
+BOUNDING_RECTS     = "BOUNDING_RECTS"
+STANDARDIZED_RECTS = "STANDARDIZED_RECTS"
+
 
 class MotionDetector(object):
     '''
@@ -49,7 +54,7 @@ class MotionDetector(object):
     '''
     
     def __init__(self, imageBuff=None, thresh=20, method=BG_SUBTRACT_AMF, minArea=400, 
-                 rectFilter=None, buffSize=5, soft_thresh = False):
+                 rectFilter=None, buffSize=5, soft_thresh = False,rect_type=BOUNDING_RECTS,rect_sigma=2.0):
         '''
         Constructor
         @param imageBuff: a pv.ImageBuffer object to be used in the background subtraction
@@ -89,6 +94,8 @@ class MotionDetector(object):
         self._bgSubtract = None  #can't initialize until buffer is full...so done in detect()  
         self._contours = []
         self._annotateImg = None
+        self._rect_type = rect_type
+        self._rect_sigma = rect_sigma
         
     def _initBGSubtract(self):
         if self._method==BG_SUBTRACT_FD:
@@ -234,7 +241,19 @@ class MotionDetector(object):
         cv.Copy(image,dest,mask) #copy only pixels from image where mask != 0               
         return pv.Image(dest)
             
-    def getRects(self):
+    def getRects(self): 
+        
+        if self._rect_type == BOUNDING_RECTS:
+            return self.getBoundingRects()
+        
+        elif self._rect_type == STANDARDIZED_RECTS:
+            return self.getStandardizedRects()
+        
+        else:
+            raise ValueError("Unknown rect type: "+self._rect_type)
+        
+            
+    def getBoundingRects(self):
         '''
         @return: the bounding boxes of the external contours of the foreground mask.
         @note: You must call detect() before getRects() to see updated results.
@@ -255,28 +274,57 @@ class MotionDetector(object):
         
         return rects
     
-    def asPolygons(self):
+    def getStandardizedRects(self):
         '''
-        @return: the bounding boxes of the external contours of the foreground mask.
+        @return: the boxes centered on the target center of mass +- n_sigma*std
         @note: You must call detect() before getRects() to see updated results.
+        '''
+        #create a list of the top-level contours found in the contours (cv.Seq) structure
+        rects = []
+        if len(self._contours) < 1: return(rects)
+        seq = self._contours
+        while not (seq == None):
+            (x, y, w, h) = cv.BoundingRect(seq) 
+            if (cv.ContourArea(seq) > self._minArea): # and  self._filter(rect)
+                r = pv.Rect(x,y,w,h)
+                moments = cv.Moments(seq)
+                m_0_0 = cv.GetSpatialMoment(moments, 0, 0)
+                m_0_1 = cv.GetSpatialMoment(moments, 0, 1)
+                m_1_0 = cv.GetSpatialMoment(moments, 1, 0)
+                mu_2_0 = cv.GetCentralMoment(moments, 2, 0)
+                mu_0_2 = cv.GetCentralMoment(moments, 0, 2)
+                
+                cx = m_1_0/m_0_0
+                cy = m_0_1/m_0_0
+                w = 2.0*self._rect_sigma*np.sqrt(mu_2_0/m_0_0)
+                h = 2.0*self._rect_sigma*np.sqrt(mu_0_2/m_0_0)
+                
+                r = pv.CenteredRect(cx,cy,w,h)
+
+                rects.append(r)
+            seq = seq.h_next()
+        
+        if self._filter != None:
+            rects = self._filter(rects)
+        
+        return rects
+    
+    def getPolygons(self,return_all=False):
+        '''
+        @param return_all: return all contours regardless of min area.
+        @return: the polygon contours of the foreground mask.
+        @note: You must call detect() before getPolygons() to see updated results.
         '''
         #create a list of the top-level contours found in the contours (cv.Seq) structure
         polys = []
         if len(self._contours) < 1: return(polys)
         seq = self._contours
         while not (seq == None):
-            #(x, y, w, h) = cv.BoundingRect(seq) 
-            rect = pv.Rect(*cv.BoundingRect(seq))
-            print rect
-            if (cv.ContourArea(seq) > self._minArea):
-                #r = pv.Rect(x,y,w,h)
-                #rects.append(r)
+
+            if return_all or (cv.ContourArea(seq) > self._minArea):
                 poly = [ pv.Point(*each) for each in seq ]
                 poly.append(poly[0])
                 
-                print cv.ContourArea(seq)
-                print pv.polygonStats(poly)
-                #print poly
                 polys.append(poly)
                 
             seq = seq.h_next()

@@ -39,14 +39,24 @@ class Test(unittest.TestCase):
             
             #if count >= 0:
             key_frame = md.getKeyFrame()
-            polygons = md.asPolygons()
+            rects = md.getStandardizedRects()
+            boxes = md.getBoundingRects()
+            
+            polygons = md.getPolygons(return_all=True)
             
             if key_frame != None:
                 for poly in polygons:
-                    key_frame.annotatePolygon(poly,width=2)
-                    box,area,center = pv.polygonStats(poly)
-                    key_frame.annotatePoint(center)
-                key_frame.show()
+                    key_frame.annotatePolygon(poly,color='#00FF00',width=1)
+                    
+                for rect in boxes:
+                    key_frame.annotatePolygon(rect.asPolygon(),width=1,color='yellow')
+                    
+                #for rect in rects:
+                #    key_frame.annotatePolygon(rect.asPolygon(),width=2)
+                #    key_frame.annotatePoint(rect.center())
+                    
+                key_frame.show("daves")
+                md.getAnnotatedImage(showContours=True).show("steves")
             
             #print polygons
                 
