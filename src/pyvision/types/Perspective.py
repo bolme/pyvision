@@ -250,7 +250,7 @@ class PerspectiveTransform:
     # @return a single link.AffineTransform which is the the same as 
     #         both affine transforms.
     def __mul__(self,affine):
-        return PerspectiveTransform(dot(self.matrix,affine.matrix),self.size,self.filter)
+        return PerspectiveTransform(np.dot(self.matrix,affine.matrix),self.size,self.filter)
 
 # TODO: Add unit tests
 class _PerspectiveTest(unittest.TestCase):
