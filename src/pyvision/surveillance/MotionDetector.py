@@ -101,6 +101,9 @@ class MotionDetector(object):
         if self._method==BG_SUBTRACT_FD:
             self._bgSubtract = pv.FrameDifferencer(self._imageBuff, self._threshold, 
                                                    soft_thresh = self._softThreshold)
+        elif self._method==BG_SUBTRACT_MCFD:
+            self._bgSubtract = pv.MotionCompensatedFrameDifferencer(self._imageBuff, self._threshold, 
+                                                   soft_thresh = self._softThreshold)
         elif self._method==BG_SUBTRACT_MF:
             self._bgSubtract = pv.MedianFilter(self._imageBuff, self._threshold,
                                                soft_thresh = self._softThreshold)
@@ -165,6 +168,8 @@ class MotionDetector(object):
         #update current annotation image from buffer, as appropriate for
         # the different methods
         if self._method==BG_SUBTRACT_FD:
+            self._annotateImg = self._imageBuff.getMiddle()
+        if self._method==BG_SUBTRACT_MCFD:
             self._annotateImg = self._imageBuff.getMiddle()
         elif self._method==BG_SUBTRACT_MF:
             self._annotateImg = self._imageBuff.getLast()
@@ -373,6 +378,31 @@ class MotionDetector(object):
                 outImg.annotateRect(r,"yellow")
         
         return outImg        
+        
+    def annotateFrame(self, key_frame, rect_color='yellow', contour_color='#00FF00'):
+        '''
+        @return: Renders annotations onto key frame that shows detection information.
+        @note: You must call detect() prior to getAnnotatedImage()
+        to see updated results.
+        '''
+        #key_frame = md.getKeyFrame()
+        
+        if key_frame != None:
+            
+            if contour_color != None:
+                for poly in self.getPolygons():
+                    key_frame.annotatePolygon(poly,color=contour_color,width=1)
+                    
+            if rect_color != None:   
+                for rect in self.getRects():
+                    key_frame.annotatePolygon(rect.asPolygon(),width=2,color=rect_color)
+                
+            #for rect in rects:
+            #    key_frame.annotatePolygon(rect.asPolygon(),width=2)
+            #    key_frame.annotatePoint(rect.center())                
+        
+            #ilog(key_frame)
+
         
     def getForegroundTiles(self):
         '''

@@ -35,14 +35,18 @@ Created on Oct 22, 2010
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import scipy as sp
+import numpy as np
 import pyvision as pv
 import math
+import cv
 #Constants used to identify a background subtraction method,
 # useful, for example, for specifying which method to use in the
 # MotionDetector class.
-BG_SUBTRACT_FD = 1  #frame differencer
-BG_SUBTRACT_MF = 2  #median filter
-BG_SUBTRACT_AMF = 3 #approx median filter
+BG_SUBTRACT_FD   = "BG_SUBTRACT_FD"  #frame differencer
+BG_SUBTRACT_MCFD = "BG_SUBTRACT_MCFD"  #frame differencer
+BG_SUBTRACT_MF   = "BG_SUBTRACT_MF"  #median filter
+BG_SUBTRACT_AMF  = "BG_SUBTRACT_AMF" #approx median filter
+
 
 class AbstractBGModel:
     def __init__(self, imageBuffer, thresh=20, soft_thresh=False):
@@ -114,6 +118,77 @@ class FrameDifferencer(AbstractBGModel):
         # gets compared to threshold to yield foreground mask
         return sp.minimum(delta1, delta2)
         
+class MotionCompensatedFrameDifferencer(AbstractBGModel):
+    '''
+    This class is useful for simple N-frame differencing method of
+    background subtraction. If you have a stationary camera, this can
+    be a simple and effective way to isolate people/moving objects
+    from the background scene.
+    
+    FrameDifferencer uses ImageBuffer for operation. Assume the buffer
+    size is 5. The output of the frame differencing operation will
+    be based on the middle image, the 3rd in the buffer. The output
+    is the intersection of the following two absolute differences:
+    abs(Middle-First) AND abs(Last-Middle).
+    '''
+
+    def __init__(self, imageBuffer, thresh=20, soft_thresh = False):
+        AbstractBGModel.__init__(self, imageBuffer, thresh, soft_thresh)
+        
+    def _computeBGDiff(self):
+        
+        n = len(self._imageBuffer)
+        
+        prev_im = self._imageBuffer[0]
+        forward = None
+        for i in range(0,n/2):
+            if forward == None:
+                forward = self._imageBuffer[i].to_next
+            else:
+                forward = forward * self._imageBuffer[i].to_next
+                
+        w,h = size = prev_im.size
+        mask = cv.CreateImage(size,cv.IPL_DEPTH_8U,1)
+        cv.Set(mask,0)
+        interior = cv.GetSubRect(mask, pv.Rect(2,2,w-4,h-4).asOpenCV()) 
+        cv.Set(interior,255)
+        mask = pv.Image(mask)
+
+        prev_im = forward(prev_im)
+        prev_mask = forward(mask)
+        
+
+        next_im = self._imageBuffer[n-1]
+        back = None
+        for i in range(n-1,n/2,-1):
+            if back == None:
+                back = self._imageBuffer[i].to_prev
+            else:
+                back = back * self._imageBuffer[i].to_prev
+        
+        next_im = back(next_im)
+        next_mask = back(mask)
+        
+        curr_im = self._imageBuffer[n/2]
+
+                
+        prevImg = prev_im.asMatrix2D()
+        curImg  = curr_im.asMatrix2D()
+        nextImg = next_im.asMatrix2D()
+        prevMask = prev_mask.asMatrix2D()
+        nextMask = next_mask.asMatrix2D()
+
+        # Compute transformed images
+        delta1 = sp.absolute(curImg - prevImg)   #frame diff 1
+        delta2 = sp.absolute(nextImg - curImg)   #frame diff 2
+        
+        delta1 = sp.minimum(delta1,prevMask)
+        delta2 = sp.minimum(delta2,nextMask)
+        
+        #use element-wise minimum of the two difference images, which is what
+        # gets compared to threshold to yield foreground mask
+        return sp.minimum(delta1, delta2)
+
 class MedianFilter(AbstractBGModel):
     '''
     Uses median pixel values of the images in a buffer to
