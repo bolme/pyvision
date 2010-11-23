@@ -43,7 +43,7 @@ import cv
 # useful, for example, for specifying which method to use in the
 # MotionDetector class.
 BG_SUBTRACT_FD   = "BG_SUBTRACT_FD"  #frame differencer
-BG_SUBTRACT_MCFD = "BG_SUBTRACT_MCFD"  #frame differencer
+BG_SUBTRACT_MCFD = "BG_SUBTRACT_MCFD"  #motion compensated frame differencer
 BG_SUBTRACT_MF   = "BG_SUBTRACT_MF"  #median filter
 BG_SUBTRACT_AMF  = "BG_SUBTRACT_AMF" #approx median filter
 
@@ -120,16 +120,10 @@ class FrameDifferencer(AbstractBGModel):
         
 class MotionCompensatedFrameDifferencer(AbstractBGModel):
     '''
-    This class is useful for simple N-frame differencing method of
-    background subtraction. If you have a stationary camera, this can
-    be a simple and effective way to isolate people/moving objects
-    from the background scene.
-    
-    FrameDifferencer uses ImageBuffer for operation. Assume the buffer
-    size is 5. The output of the frame differencing operation will
-    be based on the middle image, the 3rd in the buffer. The output
-    is the intersection of the following two absolute differences:
-    abs(Middle-First) AND abs(Last-Middle).
+    This class represents a more sophisticated frame differencing
+    algorithm that takes into account potential camera motion, and
+    applies a registration method to align subsequent images prior
+    to frame subtraction.
     '''
 
     def __init__(self, imageBuffer, thresh=20, soft_thresh = False):

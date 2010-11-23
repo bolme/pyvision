@@ -381,9 +381,9 @@ class MotionDetector(object):
         
     def annotateFrame(self, key_frame, rect_color='yellow', contour_color='#00FF00'):
         '''
+        Draws detection results on an image (key_frame) specified by the user.
         @return: Renders annotations onto key frame that shows detection information.
-        @note: You must call detect() prior to getAnnotatedImage()
-        to see updated results.
+        @note: You must call detect() prior to annotateFrame() to see updated results.
         '''
         #key_frame = md.getKeyFrame()
         
@@ -434,7 +434,6 @@ class MotionDetector(object):
         tiles = []
         for r in rects:
             #for every rectangle, crop from dest image
-            #TODO: The following pv.Image crop function raises a TypeError. Not sure why...
             t = dst.crop(r)
             tiles.append(t)
             
