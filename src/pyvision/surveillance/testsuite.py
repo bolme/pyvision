@@ -126,22 +126,21 @@ class MotionDetectTest(unittest.TestCase):
     def testMotionDetectMCFD(self):
         ilog =  pv.ImageLog()
         
-        flow = pv.OpticalFlow()
+        #flow = pv.OpticalFlow()   #This is now encapsulated in MCFD object
         md = pv.MotionDetector(method=pv.BG_SUBTRACT_MCFD,minArea=200,rect_type=pv.STANDARDIZED_RECTS)
         video = pv.Video(TOYCAR_VIDEO)
         
         i = 0
         for frame in video:    
 
-            flow.update(frame)
+            #flow.update(frame) #no longer required, this is encapsulated
             md.detect(frame)
             
             if ilog != None:
                 print "Processing Frame:",i
-                flow.annotateFrame(frame)
+                #flow.annotateFrame(frame)  #this is encapsulated in the md.annotateFrame method
 
-                key_frame = md.getKeyFrame()
-                
+                key_frame = md.getKeyFrame()                
                 md.annotateFrame(key_frame)
                 
                 if key_frame != None:
@@ -152,8 +151,6 @@ class MotionDetectTest(unittest.TestCase):
         
         if ilog != None:
             ilog.show()
-            
-
 
 
 class OpticalFlowTest(unittest.TestCase):

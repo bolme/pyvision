@@ -128,6 +128,7 @@ class MotionDetector(object):
             seq = seq.h_next()           
             
         self._convexHulls = hulls
+        
             
     def detect(self, img, ConvexHulls=False):
         '''
@@ -352,15 +353,22 @@ class MotionDetector(object):
         return self._convexHulls
         
     
-    def getAnnotatedImage(self, showRects=True, showContours=False, showConvexHulls=False):
+    def getAnnotatedImage(self, showRects=True, showContours=False, 
+                          showConvexHulls=False, showFlow=False):
         '''
-        @return: the annotation image with bounding boxes and optionally contours drawn upon it.
+        @return: the annotation image with selected objects drawn upon it. showFlow will
+        only work if the BG subtraction method was MCFD.
         @note: You must call detect() prior to getAnnotatedImage() to see updated results.
         '''
         rects = self.getRects()
         outImg = self._annotateImg.copy()  #deep copy, so can freely modify the copy
         
         
+        #draw optical flow information in white
+        if showFlow and (self._method == pv.BG_SUBTRACT_MCFD):
+            flow = self._bgSubtract.getOpticalFlow()
+            flow.annotateFrame(outImg)
+            
         if showContours or showConvexHulls:
             cvimg = outImg.asOpenCV()
         
@@ -379,11 +387,14 @@ class MotionDetector(object):
         
         return outImg        
         
-    def annotateFrame(self, key_frame, rect_color='yellow', contour_color='#00FF00'):
+    def annotateFrame(self, key_frame, rect_color='yellow', 
+                      contour_color='#00FF00', flow_color='white'):
         '''
-        Draws detection results on an image (key_frame) specified by the user.
+        Draws detection results on an image (key_frame) specified by the user. Specify
+        None as the color for any aspect you wish not drawn.
         @return: Renders annotations onto key frame that shows detection information.
         @note: You must call detect() prior to annotateFrame() to see updated results.
+        @note: Optical flow is only shown if method was MCFD
         '''
         #key_frame = md.getKeyFrame()
         
@@ -396,6 +407,10 @@ class MotionDetector(object):
             if rect_color != None:   
                 for rect in self.getRects():
                     key_frame.annotatePolygon(rect.asPolygon(),width=2,color=rect_color)
+                
+            if (flow_color != None) and (self._method == pv.BG_SUBTRACT_MCFD):
+                flow = self._bgSubtract.getOpticalFlow()
+                flow.annotateFrame(key_frame, type="TRACKING", color=flow_color)
                 
             #for rect in rects:
             #    key_frame.annotatePolygon(rect.asPolygon(),width=2)

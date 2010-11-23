@@ -35,7 +35,6 @@ Created on Oct 22, 2010
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import scipy as sp
-import numpy as np
 import pyvision as pv
 import math
 import cv
@@ -128,11 +127,42 @@ class MotionCompensatedFrameDifferencer(AbstractBGModel):
 
     def __init__(self, imageBuffer, thresh=20, soft_thresh = False):
         AbstractBGModel.__init__(self, imageBuffer, thresh, soft_thresh)
+        self._flow = pv.OpticalFlow()
+        if imageBuffer.isFull():
+            self._initFlow()  #if a non-full buffer is given, then we
+                                #must assume the caller will perform
+                                #flow initiation when appropriate.
+        
+    def _initFlow(self):
+        '''
+        Should be called after buffer is full to compute the optical flow
+        information on the buffered frames. Only needs to be called once,
+        prior to first call of _computeBGDiff(), because from then on,
+        the flow will be updated as new frames are added to the buffer.
+        '''
+        for i in range( len(self._imageBuffer)):
+            self._flow.update( self._imageBuffer[i])
+    
+    
+    def getOpticalFlow(self):
+        '''
+        @return: A handle to the pv.OpticalFlow object being used by this object.
+        '''
+        return self._flow
+    
+    def setOpticalFlow(self, OF_Object):
+        '''
+        This is an optional method that allows the user to provide an
+        optical flow object (pv.OpticalFlow) with non-default settings.
+        @param OF_Object: The optical flow object desired for use in computing the
+        motion compensated frame difference.
+        '''
+        self._flow = OF_Object 
         
     def _computeBGDiff(self):
+        self._flow.update( self._imageBuffer.getLast() )
         
-        n = len(self._imageBuffer)
-        
+        n = len(self._imageBuffer)        
         prev_im = self._imageBuffer[0]
         forward = None
         for i in range(0,n/2):
