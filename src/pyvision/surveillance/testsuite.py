@@ -11,6 +11,7 @@ import pyvision as pv
 
 BUGS_VIDEO = os.path.join(pv.__path__[0],'data','test','BugsSample.m4v')
 TAZ_VIDEO = os.path.join(pv.__path__[0],'data','test','TazSample.m4v')
+TOYCAR_VIDEO = os.path.join(pv.__path__[0],'data','test','toy_car.m4v')
 
 class MotionDetectTest(unittest.TestCase):
 
@@ -123,11 +124,11 @@ class MotionDetectTest(unittest.TestCase):
             ilog.show()
 
     def testMotionDetectMCFD(self):
-        ilog = None # pv.ImageLog()
+        ilog =  pv.ImageLog()
         
         flow = pv.OpticalFlow()
         md = pv.MotionDetector(method=pv.BG_SUBTRACT_MCFD,minArea=200,rect_type=pv.STANDARDIZED_RECTS)
-        video = pv.Video("/Users/bolme/vision/data/Tracking/TrackTest/pktest01_1.m4v")
+        video = pv.Video(TOYCAR_VIDEO)
         
         i = 0
         for frame in video:    
@@ -148,7 +149,7 @@ class MotionDetectTest(unittest.TestCase):
                     ilog(key_frame,format='jpg')
                             
             i += 1
-            if i > 20: break
+            #if i > 20: break
         
         if ilog != None:
             ilog.show()
