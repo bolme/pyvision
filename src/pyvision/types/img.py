@@ -657,7 +657,7 @@ class Image:
             if size == None:
                 size = (w,h)
             
-            print size
+            #print size
             affine = pv.AffineFromRect(pv.Rect(x,y,w,h),size)
             im = affine(self)
             if return_affine:
