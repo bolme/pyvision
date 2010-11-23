@@ -132,7 +132,6 @@ class MotionDetectTest(unittest.TestCase):
         
         i = 0
         for frame in video:    
-            frame = pv.Image(frame.asPIL())        
 
             flow.update(frame)
             md.detect(frame)
@@ -200,7 +199,6 @@ class OpticalFlowTest(unittest.TestCase):
         i = 0
         prev_frame = None
         for frame in video:  
-            frame = pv.Image(frame.asPIL())   
                  
             flow.update(frame)
             

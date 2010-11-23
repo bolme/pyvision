@@ -143,10 +143,11 @@ class Video:
     def query(self):
         if self.current_frame > 0 and cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_AVI_RATIO) == 1.0:
             return None
-        self.current_frame += 1
-        frame = cv.QueryFrame( self.cv_capture );
+        frame = cv.QueryFrame( self.cv_capture )
         if frame == None:
             raise StopIteration("End of video sequence")
+        self.current_frame += 1
+        frame = cv.CloneImage(frame);
         return pv.Image(self.resize(frame))
     
     #def grab(self):
