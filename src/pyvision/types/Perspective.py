@@ -41,10 +41,7 @@ import unittest
 import os.path
 import math
 
-try:
-    import opencv as cv
-except:
-    import cv
+import cv    
 import numpy as np
 import numpy.linalg as la
 import pyvision as pv
