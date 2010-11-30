@@ -151,6 +151,10 @@ class Image:
                 self.channels = 1
             elif self.pil.mode == 'RGB':
                 self.channels = 3
+            elif self.pil.mode == 'RGBA':
+                # 
+                self.pil = self.pil.convert('RGB')
+                self.channels = 3
             else:
                 raise TypeError("Unsuppoted format for PIL images: %s"%self.pil.mode)
             
