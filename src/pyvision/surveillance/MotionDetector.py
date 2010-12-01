@@ -40,6 +40,9 @@ from pyvision.surveillance.BackgroundSubtraction import *
 import cv
 import numpy as np
 
+#TODO: Consider Renaming the following constants with a class-specific prefix
+# so that they are easier to find in code completion. Recommend
+# MD_BOUNDING_RECTS AND MD_STANDARDIZED_RECTS. Change will break existing code.
 BOUNDING_RECTS     = "BOUNDING_RECTS"
 STANDARDIZED_RECTS = "STANDARDIZED_RECTS"
 
