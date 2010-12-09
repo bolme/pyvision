@@ -230,9 +230,12 @@ class MotionDetector(object):
         '''
         return self._fgMask
     
-    def getForegroundPixels(self):
+    def getForegroundPixels(self, bgcolor=None):
         '''
-        @return: The full color foreground pixels on a black background.
+        @param bgcolor: The background color to use. Specify as an (R,G,B) tuple.
+        Specify None for a blank/black background.
+        @return: The full color foreground pixels on either a blank (black)
+        background, or on a background color specified by the user.
         @note: You must call detect() before getForegroundPixels() to
         get updated information.
         '''
@@ -245,7 +248,10 @@ class MotionDetector(object):
         #dest image, full color, but initially all zeros (black/background)
         # we will copy the foreground areas from image to here.
         dest = cv.CloneImage(image)
-        cv.SetZero(dest)
+        if bgcolor==None:
+            cv.SetZero(dest)
+        else:
+            cv.Set(dest, cv.RGB(*bgcolor))
 
         cv.Copy(image,dest,mask) #copy only pixels from image where mask != 0               
         return pv.Image(dest)
@@ -422,13 +428,15 @@ class MotionDetector(object):
             #ilog(key_frame)
 
         
-    def getForegroundTiles(self):
+    def getForegroundTiles(self, bgcolor=None):
         '''
+        @param bgcolor: The background color to use. Specify as an (R,G,B) tuple.
+        Specify None for a blank/black background.
         @return: a list of "tiles", where each tile is a small pv.Image
         representing the clipped area of the annotationImg based on
         the motion detection. Only the foreground pixels are copied, so
-        the result are tiles with a black background and full-color
-        foreground pixels.
+        the result are tiles with full-color foreground pixels on the
+        specified background color (black by default).
         @note: You must call detect() prior to getForegroundTiles() to get
         updated information.
         '''
@@ -442,8 +450,11 @@ class MotionDetector(object):
         #dest image, full color, but initially all zeros (black/background)
         # we will copy the foreground areas from image to here.
         dest = cv.CloneImage(image)
-        cv.SetZero(dest)
-        
+        if bgcolor==None:
+            cv.SetZero(dest)
+        else:
+            cv.Set(dest, cv.RGB(*bgcolor))
+            
         cv.Copy(image,dest,mask) #copy only pixels from image where mask != 0
         dst = pv.Image(dest)
         
