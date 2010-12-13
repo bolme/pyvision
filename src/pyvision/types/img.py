@@ -40,7 +40,7 @@ __version__ = "$Revision$"
 import PIL.ImageDraw
 import PIL.Image
 
-from Image import BICUBIC, ANTIALIAS
+from PIL.Image import BICUBIC, ANTIALIAS
 
 import numpy
 import numpy as np
@@ -236,6 +236,43 @@ class Image:
         else:
             raise ValueError("Unsupported opencv image format: nChannels=%d"%cvim.nChannels)
         
+    def asThermal(self,clip_negative=False):
+        '''
+        @returns: a thermal colored representation of this image.
+        '''
+        w,h = self.size
+        mat = self.asMatrix2D()
+        if clip_negative:
+            mat = mat*(mat > 0.0)
+            
+        mat = mat - mat.min()
+        mat = mat / mat.max()
+
+        therm = np.zeros((3,w,h),dtype=np.float)
+        
+        mask = mat <= 0.1
+        therm[2,:,:] += mask*(0.5 + 0.5*mat/0.1)
+
+        mask = (mat > 0.10) & (mat <= 0.4)
+        tmp = (mat - 0.10) / 0.30
+        therm[2,:,:] += mask*(1.0-tmp)
+        therm[1,:,:] += mask*tmp
+        therm[0,:,:] += mask*tmp
+        
+        mask = (mat > 0.4) & (mat <= 0.7)
+        tmp = (mat - 0.4) / 0.3
+        therm[2,:,:] += mask*0
+        therm[1,:,:] += mask*(1-0.5*tmp)
+        therm[0,:,:] += mask*1
+
+        mask = (mat > 0.7) 
+        tmp = (mat - 0.7) / 0.3
+        therm[2,:,:] += mask*0
+        therm[1,:,:] += mask*(0.5-0.5*tmp)
+        therm[0,:,:] += mask*1
+
+        return pv.Image(therm)
+        
 
     def asAnnotated(self):
         '''
@@ -334,6 +371,20 @@ class Image:
         draw = PIL.ImageDraw.Draw(im)
         box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
         draw.ellipse(box,outline=color)
+        del draw
+
+    def annotatePoints(self,points,color='red'):
+        '''
+        Marks a point in the annotation image using a small circle
+        
+        @param point: the point to mark as type Point
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
+        im = self.asAnnotated()
+        draw = PIL.ImageDraw.Draw(im)
+        for point in points:
+            box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
+            draw.ellipse(box,outline=color)
         del draw
 
     def annotateCircle(self,point, radius=3, color='red',fill=None):
