@@ -119,7 +119,7 @@ class MotionDetector(object):
     def _computeContours(self):
         cvMask = self._fgMask.asOpenCVBW()
         cvdst = cv.CloneImage(cvMask)  #because cv.FindContours may alter source image
-        contours = cv.FindContours(cvdst, cv.CreateMemStorage(), cv.CV_RETR_EXTERNAL , cv.CV_CHAIN_APPROX_SIMPLE)
+        contours = cv.FindContours(cvdst, cv.CreateMemStorage(), cv.CV_RETR_CCOMP , cv.CV_CHAIN_APPROX_SIMPLE)
         self._contours = contours
             
     def _computeConvexHulls(self):
@@ -229,6 +229,36 @@ class MotionDetector(object):
         get the updated mask.
         '''
         return self._fgMask
+    
+    def getWatershedMask(self):
+        '''
+        Uses the watershed algorithm to refine the foreground mask.
+        Currently, this doesn't work well on real video...maybe grabcut would be better.
+        ''' 
+        cvMarkerImg = cv.CreateImage( self._fgMask.size, cv.IPL_DEPTH_32S, 1)        
+        cv.SetZero(cvMarkerImg)
+                
+        #fill each contour with a different gray level to label connected components
+        seq = self._contours        
+        c = 50
+        while not (seq == None) and len(seq) != 0:
+            if cv.ContourArea(seq) > self._minArea:
+                c += 10
+                moments = cv.Moments(seq)
+                m00 = cv.GetSpatialMoment(moments, 0, 0)
+                m01 = cv.GetSpatialMoment(moments, 0, 1)
+                m10 = cv.GetSpatialMoment(moments, 1, 0)
+                centroid = ( int(m10/m00), int(m01/m00))
+                cv.Circle(cvMarkerImg, centroid, 3, cv.RGB(c,c,c), cv.CV_FILLED)
+            seq = seq.h_next()
+        
+        if(c>0):
+            img = self._annotateImg.asOpenCV()
+            cv.Watershed(img, cvMarkerImg)
+        
+        tmp = cv.CreateImage( cv.GetSize(cvMarkerImg), cv.IPL_DEPTH_8U, 1)
+        cv.CvtScale(cvMarkerImg, tmp)
+        return pv.Image(tmp)
     
     def getForegroundPixels(self, bgcolor=None):
         '''
