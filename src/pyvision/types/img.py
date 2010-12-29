@@ -845,7 +845,7 @@ class _TestImage(unittest.TestCase):
     
     def setUp(self):
         # Assume these work correctly
-        self.im     = Image(os.path.join(pyvision.__path__[0],"data","nonface","NONFACE_46.jpg"))
+        self.im     = pv.Image(os.path.join(pyvision.__path__[0],"data","nonface","NONFACE_46.jpg"))
         self.pil    = self.im.asPIL()
         self.mat    = self.im.asMatrix2D()
         assert self.mat.shape[0] == 640
@@ -1003,7 +1003,19 @@ class _TestImage(unittest.TestCase):
         for i in range(r):
             for j in range(c):
                 self.assert_(mat[i,j] == cvmat[i,j])
+                
+    def test_ImageCropOutofBounds(self):
+        rect = pv.Rect(-3, -2, 35, 70)
+        imcrop = self.im.crop(rect)
+        cropSize = imcrop.size
         
+        self.assertEquals((35,70), cropSize)
+        
+        rect = pv.Rect(620, 460, 35, 70)
+        imcrop = self.im.crop(rect)
+        cropSize = imcrop.size
+        
+        self.assertEquals((35,70), cropSize)
         
         
         
