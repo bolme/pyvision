@@ -147,6 +147,21 @@ class Point:
         
         return sqrt(dx*dx + dy*dy + dz*dz)
     
+    def unit(self):
+        '''
+        Returns a vector in the same direction but of unit length.
+        '''
+        x = self.X()
+        y = self.Y()
+        z = self.Z()
+        l = np.sqrt(x*x+y*y+z*z)
+        if l < 0.000001:
+            # Point is at 0,0,0
+            return pv.Point(0,0,0)
+        
+        return (1.0/l)*self 
+        
+        
     def __sub__(self,point):
         return Point(self.X()-point.X(),self.Y()-point.Y(),self.Z()-point.Z())
     
