@@ -57,7 +57,8 @@ class MotionDetector(object):
     '''
     
     def __init__(self, imageBuff=None, thresh=20, method=BG_SUBTRACT_AMF, minArea=400, 
-                 rectFilter=None, buffSize=5, soft_thresh = False,rect_type=BOUNDING_RECTS,rect_sigma=2.0):
+                 rectFilter=None, buffSize=5, soft_thresh = False,rect_type=BOUNDING_RECTS,rect_sigma=2.0,
+                 smooth=False):
         '''
         Constructor
         @param imageBuff: a pv.ImageBuffer object to be used in the background subtraction
@@ -78,6 +79,8 @@ class MotionDetector(object):
           use a soft threshold, in which case the returned mask is no longer a binary
           image, but represents weighted values. NOTE: NOT CURRENTLY IMPLEMENTED. 
           SOFT THRESHOLD WILL BE IGNORED, HARD THRESHOLD ONLY IN THIS VERSION.
+        @param smooth: applies smothing to the image before detection which can
+          reduce false detections.
         @note: Until the image buffer is full, the result of the motion detection will be
           nothing. See documentation on the detect(img) method of this class.
         '''
@@ -87,6 +90,7 @@ class MotionDetector(object):
         self._filter = rectFilter
         self._threshold = 20
         self._softThreshold = False #soft_thresh
+        self._smooth = smooth
         
         if imageBuff == None:
             self._imageBuff = pv.ImageBuffer(N=buffSize)
@@ -132,6 +136,10 @@ class MotionDetector(object):
             
         self._convexHulls = hulls
         
+    def __call__(self, img, **kwargs):
+        self.detect(img,**kwargs)
+        return self.getRects()
+        
             
     def detect(self, img, ConvexHulls=False):
         '''
@@ -161,7 +169,13 @@ class MotionDetector(object):
         the buffer, which is not always the most recent image, depending on background
         subtraction method.
         '''
-        self._imageBuff.add(img)
+        # Smooth the image
+        cvim = img.asOpenCV()
+        cvim = cv.CloneImage(cvim)
+        if self._smooth:
+            cv.Smooth(cvim, cvim)
+        
+        self._imageBuff.add(pv.Image(cvim))
         if not self._imageBuff.isFull():
             return -1
         
