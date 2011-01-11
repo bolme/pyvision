@@ -753,7 +753,7 @@ class Image:
         else:
             return pv.Image(new_image)
         
-    def save(self,filename):
+    def save(self,filename,annotations=False):
         '''
         Save the image to a file.  This is performed by converting to PIL and
         then saving to a file based on on the extension.
@@ -765,7 +765,10 @@ class Image:
             # TODO: save as a matlab file
         #    raise NotImplementedError("Cannot save in matlab format")
         else:
-            self.asPIL().save(filename)
+            if annotations:
+                self.asAnnotated().save(filename)
+            else:
+                self.asPIL().save(filename)
             
     def show(self, window="PyVisionImage", pos=None, delay=1):
         '''
@@ -774,7 +777,7 @@ class Image:
             already have been created using cv.NamedWindow or set newWindow=True
         @param pos: If newWindow, then pos is the (x,y) coordinate for the new window 
         @param delay: A delay in milliseconds to wait for keyboard input (passed to cv.WaitKey).  
-            0 delays indefinatly, 1 is good for live updates and animations.  The window
+            0 delays indefinitely, 1 is good for live updates and animations.  The window
             will disappear after the program exits.  
         '''
         cv.NamedWindow(window)
