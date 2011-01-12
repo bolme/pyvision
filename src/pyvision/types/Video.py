@@ -277,12 +277,13 @@ class VideoFromImages:
     num is a zero-padded number like 0001, 0002, ...
          
     note: the amount of padded zeros is the minimum required based on the length
-    (num frames) in the video. So if you only had 120 frames, then it would be 001, 002,...120.
+    (num frames) in the video, unless a specific padding is specified. So if you only had
+    120 frames, then it would be 001, 002,...120.
+    
     We assume the frames are sequential with no gaps, and start at number startnum (with 
-    appropriate padding). If you have extra zero padding, then you can put the prefix zeros
-    as part of the prefix string.
+    appropriate padding).
     '''
-    def __init__(self,dirname,numframes,prefix="frame",ext="jpg", startnum=1, size=None):
+    def __init__(self,dirname,numframes,prefix="frame",ext="jpg", pad=None, startnum=1, size=None):
         '''
         The file names are of the format {prefix}{zero-padded num}.{ext}, the amount of
         zero-padding is determined automatically based on numframes. If there is additional
@@ -291,15 +292,27 @@ class VideoFromImages:
         would have prefix="vid_t1_s1_f", startnum=1, numframes=999, ext="jpg"
 
         @param dirname: directory where the images comprising the video exist 
-        @param numframes: the number of frames in the video...0 to numframes will be read 
+        @param numframes: the number of frames in the video...0 to numframes will be read.
+        specify None to read all images in directory, in which case you must specify
+        a value for the pad parameter.
         @param prefix: a string which remains as a constant prefix to all frames in video
-        @param ext: the extension of the images, like jpg, png, etc. Do not include the dot. 
+        @param ext: the extension of the images, like jpg, png, etc. Do not include the dot.
+        @param pad: the padding (like string.zfill(x)) used on the sequential numbering of
+        the input files. Specify None, and the padding will be determined based on length
+        of numframes. (So if numframes = 1234, then pad=4, 0001,0002,...1234) 
         @param startnum: the starting number of the first frame, defaults to 1
         @param size: the optional width,height to resize the input frames
         '''
         self.dirname = dirname
+        if numframes == None:
+            #user wants to read all frames, so padding must be specified
+            assert(pad != None and pad>0)
+                        
+        if pad == None:
+            pad = len(str(numframes))
+
+        self.pad = pad                        
         self.maxframes = numframes
-        self._numframes = numframes - startnum #number of frames to actually play
         self.prefix = prefix
         self.ext = ext
         self.size = size  #the optional width,height to resize the input frames
@@ -312,16 +325,18 @@ class VideoFromImages:
             raise IOError
         
     def query(self):      
-        if self.current_frame <= self.maxframes:  
-            pad = len(str(self.maxframes))
-            num = str(self.current_frame).zfill(pad)
-            filename = self.prefix + num + "." + self.ext
-            f = os.path.join(self.dirname, filename)
-            frame = pv.Image(f)
-            self.current_frame += 1
-            return(self.resize(frame))
-        else:
-            return None
+        num = str(self.current_frame).zfill(self.pad)
+        filename = self.prefix + num + "." + self.ext
+        f = os.path.join(self.dirname, filename)
+        
+        if (self.maxframes == None) or (self.current_frame <= self.maxframes):
+            #then we query the next in the sequence until file not exists
+            if os.path.exists(f):
+                frame = pv.Image(f)
+                self.current_frame += 1
+                return(self.resize(frame))
+        
+        return None
        
     def resize(self,frame):
         if self.size == None:
