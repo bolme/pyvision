@@ -307,10 +307,10 @@ class VideoFromImages:
         if numframes == None:
             #user wants to read all frames, so padding must be specified
             assert(pad != None and pad>0)
-                        
+        
         if pad == None:
             pad = len(str(numframes))
-
+            
         self.pad = pad                        
         self.maxframes = numframes
         self.prefix = prefix
@@ -325,8 +325,8 @@ class VideoFromImages:
             raise IOError
         
     def query(self):      
-        num = str(self.current_frame).zfill(self.pad)
-        filename = self.prefix + num + "." + self.ext
+        numstr = str(self.current_frame).zfill(self.pad)
+        filename = self.prefix + numstr + "." + self.ext
         f = os.path.join(self.dirname, filename)
         
         if (self.maxframes == None) or (self.current_frame <= self.maxframes):
@@ -335,6 +335,8 @@ class VideoFromImages:
                 frame = pv.Image(f)
                 self.current_frame += 1
                 return(self.resize(frame))
+            else:
+                print "Image file %s does not exist. Stopping VideoFromImages."%f
         
         return None
        
@@ -357,6 +359,6 @@ class VideoFromImages:
         
     def __iter__(self):
         ''' Return an iterator for this video '''
-        return VideoFromImages(self.dirname, self.maxframes, self.prefix, self.ext, self.startnum, self.size) 
+        return VideoFromImages(self.dirname, self.maxframes, self.prefix, self.ext, self.pad, self.startnum, self.size) 
         
     
