@@ -473,7 +473,14 @@ class Image:
         mat /= std
         self.matrix2d=mat
        
-
+    def equalize(self, bw=True):
+        import PIL.ImageOps
+        pil = self.asPIL().copy()
+        if bw:
+            pil = PIL.ImageOps.equalize(pil.convert('L'))
+        else:
+            pil = PIL.ImageOps.equalize(pil)
+        return pv.Image(pil)
     #------------------------------------------------------------------------        
     def _generateMatrix2D(self):
         '''
