@@ -45,8 +45,11 @@ import xml.etree.cElementTree as ET
 import os.path
 import struct
 import numpy as np
+import scipy as sp
+import scipy.io as spio
 import pyvision as pv
 import pyvision.analysis.roc as roc
+import gzip
 
 BIOMETRIC_SIGNATURE = '{http://www.bee-biometrics.org/schemas/sigset/0.1}biometric-signature'
 PRESENTATION = '{http://www.bee-biometrics.org/schemas/sigset/0.1}presentation'
@@ -62,7 +65,7 @@ BEE_DONTCARE = 0x00
 
 ##
 # Parse a BEE sigset.
-def parseSigSet(source):
+def parseSigSet(filename):
     '''
     the format of a sigset is::
         sigset = [ 
@@ -82,8 +85,11 @@ def parseSigSet(source):
                     )
                 ]   
     '''
+    if isinstance(filename,str) and filename.endswith('.gz'):
+        # assume the file is compressed
+        filename = gzip.open(filename,'rb')
 
-    sigset = ET.parse(source)
+    sigset = ET.parse(filename)
     result = []
     
     # Parse standard biometric signatures without namespaces
@@ -125,6 +131,20 @@ def parseSigSet(source):
             signature.append(presentation)
                 
     return result
+
+def saveSigset(ss,filename):
+    '''
+    save a sigset to a file.
+    
+    @param ss: a sigset structured list
+    @param filename: a file object or filename
+    '''
+    if isinstance(filename,str) and filename.endswith('.gz'):
+        # assume the file should be compressed
+        filename = gzip.open(filename,'wb')
+        
+    xmlss = sigset2xml(ss)
+    xmlss.write(filename)
 
 def sigset2xml(ss):
     root = ET.Element("biometric-signature-set")
@@ -517,6 +537,20 @@ class BEEDistanceMatrix:
         '''
         Writes the BEE distance matrix to file. WARNING: DOES NOT HANDLE MASK MATRICES CORRECTLY!
         '''
+        if filename.endswith('.mtx'):
+            # save a BEE formated matrix
+            self.saveBeeFormat(filename)
+        elif filename.endswith('.mat'):
+            # save a matlab formated matrix
+            if self.is_distance:
+                matrix_name = 'dist_matrix'
+            else:
+                matrix_name = 'sim_matrix'
+            spio.savemat(filename, {matrix_name:self.matrix})
+        else:
+            return NotImplementedError("Unsupported matrix format for filename %s"%filename)
+        
+    def saveBeeFormat(self,filename):
         #maybe check for overwrite? and add param for allowing overwrite
         file = open(filename, "w")
         # write line 1 : type and version
