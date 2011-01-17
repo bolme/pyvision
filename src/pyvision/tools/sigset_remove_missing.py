@@ -100,7 +100,6 @@ def locateFiles(sigset,imdir):
                 continue
             if file_map.has_key(basename) and image_map[file_map[basename]] == None:
                 image_map[file_map[basename]] = os.path.join(rootdir,filename)
-                if True: print "    Found image:",basename,image_map[file_map[basename]]
                 n_images += 1
             elif file_map.has_key(basename) and image_map[file_map[basename]] != None:
                 raise ValueError("Multiple images found matching recording id %s:\n   First instance:  %s\n   Second instance: %s"%(file_map[basename],image_map[file_map[basename]],os.path.join(rootdir,filename)))
@@ -108,23 +107,24 @@ def locateFiles(sigset,imdir):
                     
     if True: print "Found %d of %d images."%(n_images,len(image_map))
     
-    f = open("missing_files.csv",'wb')
-    f.write('rec_id,basename\n')
-    for rec_id,filename in image_map.iteritems():
+    missing = []
+    found = []
+    for item in sigset:
+        rec_id = item[1][0]['name']
+        filename = image_map[rec_id]
         if filename == None:
-            print "missing file for recording id:",rec_id,rec_map[rec_id]
-            f.write("%s,%s\n"%(rec_id,rec_map[rec_id]))
+            missing.append(item)
         else:
-            pass #print "found file for recording id:",rec_id,filename
+            found.append(item)
             
     
-    return image_map
+    return found,missing
 
 
 
 
 def parseOptions():
-    usage = "usage: %prog [options] <input.xml> <image_directory> <output.xml>\nReads a sigset and removes any entries that cannot be associated with an image."
+    usage = "usage: %prog [options] <input.xml> <image_directory> <found.xml> [<missing.xml>]\nReads a sigset and removes any entries that cannot be associated with an image."
     
     parser = optparse.OptionParser(usage)
     #parser.add_option("-v", "--verbose",
@@ -132,8 +132,8 @@ def parseOptions():
     #                  help="Turn on more verbose output.")
     (options, args) = parser.parse_args()
     
-    if len(args) != 3:
-        parser.error("This program requires three arguments: an input sigest, an image directory, and an output sigset.")
+    if len(args) not in [3,4]:
+        parser.error("This program requires at least three arguments: an input sigest, an image directory, and an output sigset.")
 
     return options, args
 
@@ -143,21 +143,11 @@ if __name__ == '__main__':
     options,args = parseOptions()
 
     sigset = bee.parseSigSet(args[0])
-    
-    rows = []
-    header = ["sub_id","rec_id","filename","modality","file_format"]
-    rows.append(header)
-    for each in sigset:
-        sub_id = each[0]
-        rec_id = each[1][0]['name']
-        filename = each[1][0]['file-name']
-        modality = each[1][0]['modality']
-        file_format = each[1][0]['file-format']
-        row = [sub_id,rec_id,filename,modality,file_format]
-        rows.append(row)
-
-    f = csv.writer(open(args[1],'wb'))
-    f.writerows(rows)
+    imdir = args[1]
+    found,missing = locateFiles(sigset,imdir)
+    bee.saveSigset(found, args[2])
+    if len(args) >= 4:
+        bee.saveSigset(missing, args[3])
     
     
     
