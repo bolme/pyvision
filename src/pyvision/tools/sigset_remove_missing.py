@@ -43,6 +43,85 @@ import optparse
 import csv
 
 
+import os.path
+
+
+IMAGE_EXTENSIONS = set(['.TIF','.TIFF','.JPG','.JPEG','.PNG','.GIF','.PPM','.PGM','.BMP'])
+
+
+
+def parseBasename(path):
+    '''
+    This section parses the basename without file extensions from the path.
+    
+    @returns basename from /path/to/file/basename.eee
+    '''
+    if path == None:
+        return None
+    
+    dirname,filename = os.path.split(path)
+    # Adaptation for FERET sigsets
+    basename = filename.split('.')[0]
+    #basename,extname = os.path.splitext(filename)
+    return basename
+
+
+
+
+def locateFiles(sigset,imdir):
+    '''
+    This function scans the image directories for the files listed in the
+    sigset.  If using the reduced image format, the images should be named
+    using the recording ID with a standard image extension such as "jpg".
+    Otherwise, the directories are scanned for images matching the basename
+    of the filename.  This means that the paths in the sigset do not have
+    to be specified accuratly but problems do arise if multiple copies
+    of an image are in the image directory.
+    '''
+    image_map = {}
+    file_map = {}
+    rec_map = {}
+
+    
+    for each in sigset:
+        rec_id = each[1][0]['name']
+        basename = parseBasename(each[1][0]['file-name'])
+        image_map[rec_id] = None
+        file_map[basename] = rec_id
+        rec_map[rec_id] = basename
+        
+            
+    n_images = 0
+    
+    for rootdir,dirs,files in os.walk(imdir):
+        for filename in files:
+            basename,ext = os.path.splitext(filename)
+            if ext.upper() not in IMAGE_EXTENSIONS:
+                continue
+            if file_map.has_key(basename) and image_map[file_map[basename]] == None:
+                image_map[file_map[basename]] = os.path.join(rootdir,filename)
+                if True: print "    Found image:",basename,image_map[file_map[basename]]
+                n_images += 1
+            elif file_map.has_key(basename) and image_map[file_map[basename]] != None:
+                raise ValueError("Multiple images found matching recording id %s:\n   First instance:  %s\n   Second instance: %s"%(file_map[basename],image_map[file_map[basename]],os.path.join(rootdir,filename)))
+                    
+                    
+    if True: print "Found %d of %d images."%(n_images,len(image_map))
+    
+    f = open("missing_files.csv",'wb')
+    f.write('rec_id,basename\n')
+    for rec_id,filename in image_map.iteritems():
+        if filename == None:
+            print "missing file for recording id:",rec_id,rec_map[rec_id]
+            f.write("%s,%s\n"%(rec_id,rec_map[rec_id]))
+        else:
+            pass #print "found file for recording id:",rec_id,filename
+            
+    
+    return image_map
+
+
+
 
 def parseOptions():
     usage = "usage: %prog [options] <input.xml> <image_directory> <output.xml>\nReads a sigset and removes any entries that cannot be associated with an image."
