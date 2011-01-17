@@ -300,7 +300,11 @@ class OpenCVFilterEyeLocator:
         '''
         preprocess an image tile.
         '''
-        cv.LUT(image_tile,self.image,self.lut)
+        # TODO: This function has problems in opencv 2.2.  There appears to be a bug. 
+        image_tile = pv.OpenCVToNumpy(image_tile)
+        image_tile = np.array(image_tile,dtype=np.uint8)
+        lut = pv.OpenCVToNumpy(self.lut)
+        self.image = cv.LUT(image_tile,lut)
         
         return self.image
         
