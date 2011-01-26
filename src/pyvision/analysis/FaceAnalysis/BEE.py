@@ -63,6 +63,13 @@ BEE_NONMATCH = 0x7f
 BEE_MATCH    = 0xff
 BEE_DONTCARE = 0x00
 
+BEE_CODE_MAP = {
+                0x7f:"NONMATCH",
+                0xff:"MATCH",
+                -1:"MATCH",
+                0x00:"DONTCARE",             
+                }
+
 ##
 # Parse a BEE sigset.
 def parseSigSet(filename):
@@ -456,6 +463,22 @@ class BEEDistanceMatrix:
             i += s
         return scores
 
+    def asFlatArray(self,mask=None):
+        '''query,target,score,type'''
+        r,c = self.matrix.shape
+        result = np.zeros((r*c,4),dtype=np.object)
+        for i in range(r):
+            for j in range(c):
+                result[c*i+j,0] = i 
+                result[c*i+j,1] = j
+                result[c*i+j,2] = self.matrix[i,j]
+                if BEE_CODE_MAP.has_key(mask[i,j]):
+                    result[c*i+j,3] = BEE_CODE_MAP[mask[i,j]]
+                else:
+                    result[c*i+j,3] = "0x%02x"%mask[i,j]
+        return result
+            
+        
 
 #    def getNonMatchScoresByPairs(self,mask=None):
 #        assert self.queries != None
@@ -563,7 +586,9 @@ class BEEDistanceMatrix:
         # write lines 2 and 3 (target and query sigsets)
         file.writelines([self.target_filename+"\n", self.query_filename+"\n"])
         # write line 4 (MF n_queries n_targets magic_number)
-        file.write("MF %d %d %s\n" %(self.n_queries, self.n_targets, struct.pack("L", self.magic_number)))
+        magic_number = struct.pack('I',0x12345678)
+        assert len(magic_number) == 4 # Bug fix: verify the magic number is really 4 bytes
+        file.write("MF %d %d %s\n" %(self.n_queries, self.n_targets, magic_number))
         # write the data
         file.write(self.matrix)
         file.close()
@@ -630,4 +655,12 @@ class BEEDistanceMatrix:
         '''
         type = {True:"Distance",False:"Similarity"}[self.is_distance]
         return "BEE[file=%s;type=%s]"%(self.shortname,type)
+    
+    def __getitem__(self,index):
+        '''An accessor to quickly read matrix data'''
+        return self.matrix.__getitem__(index)
+    
+    def shape(self):
+        '''@returns: the number of rows and columns.'''
+        return self.matrix.shape
     
