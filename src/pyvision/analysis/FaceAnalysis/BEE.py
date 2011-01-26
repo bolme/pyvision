@@ -44,6 +44,7 @@ see: <a href="http://www.bee-biometrics.org">http://www.bee-biometrics.org</a>
 import xml.etree.cElementTree as ET
 import os.path
 import struct
+import binascii
 import numpy as np
 import scipy as sp
 import scipy.io as spio
@@ -256,10 +257,19 @@ class BEEDistanceMatrix:
         
         #read the distance matrix header (first four lines of the file)
         
-        #read and process line 1
-        line = f.readline().split()
-        assert line[0][0] in ['D','S','M']
-        assert line[0][1] == '2'
+        line = f.readline()
+        # Test line endings
+        if len(line) != 3 or line[-1] != "\x0a":
+            # Note: \x0a is the "official" line ending char as of 
+            #       \x0d is also supported in the Java and C++ tools but it will cause a failure in this implementation.
+            #       see IARPA BEST - Challenge Problem Specification and Executable Application Program Interface
+            #       thanks to Todd Scruggs
+            raise ValueError("Unsupported line ending.  Should two characters followed by LF (0x0A).")
+        # Check Format
+        line = line.strip()
+        if line not in ['D2','S2','M2']:
+            raise ValueError('Unknown matrix Format "%s".  Should be D2, S2, or M2.'%line)
+        
         self.is_distance = True
         if line[0][0] == 'S':
             self.is_distance = False
@@ -279,7 +289,14 @@ class BEEDistanceMatrix:
         
         self.n_queries = int(line[1])
         self.n_targets = int(line[2])
-        self.magic_number = struct.unpack_from("I",line[3])[0]
+        
+        big_endian = struct.pack(">I",0x12345678)
+        little_endian = struct.pack("<I",0x12345678)
+        
+        if line[3] != big_endian and line[3] != little_endian:
+            print "Warning unsupported magic number is BEE matrix: 0x%s"%binascii.hexlify(line[3])
+            
+        self.magic_number = struct.unpack_from("=I",line[3])[0]
         if self.magic_number == 0x12345678:
             byteswap = False
         elif self.magic_number == 0x78563412:
@@ -480,62 +497,6 @@ class BEEDistanceMatrix:
             
         
 
-#    def getNonMatchScoresByPairs(self,mask=None):
-#        assert self.queries != None
-#        assert self.targets != None
-#        
-#        matches = {}
-#        queries = np.array([ name for name,sig in self.queries ])
-#        targets = np.array([ name for name,sig in self.targets ])
-#        
-#        rows = queries.argsort()
-#        cols = targets.argsort()
-#        print rows
-#        print cols
-#        qnames = list(set(queries))
-#        tnames = list(set(targets))
-#        
-#        matrix = (self.matrix[rows,:][:,cols])
-#        if mask != None:
-#            mask = (mask.matrix[rows,:][:,cols])
-#        queries = queries[rows]
-#        targets = targets[cols]
-#
-#        q_blocks = {}
-#        for qname in qnames:
-#            rows = np.nonzero(qname == queries)[0]
-#            q_blocks[qname] = (rows[0],rows[-1]+1)
-#        
-#        t_blocks = {}
-#        for tname in tnames:
-#            cols = np.nonzero(tname == targets)[0]
-#            t_blocks[tname] = (cols[0],(cols[-1]+1))
-#        
-#        
-#        total = len(qnames)*len(tnames)
-#        
-#        i = 0
-#        for qname in qnames:
-#            matches[qname]= {}
-#            for tname in tnames:
-#                
-#                if qname == tname:
-#                    continue
-#
-#                r1,r2 = q_blocks[qname]
-#                c1,c2 = t_blocks[tname]
-#
-#                tmp = matrix[r1:r2,c1:c2]
-#                if mask != None:
-#                    m = mask[r1:r2,c1:c2] != 0x00
-#                    matches[qname][tname] = tmp.flatten()[m.flatten()]
-#                else:
-#                    matches[qname][tname] = tmp.flatten()
-#                
-#                if len(matches[qname][tname]) == 0:
-#                    del matches[qname][tname]
-#            
-#        return matches
             
     
     def printInfo(self):
@@ -548,10 +509,6 @@ class BEEDistanceMatrix:
         print "    <total size>    :",self.n_targets*self.n_queries
         print "    magic_number    : %x"%self.magic_number
         print "    matrix.shape    :",self.matrix.shape
-        #print "    <matrix sample> :",self.matrix[0,0:4]
-        #print "    <matrix sample> :",self.matrix[1,0:4]
-        #print "    <matrix sample> :",self.matrix[2,0:4]
-        #print "    <matrix sample> :",self.matrix[3,0:4]
         
     def write(self,filename):
         self.save(filename)
@@ -575,20 +532,25 @@ class BEEDistanceMatrix:
         
     def saveBeeFormat(self,filename):
         #maybe check for overwrite? and add param for allowing overwrite
-        file = open(filename, "w")
+        file = open(filename, "wb")
+        
         # write line 1 : type and version
         if self.is_distance:
             file.write('D') #doesn't handle mask matrices!
         else:
             file.write('S') #doesn't handle mask matrices!
             
-        file.write("2\n")
+        file.write("2\x0a")
+        
         # write lines 2 and 3 (target and query sigsets)
-        file.writelines([self.target_filename+"\n", self.query_filename+"\n"])
+        file.write(self.target_filename+"\x0a")
+        file.write(self.query_filename+"\x0a")
+        
         # write line 4 (MF n_queries n_targets magic_number)
-        magic_number = struct.pack('I',0x12345678)
+        magic_number = struct.pack('=I',0x12345678)
         assert len(magic_number) == 4 # Bug fix: verify the magic number is really 4 bytes
-        file.write("MF %d %d %s\n" %(self.n_queries, self.n_targets, magic_number))
+        file.write("MF %d %d %s\x0a" %(self.n_queries, self.n_targets, magic_number))
+        
         # write the data
         file.write(self.matrix)
         file.close()
