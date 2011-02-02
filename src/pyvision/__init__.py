@@ -70,12 +70,12 @@ Genetic Algorithm     optimization        pyvision.optimize.GeneticAlgorithm
 import unittest
 import sys
 
-__version__ = "$Rev$"
+__version__ = "0.9.0 $Rev$"
 __info__ = "$Id$"
 __license__= '''
 PyVision License
 
-Copyright (c) 2006-2008 David S. Bolme
+Copyright (c) 2006-2010 David S. Bolme
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -145,7 +145,7 @@ def disableCommercialUseWarnings():
 
 from pyvision.types.img import Image,OpenCVToNumpy,NumpyToOpenCV
 
-from pyvision.types.Video import Video, Webcam, VideoFromImages
+from pyvision.types.Video import Video, Webcam, VideoFromImages, FFMPEGVideo
 
 from pyvision.types.Point import Point,readPointsFile
 
@@ -188,6 +188,24 @@ from pyvision.util.windows import cosineWindow, hammingWindow, hannWindow
 from pyvision.analysis.stats import pbinom, qbinom, cibinom, mcnemar_test, SummaryStats
 
 from pyvision.point.GaborJets import GaborFilters, GaborImage, GaborJet, FilterBank, GaborWavelet
+
+from pyvision.other.color import Histogram, hsBackProjectHist, rgbBackProjectHist, rgbHist, hsHist, HIST_HS, HIST_RGB
+
+from pyvision.ml.pca import prcomp, pca
+
+from pyvision.ml.lda import lda
+
+from pyvision.other.surf import surf
+
+
+def searchNames(text,object):
+    '''Search dir(object) for patterns matching text'''
+    for name in dir(object):
+        if text.upper() in name.upper():
+            print name
+    
+    
+
 
 # TODO: Features to be included in the initial release.
 #     analysis: 
@@ -369,6 +387,15 @@ def test():
     from pyvision.analysis.classifier.ConfusionMatrix import _TestConfusionMatrix
     cm_suite = unittest.TestLoader().loadTestsFromTestCase(_TestConfusionMatrix)
     
+    from pyvision.other.testsuite import _TestDistance
+    dist_suite = unittest.TestLoader().loadTestsFromTestCase(_TestDistance)
+
+    from pyvision.other.testsuite import _TestNormalize
+    norm_suite = unittest.TestLoader().loadTestsFromTestCase(_TestNormalize)
+    
+    from pyvision.other.testsuite import _TestSURF
+    surf_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSURF)
+    
     
     test_suites = [
                    version_suite,
@@ -390,6 +417,9 @@ def test():
                    stats_suite,
                    table_suite,
                    cm_suite,
+                   dist_suite,
+                   norm_suite,
+                   surf_suite,
                    ]
     
     pyvision_suite = unittest.TestSuite(test_suites)
