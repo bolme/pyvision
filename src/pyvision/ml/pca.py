@@ -9,7 +9,7 @@ import scipy.linalg as la
 
 def prcomp(data,center=True,scale=False):
     '''
-    data vectors are in rows
+    Conduct a basic principal components analysis on the data.
     
     This function has been compared to R to verify that it produces similar results.
     
@@ -49,4 +49,7 @@ def prcomp(data,center=True,scale=False):
         
     return result
 
+
+# Alias the name to pca
+pca = prcomp
 
