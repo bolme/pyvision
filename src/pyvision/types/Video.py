@@ -180,13 +180,14 @@ class Video:
         
                 
         
-class FfmpegIn:
+class FFMPEGVideo:
     # TODO: there may be a bug with the popen interface
     
     def __init__(self,filename,size=None,aspect=None,options=""):
         self.filename = filename
         self.size = size
         self.aspect = aspect
+        self.options = options 
         
         # Open a pipe
         args = "/opt/local/bin/ffmpeg -i %s %s -f yuv4mpegpipe - "%(filename,options)
@@ -204,8 +205,8 @@ class FfmpegIn:
         # I am not sure what all this means but I am checking it anyway
         assert format=='YUV4MPEG2'
         #assert t1=='Ip'
-        assert t2=='C420mpeg2'
-        assert t3=='XYSCSS=420MPEG2'
+        #assert t2=='C420mpeg2'
+        #assert t3=='XYSCSS=420MPEG2'
 
         # get the width and height
         assert w[0] == "W"
@@ -247,10 +248,10 @@ class FfmpegIn:
         v = self.stdout.read(self.w*self.h/4)
         if len(y) < self.w*self.h:
             raise EOFError
-        
-        self.frame_y.imageData=y
-        self.frame_u2.imageData=u
-        self.frame_v2.imageData=v
+
+        cv.SetData(self.frame_y,y)
+        cv.SetData(self.frame_u2,u)
+        cv.SetData(self.frame_v2,v)
 
         cv.Resize(self.frame_u2,self.frame_u)
         cv.Resize(self.frame_v2,self.frame_v)
@@ -265,6 +266,20 @@ class FfmpegIn:
             out = self.frame_resized
 
         return pv.Image(self.frame_y),pv.Image(self.frame_u),pv.Image(self.frame_v),pv.Image(out)
+    
+    
+    def __iter__(self):
+        ''' Return an iterator for this video '''
+        return FFMPEGVideo(self.filename,size=self.size,aspect=self.aspect,options=self.options)
+
+        
+    def next(self):
+        try:
+            _,_,_,frame = self.frame()
+        except EOFError:
+            raise StopIteration("End of video sequence")
+        return frame
+
         
 class VideoFromImages:
     '''
