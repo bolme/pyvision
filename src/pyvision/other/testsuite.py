@@ -12,10 +12,11 @@ import pyvision as pv
 import numpy as np
 #from optic_flow import *
 from distance import *
+import cv
 
 import os.path
 
-class TestNormalize(unittest.TestCase):
+class _TestNormalize(unittest.TestCase):
     
     def setUp(self):
         # Eye coordinates generated automatically
@@ -109,7 +110,7 @@ class TestNormalize(unittest.TestCase):
             ilog.log(norm,label="lowPass_Normalization")
             
         mat = norm.asMatrix2D()
-        self.assertAlmostEqual(mat.mean(),123.70116424560547,places=3)
+        self.assertAlmostEqual(mat.mean(),123.69997406005859,places=3)
         self.assertAlmostEqual(mat.std(),36.886999835117216,places=3)
 
     def test_6_highPass(self):
@@ -125,7 +126,7 @@ class TestNormalize(unittest.TestCase):
             
         mat = norm.asMatrix2D()
         self.assertAlmostEqual(mat.mean(),0.0,places=4)
-        self.assertAlmostEqual(mat.std(),22.935605337280723,places=3)
+        self.assertAlmostEqual(mat.std(),22.936873341661158,places=3)
 
     def test_7_veryHighPass(self):
         '''highPassFilter Normalization: sigma = 1.5........................'''
@@ -141,7 +142,7 @@ class TestNormalize(unittest.TestCase):
             
         mat = norm.asMatrix2D()
         self.assertAlmostEqual(mat.mean(),0.0,places=4)
-        self.assertAlmostEqual(mat.std(),8.001150048562355,places=3)
+        self.assertAlmostEqual(mat.std(),8.0027218003238687,places=3)
 
     def test_8_selfQuotient(self):
         '''selfQuotient Normalization: .....................................'''
@@ -155,46 +156,60 @@ class TestNormalize(unittest.TestCase):
             ilog.log(norm,label="selfQuotient_Normalization")
             
         mat = norm.asMatrix2D()
-        self.assertAlmostEqual(mat.mean(),0.99385333061218262,places=3)
-        self.assertAlmostEqual(mat.std(),0.089332874756000477,places=3)
+        self.assertAlmostEqual(mat.mean(),0.98861616849899292,places=3)
+        self.assertAlmostEqual(mat.std(),0.1647989569275968,places=3)
 
 
 
-class TestOpticFlow(unittest.TestCase):
+class _TestSURF(unittest.TestCase):
     
-    def setUp(self):
-        '''Initialize the tests'''
-        path1 = os.path.join(pv.__path__[0],"data","test","TAZ_0330.jpg")
-        path2 = os.path.join(pv.__path__[0],"data","test","TAZ_0331.jpg")
+    def test_1_SURF(self):
+        '''SURF Lena: ......................................................'''
+        ilog = None
+        if 'ilog' in globals().keys():
+            ilog = globals()['ilog']
+                    
+        filename = os.path.join(pv.__path__[0],'data','misc','lena.jpg')
+        im = pv.Image(filename)
+        timer = pv.Timer()
+        keypoints,descriptors = pv.surf(im)
+        timer.mark("LenaSurf")
+        if ilog != None:
+            ilog(timer,"SURFLena")
+        for each in keypoints:
+            im.annotateCircle(pv.Point(each[0][0],each[0][1]), each[2])
+        if ilog != None:
+            ilog(im,'SurfKeypoints')
+                
+        self.assertEqual(len(keypoints),len(descriptors))
+        self.assertEqual(len(keypoints),824)
+        #print descriptors
         
-        prev = pv.Image(path1)
-        curr = pv.Image(path2)
         
-        w,h = prev.size
-        scale = 2
-        
-        self.prev = pv.AffineScale(1.0/scale,(w/scale,h/scale)).transformImage(prev)
-        self.curr = pv.AffineScale(1.0/scale,(w/scale,h/scale)).transformImage(curr)
-        
-        self.prev.asOpenCVBW()
-        self.curr.asOpenCVBW()
+    def test_2_SURF(self):
+        '''SURF Taz: .......................................................'''
+        ilog = None
+        if 'ilog' in globals().keys():
+            ilog = globals()['ilog']
+                    
+        filename = os.path.join(pv.__path__[0],'data','test','TAZ_0010.jpg')
+        im = pv.Image(filename)
+        timer = pv.Timer()
+        keypoints,descriptors = pv.surf(im)
+        timer.mark("TazSurf")
+        if ilog != None:
+            ilog(timer,"SURFTaz")
+        for each in keypoints:
+            im.annotateCircle(pv.Point(each[0][0],each[0][1]), each[2])
+        if ilog != None:
+            ilog(im,'SurfKeypoints')
 
-    
-    def test_1_goodFeaturesToTrack(self):
-        '''optic_flow::goodFeaturesToTrack..................................'''
-        #points = goodFeaturesToTrack(self.prev,max_count=50)
-        #self.assertEqual( len(points) , 50 )
-        
-            
-    def test_2_opticalFlowPyrLK(self):
-        '''optic_flow::opticalFlowPyrLK........  .............................'''
-        #points = goodFeaturesToTrack(self.prev,max_count=50)
-        #self.assertEqual( len(points) , 50 )
-        
+        self.assertEqual(len(keypoints),len(descriptors))
+        self.assertEqual(len(keypoints),384)        
             
          
                     
-class TestDistance(unittest.TestCase):
+class _TestDistance(unittest.TestCase):
     
     def setUp(self):
         '''Initialize the tests'''
@@ -234,6 +249,7 @@ class TestDistance(unittest.TestCase):
         byte_hamming = hamming(a,b)
         
         self.assertEquals(bin_hamming,byte_hamming)
+        
 
     def test_3_hamming(self):
         '''distance::hamming 2..............................................'''
@@ -257,13 +273,18 @@ def test():
     '''Run the face test suite.'''
     pv.disableCommercialUseWarnings()
     
-    normalize_suite = unittest.TestLoader().loadTestsFromTestCase(TestNormalize)
+    normalize_suite = unittest.TestLoader().loadTestsFromTestCase(_TestNormalize)
+    surf_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSURF)
+    dist_suite = unittest.TestLoader().loadTestsFromTestCase(_TestDistance)
     
     
     
     test_suites = [
                    normalize_suite,
+                   surf_suite,
+                   dist_suite
                    ]
+    
     
     pyvision_suite = unittest.TestSuite(test_suites)
     
@@ -272,9 +293,7 @@ def test():
     
 if __name__ == '__main__':
     # By default run the test suite
-    ilog = pv.ImageLog()
-    test()
-    ilog.show()
+    unittest.main(testRunner = unittest.TextTestRunner(verbosity=2))
     
     
     
