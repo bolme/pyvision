@@ -120,6 +120,19 @@ class ImageLog:
         pickle.dump(object, f)
         f.close()
         self.count += 1
+        
+    def file(self,data=None,label="NOLABEL",ext='.dat'):
+        '''
+        Write the buffer data to a file.  If data == None then the file object is returned.
+        '''
+        filename = join(self.dir,'%06d_%s%s'%(self.count,label,ext))
+        self.count += 1
+        f = open(filename,'wb')
+        if data != None:
+            f.write(data)
+            f.close()
+        else:
+            return f
     
     def show(self):
         '''
