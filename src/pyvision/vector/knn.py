@@ -54,20 +54,68 @@ class PNorm:
         
         return np.array(dist_mat)
     
-def chisquared(points, data):
+class RobustPNorm:
+    def __init__(self,p,scale=1.0):
+        '''
+        @param scale: adjust the size of the robust bins
+        '''
+        
+        self.p = float(p)
+        self.scale = scale
+    
+    def __call__(self, points, data):
         r,c = data.shape
         
         dist_mat = []
-        for pt in points:
-            pt = pt.reshape(1,c)
-            tmp1 = (data - pt)**2
-            tmp2 = data + pt + 0.00001
-            tmp3 = tmp1/tmp2
-            
-            row = np.sum(tmp3,axis=1)
-            dist_mat.append(row)
+        if self.p == np.inf:
+            for pt in points:
+                pt = pt.reshape(1,c)
+                raw_dist = self.scale*(data - pt)
+                robust_dist = raw_dist/np.sqrt(1+raw_dist**2) # sigmoid - locally linear
+                row =  np.amax(np.abs(robust_dist),axis=-1)
+                dist_mat.append(row)
+        else:
+            for pt in points:
+                pt = pt.reshape(1,c)
+                raw_dist = self.scale*(data - pt)
+                robust_dist = raw_dist/np.sqrt(1+raw_dist**2) # sigmoid - locally linear
+                row = np.sum(np.abs(robust_dist)**self.p,axis=1)**(1.0/self.p)
+                dist_mat.append(row)
         
         return np.array(dist_mat)
+    
+def chisquared(points, data):
+    '''
+    Compute the chi squared statistic between histograms
+    '''
+    # all values in the histogram must be positive
+    assert points.min() >= 0.0
+    assert data.min() >= 0.0
+    
+    r,c = data.shape
+    
+    
+    dist_mat = []
+    for pt in points:
+        pt = pt.reshape(1,c)
+        tmp1 = (data - pt)**2
+        tmp2 = data + pt
+        mask = tmp2 < 0.000001
+        tmp3 = (tmp1 * ~mask) /(tmp2 + 1.0*mask) # prevent divide by zero
+        
+        row = np.sum(tmp3,axis=1)
+        dist_mat.append(row)
+    
+    return np.array(dist_mat)
+
+def bhattacharyya(points,data):
+    '''
+    Compute bhattacharyya distance for histograms.
+    '''
+    raise NotImplementedError()
+    # all values in the historgams must be positive
+    assert points.min() >= 0.0
+    assert data.min() >= 0.0
         
         
 def correlation(points,data):

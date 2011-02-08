@@ -143,6 +143,9 @@ def disableCommercialUseWarnings():
 
 #Import basic pyvision types
 
+#================================== Imports =====================================
+
+
 from pyvision.types.img import Image,OpenCVToNumpy,NumpyToOpenCV
 
 from pyvision.types.Video import Video, Webcam, VideoFromImages, FFMPEGVideo
@@ -179,7 +182,7 @@ from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotientImage,
 
 from pyvision.other.distance import boolToUbyte, ubyteToBool, hamming
 
-from pyvision.vector.knn import PNorm,correlation,chisquared
+from pyvision.vector.knn import RobustPNorm,PNorm,correlation,chisquared
 
 from pyvision.util.fast_util import LocalMaximumDetector
 
@@ -196,6 +199,15 @@ from pyvision.ml.pca import prcomp, pca
 from pyvision.ml.lda import lda
 
 from pyvision.other.surf import surf
+
+from pyvision.analysis.bee import *
+
+
+
+
+
+#================================== Misc Functions =====================================
+
 
 
 def searchNames(text,object):
