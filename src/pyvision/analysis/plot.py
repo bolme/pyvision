@@ -487,8 +487,8 @@ class Plot:
         points = Points(points,color=color,shape=shape,size=size,label=label,lty=lty,width=width)
         self.graphics.append(points)
         
-    def show(self):
-        self.asImage().show()
+    def show(self,**kwargs):
+        self.asImage().show(**kwargs)
     
     
         
