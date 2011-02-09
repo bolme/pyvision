@@ -8,6 +8,16 @@ from pyvision.analysis.FaceAnalysis.EyesFile import EyesFile
 
 SCRAPS_EYES = EyesFile(os.path.join(pv.__path__[0],'data','csuScrapShots','coords.txt'))
 
+
+# Common test images
+AIRPLANE = os.path.join(pv.__path__[0],'data','misc','airplane.jpg')
+BABOON   = os.path.join(pv.__path__[0],'data','misc','baboon.jpg')
+FRUITS   = os.path.join(pv.__path__[0],'data','misc','fruits.jpg')
+LENA     = os.path.join(pv.__path__[0],'data','misc','lena.jpg')
+LOGO     = os.path.join(pv.__path__[0],'data','misc','logo.jpg')
+
+
+
 def genderClassifier(clsfy, ilog=None):
     '''
     genderClassifier takes a classifier as an argument and will use the 
