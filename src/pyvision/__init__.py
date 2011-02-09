@@ -202,6 +202,8 @@ from pyvision.other.surf import surf
 
 from pyvision.analysis.bee import *
 
+from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO
+
 
 
 
