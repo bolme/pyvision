@@ -287,6 +287,17 @@ class Image:
                 self.annotated = self.asPIL().copy().convert("RGB")
         return self.annotated
             
+    def asHSV(self):
+        '''
+        @return: an OpenCV HSV encoded image
+        '''
+        cvim = self.asOpenCV()
+        dst = cv.CreateImage(cv.GetSize(cvim), cv.IPL_DEPTH_8U, 3)
+        cv.CvtColor(cvim, dst, cv.CV_BGR2HSV)
+        
+        return dst
+        
+        
     def annotateRect(self,rect,color='red'):
         '''
         Draws a rectangle on the annotation image
@@ -676,6 +687,16 @@ class Image:
 
         return pyvision.Image(tmp)
     
+    def scale(self, scale):
+        ''' Returns a scaled version of the image. This is a convenience function.
+        For more control, look at the Affine class for arbitrary transformations.
+        @param scale: a float indicating the scale factor
+        @returns: a new pyvision image that is the scaled version of this image.
+        ''' 
+        w,h = self.size
+        new_size = (int(round(scale*w)),int(round(scale*h)))
+        return self.resize(new_size)
+    
     def copy(self):
         '''
         Returns a new pv.Image which is a copy of (only) the current image.
@@ -794,9 +815,9 @@ class Image:
             
         x = pyvision.Image(self.asAnnotated())        
         cv.ShowImage(window, x.asOpenCV() )
-        cv.WaitKey(delay=delay)
+        key = cv.WaitKey(delay=delay)
         del x
-    
+        return key
 ##
 # Convert a 32bit opencv matrix to a numpy matrix
 def OpenCVToNumpy(cvmat):
@@ -1026,6 +1047,16 @@ class _TestImage(unittest.TestCase):
         cropSize = imcrop.size
         
         self.assertEquals((35,70), cropSize)
+        
+    def test_asHSV(self):
+        im = pv.Image(os.path.join(pyvision.__path__[0],"data","misc","baboon.jpg"))
+        hsv = im.asHSV()
+        im = pv.Image(hsv)
+        #im.show(delay=0)
+
+        im = pv.Image(os.path.join(pyvision.__path__[0],"data","misc","baboon_bw.jpg"))
+        self.assertRaises(Exception, im.asHSV)
+
         
         
         
