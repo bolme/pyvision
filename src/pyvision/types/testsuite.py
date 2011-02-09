@@ -14,6 +14,10 @@ DATA_DIR = os.path.join(pv.__path__[0],'data','test')
 SYNC_VIDEO = 'video_sync.mov'
 SYNC_FRAMES = ['video_sync_0001.jpg', 'video_sync_0002.jpg', 'video_sync_0003.jpg', 'video_sync_0004.jpg', 'video_sync_0005.jpg',]
 
+BUGS_VIDEO = os.path.join(pv.__path__[0],'data','test','BugsSample.m4v')
+TAZ_VIDEO = os.path.join(pv.__path__[0],'data','test','TazSample.m4v')
+TOYCAR_VIDEO = os.path.join(pv.__path__[0],'data','test','toy_car.m4v')
+
 
 class TestVideo(unittest.TestCase):
     '''Tests for the video class.'''
@@ -56,6 +60,38 @@ class TestVideo(unittest.TestCase):
         video = pv.Video(video_path)
         
         self.assertEquals(len(video),5)
+        
+        
+
+ 
+class TestFFMPEGVideo(unittest.TestCase):
+    '''Tests for the video class.'''
+    
+    def testBugsVideo(self):
+        ilog = pv.ImageLog()
+        #ilog = None
+        
+        
+        video = pv.FFMPEGVideo(BUGS_VIDEO)
+        
+        i = 0
+        for frame in video:            
+            
+            if ilog != None:
+                print "Processing Frame:",i
+                
+                #if frame != None:
+                ilog(frame,format='jpg')
+                            
+            i += 1
+        
+        if ilog != None:
+            ilog.show()
+
+    
+
+
+       
         
         
 

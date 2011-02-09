@@ -31,8 +31,6 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import Point as pt
-#import cv
 import pyvision as pv
 import numpy as np
 
@@ -40,20 +38,32 @@ def BoundingRect(*points):
     '''
     Create a rectangle that includes all of the points.
     '''
-    tmp = []
+    xs = []
+    ys = []
     for each in points:
         if type(each) == list or type(each) == tuple:
-            tmp += each
+            rect = BoundingRect(*each)
+            xs.append(rect.x)
+            xs.append(rect.x+rect.w)
+            ys.append(rect.y)
+            ys.append(rect.y+rect.h)
+        elif isinstance(each, pv.Rect):
+            rect = each
+            xs.append(rect.x)
+            xs.append(rect.x+rect.w)
+            ys.append(rect.y)
+            ys.append(rect.y+rect.h)
+        elif isinstance(each,pv.Point):
+            xs.append(each.X())
+            ys.append(each.Y())
         else:
-            tmp.append(each)
-    assert len(tmp) > 0
-    minx = maxx = tmp[0].X()
-    miny = maxy = tmp[0].Y()
-    for each in tmp:
-        minx = min(minx,each.X())
-        maxx = max(maxx,each.X())
-        miny = min(miny,each.Y())
-        maxy = max(maxy,each.Y())
+            raise TypeError("Cannot create bounding rect for geometry of type: %s"%each.__class__)
+        
+    assert len(xs) > 0
+    minx = min(*xs)
+    maxx = max(*xs)
+    miny = min(*ys)
+    maxy = max(*ys)
     return Rect(minx,miny,maxx-minx,maxy-miny)
 
 def CenteredRect(cx,cy,w,h):
@@ -149,7 +159,7 @@ class Rect:
         
         @returns: a pv.Point at the center.
         '''
-        return pt.Point(self.x+0.5*self.w,self.y+0.5*self.h)
+        return pv.Point(self.x+0.5*self.w,self.y+0.5*self.h)
     
     def area(self):
         '''
@@ -283,11 +293,10 @@ class Rect:
 def test():
     '''
     '''
-    import Point
-    p1 = Point.Point(1,1)
-    p2 = Point.Point(4,4)
-    p3 = Point.Point(5,4)
-    p4 = Point.Point(6,8)
+    p1 = pv.Point(1,1)
+    p2 = pv.Point(4,4)
+    p3 = pv.Point(5,4)
+    p4 = pv.Point(6,8)
 
     r1 = BoundingRect(p1,p2)
     r2 = BoundingRect(p3,p4)

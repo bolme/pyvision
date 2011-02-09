@@ -160,6 +160,13 @@ class Point:
             return pv.Point(0,0,0)
         
         return (1.0/l)*self 
+    
+    def magnitude(self):
+        x = self.X()
+        y = self.Y()
+        z = self.Z()
+        
+        return np.sqrt(x**2+y**2+z**2)
         
         
     def __sub__(self,point):
