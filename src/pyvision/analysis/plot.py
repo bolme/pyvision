@@ -79,10 +79,10 @@ class Label:
         self.rotate = rotate
         self.color = color
         
-    def draw(self,plot,buffer):
+    def draw(self,plot,buffer,bounds):
         x,y = self.point
-        x = plot.x(x)
-        y = plot.y(y)
+        x = plot.x(x,bounds)
+        y = plot.y(y,bounds)
         drawLabel(buffer,[x,y],self.label,size=self.size,align=self.align,rotate=self.rotate,color=self.color)
         
     def range(self):
@@ -105,10 +105,9 @@ class Points:
         self.lty = lty
         
         
-    def draw(self,plot,buffer):
+    def draw(self,plot,buffer,bounds):
         ''''''
-        
-        points = [ (plot.x(x),plot.y(y)) for x,y in self.points]
+        points = [ (plot.x(x,bounds),plot.y(y,bounds)) for x,y in self.points]
         
         if self.lty != None:
             self.drawCurve(points,buffer)
@@ -312,8 +311,9 @@ class Plot:
         drawLabel(pil,(self.left+0.5*w,fh-5),self.xlabel,align='above',size='large',rotate=False)
         
         buffer = PIL.Image.new("RGB",(w,h),'white')
+        bounds = self.range()
         for each in self.graphics:
-            each.draw(self,buffer)
+            each.draw(self,buffer,bounds)
             
         pil.paste(buffer,(self.left,self.top))
         
@@ -327,14 +327,14 @@ class Plot:
         # Tickmarks
         draw = PIL.ImageDraw.Draw(pil)
         for i in range(len(at)):
-            x = self.left+self.x(at[i])
+            x = self.left+self.x(at[i],bounds)
             y = self.top+h
             draw.line((x,y,x,y+5),fill='black')
         del draw
         
         # Labels
         for i in range(len(at)):
-            x = self.left+self.x(at[i])
+            x = self.left+self.x(at[i],bounds)
             y = self.top+h
             drawLabel(pil, (x,y+5), labels[i], size='large',align='bellow',rotate=False,color='black')
 
@@ -345,27 +345,27 @@ class Plot:
         draw = PIL.ImageDraw.Draw(pil)
         for i in range(len(at)):
             x = self.left
-            y = self.top+self.y(at[i])
+            y = self.top+self.y(at[i],bounds)
             draw.line((x,y,x-5,y),fill='black')
         del draw
         
         # Labels
         for i in range(len(at)):
             x = self.left
-            y = self.top+self.y(at[i])
+            y = self.top+self.y(at[i],bounds)
             drawLabel(pil, (x-5,y), labels[i], size='large',align='left',rotate=True,color='black')
         
         return pv.Image(pil)
             
         
-    def x(self,x):
-        minx,maxx,_,_ = self.range()
+    def x(self,x,bounds):
+        minx,maxx,_,_ = bounds
         w,_ = self.size
         return w*(x-minx)/float(maxx-minx)
 
 
-    def y(self,y):
-        _,_,miny,maxy = self.range()
+    def y(self,y,bounds):
+        _,_,miny,maxy = bounds
         _,h = self.size
         return h-h*(y-miny)/float(maxy-miny)
     
@@ -526,6 +526,7 @@ class TestPlot(unittest.TestCase):
         "Plot: No Data"
         plot = Plot()
         plot.asImage()
+        
         
         
 
