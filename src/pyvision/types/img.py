@@ -298,17 +298,19 @@ class Image:
         return dst
         
         
-    def annotateRect(self,rect,color='red'):
+    def annotateRect(self,rect,color='red', fill_color=None):
         '''
         Draws a rectangle on the annotation image
         
         @param rect: a rectangle of type Rect
         @param color: defined as ('#rrggbb' or 'name') 
+        @param fill_color: defined as per color, but indicates the color
+        used to fill the rectangle. Specify None for no fill.
         '''
         im = self.asAnnotated()
         draw = PIL.ImageDraw.Draw(im)
         box = [rect.x,rect.y,rect.x+rect.w,rect.y+rect.h]
-        draw.rectangle(box,outline=color)
+        draw.rectangle(box,outline=color,fill=fill_color)
         del draw
         
     def annotateThickRect(self,rect,color='red',width=5):
