@@ -8,7 +8,7 @@ Created on Feb 28, 2011
 import unittest
 
 import pyvision as pv
-from GeneticAlgorithm import *
+import pyvision.optimize.genetic as ga
 import scipy as sp
 import numpy as np
 
@@ -218,25 +218,25 @@ class GeneticAlgorithmTest(unittest.TestCase):
 
 
     def test2DSurfaceFloatMP(self):
-        ga = GeneticAlgorithm(Fitness(),[GAFloat(0.0,10.0),GAFloat(0.0,10.0)],n_processes=4)
-        score,args,kwargs = ga.optimize(max_iter=1000)
+        alg = ga.GeneticAlgorithm(Fitness(),[ga.GAFloat(0.0,10.0),ga.GAFloat(0.0,10.0)],n_processes=4)
+        score,args,kwargs = alg.optimize(max_iter=1000)
         print "test2DSurfaceFloatMP",score,args,kwargs
         
     def test2DSurfaceFloatSP(self):
-        ga = GeneticAlgorithm(Fitness(),[GAFloat(0.0,10.0),GAFloat(0.0,10.0)],n_processes=1)
-        score,args,kwargs = ga.optimize(max_iter=1000)
+        alg = ga.GeneticAlgorithm(Fitness(),[ga.GAFloat(0.0,10.0),ga.GAFloat(0.0,10.0)],n_processes=1)
+        score,args,kwargs = alg.optimize(max_iter=1000)
         print "test2DSurfaceFloatSP",score,args,kwargs
         
     def test2DSurfaceIntSP(self):
-        ga = GeneticAlgorithm(FitnessInt(),[GAInteger(0,1000),GAInteger(0,1000)],n_processes=1)
-        score,args,kwargs = ga.optimize(max_iter=1000)
+        alg = ga.GeneticAlgorithm(FitnessInt(),[ga.GAInteger(0,1000),ga.GAInteger(0,1000)],n_processes=1)
+        score,args,kwargs = alg.optimize(max_iter=1000)
         print "test2DSurfaceIntSP",score,args,kwargs
         
     def testNapsack(self):
         fitness = FitnessNapsack()
         #fitness.solve()
-        ga = GeneticAlgorithm(FitnessNapsack(),[GARanking(100)],n_processes=1)
-        score,args,kwargs = ga.optimize(max_iter=200000)
+        alg = ga.GeneticAlgorithm(FitnessNapsack(),[ga.GARanking(100)],n_processes=1)
+        score,args,kwargs = alg.optimize(max_iter=1000)
         print "testNapsack",score,args,kwargs
         
         

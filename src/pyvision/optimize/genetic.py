@@ -56,6 +56,7 @@ import traceback
 import numpy as np
 import copy
 import time
+import pyvision as pv
 
 # Genetic algorithm message types
 _GA_EVALUATE="GA_EVALUATE"
@@ -175,7 +176,7 @@ class GAInteger(GAVariable):
 
 class GABoolean(GAVariable):
     
-    def __init__(self,minval,maxval,**kwargs):
+    def __init__(self,**kwargs):
         GAVariable.__init__(self, **kwargs)
         self.random()
         
@@ -284,40 +285,11 @@ def dict_generate(args):
             dict_generate(args[i])
        
 
-def _gaEvaluate(fitness,args,kwargs):
-    
-    assert isinstance(args, (list,tuple))
-    assert isinstance(kwargs, dict)
-    args = copy.deepcopy(args)
-    kwargs = copy.deepcopy(kwargs)
-    list_generate(args)
-    dict_generate(kwargs)
-    return fitness(*args,**kwargs)
-
-def _gaWorker(work_queue,results_queue):
-    while True:
-        command = None
-        try:
-            command = work_queue.get()
-            #print command
-            if command[0] == _GA_EVALUATE:
-                _,fitness,args,kwargs = command
-                score = _gaEvaluate(fitness, args, kwargs)
-                #print "worker:",score,args,kwargs
-                results_queue.put([_GA_SCORE,score,args,kwargs])
-            elif command[0] == _GA_STOP_WORKER:
-                #print "Stopping Worker"
-                break
-            else:
-                sys.stderr.write("Worker encountered unknown command of type: %s\n"%(command[0]))
-        except:    
-            print "Error in work queue."
-            traceback.print_exc()
-    print "Worker Complete."
-    sys.exit()
-
-
 def _gaWork(data):
+    '''
+    This is a work function that gets called on child processes 
+    to evaluate a fitness function.
+    '''
     try:
         fitness,args,kwargs = data
         assert isinstance(args, (list,tuple))
@@ -348,6 +320,13 @@ class GeneticAlgorithm:
         self.run_data = None
         
         self.running_workers = 0
+        
+        self.best_score = np.inf
+        self.population = []
+        self.bests = []
+        self.worsts = []
+        self.history = []
+        self.iter = 0
         
     def list_random(self,args):
         for i in range(len(args)):
@@ -452,6 +431,48 @@ class GeneticAlgorithm:
         
         return args
     
+    
+    def addIndividual(self,score,args,kwargs,ilog=None):
+        if score == np.inf:
+            return
+        
+        if score < self.best_score:
+            self.best_score = score
+            if ilog != None:
+                # Print data
+                print "New Best Score:",score
+                
+                for i in range(len(args)):
+                    print "    arg%02d"%i,args[i]
+                keys = list(kwargs.keys())
+                keys.sort()
+                for key in keys:
+                    print "    %10s:"%key,kwargs[key]
+                
+        self.population.append([score,args,kwargs])
+        self.population.sort(lambda x,y: cmp(x[0],y[0]))
+        self.population = self.population[:self.population_size]
+
+        self.history.append(score)
+        self.bests.append(self.population[0][0])
+        self.worsts.append(self.population[-1][0])
+        
+        self.iter += 1
+
+        if ilog != None:    
+            self.printPopulation()
+            
+            ilog.pickle([score,args,kwargs],"Fitness_%0.8f"%score)
+            
+            plot = pv.Plot(title="Population Statistics",xlabel="Iteration",ylabel="Score")
+            data = [ [i,self.bests[i]] for i in range(len(self.bests)) ]
+            plot.lines(data,width=3,color='green')
+            data = [ [i,self.history[i]] for i in range(len(self.bests)) ]
+            plot.points(data,shape=16,color='blue',size=2)
+            data = [ [i,self.worsts[i]] for i in range(len(self.bests)) ]
+            plot.lines(data,width=3,color='red')
+            ilog(plot,"PopulationData")
+    
 
     def printPopulation(self):
         print "GA Population:",
@@ -462,18 +483,16 @@ class GeneticAlgorithm:
             print "%8.3f"%self.population[i][0],
         print
         print
-
-
         
     
     def optimize(self,max_iter=1000,callback=None,ilog=None):
-        best_score = 0.0
-        best_alg = None
-        history = []
-        bests = []
-        worsts = []
-        iter = 0
-        self.population = []
+        #best_score = 0.0
+        #best_alg = None
+        #history = []
+        #bests = []
+        #worsts = []
+        #iter = 0
+        #self.population = []
         
         # Create worker process pool
         if self.n_processes > 1: 
@@ -489,29 +508,21 @@ class GeneticAlgorithm:
             scores = pool.map(_gaWork, work)
             for i in range(len(scores)):
                 score = scores[i]
-                if score == np.inf:
-                    continue
                 _,args,kwargs = work[i]
-                self.population.append([score,args,kwargs])
-                iter += 1
+                self.addIndividual(score,args,kwargs,ilog=ilog)
         else:
             for each in work:
                 score = _gaWork(each)
-                if score == np.inf:
-                    continue
                 _,args,kwargs = each
-                self.population.append([score,args,kwargs])
-                iter += 1
+                self.addIndividual(score,args,kwargs,ilog=ilog)
                 
         if len(self.population) < 2:
             raise ValueError("Could not initialize population.")
-
-        self.population.sort(lambda x,y: cmp(x[0],y[0]))
         
         if ilog != None:
             self.printPopulation()
         
-        while iter < max_iter:
+        while self.iter < max_iter:
             
             # Generate the next round of work
             n_work = max(1,self.n_processes)
@@ -532,23 +543,13 @@ class GeneticAlgorithm:
                 scores = pool.map(_gaWork, work)
                 for i in range(len(scores)):
                     score = scores[i]
-                    if score == np.inf:
-                        continue
                     _,args,kwargs = work[i]
-                    self.population.append([score,args,kwargs])
-                    iter += 1
+                    self.addIndividual(score,args,kwargs,ilog=ilog)
             else:
                 for each in work:
                     score = _gaWork(each)
-                    if score == np.inf:
-                        continue
                     _,args,kwargs = each
-                    self.population.append([score,args,kwargs])
-                    iter += 1
-
-            self.population.sort(lambda x,y: cmp(x[0],y[0]))
-            
-            self.population = self.population[:self.population_size]
+                    self.addIndividual(score,args,kwargs,ilog=ilog)
 
             if ilog != None:
                 self.printPopulation()
