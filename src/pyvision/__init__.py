@@ -160,7 +160,7 @@ from pyvision.types.Perspective import  PerspectiveTransform, PerspectiveFromPoi
 
 from pyvision.analysis.ImageLog import ImageLog
 
-from pyvision.analysis.VideoMontage import VideoMontage
+from pyvision.analysis.Montage import ImageMontage, VideoMontage
 
 from pyvision.analysis.plot import Plot
 
@@ -170,7 +170,7 @@ from pyvision.analysis.Timer import Timer
 
 from pyvision.analysis.roc import ROC,ROC_LOG_SAMPLED,ROC_MATCH_SAMPLED
 
-from pyvision.surveillance.ImageBuffer import ImageBuffer
+from pyvision.types.ImageBuffer import ImageBuffer
 
 from pyvision.surveillance.BackgroundSubtraction import AbstractBGModel, FrameDifferencer, MedianFilter, ApproximateMedianFilter, MotionCompensatedFrameDifferencer, BG_SUBTRACT_FD, BG_SUBTRACT_MCFD, BG_SUBTRACT_MF, BG_SUBTRACT_AMF
 

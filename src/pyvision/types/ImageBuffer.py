@@ -35,6 +35,7 @@ Created on Oct 22, 2010
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import scipy as sp
+import pyvision as pv
 
 class ImageBuffer:
     '''
@@ -117,7 +118,7 @@ class ImageBuffer:
         assert not self.isFull()
         
         while not self.isFull():
-            im = vid.getNext()
+            im = vid.next()
             self.add(im)
 
         return
@@ -143,3 +144,23 @@ class ImageBuffer:
             
         return stack
     
+    def asMontage(self, N=10):
+        (w,h) = self[0].size
+        tw = w/5
+        th = h/5
+        if tw < 64: tw=64
+        if th < 48: th=48
+        im = pv.ImageMontage(self._data, layout=(1,N), tileSize=(tw,th),
+                                        gutter=2, byrow=False)
+        return im
+    
+    def show(self, N=10, window="Image Buffer", pos=None, delay=0):
+        '''
+        @param N: The number of images in the buffer to display at once
+        @param window: The window name
+        @param pos: The window position
+        @param delay: The window display duration 
+        '''
+        im = self.asMontage(N=N)
+        img = im.asImage()
+        img.show(window, pos, delay)
