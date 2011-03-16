@@ -162,5 +162,7 @@ class ImageBuffer:
         @param delay: The window display duration 
         '''
         im = self.asMontage(N=N)
-        img = im.asImage()
-        img.show(window, pos, delay)
+        im.show(window, pos, delay)
+        #img = im.asImage()
+        #img.show(window, pos, delay)
+        

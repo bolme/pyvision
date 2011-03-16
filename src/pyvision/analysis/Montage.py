@@ -364,10 +364,12 @@ if __name__ == '__main__':
 import os
 TOYCAR_VIDEO = os.path.join(pv.__path__[0],'data','test','toy_car.m4v')
 vid = pv.Video(TOYCAR_VIDEO)
-
+'''
+'''
 vm = VideoMontage({"V1":vid,"V2":vid,"V3":vid}, layout=(3,1), tileSize=(256,192))
 for img in vm:
     img.show("Video Montage", delay=60, pos=(10,10))
+
 '''
 '''
 imageList = []
@@ -375,10 +377,11 @@ counter = 0
 
 #get a list of images from the first several frames of video
 for img in vid:
+    print counter
     if counter > 11: break
     imageList.append(img)
     counter += 1
     
-im = ImageMontage(imageList, (2, 4), tileSize=(128,96), gutter=2, byrow=False)
+im = ImageMontage(imageList, (2, 4), tileSize=(128,96), gutter=2, byrow=True)
 im.show(window="Montage",delay=0)
 '''
