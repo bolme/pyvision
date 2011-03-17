@@ -48,7 +48,7 @@ def lda(data,labels,reg=0.0):
     @type data: np.array
     @param labels: a corresponding 1D array of labels, one label per row in data
     @type labels: np.array (int or str)
-    @return: (lda_basis,lda_values,means,priors)
+    @return: (lda_values,lda_basis,means,priors)
     @rtype: (np.array,np.array,dict,dict)
     '''
     means = {}
@@ -97,7 +97,9 @@ def lda(data,labels,reg=0.0):
     assert Sw.shape == (D,D)
     
     #Compute vectors using generalized eigenvector solver: Sb v = l Sw v
-    val,vec = la.eigh(Sb,Sw+reg*np.eye(Sw.shape[0]))
+    if reg >= 0:
+        Sw = Sw+reg*np.eye(Sw.shape[0]) # regularization for stability
+    val,vec = la.eigh(Sb,Sw)
     
     # Reorder vectors so the most important comes first
     order = val.argsort()[::-1] # reverse order
