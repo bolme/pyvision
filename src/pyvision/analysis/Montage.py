@@ -357,31 +357,49 @@ class VideoMontage:
             
         im = ImageMontage(imageList, self.layout, self.vidsize, gutter=2, byrow=True)      
         return im.asImage()
-
-if __name__ == '__main__':
-    pass
-'''
-import os
-TOYCAR_VIDEO = os.path.join(pv.__path__[0],'data','test','toy_car.m4v')
-vid = pv.Video(TOYCAR_VIDEO)
-'''
-'''
-vm = VideoMontage({"V1":vid,"V2":vid,"V3":vid}, layout=(3,1), tileSize=(256,192))
-for img in vm:
-    img.show("Video Montage", delay=60, pos=(10,10))
-
-'''
-'''
-imageList = []
-counter = 0
-
-#get a list of images from the first several frames of video
-for img in vid:
-    print counter
-    if counter > 11: break
-    imageList.append(img)
-    counter += 1
     
-im = ImageMontage(imageList, (2, 4), tileSize=(128,96), gutter=2, byrow=True)
-im.show(window="Montage",delay=0)
-'''
+def demo_imageMontage():
+    import os
+    imageList = []
+    counter = 0
+    
+    #get all the jpgs in the data/misc directory
+    JPGDIR = os.path.join(pv.__path__[0],'data','misc')
+    filenames = os.listdir(JPGDIR)
+    jpgs = [os.path.join(JPGDIR,f) for f in filenames if f.endswith(".jpg")]
+    
+    for fn in jpgs:
+        print counter
+        if counter > 8: break
+        imageList.append( pv.Image(fn) )
+        counter += 1
+        
+    im = ImageMontage(imageList, (2, 3), tileSize=(128,96), gutter=2, byrow=False)
+    im.show(window="Image Montage",delay=0)
+
+    
+def demo_videoMontage():
+    import os
+
+    TOYCAR_VIDEO = os.path.join(pv.__path__[0],'data','test','toy_car.m4v')
+    TAZ_VIDEO = os.path.join(pv.__path__[0],'data','test','TazSample.m4v')
+    
+    vid1 = pv.Video(TOYCAR_VIDEO)
+    vid2 = pv.Video(TAZ_VIDEO)
+    
+    vm = VideoMontage({"V1":vid1,"V2":vid2}, layout=(2,1), tileSize=(256,192))
+    for img in vm:
+        img.show("Video Montage", delay=60, pos=(10,10))
+    
+#if __name__ == '__main__':
+#    pass
+
+#print "Demo of an Image Montage..."
+#demo_imageMontage()
+
+#print "Demo of a Video Montage..."
+#demo_videoMontage()
+
+
+
+
