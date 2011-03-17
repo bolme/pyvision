@@ -348,6 +348,7 @@ class BEEDistanceMatrix:
         '''
         Creates a bee matrix from a numpy array.
         '''
+        self.shortname=None
         #read the distance matrix header (first four lines of the file)
         mat = mat.astype(np.float32)
         # select distance or similarity
