@@ -78,7 +78,7 @@ class GAVariable:
     
     
     '''
-    def __init__(self,mutation_rate=0.05):
+    def __init__(self,mutation_rate=0.025):
         self.mutation_rate = mutation_rate
     
     def random(self):
@@ -236,7 +236,7 @@ class GABoolean(GAVariable):
     def mutate(self):
         '''introduce mutations into the variable.'''
         if random.random() < self.mutation_rate:
-            self.value = ~self.value
+            self.random()
 
     def generate(self):
         '''generate the actual value that will be populated in the arguments'''
