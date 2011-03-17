@@ -136,6 +136,49 @@ class GAFloat(GAVariable):
         return str(self.value)
         
 
+class GALogFloat(GAVariable):
+    '''
+    A float on a log scale.
+    '''
+    
+    def __init__(self,minval,maxval,**kwargs):
+        GAVariable.__init__(self, **kwargs)
+        minval = np.log(minval)
+        maxval = np.log(maxval)
+        self.minval,self.maxval = min(minval,maxval),max(minval,maxval)
+        self.random()
+        
+    def clipRange(self):
+        self.value = _clipRange(self.value, self.minval, self.maxval)
+
+    def random(self):
+        ''' Initialize this variable randomly '''
+        self.value = self.minval + (self.maxval - self.minval)*random.random()
+        self.clipRange()
+    
+    def combine(self,other):
+        '''combine this variable with other.'''
+        dist = np.abs(self.value - other.value)+0.000001
+        if random.randint(0,1) == 0:
+            self.value = other.value
+        self.value += np.random.normal(0,dist/3.0)
+        self.clipRange()
+
+    def mutate(self):
+        '''introduce mutations into the variable.'''
+        if random.random() < self.mutation_rate:
+            dist = np.abs(self.maxval-self.minval)
+            self.value += np.random.normal(0,dist/3.0)
+        self.clipRange()
+
+    def generate(self):
+        '''generate the actual value that will be populated in the arguments'''
+        return np.exp(self.value)
+    
+    def __repr__(self):
+        return str(np.exp(self.value))
+        
+
 class GAInteger(GAVariable):
     
     def __init__(self,minval,maxval,**kwargs):
@@ -194,6 +237,36 @@ class GABoolean(GAVariable):
         '''introduce mutations into the variable.'''
         if random.random() < self.mutation_rate:
             self.value = ~self.value
+
+    def generate(self):
+        '''generate the actual value that will be populated in the arguments'''
+        return self.value
+    
+    def __repr__(self):
+        return str(self.value)
+        
+
+class GAChoice(GAVariable):
+    
+    def __init__(self,*choices, **kwargs):
+        GAVariable.__init__(self, **kwargs)
+        self.choices = choices
+        self.random()
+        
+
+    def random(self):
+        ''' Initialize this variable randomly '''
+        self.value = random.sample(self.choices,1)[0]
+    
+    def combine(self,other):
+        '''combine this variable with other.'''
+        if random.randint(0,1) == 0:
+            self.value = other.value
+
+    def mutate(self):
+        '''introduce mutations into the variable.'''
+        if random.random() < self.mutation_rate:
+            self.value = random.sample(self.choices,1)[0]
 
     def generate(self):
         '''generate the actual value that will be populated in the arguments'''
@@ -519,8 +592,6 @@ class GeneticAlgorithm:
         if len(self.population) < 2:
             raise ValueError("Could not initialize population.")
         
-        if ilog != None:
-            self.printPopulation()
         
         while self.iter < max_iter:
             
@@ -550,9 +621,6 @@ class GeneticAlgorithm:
                     score = _gaWork(each)
                     _,args,kwargs = each
                     self.addIndividual(score,args,kwargs,ilog=ilog)
-
-            if ilog != None:
-                self.printPopulation()
 
             if callback != None:
                 callback(self.population)
