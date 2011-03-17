@@ -152,14 +152,16 @@ def hsHist(im,h_bins=32,s_bins=32,mask=None,normalize=True):
 
 def rgbHist(im,r_bins=8,g_bins=8,b_bins=8,mask=None,normalize=True):
     '''
-    Compute the hue saturation histogram of an image. (Based on OpenCV example code).
+    Compute the rgb saturation histogram of an image. (Based on OpenCV example code).
     
     @param im: the image
     @type im: pv.Image
-    @param h_bins: the number of bins for hue.
-    @type h_bins: int
-    @param s_bins: the number of bins for saturation.
-    @type s_bins: int
+    @param r_bins: the number of bins for hue.
+    @type r_bins: int
+    @param g_bins: the number of bins for hue.
+    @type g_bins: int
+    @param b_bins: the number of bins for hue.
+    @type b_bins: int
     @param mask: an image containing a mask
     @type mask: cv.Image or np.array(dtype=np.bool)
     @return: an OpenCV histogram
