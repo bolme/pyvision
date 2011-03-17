@@ -298,6 +298,17 @@ class Image:
         return dst
         
         
+    def asLAB(self):
+        '''
+        @return: an OpenCV LAB encoded image
+        '''
+        cvim = self.asOpenCV()
+        dst = cv.CreateImage(cv.GetSize(cvim), cv.IPL_DEPTH_8U, 3)
+        cv.CvtColor(cvim, dst, cv.CV_BGR2Lab)
+        
+        return dst
+        
+        
     def annotateRect(self,rect,color='red', fill_color=None):
         '''
         Draws a rectangle on the annotation image
