@@ -178,7 +178,7 @@ class Video:
             raise StopIteration("End of video sequence")
         return frame
         
-    def play(self, window=None, pos=None, delay=25, onNewFrame=None ):
+    def play(self, window=None, pos=None, delay=20, onNewFrame=None ):
         '''
         Plays the video, calling the onNewFrame function after loading each
          frame from the video. The user may interrupt video playback by
@@ -191,8 +191,11 @@ class Video:
         @param pos: A tuple (x,y) where the output window should be located
         on the users screen. None indicates default openCV positioning algorithm
         will be used.
-        @param delay: The delay between window updates, if an output window
-        was specified.
+        @param delay: The delay in ms between window updates. This allows the user
+        to control the playback frame rate. A value of 0 indicates that the video
+        will wait for keyboard input prior to advancing to the next frame. This
+        delay is used by the pauseAndPlay interface, so it will affect the rate
+        at which onNewFrame is called as well.
         @param onNewFrame: A python callable object (function) with a
         signature of 'foo( pvImage, frameNum, userKey )', where userKey is
         the key pressed by the user (if any) during the pauseAndPlay interface.
@@ -200,7 +203,10 @@ class Video:
         the user terminated playback using the 'q'uit option.
         '''
         vid = self
-        delayObj = {'wait_time':delay, 'current_state':'PLAYING'}
+        if delay==0:
+            delayObj = {'wait_time':20, 'current_state':'PAUSED'}
+        else:
+            delayObj = {'wait_time':delay, 'current_state':'PLAYING'}
         key=''
         for fn, img in enumerate(vid):
             if window != None:
@@ -208,13 +214,13 @@ class Video:
                 img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white")
                 img.show(window=window,pos=pos)
             
+            if onNewFrame != None:
+                onNewFrame( img, fn, key)
+                
             key = self._pauseAndPlay(delayObj)
             if key == 'q':
                 #user selected quit playback
                 return(fn)
-            
-            if onNewFrame != None:
-                onNewFrame( img, fn, key)
         
         return(fn)
     
