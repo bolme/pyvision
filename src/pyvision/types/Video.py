@@ -178,7 +178,91 @@ class Video:
             raise StopIteration("End of video sequence")
         return frame
         
-                
+    def play(self, window=None, pos=None, delay=25, onNewFrame=None ):
+        '''
+        Plays the video, calling the onNewFrame function after loading each
+         frame from the video. The user may interrupt video playback by
+         hitting (sometimes repeatedly) the spacebar, upon which they are
+         given a text menu in the console to abort program, quit playback,
+         continue playback, or step to the next frame.
+        @param window: The window name used to display the video. If None,
+        then the video won't be shown, but onNewFrame will be called at
+        each frame.
+        @param pos: A tuple (x,y) where the output window should be located
+        on the users screen. None indicates default openCV positioning algorithm
+        will be used.
+        @param delay: The delay between window updates, if an output window
+        was specified.
+        @param onNewFrame: A python callable object (function) with a
+        signature of 'foo( pvImage, frameNum, userKey )', where userKey is
+        the key pressed by the user (if any) during the pauseAndPlay interface.
+        @return: The final frame number of the video, or the frame number at which
+        the user terminated playback using the 'q'uit option.
+        '''
+        vid = self
+        delayObj = {'wait_time':delay, 'current_state':'PLAYING'}
+        key=''
+        for fn, img in enumerate(vid):
+            if window != None:
+                pt = pv.Point(10, 10)
+                img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white")
+                img.show(window=window,pos=pos)
+            
+            key = self._pauseAndPlay(delayObj)
+            if key == 'q':
+                #user selected quit playback
+                return(fn)
+            
+            if onNewFrame != None:
+                onNewFrame( img, fn, key)
+        
+        return(fn)
+    
+    def _pauseAndPlay(self,delayObj={'wait_time':20, 'current_state':'PLAYING'}):
+        '''
+        This function is intended to be used in the playback loop of a video.
+        It allows the user to interrupt the playback to pause the video, to 
+        step through it one frame at a time, and to register other keys/commands
+        that the user may select.
+        @param delayObj: The "delay object", which is just a dictionary that
+        specifies the wait_time (the delay in ms between frames), and
+        the current_state of either 'PLAYING' or 'PAUSED'
+        '''
+        state = delayObj['current_state']
+        wait = delayObj['wait_time']
+        #print state, wait
+        
+        if state=="PAUSED":
+            print "PAUSED: Select <a>bort program, <q>uit playback, <c>ontinue playback, or <s>tep to next frame."
+            wait = 0
+            
+        c = cv.WaitKey(wait)
+        c = c & 127 #bit mask to get only lower 8 bits
+        
+        #sometimes a person has to hold down the spacebar to get the input
+        # recognized by the cv.WaitKey() within the short time limit. So
+        # we need to 'soak up' these extra inputs when the user is still
+        # holding the spacebar, but we've gotten into the pause state.
+        while c==ord(' '):
+            print "PAUSED: Select <a>bort program, <q>uit playback, <c>ontinue playback, or <s>tep to next frame."
+            c = cv.WaitKey(0)
+            c = c & 127 #bit mask to get only lower 8 bits
+        
+        #At this point, we have a non-spacebar input, so process it.
+        if c == ord('a'):   #abort
+            print "User Aborted Program."
+            raise SystemExit
+        elif c == ord('q'): #quit video playback
+            return 'q'
+        elif c == ord('c'): #continue video playback
+            delayObj['current_state'] = "PLAYING"
+            return 'c'
+        elif c == ord('s'): #step to next frame, keep in paused state
+            delayObj['current_state'] = "PAUSED"
+            return 's'
+        else:   #any other keyboard input is just returned
+            #delayObj['current_state'] = "PAUSED"
+            return chr(c)
         
 class FFMPEGVideo:
     # TODO: there may be a bug with the popen interface
@@ -281,7 +365,7 @@ class FFMPEGVideo:
         return frame
 
         
-class VideoFromImages:
+class VideoFromImages(Video):
     '''
     This class allows the user to treat a directory of images as a video. It is assumed that
     the files in the directory are named as follows:
@@ -376,4 +460,4 @@ class VideoFromImages:
         ''' Return an iterator for this video '''
         return VideoFromImages(self.dirname, self.maxframes, self.prefix, self.ext, self.pad, self.startnum, self.size) 
         
-    
+                
