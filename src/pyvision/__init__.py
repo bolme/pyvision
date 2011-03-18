@@ -204,7 +204,7 @@ from pyvision.analysis.bee import *
 
 from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO
 
-
+from pyvision.analysis.VideoStreamProcessor import *
 
 
 
