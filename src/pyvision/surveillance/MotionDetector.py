@@ -283,6 +283,8 @@ class MotionDetector(object):
         @note: You must call detect() before getForegroundPixels() to
         get updated information.
         '''
+        if self._fgMask == None: return None
+        
         #binary mask selecting foreground regions
         mask = self._fgMask.asOpenCVBW()
         
@@ -415,7 +417,7 @@ class MotionDetector(object):
         '''
         rects = self.getRects()
         outImg = self._annotateImg.copy()  #deep copy, so can freely modify the copy
-        
+        if outImg == None: return None
         
         #draw optical flow information in white
         if showFlow and (self._method == pv.BG_SUBTRACT_MCFD):
@@ -487,6 +489,7 @@ class MotionDetector(object):
         
         #binary mask selecting foreground regions
         mask = self._fgMask.asOpenCVBW()
+        if mask == None: return None
         
         #full color source image
         image = self._annotateImg.copy().asOpenCV()
