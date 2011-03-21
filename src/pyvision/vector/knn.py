@@ -118,7 +118,7 @@ def bhattacharyya(points,data):
     assert data.min() >= 0.0
         
         
-def correlation(points,data):
+def correlation(points,data,reg=0.00001):
     '''
     Compute the correlation between points and data where 
     points are stored as rows.
@@ -129,8 +129,8 @@ def correlation(points,data):
     points = points - points.mean(axis=1).reshape(pr,1)
     data = data - data.mean(axis=1).reshape(dr,1)
     
-    ps = 1.0/np.sqrt((points*points).sum(axis=1)).reshape(pr,1)
-    ds = 1.0/np.sqrt((data*data).sum(axis=1)).reshape(dr,1)
+    ps = 1.0/np.sqrt((points*points).sum(axis=1)+reg).reshape(pr,1)
+    ds = 1.0/np.sqrt((data*data).sum(axis=1)+reg).reshape(dr,1)
  
     points = points * ps
     data = data * ds
