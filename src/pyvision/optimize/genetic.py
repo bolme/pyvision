@@ -177,6 +177,10 @@ class GALogFloat(GAVariable):
     
     def __repr__(self):
         return str(np.exp(self.value))
+    
+    
+class GAAngle(GAVariable):
+    pass # TODO: implement this.
         
 
 class GAInteger(GAVariable):
@@ -327,6 +331,51 @@ class GARanking(GAVariable):
     
     def __repr__(self):
         return str(self.ranking)
+    
+    
+class GAUnitVector(GAVariable):
+    ''' A vector constrained to length 1.0. '''
+    def __init__(self,n_elements,**kwargs):
+        GAVariable.__init__(self, **kwargs)
+        self.n_elements = n_elements
+        
+    def clipRange(self):
+        self.value = pv.unit(self.value)
+        
+    def random(self):
+        ''' Initialize this variable randomly '''
+        self.value = np.random.normal(size=[self.n_elements])
+        self.clipRange()
+    
+    def combine(self,other):
+        '''combine this variable with other.'''
+        for i in range(len(self.value)):
+            dist = np.abs(self.value[i] - other.value[i])+0.000001
+            if random.randint(0,1) == 0:
+                self.value[i] = other.value[i]
+            self.value[i] += np.random.normal(0,dist/3.0)
+        self.clipRange()
+
+        
+        
+    def mutate(self):
+        '''introduce mutations into the variable.'''
+        if random.random() < self.mutation_rate:
+            for i in range(len(self.value)):
+                self.value[i] += np.random.normal(0,0.02)
+        self.clipRange()
+        
+    
+    def generate(self):
+        '''generate the actual value that will be populated in the arguments'''
+        return self.value
+    
+    def __repr__(self):
+        return str(self.value)
+
+class GAWeighting(GAVariable):
+    ''' A positive vector that sums to 1.0. '''
+    pass # implement this
         
 
 class GASequence:
