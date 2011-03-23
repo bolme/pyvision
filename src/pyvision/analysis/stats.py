@@ -34,6 +34,8 @@
 #import scipy as sp
 import scipy.stats.distributions as distributions
 import numpy as np
+import scipy as sp
+
 
 def pbinom(q,size,prob):
     '''Binomial probabilites - measured from the left.'''
@@ -189,6 +191,82 @@ def mcnemar_test(sf,fs):
     
     return pvalue
     
+def pdfWeibull(x,shape,scale):
+    pdf = (shape/scale)*((x/scale)**(shape-1))*np.exp(-(x/scale)**shape)
+    return pdf
+
+    
+def cdfWeibull(x,shape,scale):
+    cdf = 1.0-np.exp(-(x/scale)**shape)
+    return cdf
+
+    
+def fitWeibull(x,ilog=None):
+    '''
+    Emperically fit a Weibull distribution to x 
+    
+    @param x: a list containing the x.
+    @type x: a list of floats
+    @param ilog: an image log to save fit information.
+    @type ilog: pv.ImageLog
+    @returns: (k,lambda) 
+    '''
+    x = np.array(x)
+    assert x.min() >= 0.0
+    
+    n = len(x)
+
+    def nll(params):
+        ''' Negative log liklyhood'''
+        shape,scale = params
+        
+        mask = x > 0
+        pdf = pdfWeibull(x, shape, scale)
+        #pdf = (shape/scale)*((x/scale)**(shape-1))*np.exp(-(x/scale)**shape)
+        ll = np.log(pdf[mask]).sum()
+        t1 = (~mask).sum()
+        ll += t1*np.log(0.000001)
+
+        return -ll/len(x)
+
+    tmp = sp.optimize.fmin(nll,[1.0,np.mean(x)],disp=0)
+    shape,scale = tmp
+    
+    if ilog != None:
+        # Plot the CDF
+        order = x.argsort()
+        x = x[order]
+        del order
+        
+        points = [0,0]
+        points = [[0,0]] + [ [x[i],float(i)/n] for i in range(n)]
+        plot = pv.Plot(title="Weibull CDF")
+        plot.points(points)
+        
+        cdf = cdfWeibull(x, shape, scale)
+        
+        lines = [[0,0]] + [ [x[i],cdfWeibull(x[i], shape, scale)] for i in range(n)]
+        plot.lines(lines)
+        ilog(plot,"WeibullCDF")
+
+        plot = pv.Plot(title="Weibull PDF")
+        y = pdfWeibull(x, shape, scale)
+        points = np.array([x,y]).reshape(2,n).T
+        plot.lines(points,color='red',width=3)
+        
+        hist, bins = np.histogram(x, 5, normed=True)
+        
+        t1 = 0.5*(bins[:-1] + bins[1:])
+        points = np.array([t1,hist]).reshape(2,5).T
+        plot.lines(points,color='blue',width=3)
+        ilog(plot,"WeibullPDF")
+        
+        
+    return shape,scale
+
+    
+
+        
 
 class SummaryStats:
     
@@ -317,6 +395,7 @@ class SummaryStats:
             
 
 import unittest
+import pyvision as pv
 class _TestStats(unittest.TestCase):
     def setUp(self):
         self.normal_data = [1.3139,  5.2441,  0.0756,  4.4679,  2.3845,  
@@ -402,7 +481,54 @@ class _TestStats(unittest.TestCase):
         self.assertAlmostEqual(mcnemar_test(16,24),0.268,places=3)
         self.assertAlmostEqual(mcnemar_test(64,96),0.014,places=3)
         
-
+    def test_fitWeibull(self):
+        ilog = pv.ImageLog()
+        
+        # data genereated in R with shape=1 and scale=1 
+        # from fitdistr
+        #      shape       scale  
+        #      1.1082557   1.0212356 
+        #      (0.1358495) (0.1535614)
+        data = [0.39764089, 0.60824086, 0.40285732, 1.54531775, 1.73364323, 1.23747338, 1.12446222, 3.15989785, 0.22271289,
+                1.28213280, 1.68005746, 0.58658749, 0.83938237, 1.25577118, 0.64729513, 1.92565971, 0.36610902, 0.10363669,
+                0.15618127, 0.02262031, 0.25985175, 0.14230431, 1.54069502, 1.06272791, 0.05364079, 0.93874689, 1.01770360,
+                0.40204781, 0.40660520, 0.12017453, 0.73480365, 3.73042281, 1.37838373, 0.17739429, 1.21166837, 3.79022634,
+                0.91822186, 1.07417484, 0.37926781, 0.66128749,]
+        shape,scale = fitWeibull(data,ilog = ilog)
+        self.assertAlmostEqual(shape,1.1082557,places=4)
+        self.assertAlmostEqual(scale,1.0212356,places=4)
+        
+        # data genereated in R with shape=2 and scale=5 
+        # from fitdistr
+        #     shape       scale  
+        #     1.8456678   5.3412324 
+        #     (0.2288101) (0.4831310)
+        data = [9.0668007,  7.5244193,  1.3643692,  2.4980839,  3.8229886,  0.7847899, 10.2635502,  6.4853731,  4.1691479,
+                4.7222325,  3.6751391, 10.5038682,  1.8489645,  5.5697636, 10.3385587,  1.8399665,  7.8512893,  1.6301032,
+                7.1892784,  3.4151212,  2.1018280,  3.0128155,  5.4290304,  3.9759659,  6.4867134,  4.8687895,  1.2671571,
+                6.4746843,  3.6922549,  3.6133898,  5.8451979,  5.5435995,  4.2617657,  3.3490959,  6.3412869,  1.3440581,
+                2.7830355,  2.1482365,  2.5091446,  9.5137472]
+        shape,scale = fitWeibull(data,ilog = ilog)
+        self.assertAlmostEqual(shape,1.8456678,places=4)
+        self.assertAlmostEqual(scale,5.3412324,places=4)
+        
+        # data genereated in R with shape=0.5 and scale=0.2
+        # from fitdistr
+        #    shape        scale   
+        #    0.51119109   0.15523840 
+        #    (0.06552176) (0.05033735)
+        data = [4.368635e-02, 1.716870e-01, 5.265532e-01, 2.387941e-04, 1.836984e-01, 4.835876e-01, 2.159292e-03, 1.060331e+00,
+                1.945628e-02, 4.110887e-01, 1.257612e-01, 2.911412e-02, 6.198067e-01, 5.143289e-01, 1.047416e-01, 3.997763e-01,
+                4.596470e-07, 7.417249e-03, 5.209768e-03, 4.370919e-03, 3.816381e-01, 8.640891e-03, 4.125977e-02, 2.129932e-02,
+                6.916213e-03, 1.037448e-01, 1.946721e-02, 1.445826e-01, 9.911569e-01, 2.074493e-01, 2.726630e-03, 3.030224e-02,
+                1.991381e+00, 1.616899e-01, 1.251923e+00, 4.915620e-01, 1.826906e-01, 8.091978e-04, 7.905816e-03, 5.381265e-02]
+        shape,scale = fitWeibull(data,ilog=ilog)
+        self.assertAlmostEqual(shape,0.51119109,places=4)
+        self.assertAlmostEqual(scale,0.15523840,places=4)
+        
+        if ilog != None:
+            ilog.show()
+        
         
         
         
