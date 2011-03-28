@@ -42,17 +42,22 @@ class AbstractVSP():
     together to accomplish processing on a video stream.
     '''
     
-    def __init__(self, nextModule=None):
+    def __init__(self, window=None, nextModule=None):
         ''' Constructor
+        @param window: The window name to use when displaying this VSP's
+        output. Specify None to suppress showing the output, but note that
+        if you modify the current image with annotations, those will be
+        persisted "downstream" to later processors.
         @param nextModule: A Video Stream Processor object that should be
         invoked on every frame after this processor has finished.
         '''
+        self._windowName = window
         self._nextModule = nextModule
     
     def __call__(self, img, fn, **kwargs):
         self._onNewFrame(img, fn, **kwargs)
         if self._nextModule != None:
-            self._nextModule(img, fn, **kwargs)
+            self._nextModule(img, fn, prevModule=self, **kwargs)
             
     def _onNewFrame(self, img, fn, key=None, buffer=None, prevModule=None):
         ''' Override this abstract method with the processing your object
@@ -67,21 +72,25 @@ class SimpleVSP(AbstractVSP):
     '''A simple VSP object simply displays the input video frame with
     some simple annotation to show the frame number in upper left corner.
     '''
+    def __init__(self, window="Input", nextModule=None):
+        AbstractVSP.__init__(self, window=window, nextModule=nextModule)
+        
     def _onNewFrame(self, img, fn, key=None, buffer=None, prevModule=None):
         pt = pv.Point(10, 10)
         img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white")
         img.annotateLabel(label="Key: %s"%key, point=pv.Point(10,20), color="white")
-        img.show("Input Video")
+        if self._windowName != None: img.show(window=self._windowName)
         
 class MotionDetectionVSP(AbstractVSP):
-    def __init__(self, md_object ,nextModule=None):
+    def __init__(self, md_object, window="Motion Detection", nextModule=None):
         ''' Constructor
         @param md_object: The pyvision motion detection object to be used by
         this VSP
+        @param window: The name of the output window. Use None to suppress output.
         @param nextModule: The next VSP, if any, to be called by this VSP.
         '''
         self._md = md_object
-        AbstractVSP.__init__(self, nextModule)
+        AbstractVSP.__init__(self, window=window, nextModule=nextModule)
         
     def _onNewFrame(self, img, fn, key=None, buffer=None, prevModule=None):
         ''' Performs motion detection using this object's md object,
@@ -90,6 +99,8 @@ class MotionDetectionVSP(AbstractVSP):
         md = self._md
         rc = md.detect(img)
         if rc > -1:
-            img_fg = md.getForegroundPixels()
-            img_fg.show("Foreground")
+            md.annotateFrame(img, rect_color="yellow", contour_color=None, flow_color=None)
+            if self._windowName != None: img.show(window=self._windowName)
+            #img_fg = md.getForegroundPixels()
+            #img_fg.show("Foreground")
             
