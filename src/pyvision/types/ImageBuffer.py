@@ -161,7 +161,12 @@ class ImageBuffer:
         @param pos: The window position
         @param delay: The window display duration 
         '''
-        im = self.asMontage(N=N)
+        if self[0] == None: return
+        
+        if N <= self._count:
+            im = self.asMontage(N=N)
+        else:
+            im = self.asMontage(N=self._count)
         im.show(window, pos, delay)
         #img = im.asImage()
         #img.show(window, pos, delay)

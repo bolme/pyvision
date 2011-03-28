@@ -178,7 +178,7 @@ class Video:
             raise StopIteration("End of video sequence")
         return frame
         
-    def play(self, window=None, pos=None, delay=20, imageBuffer=None, onNewFrame=None ):
+    def play(self, window="Input", pos=None, delay=20, imageBuffer=None, onNewFrame=None ):
         '''
         Plays the video, calling the onNewFrame function after loading each
          frame from the video. The user may interrupt video playback by
