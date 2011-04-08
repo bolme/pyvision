@@ -811,7 +811,7 @@ class Image:
             else:
                 self.asPIL().save(filename)
             
-    def show(self, window="PyVisionImage", pos=None, delay=1):
+    def show(self, window="PyVisionImage", pos=None, delay=1, size=None):
         '''
         Displays the annotated version of the image using OpenCV highgui
         @param window: the name of the highgui window to use, this should
@@ -820,13 +820,20 @@ class Image:
         @param delay: A delay in milliseconds to wait for keyboard input (passed to cv.WaitKey).  
             0 delays indefinitely, 1 is good for live updates and animations.  The window
             will disappear after the program exits.  
+        @param size: Optional output size for image, None=native size.
         '''
         cv.NamedWindow(window)
         
         if pos != None:
             cv.MoveWindow(window, pos[0], pos[1])
             
-        x = pyvision.Image(self.asAnnotated())        
+            
+            
+        if size != None:
+            x = pyvision.Image(self.resize(size).asAnnotated())
+        else:
+            x = pyvision.Image(self.asAnnotated())    
+            
         cv.ShowImage(window, x.asOpenCV() )
         key = cv.WaitKey(delay=delay)
         del x
