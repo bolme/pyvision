@@ -44,7 +44,7 @@ class ImageMontage(object):
     than "viewports" in the layout.
     '''
 
-    def __init__(self, imageList, layout=(2,4), tileSize=(64,48), gutter=2, byrow=True):
+    def __init__(self, imageList, layout=(2,4), tileSize=(64,48), gutter=2, byrow=True, nolabels=False):
         '''
         Constructor
         @param imageList: A list of pyvision images that you wish to display
@@ -56,6 +56,9 @@ class ImageMontage(object):
         @param byrow: If true, the image tiles are placed in row-major order, that
         is, one row of the montage is filled before moving to the next. If false,
         then column order is used instead.
+        @param nolabels: By default, each image in the montage has a numeric label
+        in the lower left corner indicating the order of the images. If you wish to
+        suppress this label, set nolabels=True.
         '''
         self._tileSize = tileSize
         self._rows = layout[0]
@@ -66,6 +69,7 @@ class ImageMontage(object):
         self._txtfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 0.5,0.5)
         self._txtcolor = (255,255,255)   
         self._imgPtr = 0
+        self._nolabels = nolabels
         
         #check if we need to allow for scroll-arrow padding
         if self._rows * self._cols < len(imageList):
@@ -282,14 +286,15 @@ class ImageMontage(object):
         else:
             cv.Copy(cvTile,cvImg)  #should respect the ROI
 
-        #draw image number in lower left corner, respective to ROI
-        ((tw,th),_) = cv.GetTextSize("%d"%imgNum, self._txtfont)
-        #print "DEBUG: tw, th = %d,%d"%(tw,th)
-        if tw>0 and th>0:
-            cv.Rectangle(cvImg, (0,self._tileSize[1]-1),(tw+1,self._tileSize[1]-(th+1)-self._gutter), (0,0,0), thickness=cv.CV_FILLED )
-            font = self._txtfont
-            color = self._txtcolor
-            cv.PutText(cvImg, "%d"%imgNum, (1,self._tileSize[1]-self._gutter-2), font, color)                        
+        if not self._nolabels:
+            #draw image number in lower left corner, respective to ROI
+            ((tw,th),_) = cv.GetTextSize("%d"%imgNum, self._txtfont)
+            #print "DEBUG: tw, th = %d,%d"%(tw,th)
+            if tw>0 and th>0:
+                cv.Rectangle(cvImg, (0,self._tileSize[1]-1),(tw+1,self._tileSize[1]-(th+1)-self._gutter), (0,0,0), thickness=cv.CV_FILLED )
+                font = self._txtfont
+                color = self._txtcolor
+                cv.PutText(cvImg, "%d"%imgNum, (1,self._tileSize[1]-self._gutter-2), font, color)                        
                    
         #reset ROI 
         cv.SetImageROI(cvImg, (0,0,self._size[0],self._size[1]))
