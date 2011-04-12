@@ -390,6 +390,7 @@ class GASet:
         
 def list_generate(args):
     for i in range(len(args)):
+        #print args[i]
         if isinstance(args[i],GAVariable):
             args[i] = args[i].generate()
         elif isinstance(args[i],(list,tuple)):
@@ -586,18 +587,19 @@ class GeneticAlgorithm:
             
             ilog.pickle([score,args,kwargs],"Fitness_%0.8f"%score)
             
-            plot = pv.Plot(title="Population Statistics",xlabel="Iteration",ylabel="Score")
-            data = [ [i,self.bests[i]] for i in range(len(self.bests)) ]
-            plot.lines(data,width=3,color='green')
-            data = [ [i,self.history[i]] for i in range(len(self.bests)) ]
-            plot.points(data,shape=16,color='blue',size=2)
-            data = [ [i,self.worsts[i]] for i in range(len(self.bests)) ]
-            plot.lines(data,width=3,color='red')
-            ilog(plot,"PopulationData")
+            if self.iter % 25 == 0:
+                plot = pv.Plot(title="Population Statistics",xlabel="Iteration",ylabel="Score")
+                data = [ [i,self.bests[i]] for i in range(len(self.bests)) ]
+                plot.lines(data,width=3,color='green')
+                data = [ [i,self.history[i]] for i in range(len(self.bests)) ]
+                plot.points(data,shape=16,color='blue',size=2)
+                data = [ [i,self.worsts[i]] for i in range(len(self.bests)) ]
+                plot.lines(data,width=3,color='red')
+                ilog(plot,"PopulationData")
     
 
     def printPopulation(self):
-        print "GA Population:",
+        print "GA Population (Iteration %d):"%self.iter,
         for i in range(len(self.population)):
             if i % 10 == 0:
                 print
@@ -608,13 +610,9 @@ class GeneticAlgorithm:
         
     
     def optimize(self,max_iter=1000,callback=None,ilog=None):
-        #best_score = 0.0
-        #best_alg = None
-        #history = []
-        #bests = []
-        #worsts = []
-        #iter = 0
-        #self.population = []
+        '''
+        @returns: best_score, args, kwargs
+        '''
         
         # Create worker process pool
         if self.n_processes > 1: 
@@ -674,7 +672,13 @@ class GeneticAlgorithm:
             if callback != None:
                 callback(self.population)
                 
-        return self.population[0]
+        args   = copy.deepcopy(self.population[0][1])
+        kwargs = copy.deepcopy(self.population[0][2])
+        list_generate(args)
+        dict_generate(kwargs)
+        
+        return self.population[0][0],args,kwargs
+
 
             
             
