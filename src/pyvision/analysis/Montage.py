@@ -119,13 +119,15 @@ class ImageMontage(object):
             for row in range(self._rows):
                 for col in range(self._cols):
                     if img_ptr > len(self._images)-1: break
-                    self._composite(self._images[img_ptr], (row,col), img_ptr)
+                    tile = pv.Image(self._images[img_ptr].asAnnotated())
+                    self._composite(tile, (row,col), img_ptr)
                     img_ptr += 1
         else:
             for col in range(self._cols):
                 for row in range(self._rows):
                     if img_ptr > len(self._images)-1: break
-                    self._composite(self._images[img_ptr], (row,col), img_ptr)
+                    tile = pv.Image(self._images[img_ptr].asAnnotated())
+                    self._composite(tile, (row,col), img_ptr)
                     img_ptr += 1
         
         #if mousePos != None:
