@@ -98,10 +98,16 @@ def locateFiles(sigset,imdir):
             basename,ext = os.path.splitext(filename)
             if ext.upper() not in IMAGE_EXTENSIONS:
                 continue
+            print filename
             if file_map.has_key(basename) and image_map[file_map[basename]] == None:
                 image_map[file_map[basename]] = os.path.join(rootdir,filename)
                 n_images += 1
             elif file_map.has_key(basename) and image_map[file_map[basename]] != None:
+                raise ValueError("Multiple images found matching recording id %s:\n   First instance:  %s\n   Second instance: %s"%(file_map[basename],image_map[file_map[basename]],os.path.join(rootdir,filename)))
+            if rec_map.has_key(basename) and rec_map[file_map[basename]] == None:
+                image_map[file_map[basename]] = os.path.join(rootdir,filename)
+                n_images += 1
+            elif rec_map.has_key(basename) and image_map[file_map[basename]] != None:
                 raise ValueError("Multiple images found matching recording id %s:\n   First instance:  %s\n   Second instance: %s"%(file_map[basename],image_map[file_map[basename]],os.path.join(rootdir,filename)))
                     
                     
