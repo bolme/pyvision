@@ -200,9 +200,9 @@ from pyvision.ml.lda import lda
 
 from pyvision.other.surf import surf
 
-from pyvision.analysis.bee import *
+from pyvision.analysis.bee import parseSigSet,saveSigset,BEE_CODE_MAP,BEE_DONTCARE,BEE_MATCH,BEE_NONMATCH,BEEDistanceMatrix
 
-from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO
+from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO
 
 from pyvision.analysis.VideoStreamProcessor import *
 
