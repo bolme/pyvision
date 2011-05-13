@@ -349,8 +349,11 @@ class BEEDistanceMatrix:
         Creates a bee matrix from a numpy array.
         '''
         self.shortname=None
+        
         #read the distance matrix header (first four lines of the file)
-        mat = mat.astype(np.float32)
+        if mat.dtype != np.byte:    
+            mat = mat.astype(np.float32)
+            
         # select distance or similarity
         self.is_distance = is_distance
 
@@ -536,11 +539,15 @@ class BEEDistanceMatrix:
         file = open(filename, "wb")
         
         # write line 1 : type and version
-        if self.is_distance:
-            file.write('D') #doesn't handle mask matrices!
+        type = 'D'
+        if self.matrix.dtype == np.byte:    
+            type = 'M'
+        elif self.is_distance:
+            type = 'D'
         else:
-            file.write('S') #doesn't handle mask matrices!
+            type = 'S'
             
+        file.write(type)
         file.write("2\x0a")
         
         # write lines 2 and 3 (target and query sigsets)
@@ -550,7 +557,10 @@ class BEEDistanceMatrix:
         # write line 4 (MF n_queries n_targets magic_number)
         magic_number = struct.pack('=I',0x12345678)
         assert len(magic_number) == 4 # Bug fix: verify the magic number is really 4 bytes
-        file.write("MF %d %d %s\x0a" %(self.n_queries, self.n_targets, magic_number))
+        if type == 'M':
+            file.write("MB %d %d %s\x0a" %(self.n_queries, self.n_targets, magic_number))
+        else:
+            file.write("MF %d %d %s\x0a" %(self.n_queries, self.n_targets, magic_number))
         
         # write the data
         file.write(self.matrix)
