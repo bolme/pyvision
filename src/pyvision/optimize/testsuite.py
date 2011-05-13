@@ -217,27 +217,67 @@ class GeneticAlgorithmTest(unittest.TestCase):
         pass
 
 
-    def test2DSurfaceFloatMP(self):
+    def dtest2DSurfaceFloatMP(self):
         alg = ga.GeneticAlgorithm(Fitness(),[ga.GAFloat(0.0,10.0),ga.GAFloat(0.0,10.0)],n_processes=4)
         score,args,kwargs = alg.optimize(max_iter=1000)
         print "test2DSurfaceFloatMP",score,args,kwargs
         
-    def test2DSurfaceFloatSP(self):
+    def dtest2DSurfaceFloatSP(self):
         alg = ga.GeneticAlgorithm(Fitness(),[ga.GAFloat(0.0,10.0),ga.GAFloat(0.0,10.0)],n_processes=1)
         score,args,kwargs = alg.optimize(max_iter=1000)
         print "test2DSurfaceFloatSP",score,args,kwargs
         
-    def test2DSurfaceIntSP(self):
+    def dtest2DSurfaceIntSP(self):
         alg = ga.GeneticAlgorithm(FitnessInt(),[ga.GAInteger(0,1000),ga.GAInteger(0,1000)],n_processes=1)
         score,args,kwargs = alg.optimize(max_iter=1000)
         print "test2DSurfaceIntSP",score,args,kwargs
         
-    def testNapsack(self):
+    def dtestNapsack(self):
         fitness = FitnessNapsack()
         #fitness.solve()
         alg = ga.GeneticAlgorithm(FitnessNapsack(),[ga.GARanking(100)],n_processes=1)
         score,args,kwargs = alg.optimize(max_iter=1000)
         print "testNapsack",score,args,kwargs
+        
+    def testCircularRange(self):
+        self.assertAlmostEqual(ga._circularRange(10, -np.pi, np.pi),10-4*np.pi)
+        self.assertAlmostEqual(ga._circularRange(50.77, -np.pi, np.pi),50.77-16*np.pi)
+        self.assertAlmostEqual(ga._circularRange(-10, -np.pi, np.pi),-10+4*np.pi)
+        self.assertAlmostEqual(ga._circularRange(-50.77, -np.pi, np.pi),-50.77+16*np.pi)
+        self.assertAlmostEqual(ga._circularRange(-1.54, -np.pi, np.pi),-1.54)
+        self.assertAlmostEqual(ga._circularRange(0.5, -np.pi, np.pi),0.5)
+        
+    def testGAAngle(self):
+        # Test random
+        for i in range(100):
+            ang = ga.GAAngle()
+            #print ang
+        # Test mutate
+        for i in range(100):
+            ang = ga.GAAngle(mutation_rate=0.5)
+            #print ang,
+            ang.mutate()
+            #print ang
+            
+        # Test Combine
+        for i in range(100):
+            ang1 = ga.GAAngle()
+            ang2 = ga.GAAngle()
+            ang2.value = ang1.value + 0.1
+            ang2.clipRange()
+            #print ang1,ang2,
+            ang1.combine(ang2)
+            #print ang1
+        
+        # Test Combine
+        for i in range(100):
+            ang1 = ga.GAAngle()
+            ang2 = ga.GAAngle()
+            ang2.value = ang1.value + 1
+            ang2.clipRange()
+            #print ang1,ang2,
+            ang1.combine(ang2)
+            #print ang1
         
         
         

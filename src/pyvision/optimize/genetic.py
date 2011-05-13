@@ -70,6 +70,23 @@ def _clipRange(val,minval,maxval):
     return val
 
 
+def _circularRange(val,minval,maxval):
+    minval,maxval = min(minval,maxval),max(minval,maxval)
+    dist = maxval - minval
+    if val > maxval:
+        t1 = (val - maxval)/dist
+        t2 = t1 - math.floor(t1)
+        t3 = minval + dist*t2
+        return t3
+    elif val < minval:
+        t1 = (val - minval)/dist
+        t2 = t1 - math.ceil(t1)
+        t3 = maxval + dist*t2
+        return t3
+
+    return val
+
+
 class GAVariable:
     ''' 
     This is a superclass for a variable that is optimized by the GA. It 
@@ -96,6 +113,13 @@ class GAVariable:
     def generate(self):
         '''generate the actual value that will be populated in the arguments'''
         raise NotImplementedError("This method should be overridden by subclasses")
+    
+    def flatValue(self):
+        return self.generate()
+        
+    def __repr__(self):
+        return str(self.value)
+
     
     
 class GAFloat(GAVariable):
@@ -125,7 +149,7 @@ class GAFloat(GAVariable):
         '''introduce mutations into the variable.'''
         if random.random() < self.mutation_rate:
             dist = np.abs(self.maxval-self.minval)
-            self.value += np.random.normal(0,dist/3.0)
+            self.value += np.random.normal(0,dist/50.0)
         self.clipRange()
 
     def generate(self):
@@ -168,7 +192,7 @@ class GALogFloat(GAVariable):
         '''introduce mutations into the variable.'''
         if random.random() < self.mutation_rate:
             dist = np.abs(self.maxval-self.minval)
-            self.value += np.random.normal(0,dist/3.0)
+            self.value += np.random.normal(0,dist/50.0)
         self.clipRange()
 
     def generate(self):
@@ -180,7 +204,148 @@ class GALogFloat(GAVariable):
     
     
 class GAAngle(GAVariable):
-    pass # TODO: implement this.
+    '''
+    Maps to an angle in the range -pi to pi.
+    '''
+    
+    def __init__(self,minval=-np.pi,maxval=np.pi,**kwargs):
+        GAVariable.__init__(self, **kwargs)
+        self.minval,self.maxval = minval,maxval
+        self.random()
+        
+    def clipRange(self):
+        self.value = _circularRange(self.value, self.minval, self.maxval)
+
+    def random(self):
+        ''' Initialize this variable randomly '''
+        self.value = self.minval + (self.maxval - self.minval)*random.random()
+        self.clipRange()
+    
+    def combine(self,other):
+        '''combine this variable with other.'''
+        t1 = 0.5*(self.minval + self.maxval) # find the center of the range
+        t2 = t1 - self.value # adjustment to center self.value
+        t3 = _circularRange( other.value + t2, self.minval, self.maxval) # adjust other.value
+        dist = np.abs(t3 - t1) # compute dist
+
+        # select one value
+        if random.randint(0,1) == 0:
+            self.value = other.value
+        
+        # adjust it
+        self.value += np.random.normal(0,dist/3.0)
+        
+        # clip
+        self.clipRange()
+
+    def mutate(self):
+        '''introduce mutations into the variable.'''
+        if random.random() < self.mutation_rate:
+            dist = np.abs(self.maxval-self.minval)
+            self.value += np.random.normal(0,dist/50.0)
+        self.clipRange()
+
+    def generate(self):
+        '''generate the actual value that will be populated in the arguments'''
+        return self.value
+    
+    def __repr__(self):
+        return str(self.value)
+        
+class GAUnitRect(GAVariable):
+    
+    def __init__(self,min_width=0.2,max_width=1.0,min_height=0.2,max_height=1.0,**kwargs):
+        GAVariable.__init__(self,**kwargs)
+        
+        assert min_width >= 0
+        assert min_width <= 1
+        assert max_width >= 0
+        assert max_width <= 1
+        assert min_height >= 0
+        assert min_height <= 1
+        assert max_height >= 0
+        assert max_height <= 1
+        assert min_width <= max_width
+        assert min_height <= max_height
+        
+        self.min_width = min_width
+        self.max_width = max_width
+        self.min_height = min_height
+        self.max_height = max_height
+        
+        self.random()
+        
+    def clipRange(self):
+        self.cx     = _clipRange(self.cx, 0.0, 1.0)
+        self.cy     = _clipRange(self.cy, 0.0, 1.0)
+        self.width  = _clipRange(self.width, self.min_width, self.max_width)
+        self.height = _clipRange(self.height, self.min_height, self.max_height)
+
+        
+    def random(self):
+        ''' Initialize this variable randomly '''
+        self.cx = random.random()
+        self.cy = random.random()
+        
+        diff = self.max_width - self.min_width
+        self.width = self.min_width + random.random() * diff
+        
+        diff = self.max_height - self.min_height
+        self.height = self.min_height + random.random() * diff
+        self.clipRange()
+
+    
+    def combine(self,other):
+        '''combine this variable with other.'''
+
+        # select one value
+        cx_dist = np.abs(self.cx - other.cx)
+        cy_dist = np.abs(self.cy - other.cy)
+        w_dist = np.abs(self.width - other.width)
+        h_dist = np.abs(self.height - other.height)
+        
+        if random.randint(0,1) == 0:
+            self.cx = other.cx
+            self.cy = other.cy
+            self.width = other.width
+            self.height = other.height
+            
+        self.cx += np.random.normal(0,cx_dist/3.0)
+        self.cy += np.random.normal(0,cy_dist/3.0)
+        self.width += np.random.normal(0,w_dist/3.0)
+        self.height += np.random.normal(0,h_dist/3.0)
+
+        # clip
+        self.clipRange()
+
+    def mutate(self):
+        '''introduce mutations into the variable.'''
+        if random.random() < self.mutation_rate:
+            dist = np.abs(1.0)
+            self.cx += np.random.normal(0,dist/50.0)
+
+            dist = np.abs(1.0)
+            self.cy += np.random.normal(0,dist/50.0)
+
+            dist = np.abs(1.0)
+            self.cy += np.random.normal(0,dist/50.0)
+
+            dist = np.abs(1.0)
+            self.cy += np.random.normal(0,dist/50.0)
+
+            self.clipRange()
+
+    def generate(self):
+        '''generate the actual value that will be populated in the arguments'''
+        return self.value
+    
+    def flatValue(self):
+        return self.value.asCenteredTuple()
+    
+    def __repr__(self):
+        return str(self.generate())
+
+        
         
 
 class GAInteger(GAVariable):
@@ -329,6 +494,9 @@ class GARanking(GAVariable):
         '''generate the actual value that will be populated in the arguments'''
         return self.ranking
     
+    def flatValue(self):
+        return self.ranking
+    
     def __repr__(self):
         return str(self.ranking)
     
@@ -369,6 +537,9 @@ class GAUnitVector(GAVariable):
     def generate(self):
         '''generate the actual value that will be populated in the arguments'''
         return self.value
+    
+    def flatValue(self):
+        return list(self.value.flatten())
     
     def __repr__(self):
         return str(self.value)
