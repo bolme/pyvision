@@ -10,11 +10,13 @@ SCRAPS_EYES = EyesFile(os.path.join(pv.__path__[0],'data','csuScrapShots','coord
 
 
 # Common test images
-AIRPLANE = os.path.join(pv.__path__[0],'data','misc','airplane.jpg')
-BABOON   = os.path.join(pv.__path__[0],'data','misc','baboon.jpg')
-FRUITS   = os.path.join(pv.__path__[0],'data','misc','fruits.jpg')
-LENA     = os.path.join(pv.__path__[0],'data','misc','lena.jpg')
-LOGO     = os.path.join(pv.__path__[0],'data','misc','logo.jpg')
+AIRPLANE  = os.path.join(pv.__path__[0],'data','misc','airplane.jpg')
+BABOON    = os.path.join(pv.__path__[0],'data','misc','baboon.jpg')
+FRUITS    = os.path.join(pv.__path__[0],'data','misc','fruits.jpg')
+LENA      = os.path.join(pv.__path__[0],'data','misc','lena.jpg')
+LOGO      = os.path.join(pv.__path__[0],'data','misc','logo.jpg')
+TAZ_IMAGE = os.path.join(pv.__path__[0],'data','test','TAZ_0010.jpg')
+TAZ_VIDEO = os.path.join(pv.__path__[0],'data','test','TazSample.m4v')
 
 
 
