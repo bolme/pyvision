@@ -208,6 +208,7 @@ class Video:
         @return: The final frame number of the video, or the frame number at which
         the user terminated playback using the 'q'uit option.
         '''
+        fn = -1
         vid = self
         if delay==0:
             delayObj = {'wait_time':20, 'current_state':'PAUSED'}
