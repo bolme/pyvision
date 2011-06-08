@@ -12,6 +12,16 @@ import pyvision.optimize.genetic as ga
 import scipy as sp
 import numpy as np
 
+def callback(population):
+    plot = pv.Plot(xrange=[0,10],yrange=[0,10])
+    pts = [ [each[1][0].value,each[1][1].value] for each in population ]
+    #pts = [ pv.Point(each[1][0],each[1][1]) for each in population ]
+    #print pts
+    plot.points(pts)
+    plot.show(delay=10)
+    #for each in population:
+    #    plot.point(each[1])
+
 class Fitness:
     '''
     Min values is approx -0.63 @ [8,2]
@@ -222,9 +232,9 @@ class GeneticAlgorithmTest(unittest.TestCase):
         score,args,kwargs = alg.optimize(max_iter=1000)
         print "test2DSurfaceFloatMP",score,args,kwargs
         
-    def dtest2DSurfaceFloatSP(self):
+    def test2DSurfaceFloatSP(self):
         alg = ga.GeneticAlgorithm(Fitness(),[ga.GAFloat(0.0,10.0),ga.GAFloat(0.0,10.0)],n_processes=1)
-        score,args,kwargs = alg.optimize(max_iter=1000)
+        score,args,kwargs = alg.optimize(max_iter=5000,callback=callback)
         print "test2DSurfaceFloatSP",score,args,kwargs
         
     def dtest2DSurfaceIntSP(self):
@@ -239,7 +249,7 @@ class GeneticAlgorithmTest(unittest.TestCase):
         score,args,kwargs = alg.optimize(max_iter=1000)
         print "testNapsack",score,args,kwargs
         
-    def testCircularRange(self):
+    def dtestCircularRange(self):
         self.assertAlmostEqual(ga._circularRange(10, -np.pi, np.pi),10-4*np.pi)
         self.assertAlmostEqual(ga._circularRange(50.77, -np.pi, np.pi),50.77-16*np.pi)
         self.assertAlmostEqual(ga._circularRange(-10, -np.pi, np.pi),-10+4*np.pi)
@@ -247,7 +257,7 @@ class GeneticAlgorithmTest(unittest.TestCase):
         self.assertAlmostEqual(ga._circularRange(-1.54, -np.pi, np.pi),-1.54)
         self.assertAlmostEqual(ga._circularRange(0.5, -np.pi, np.pi),0.5)
         
-    def testGAAngle(self):
+    def dtestGAAngle(self):
         # Test random
         for i in range(100):
             ang = ga.GAAngle()

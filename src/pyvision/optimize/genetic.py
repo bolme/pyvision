@@ -276,10 +276,10 @@ class GAUnitRect(GAVariable):
         self.random()
         
     def clipRange(self):
-        self.cx     = _clipRange(self.cx, 0.0, 1.0)
-        self.cy     = _clipRange(self.cy, 0.0, 1.0)
         self.width  = _clipRange(self.width, self.min_width, self.max_width)
         self.height = _clipRange(self.height, self.min_height, self.max_height)
+        self.cx     = _clipRange(self.cx, 0.5*self.width, 1.0 - 0.5*self.width)
+        self.cy     = _clipRange(self.cy, 0.5*self.height, 1.0 - 0.5*self.height)
 
         
     def random(self):
@@ -337,7 +337,7 @@ class GAUnitRect(GAVariable):
 
     def generate(self):
         '''generate the actual value that will be populated in the arguments'''
-        return self.value
+        return pv.CenteredRect(self.cx, self.cy, self.width, self.height)
     
     def flatValue(self):
         return self.value.asCenteredTuple()
@@ -506,6 +506,7 @@ class GAUnitVector(GAVariable):
     def __init__(self,n_elements,**kwargs):
         GAVariable.__init__(self, **kwargs)
         self.n_elements = n_elements
+        self.random()
         
     def clipRange(self):
         self.value = pv.unit(self.value)
