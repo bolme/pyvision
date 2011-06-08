@@ -299,10 +299,10 @@ class GAUnitRect(GAVariable):
         '''combine this variable with other.'''
 
         # select one value
-        cx_dist = np.abs(self.cx - other.cx)
-        cy_dist = np.abs(self.cy - other.cy)
-        w_dist = np.abs(self.width - other.width)
-        h_dist = np.abs(self.height - other.height)
+        cx_dist = np.abs(self.cx - other.cx) + 1e-7
+        cy_dist = np.abs(self.cy - other.cy) + 1e-7
+        w_dist = np.abs(self.width - other.width) + 1e-7
+        h_dist = np.abs(self.height - other.height) + 1e-7
         
         if random.randint(0,1) == 0:
             self.cx = other.cx
@@ -310,6 +310,8 @@ class GAUnitRect(GAVariable):
             self.width = other.width
             self.height = other.height
             
+        if cx_dist <= 0 or cy_dist <= 0 or w_dist <= 0 or h_dist <= 0  :
+            print "Combining:",self,other,cx_dist,cy_dist,w_dist,h_dist
         self.cx += np.random.normal(0,cx_dist/3.0)
         self.cy += np.random.normal(0,cy_dist/3.0)
         self.width += np.random.normal(0,w_dist/3.0)
@@ -338,6 +340,103 @@ class GAUnitRect(GAVariable):
     def generate(self):
         '''generate the actual value that will be populated in the arguments'''
         return pv.CenteredRect(self.cx, self.cy, self.width, self.height)
+    
+    def flatValue(self):
+        return self.value.asCenteredTuple()
+    
+    def __repr__(self):
+        return str(self.generate())
+
+        
+        
+class GAUnitRect2(GAVariable):
+    
+    def __init__(self,min_width=0.2,max_width=1.0,min_height=0.2,max_height=1.0,**kwargs):
+        GAVariable.__init__(self,**kwargs)
+        
+        assert min_width >= 0
+        assert min_width <= 1
+        assert max_width >= 0
+        assert max_width <= 1
+        assert min_height >= 0
+        assert min_height <= 1
+        assert max_height >= 0
+        assert max_height <= 1
+        assert min_width <= max_width
+        assert min_height <= max_height
+        
+        self.min_width = min_width
+        self.max_width = max_width
+        self.min_height = min_height
+        self.max_height = max_height
+        
+        self.random()
+        
+    def clipRange(self):
+        self.left   = _clipRange(0, self.left, 1)
+        self.right  = _clipRange(0, self.right, 1)
+        self.top    = _clipRange(0, self.top, 1)
+        self.bottom = _clipRange(0, self.bottom,1)
+        if self.left > self.right:
+            self.left,self.right = self.right,self.left
+        if self.bottom < self.top:
+            self.bottom,self.top = self.top,self.bottom
+
+        
+    def random(self):
+        ''' Initialize this variable randomly '''
+        self.left = random.random()
+        self.right = random.random()
+        self.top = random.random()
+        self.bottom = random.random()
+        self.clipRange()
+
+    
+    def combine(self,other):
+        '''combine this variable with other.'''
+
+        # select one value
+        l_dist = np.abs(self.left - other.left) + 1e-7
+        r_dist = np.abs(self.right - other.right) + 1e-7
+        t_dist = np.abs(self.top - other.top) + 1e-7
+        b_dist = np.abs(self.bottom - other.bottom) + 1e-7
+        
+        if random.randint(0,1) == 0:
+            self.left   = other.left
+            self.right  = other.right
+            self.top    = other.top
+            self.bottom = other.bottom
+            
+        if l_dist <= 0 or r_dist <= 0 or t_dist <= 0 or b_dist <= 0  :
+            print "Combining:",self,other,l_dist,r_dist,t_dist,b_dist
+        self.left   += np.random.normal(0,l_dist/3.0)
+        self.right  += np.random.normal(0,r_dist/3.0)
+        self.top    += np.random.normal(0,t_dist/3.0)
+        self.bottom += np.random.normal(0,b_dist/3.0)
+
+        # clip
+        self.clipRange()
+
+    def mutate(self):
+        '''introduce mutations into the variable.'''
+        if random.random() < self.mutation_rate:
+            dist = np.abs(1.0)
+            self.left += np.random.normal(0,dist/50.0)
+
+            dist = np.abs(1.0)
+            self.right += np.random.normal(0,dist/50.0)
+
+            dist = np.abs(1.0)
+            self.top += np.random.normal(0,dist/50.0)
+
+            dist = np.abs(1.0)
+            self.bottom += np.random.normal(0,dist/50.0)
+
+            self.clipRange()
+
+    def generate(self):
+        '''generate the actual value that will be populated in the arguments'''
+        return pv.BoundingRect([pv.Point(self.left,self.top),pv.Point(self.right,self.bottom)])
     
     def flatValue(self):
         return self.value.asCenteredTuple()
@@ -585,7 +684,6 @@ def _gaWork(data):
     This is a work function that gets called on child processes 
     to evaluate a fitness function.
     '''
-    np.seterr(all='raise')
     try:
         fitness,args,kwargs = data
         assert isinstance(args, (list,tuple))
@@ -782,7 +880,7 @@ class GeneticAlgorithm:
         print
         
     
-    def optimize(self,max_iter=1000,callback=None,ilog=None):
+    def optimize(self,max_iter=1000,callback=None,ilog=None,restart_dir=None):
         '''
         @returns: best_score, args, kwargs
         '''

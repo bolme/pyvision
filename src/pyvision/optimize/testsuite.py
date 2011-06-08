@@ -11,6 +11,7 @@ import pyvision as pv
 import pyvision.optimize.genetic as ga
 import scipy as sp
 import numpy as np
+import random
 
 def callback(population):
     plot = pv.Plot(xrange=[0,10],yrange=[0,10])
@@ -21,6 +22,20 @@ def callback(population):
     plot.show(delay=10)
     #for each in population:
     #    plot.point(each[1])
+
+def unitRectCallback(population):
+    if random.random() < 0.05:
+        return
+    print "Score:",population[0][0]
+    im = pv.Image(np.zeros((1000,1000),dtype=np.float32))
+    for each in population:
+        rect = each[1][0].generate()
+        im.annotateRect(1000*rect,color='gray')
+    rect = population[0][1][0].generate()
+    im.annotatePolygon((1000*rect).asPolygon(),color='green',width=3)
+    target_rect = pv.CenteredRect(.33385,.69348,.3482,.55283)
+    im.annotatePolygon((1000*target_rect).asPolygon(),color='white',width=3)
+    im.show()
 
 class Fitness:
     '''
@@ -214,7 +229,9 @@ class FitnessNapsack:
         return -value
             
     
-
+def fitnessUnitRect(rect,**kwargs):
+    target_rect = pv.CenteredRect(.33385,.69348,.3482,.55283)
+    return -target_rect.overlap(rect)
 
 class GeneticAlgorithmTest(unittest.TestCase):
 
@@ -232,7 +249,7 @@ class GeneticAlgorithmTest(unittest.TestCase):
         score,args,kwargs = alg.optimize(max_iter=1000)
         print "test2DSurfaceFloatMP",score,args,kwargs
         
-    def test2DSurfaceFloatSP(self):
+    def dtest2DSurfaceFloatSP(self):
         alg = ga.GeneticAlgorithm(Fitness(),[ga.GAFloat(0.0,10.0),ga.GAFloat(0.0,10.0)],n_processes=1)
         score,args,kwargs = alg.optimize(max_iter=5000,callback=callback)
         print "test2DSurfaceFloatSP",score,args,kwargs
@@ -248,6 +265,13 @@ class GeneticAlgorithmTest(unittest.TestCase):
         alg = ga.GeneticAlgorithm(FitnessNapsack(),[ga.GARanking(100)],n_processes=1)
         score,args,kwargs = alg.optimize(max_iter=1000)
         print "testNapsack",score,args,kwargs
+
+    def testGAUnitRect(self):
+        print "Running unitrect test"
+        alg = ga.GeneticAlgorithm(fitnessUnitRect,[ga.GAUnitRect2(min_width=0.05,min_height=0.05,max_height=1.0,max_width=1.0)],population_size=20,n_processes=1)
+        score,args,kwargs = alg.optimize(max_iter=10000,callback=unitRectCallback)
+        print "testGAUnitRect",score,args,kwargs
+        
         
     def dtestCircularRange(self):
         self.assertAlmostEqual(ga._circularRange(10, -np.pi, np.pi),10-4*np.pi)
@@ -295,5 +319,6 @@ class GeneticAlgorithmTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    print "Running GA Test Suite"
     #import sys;sys.argv = ['', 'Test.test2DSurface']
     unittest.main()
