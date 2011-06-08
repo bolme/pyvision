@@ -585,6 +585,7 @@ def _gaWork(data):
     This is a work function that gets called on child processes 
     to evaluate a fitness function.
     '''
+    np.seterr(all='raise')
     try:
         fitness,args,kwargs = data
         assert isinstance(args, (list,tuple))
