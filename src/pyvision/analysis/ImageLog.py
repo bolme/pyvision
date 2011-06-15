@@ -156,9 +156,9 @@ class ImageLog:
         elif sys.platform.startswith("linux"):
             files.sort()
             startfile = join(self.dir, files.pop(0))
-            system("gwenview %s"%startfile) #gwenview will show thumbnails for all files
-                                            #in same directory as startfile.
-            #print "ImageLog.show() is not supported on linux."
+            #gthumb will show thumbnails for all files in same directory as startfile.
+            #If you use KDE, gwenview might be better...
+            system("gthumb %s"%startfile)
         elif sys.platform.startswith("windows"):
             print "ImageLog.show() is not supported on windows."
         
