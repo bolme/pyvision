@@ -32,7 +32,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import os.path
-from PIL.Image import composite,LINEAR
+from Image import composite,LINEAR
 import pyvision as pv
 from pyvision.edge.sobel import sobel
 #from pyvision.edge.canny import canny
