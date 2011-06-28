@@ -182,7 +182,7 @@ from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotientImage,
 
 from pyvision.other.distance import boolToUbyte, ubyteToBool, hamming
 
-from pyvision.vector.knn import RobustPNorm,PNorm,correlation,chisquared
+from pyvision.ml.knn import RobustPNorm,PNorm,correlation,chisquared,KNearestNeighbors,FLANNTree,FLANN_IMPORTED
 
 from pyvision.util.fast_util import LocalMaximumDetector
 
