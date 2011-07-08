@@ -271,16 +271,17 @@ try:
     
     class FLANNTree:
         def __init__(self,points,**kwargs):
-            self.data = copy.deepcopy(points)
+            data = copy.deepcopy(np.array(points,np.float64))
+            self.n = data.shape[1]
             self.flann = pyflann.FLANN()
             start = time.time()
-            self.index = self.flann.build_index(self.data,log_level='info')
+            self.index = self.flann.build_index(data,log_level='info')
             stop = time.time()
             self.indexing_time = stop-start
             
         def query(self, x, k=1,**kwargs):
-            if not isinstance(x, np.ndarray) or x.shape != (1,self.data.shape[1]):
-                x = np.array(x).reshape(1,self.data.shape[1])
+            if not isinstance(x, np.ndarray) or x.shape != (1,self.n):
+                x = np.array(x,dtype=np.float64).reshape(1,self.n)
             
             results,dists = self.flann.nn_index(x,num_neighbors=k,**kwargs)
             return np.sqrt(dists.flatten()),results.flatten()
@@ -288,7 +289,9 @@ try:
     FLANN_IMPORTED = True
     
 except:
-    pass # could not import flann
+    def FLANNTree(*args,**kwargs):
+        print "WARNING: The pyflann library was not imported.  Using pv.KNearestNeighbors instead."
+        return pv.KNearestNeighbors(*args,**kwargs)
 
         
 class AKNNTest(unittest.TestCase):
