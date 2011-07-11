@@ -31,11 +31,11 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from time import *
+import time
 from os import makedirs,system,listdir
 from os.path import join
 import csv
-import pickle
+import cPickle
 import sys
 import pyvision as pv
 
@@ -54,7 +54,7 @@ class ImageLog:
         @param topdir: The location where the log directory will be created.
         @param name: a name to append to the directory name.
         '''
-        self.date = strftime("%Y%m%d_%H%M%S")
+        self.date = time.strftime("%Y%m%d_%H%M%S")
         self.name=name
         self.dir = topdir+'/'+self.date+'_'+name
         makedirs(self.dir)
@@ -116,8 +116,8 @@ class ImageLog:
         
         '''
         filename = join(self.dir,'%06d_%s.pkl'%(self.count,label))
-        f = open(filename,'wr')
-        pickle.dump(object, f)
+        f = open(filename,'wb')
+        cPickle.dump(object, f, protocol=2)
         f.close()
         self.count += 1
         
