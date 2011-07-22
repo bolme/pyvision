@@ -223,6 +223,7 @@ class Video:
             
             if window != None:
                 pt = pv.Point(10, 10)
+                img.annotateRect(pv.Rect(8,8,80,15),color="black", fill_color="black")
                 img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white")
                 img.show(window=window,pos=pos)
             
