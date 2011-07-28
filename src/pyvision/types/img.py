@@ -821,6 +821,7 @@ class Image:
             0 delays indefinitely, 1 is good for live updates and animations.  The window
             will disappear after the program exits.  
         @param size: Optional output size for image, None=native size.
+        @returns: a key press event,
         '''
         cv.NamedWindow(window)
         
