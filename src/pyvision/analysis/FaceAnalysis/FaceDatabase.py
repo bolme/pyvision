@@ -3,6 +3,19 @@ from EyesFile import EyesFile
 import os.path
 import numpy as np
 
+def faceFromEyes(eye1, eye2):
+    '''
+    Given eye coordinates estimate the face rectangle
+    Assumes the face is reasonably horizontal.
+    '''
+    truth_rect = pv.BoundingRect(eye1, eye2)
+    truth_rect.w = 3.0 * truth_rect.w
+    truth_rect.h = truth_rect.w
+    truth_rect.x = truth_rect.x - 0.33 * truth_rect.w
+    truth_rect.y = truth_rect.y - 0.4 * truth_rect.w
+    return truth_rect
+
+
 class FaceDatabase:
     
     class FaceObject:
@@ -16,9 +29,22 @@ class FaceDatabase:
             self.mouth = None
             self.face_rect = None
             
-        def __str__(self):
-            return "<FaceObject %s>"%(self.key,) 
+        #def __str__(self):
+        #    return "<FaceObject %s>"%(self.key,) 
             
+        def __str__(self):
+            return self.__repr__()
+    
+        def __repr__(self):
+            w,h,rx,ry,rw,rh = -1,-1,-1,-1,-1,-1
+            if self.image != None:
+                w,h = self.image.size
+            if self.face_rect != None:
+                rx,ry,rw,rh = self.face_rect.asTuple()
+            else:
+                rect = faceFromEyes(self.left_eye,self.right_eye)
+                rx,ry,rw,rh = rect.asTuple()
+            return "FaceObject(%s, image: w%d h%d, face: x%d y%d w%d h%d)"%(self.key,w,h,rx,ry,rw,rh)
         
     def __init__(self):
         pass
@@ -28,6 +54,7 @@ class FaceDatabase:
     
     def __getitem__(self,key):
         pass
+    
     
 class ScrapShotsDatabase(FaceDatabase):    
 
