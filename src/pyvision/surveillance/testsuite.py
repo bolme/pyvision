@@ -124,7 +124,7 @@ class MotionDetectTest(unittest.TestCase):
             ilog.show()
 
     def testMotionDetectMCFD(self):
-        ilog =  pv.ImageLog()
+        ilog = None # pv.ImageLog()
         
         #flow = pv.OpticalFlow()   #This is now encapsulated in MCFD object
         md = pv.MotionDetector(method=pv.BG_SUBTRACT_MCFD,minArea=200,rect_type=pv.STANDARDIZED_RECTS)
