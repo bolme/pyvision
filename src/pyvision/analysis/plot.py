@@ -458,11 +458,12 @@ class Plot:
             try:
                 tmp = []
                 for pt in points:
+                    #print pt
                     tmp.append((float(pt[0]),float(pt[1])))
                 return tmp
             except:
-                #raise
-                raise ValueError("Could not read points.")
+                raise
+                #raise ValueError("Could not read points.")
 
     def label(self,point,label,**kwargs):
         ''' render multiple points'''
