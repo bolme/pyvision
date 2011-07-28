@@ -302,9 +302,7 @@ class OpenCVFilterEyeLocator:
         '''
         # TODO: This function has problems in opencv 2.2.  There appears to be a bug. 
         image_tile = pv.OpenCVToNumpy(image_tile)
-        image_tile = np.array(image_tile,dtype=np.uint8)
-        lut = pv.OpenCVToNumpy(self.lut)
-        self.image = cv.LUT(image_tile,lut)
+        self.image = pv.NumpyToOpenCV(np.log(image_tile + 1.0).astype(np.float32))
         
         return self.image
         
@@ -316,7 +314,6 @@ class OpenCVFilterEyeLocator:
         self._preprocess(image_tile)
         
         cv.DFT(self.image,  self.image,  cv.CV_DXT_FORWARD)
-        
         cv.MulSpectrums( self.image, self.left_filter_dft, self.left_corr, cv.CV_DXT_MUL_CONJ )
         cv.MulSpectrums( self.image, self.right_filter_dft, self.right_corr, cv.CV_DXT_MUL_CONJ )
         
