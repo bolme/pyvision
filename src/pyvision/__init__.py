@@ -178,7 +178,7 @@ from pyvision.surveillance.MotionDetector import MotionDetector,BOUNDING_RECTS,S
 
 from pyvision.surveillance.optical_flow import OpticalFlow
 
-from pyvision.other.normalize import meanStd, meanUnit, unit, selfQuotientImage, lowPassFilter, highPassFilter, bandPassFilter
+from pyvision.other.normalize import clipRange, meanStd, meanUnit, unit, selfQuotientImage, lowPassFilter, highPassFilter, bandPassFilter
 
 from pyvision.other.distance import boolToUbyte, ubyteToBool, hamming
 
@@ -188,7 +188,7 @@ from pyvision.util.fast_util import LocalMaximumDetector
 
 from pyvision.util.windows import cosineWindow, hammingWindow, hannWindow
 
-from pyvision.analysis.stats import pbinom, qbinom, cibinom, mcnemar_test, SummaryStats
+from pyvision.analysis.stats import pbinom, qbinom, cibinom, mcnemar_test, SummaryStats, cor, cov, cov2cor
 
 from pyvision.point.GaborJets import GaborFilters, GaborImage, GaborJet, FilterBank, GaborWavelet
 
@@ -373,8 +373,8 @@ def test():
     from pyvision.point.PhaseCorrelation import _TestPhaseCorrelation
     pc_suite = unittest.TestLoader().loadTestsFromTestCase(_TestPhaseCorrelation)
     
-    from pyvision.optimize.GeneticAlgorithm import _TestGeneticAlgorithm
-    ga_suite = unittest.TestLoader().loadTestsFromTestCase(_TestGeneticAlgorithm)
+    from pyvision.optimize.testsuite import GeneticAlgorithmTest
+    ga_suite = unittest.TestLoader().loadTestsFromTestCase(GeneticAlgorithmTest)
     
     from pyvision.face.CascadeDetector import _TestCascadeDetector
     cd_suite = unittest.TestLoader().loadTestsFromTestCase(_TestCascadeDetector)
