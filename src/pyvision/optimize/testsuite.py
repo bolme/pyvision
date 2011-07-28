@@ -26,7 +26,7 @@ def callback(population):
 def unitRectCallback(population):
     if random.random() < 0.05:
         return
-    print "Score:",population[0][0]
+    #print "Score:",population[0][0]
     im = pv.Image(np.zeros((1000,1000),dtype=np.float32))
     for each in population:
         rect = each[1][0].generate()
@@ -169,9 +169,9 @@ class FitnessNapsack:
         
         solution,score,remaining = self.greedy(weights,values,self.max_weight)
         #score = self.greedy_soft(weights,values,self.max_weight)
-        print "Greedy",score,remaining,solution
-        print "GreedySoft",self.greedy_soft(weights, values, self.max_weight)
-        print "Search",self.search(weights, values, self.max_weight,0.0,0.0,[])
+        #print "Greedy",score,remaining,solution
+        #print "GreedySoft",self.greedy_soft(weights, values, self.max_weight)
+        #print "Search",self.search(weights, values, self.max_weight,0.0,0.0,[])
             
     def greedy(self,weights,values,remaining):
         if len(weights) == 0:
@@ -198,7 +198,7 @@ class FitnessNapsack:
     
     def search(self,weights,values,remaining,best,score,solution):
         if len(weights) == 0 and score > best:
-            print "New Best:",score,solution
+            #print "New Best:",score,solution
             #assert 0 
             return score
 
@@ -233,6 +233,17 @@ def fitnessUnitRect(rect,**kwargs):
     target_rect = pv.CenteredRect(.33385,.69348,.3482,.55283)
     return -target_rect.overlap(rect)
 
+
+def fitnessUnitVector(vec,**kwargs):
+    target = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]
+    sum_sq = 0.0
+    for i in range(len(vec)):
+        sum_sq += (target[i] - vec[i])**2
+    score =  np.sqrt(sum_sq)
+    #print "Score:",score
+    return score
+
+
 class GeneticAlgorithmTest(unittest.TestCase):
 
 
@@ -247,30 +258,37 @@ class GeneticAlgorithmTest(unittest.TestCase):
     def dtest2DSurfaceFloatMP(self):
         alg = ga.GeneticAlgorithm(Fitness(),[ga.GAFloat(0.0,10.0),ga.GAFloat(0.0,10.0)],n_processes=4)
         score,args,kwargs = alg.optimize(max_iter=1000)
-        print "test2DSurfaceFloatMP",score,args,kwargs
+        #print "test2DSurfaceFloatMP",score,args,kwargs
         
     def dtest2DSurfaceFloatSP(self):
         alg = ga.GeneticAlgorithm(Fitness(),[ga.GAFloat(0.0,10.0),ga.GAFloat(0.0,10.0)],n_processes=1)
         score,args,kwargs = alg.optimize(max_iter=5000,callback=callback)
-        print "test2DSurfaceFloatSP",score,args,kwargs
+        #print "test2DSurfaceFloatSP",score,args,kwargs
         
     def dtest2DSurfaceIntSP(self):
         alg = ga.GeneticAlgorithm(FitnessInt(),[ga.GAInteger(0,1000),ga.GAInteger(0,1000)],n_processes=1)
         score,args,kwargs = alg.optimize(max_iter=1000)
-        print "test2DSurfaceIntSP",score,args,kwargs
+        #print "test2DSurfaceIntSP",score,args,kwargs
         
     def dtestNapsack(self):
         fitness = FitnessNapsack()
         #fitness.solve()
         alg = ga.GeneticAlgorithm(FitnessNapsack(),[ga.GARanking(100)],n_processes=1)
         score,args,kwargs = alg.optimize(max_iter=1000)
-        print "testNapsack",score,args,kwargs
+        #print "testNapsack",score,args,kwargs
 
-    def testGAUnitRect(self):
-        print "Running unitrect test"
-        alg = ga.GeneticAlgorithm(fitnessUnitRect,[ga.GAUnitRect2(min_width=0.05,min_height=0.05,max_height=1.0,max_width=1.0)],population_size=20,n_processes=1)
+    def testGAUnitVector(self):
+        #print "Running unitrect test"
+        alg = ga.GeneticAlgorithm(fitnessUnitVector,[ga.GAUnitVector(9)],population_size=20,n_processes=1)
+        score,args,kwargs = alg.optimize(max_iter=10000)
+        #print "testGAUnitVector",score,args,kwargs
+        
+    
+    def dtestGAUnitRect(self):
+        #print "Running unitrect test"
+        alg = ga.GeneticAlgorithm(fitnessUnitRect,[ga.GAUnitRect2(min_width=0.05,min_height=0.05,max_height=1.0,max_width=1.0)],population_size=20,n_processes=4)
         score,args,kwargs = alg.optimize(max_iter=10000,callback=unitRectCallback)
-        print "testGAUnitRect",score,args,kwargs
+        #print "testGAUnitRect",score,args,kwargs
         
         
     def dtestCircularRange(self):
