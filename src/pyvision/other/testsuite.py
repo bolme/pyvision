@@ -182,7 +182,7 @@ class _TestSURF(unittest.TestCase):
             ilog(im,'SurfKeypoints')
                 
         self.assertEqual(len(keypoints),len(descriptors))
-        self.assertEqual(len(keypoints),824)
+        self.assertEqual(len(keypoints),774)
         #print descriptors
         
         
@@ -205,7 +205,7 @@ class _TestSURF(unittest.TestCase):
             ilog(im,'SurfKeypoints')
 
         self.assertEqual(len(keypoints),len(descriptors))
-        self.assertEqual(len(keypoints),384)        
+        self.assertEqual(len(keypoints),367)        
             
          
                     
