@@ -35,6 +35,7 @@
 import scipy.stats.distributions as distributions
 import numpy as np
 import scipy as sp
+import copy
 
 
 def pbinom(q,size,prob):
@@ -265,8 +266,75 @@ def fitWeibull(x,ilog=None):
     return shape,scale
 
     
+def cov(x,y=None):
+    '''
+    A function that simply computes the covariance: Cov(X,Y).  Data points 
+    should be stored in rows.  This function should have similar conventions
+    and results as the R function of the same name.
+    
+    @param x: a matrix containing data.
+    @type x: np.array
+    @param y: an optional second matrix.  By default y = x.
+    @type x: np.array
+    '''
+    if y == None:
+        y = x
+    x = copy.deepcopy(x)
+    y = copy.deepcopy(y)
+    nx,dx = x.shape
+    n,dy = y.shape
+    
+    assert nx == n
+    
+    mx = x.mean(axis=0).reshape(1,dx)
+    my = y.mean(axis=0).reshape(1,dy)
+    x -= mx
+    y -= my
+    s = 1.0/(n-1)
+    return s*np.dot(x.T,y)
 
-        
+
+def cor(x,y=None):
+    '''
+    A function that simply computes the correlation matrix: Corr(X,Y).  Data points 
+    should be stored in rows.  This function should have similar conventions
+    and results as the R function of the same name.
+    
+    @param x: a matrix containing data.
+    @type x: np.array
+    @param y: an optional second matrix.  By default y = x.
+    @type x: np.array
+    '''
+    if y == None:
+        y = x
+    x = copy.deepcopy(x)
+    y = copy.deepcopy(y)
+    nx,dx = x.shape
+    n,dy = y.shape
+    
+    assert nx == n
+    
+    mx = x.mean(axis=0).reshape(1,dx)
+    my = y.mean(axis=0).reshape(1,dy)
+    sx = x.std(axis=0,ddof=1).reshape(1,dx)
+    sy = y.std(axis=0,ddof=1).reshape(1,dy)
+    x = (x-mx)/sx
+    y = (y-my)/sy
+    s = 1.0/(n-1)
+    return s*np.dot(x.T,y)
+
+
+def cov2cor(v):
+    '''
+    Converts a symmetric positive definite matrix to a correlation matrix by 
+    normalizing by the diagonal.
+    '''
+    r,c = v.shape
+    assert r == c
+    s = 1.0/np.sqrt(np.diag(v))
+    v *= s.reshape(r,1)
+    v *= s.reshape(1,c)
+    return v
 
 class SummaryStats:
     
@@ -408,6 +476,26 @@ class _TestStats(unittest.TestCase):
                             2.5222,  2.2261,  3.3774,  2.7479,  2.7690,  
                             4.6934,  3.0834,  8.9465,  5.5662,  5.1551,  
                             -1.6149,  -1.2087,  1.8739,  7.6589,  4.9503]
+        # data from R
+        self.longley = [[83.0,  234.289,      235.6,        159.0,    107.608, 1947,   60.323,],
+                        [88.5,  259.426,      232.5,        145.6,    108.632, 1948,   61.122,],
+                        [88.2,  258.054,      368.2,        161.6,    109.773, 1949,   60.171,],
+                        [89.5,  284.599,      335.1,        165.0,    110.929, 1950,   61.187,],
+                        [96.2,  328.975,      209.9,        309.9,    112.075, 1951,   63.221,],
+                        [98.1,  346.999,      193.2,        359.4,    113.270, 1952,   63.639,],
+                        [99.0,  365.385,      187.0,        354.7,    115.094, 1953,   64.989,],
+                        [100.0, 363.112,      357.8,        335.0,    116.219, 1954,   63.761,],
+                        [101.2, 397.469,      290.4,        304.8,    117.388, 1955,   66.019,],
+                        [104.6, 419.180,      282.2,        285.7,    118.734, 1956,   67.857,],
+                        [108.4, 442.769,      293.6,        279.8,    120.445, 1957,   68.169,],
+                        [110.8, 444.546,      468.1,        263.7,    121.950, 1958,   66.513,],
+                        [112.6, 482.704,      381.3,        255.2,    123.366, 1959,   68.655,],
+                        [114.2, 502.601,      393.1,        251.4,    125.368, 1960,   69.564,],
+                        [115.7, 518.173,      480.6,        257.2,    127.852, 1961,   69.331,],
+                        [116.9, 554.894,      400.7,        282.7,    130.081, 1962,   70.551,],]
+        
+        self.longley = np.array(self.longley)
+
         
     def test_summarystats(self):
         # Verified with R and SAS
@@ -482,7 +570,8 @@ class _TestStats(unittest.TestCase):
         self.assertAlmostEqual(mcnemar_test(64,96),0.014,places=3)
         
     def test_fitWeibull(self):
-        ilog = pv.ImageLog()
+        ilog = None
+        #ilog = pv.ImageLog()
         
         # data genereated in R with shape=1 and scale=1 
         # from fitdistr
@@ -528,6 +617,19 @@ class _TestStats(unittest.TestCase):
         
         if ilog != None:
             ilog.show()
+            
+    def test_cov(self):
+        t = cov(self.longley)
+        
+    def test_cor2cov(self):
+        v = cov(self.longley)
+        cov2cor(v)
+        
+    def test_cor(self):
+        print cor(self.longley)
+
+        
+        
         
         
         
