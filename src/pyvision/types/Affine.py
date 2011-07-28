@@ -46,7 +46,7 @@ import copy
 import weakref
 
 try:
-    from PIL.Image import AFFINE,NEAREST,BILINEAR,BICUBIC,ANTIALIAS
+    from PIL.Image import AFFINE,NEAREST,BILINEAR,BICUBIC,ANTIALIAS 
 except:
     from Image import AFFINE,NEAREST,BILINEAR,BICUBIC,ANTIALIAS
     
@@ -765,17 +765,17 @@ class _AffineTest(unittest.TestCase):
         
         tmp2 = AffineScale(10.0,(w,h)).transformImage(tmp1,use_orig=False)
         tmp2.annotateLabel(pv.Point(10,10), "This image should be blurry.")
-        tmp2.show()
+        #tmp2.show()
        
         tmp3 = AffineScale(10.0,(w,h)).transformImage(tmp1,use_orig=True)
         tmp3.annotateLabel(pv.Point(10,10), "This image should be sharp.")
-        tmp3.show()
+        #tmp3.show()
         
         del im
         
         tmp4 = AffineScale(10.0,(w,h)).transformImage(tmp1,use_orig=True)
         tmp4.annotateLabel(pv.Point(10,10), "This image should be blurry.")
-        tmp4.show()
+        #tmp4.show()
         
     def test_prev_ref3(self):
         fname = os.path.join(pv.__path__[0],'data','nonface','NONFACE_13.jpg')
