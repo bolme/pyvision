@@ -41,6 +41,23 @@ def normalizeMeanStd(matrix):
     print '''normalizeMeanStd is deprecated.  Please call as normalize.meanStd'''
     return meanStd(matrix)
 
+def clipRange(matrix,min_val,max_val):
+    ''' zero mean, one standard deviation '''
+    is_image = False
+    if isinstance(matrix,pv.Image):
+        matrix = matrix.asMatrix2D()
+        is_image = True
+    # Otherwize, assume it is a numpy matrix
+    mask = matrix > max_val
+    matrix = max_val*mask + matrix*(~mask)
+    
+    mask = matrix < min_val
+    matrix = min_val*mask + matrix*(~mask)
+    
+    if is_image:
+        return pv.Image(matrix)
+    return matrix
+
 def meanStd(matrix):
     ''' zero mean, one standard deviation '''
     is_image = False
