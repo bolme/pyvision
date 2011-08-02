@@ -61,7 +61,7 @@ COMPLEX_COMPONENT = '{http://www.bee-biometrics.org/schemas/sigset/0.1}presentat
 COMPLEX_DATA = '{http://www.bee-biometrics.org/schemas/sigset/0.1}data'
 
 BEE_NONMATCH = 0x7f
-BEE_MATCH    = 0xff
+BEE_MATCH    = -1 #0xff
 BEE_DONTCARE = 0x00
 
 BEE_CODE_MAP = {

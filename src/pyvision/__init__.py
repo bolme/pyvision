@@ -178,7 +178,7 @@ from pyvision.surveillance.MotionDetector import MotionDetector,BOUNDING_RECTS,S
 
 from pyvision.surveillance.optical_flow import OpticalFlow
 
-from pyvision.other.normalize import clipRange, meanStd, meanUnit, unit, selfQuotientImage, lowPassFilter, highPassFilter, bandPassFilter
+from pyvision.other.normalize import clipRange, meanStd, meanUnit, unit, selfQuotientImage, lowPassFilter, highPassFilter, bandPassFilter, gaussianFilter
 
 from pyvision.other.distance import boolToUbyte, ubyteToBool, hamming
 

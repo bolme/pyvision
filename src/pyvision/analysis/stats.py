@@ -626,7 +626,7 @@ class _TestStats(unittest.TestCase):
         cov2cor(v)
         
     def test_cor(self):
-        print cor(self.longley)
+        cor(self.longley)
 
         
         

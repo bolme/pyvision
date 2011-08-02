@@ -35,6 +35,7 @@ from math import *
 import scipy as sp
 import numpy as np
 import pyvision as pv
+import cv
 
 def normalizeMeanStd(matrix):
     ''' TODO: deprecated please use meanStd.'''
@@ -121,7 +122,10 @@ def selfQuotientImage(matrix,sigma=5.0):
     return matrix
 
 
-
+def gaussianFilter(im,sigma):
+    cvim = cv.CreateImage(im.size,cv.IPL_DEPTH_8U,3)
+    cv.Smooth(im.asOpenCV(),cvim,cv.CV_GAUSSIAN,0,0,sigma)
+    return pv.Image(cvim)
 
 def highPassFilter(matrix,sigma):
     '''
