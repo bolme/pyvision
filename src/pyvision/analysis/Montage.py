@@ -329,9 +329,7 @@ class VideoMontage:
         
         self.vids = videoDict
         self.layout = layout
-        self.vidsize = tileSize
-        
-        self._montage = None #lazy initialization        
+        self.vidsize = tileSize 
         self.imgs = {}
         self.stopped = []
         
