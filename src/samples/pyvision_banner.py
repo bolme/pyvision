@@ -42,47 +42,52 @@ import cv
 if __name__ == '__main__':
     ilog = pv.ImageLog()
     source_name = os.path.join(pv.__path__[0],'data','misc','p5240019.jpg')
+
+    #Load source image and resize to smaller scale
     im = pv.Image(source_name)
+    print "Size before affine scale: %s"%str(im.size)
     im = pv.AffineScale(0.25,(320,240)).transformImage(im)
-    #im.show()
+    print "Size after scaling: %s"%str(im.size)
     ilog.log(im, 'Input')    
-    im.show(window='Input', pos=(0,0))
+    #im.show(window='Input', pos=(0,0))
+            
+    #Generate edge image using sobel edge detector
+    edges = sobel(im, 1, 0 , 3, 0)
+    ilog.log(edges, 'Edges')  
+    #edges.show(window='Edges', pos=(360,0))
     
+    #Generate threshold mask, shows numpy integration
     mat = im.asMatrix2D()
     high = mat > 180
     low = mat < 50
     mask = high#+low
-    
-    #edges = canny(im,100,200)   #canny crashes in opencv2.1 on linux64...
-        
-    #sobel edge detector
-    edges = sobel(im, 1, 0 , 3, 0)
-        
-    #edges.show()
-    edges.show(window='Edges', pos=(360,0))
-    
-    ilog.log(edges, 'Edges')    
     ilog.log(pv.Image(1.0*mask), 'Mask')
     
+    #Composite operation using PIL
     e = edges.asPIL().convert('RGB')
     m = pv.Image(1.0*mask).asPIL()
     i = im.asPIL()
     logo = pv.Image(composite(i,e,m))
     ilog.log(logo, 'Composite')    
-    logo.show(window='Composite', pos=(0,300) )
+    #logo.show(window='Composite', pos=(0,300) )
     
+    #Keypoint detection using OpenCV's SURF detector
+    logo_surf = logo.copy()
     sm = pv.Image(im.asPIL().resize((320,240),LINEAR))
     detector = DetectorSURF()    
     points = detector.detect(sm)
     for score,pt,radius in points:
-        logo.annotateCircle(pt*4,radius*4)
+        logo_surf.annotateCircle(pt*4,radius*4)
+    ilog.log(logo_surf, 'Annotated')
+    #logo_surf.show(window='Annotated',pos=(360,300))
     
-    #logo.show()
-    logo.show(window='Annotated',pos=(360,300))
-    print "Have an image focused in UI and hit spacebar to continue..."
-    cv.WaitKey(0)
+    #Demonstrate use of ImageMontage class to show a few small images in a single window
+    print "Have the image montage focused in UI and hit spacebar to continue..."
+    imontage = pv.ImageMontage([im,edges,logo,logo_surf], layout=(2,2), tileSize=im.size, gutter=3, byrow=True, nolabels=True)
+    imontage.show(window="Image Montage", delay=0)
     
-    ilog.log(logo, 'Annotated')
+    #Show the images stored to the image log object
+    print "Showing image log. These images are stored in a tmp directory."
     ilog.show()
 
     
