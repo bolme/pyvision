@@ -382,6 +382,51 @@ class FFMPEGVideo:
             raise StopIteration("End of video sequence")
         return frame
 
+class VideoFromFileList(Video):
+    '''
+    Given a sorted list of filenames (including full path), this will
+    treat the list as a video sequence.
+    '''
+    def __init__(self, filelist, size=None):
+        '''
+        @param filelist: a list of full file paths to the images that comprise the video.
+        They must be files capable of being loaded into a pv.Image() object, and should
+        be in sorted order for playback.
+        @param size: Optional tuple to indicate the desired playback window size.
+        '''
+        self.filelist = filelist
+        self.idx = 0
+        self.size = size
+        
+    def resize(self,frame):
+        if self.size == None:
+            return frame
+        else:
+            depth = frame.depth
+            channels = frame.channels
+            w,h = self.size
+            resized = cv.CreateImage( (w,h), depth, channels )
+            cv.Resize( frame.asOpenCV(), resized, cv.CV_INTER_LINEAR )
+            return pv.Image(resized)
+            
+    def query(self):
+        if self.idx >= len(self.filelist): return None
+        f = self.filelist[self.idx]
+        frame = pv.Image(f)
+        self.idx += 1
+        return self.resize(frame)
+        
+                    
+    def next(self):
+        frame = self.query()
+        if frame == None:
+            raise StopIteration("End of video sequence")
+        return frame
+        
+    def __iter__(self):
+        ''' Return an iterator for this video '''
+        return VideoFromFileList(self.filelist) 
+ 
         
 class VideoFromImages(Video):
     '''
