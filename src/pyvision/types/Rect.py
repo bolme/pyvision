@@ -288,6 +288,13 @@ class Rect:
         '''
         if isinstance(val,float) or isinstance(val,int): 
             return Rect(self.x*val,self.y*val,self.w*val,self.h*val)
+        
+    def __div__(self,val):
+        '''
+        Divide the rectangle by a constant
+        '''
+        if isinstance(val,float) or isinstance(val,int): 
+            return Rect(self.x/val,self.y/val,self.w/val,self.h/val)
 
 
 def test():
