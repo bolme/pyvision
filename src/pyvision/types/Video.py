@@ -178,7 +178,7 @@ class Video:
             raise StopIteration("End of video sequence")
         return frame
         
-    def play(self, window="Input", pos=None, delay=20, imageBuffer=None, onNewFrame=None, onNewFrame_kwargs={} ):
+    def play(self, window="Input", pos=None, delay=20, imageBuffer=None, onNewFrame=None, **kwargs ):
         '''
         Plays the video, calling the onNewFrame function after loading each
          frame from the video. The user may interrupt video playback by
@@ -205,7 +205,7 @@ class Video:
         signature of 'foo( pvImage, frameNum, key=None, buffer=None )', where key is
         the key pressed by the user (if any) during the pauseAndPlay interface, and
         buffer is a reference to the optional image buffer provided to the play method.
-        @param onNewFrame_kwargs: Optional keyword arguments that should be passed
+        @param kwargs: Optional keyword arguments that should be passed
         onto the onNewFrame function.
         @return: The final frame number of the video, or the frame number at which
         the user terminated playback using the 'q'uit option.
@@ -227,7 +227,7 @@ class Video:
                 img.show(window=window,pos=pos)
             
             if onNewFrame != None:
-                onNewFrame( img, fn, key=key, buffer=imageBuffer, **onNewFrame_kwargs )
+                onNewFrame( img, fn, key=key, buffer=imageBuffer, **kwargs )
                 
             key = self._pauseAndPlay(delayObj)
             if key == 'q':
