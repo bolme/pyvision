@@ -527,13 +527,14 @@ class VideoFromImageStack(Video):
     '''
     def __init__(self, imageStack, size=None):
         '''
-	@param imageStack: The bumpy ndarray that represents the image stack. Should be of dimensions (frames,width,height).
+	@param imageStack: The numpy ndarray that represents the image stack. Should be of dimensions (frames,width,height).
         @param size: the optional width,height to resize the input frames
         '''
         (f,_,_) = imageStack.shape
 	self.imageStack = imageStack
 	self.numFrames = f
 	self.current_frame = 0
+        self.size = size
 
     def query(self):
         if self.current_frame < self.numFrames:
