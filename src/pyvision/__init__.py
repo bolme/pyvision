@@ -148,7 +148,7 @@ def disableCommercialUseWarnings():
 
 from pyvision.types.img import Image,OpenCVToNumpy,NumpyToOpenCV
 
-from pyvision.types.Video import Video, Webcam, VideoFromImages, VideoFromFileList, FFMPEGVideo
+from pyvision.types.Video import Video, Webcam, VideoFromImages, VideoFromFileList, VideoFromImageStack, FFMPEGVideo
 
 from pyvision.types.Point import Point,readPointsFile
 

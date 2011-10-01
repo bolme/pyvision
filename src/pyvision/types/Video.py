@@ -535,8 +535,7 @@ class VideoFromImageStack(Video):
 	self.numFrames = f
 	self.current_frame = 0
 
-    def query(self):      
-        numstr = str(self.current_frame).zfill(self.pad)
+    def query(self):
         if self.current_frame < self.numFrames:
 		frame = pv.Image( self.imageStack[self.current_frame,:,:])
                 self.current_frame += 1
