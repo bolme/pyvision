@@ -31,9 +31,6 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-# TODO: This will probably not yet work with OpenCV 2.0
-
 import time
 import os
 import pyvision as pv
@@ -523,4 +520,48 @@ class VideoFromImages(Video):
         ''' Return an iterator for this video '''
         return VideoFromImages(self.dirname, self.maxframes, self.prefix, self.ext, self.pad, self.startnum, self.size) 
         
+class VideoFromImageStack(Video):
+    '''
+    This class allows the user to treat a stack of images in a 3D numpy array as a video.
+	We assume that the dimensions of the array are ordered as (frame #, width, height)
+    '''
+    def __init__(self, imageStack, size=None):
+        '''
+	@param imageStack: The bumpy ndarray that represents the image stack. Should be of dimensions (frames,width,height).
+        @param size: the optional width,height to resize the input frames
+        '''
+        (f,_,_) = imageStack.shape
+	self.imageStack = imageStack
+	self.numFrames = f
+	self.current_frame = 0
+
+    def query(self):      
+        numstr = str(self.current_frame).zfill(self.pad)
+        if self.current_frame < self.numFrames:
+		frame = pv.Image( self.imageStack[self.current_frame,:,:])
+                self.current_frame += 1
+                return(self.resize(frame))
+        
+        return None
+       
+    def resize(self,frame):
+        if self.size == None:
+            return frame
+        else:
+            depth = frame.depth
+            channels = frame.channels
+            w,h = self.size
+            resized = cv.CreateImage( (w,h), depth, channels )
+            cv.Resize( frame.asOpenCV(), resized, cv.CV_INTER_LINEAR )
+            return pv.Image(resized)
+                
+    def next(self):
+        frame = self.query()
+        if frame == None:
+            raise StopIteration("End of video sequence")
+        return frame
+        
+    def __iter__(self):
+        ''' Return an iterator for this video '''
+        return VideoFromImageStack(self.imageStack, self.size) 
                 
