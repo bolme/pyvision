@@ -271,7 +271,9 @@ try:
     
     class FLANNTree:
         def __init__(self,points,**kwargs):
-            data = copy.deepcopy(np.array(points,np.float64))
+            self.dtype = points.dtype
+            #data = np.array(points,np.float64).copy()
+            data = points
             self.n = data.shape[1]
             self.flann = pyflann.FLANN()
             start = time.time()
@@ -280,12 +282,11 @@ try:
             self.indexing_time = stop-start
             
         def query(self, x, k=1,**kwargs):
-            if not isinstance(x, np.ndarray) or x.shape != (1,self.n):
-                x = np.array(x,dtype=np.float64).reshape(1,self.n)
-            
+            if x.shape == (0,):
+                return [],[]  
             results,dists = self.flann.nn_index(x,num_neighbors=k,**kwargs)
             return np.sqrt(dists.flatten()),results.flatten()
-        
+                
     FLANN_IMPORTED = True
     
 except:
