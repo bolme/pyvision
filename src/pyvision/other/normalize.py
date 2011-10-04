@@ -33,6 +33,7 @@
 
 from math import *
 import scipy as sp
+import scipy.ndimage as ndi
 import numpy as np
 import pyvision as pv
 import cv
@@ -94,6 +95,8 @@ def unit(matrix):
         matrix = matrix.asMatrix2D()
         is_image = True
     length = sqrt( (matrix*matrix).sum() )
+    if length < 0.00001: #Prevent divide by zero
+        length = 0.00001
     matrix = (1.0/length) * matrix
     if is_image:
         return pv.Image(matrix)
@@ -112,7 +115,7 @@ def selfQuotientImage(matrix,sigma=5.0):
 
     assert matrix.min() >= 0 
     matrix = matrix + 0.01*matrix.max()
-    denom = sp.ndimage.gaussian_filter(matrix,sigma)
+    denom = ndi.gaussian_filter(matrix,sigma)
 
     # make sure there are no divide by zeros
     matrix = matrix/denom
@@ -145,7 +148,7 @@ def highPassFilter(matrix,sigma):
         matrix = matrix.asMatrix2D()
         is_image = True
 
-    matrix = matrix - sp.ndimage.gaussian_filter(matrix,sigma)
+    matrix = matrix - ndi.gaussian_filter(matrix,sigma)
     
     if is_image:
         return pv.Image(matrix)
@@ -165,7 +168,7 @@ def lowPassFilter(matrix,sigma):
         matrix = matrix.asMatrix2D()
         is_image = True
 
-    matrix = sp.ndimage.gaussian_filter(matrix,sigma)
+    matrix = ndi.gaussian_filter(matrix,sigma)
     
     if is_image:
         return pv.Image(matrix)
@@ -191,7 +194,7 @@ def bandPassFilter(matrix,sigma_low, sigma_high):
         matrix = matrix.asMatrix2D()
         is_image = True
 
-    matrix = sp.ndimage.gaussian_filter(matrix,sigma_high) - sp.ndimage.gaussian_filter(matrix,sigma_low)
+    matrix = ndi.gaussian_filter(matrix,sigma_high) - ndi.gaussian_filter(matrix,sigma_low)
     
     if is_image:
         return pv.Image(matrix)
