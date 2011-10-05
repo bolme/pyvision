@@ -206,6 +206,8 @@ from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO
 
 from pyvision.analysis.VideoStreamProcessor import *
 
+from analysis.progress_bar import ProgressBar
+
 
 
 #================================== Misc Functions =====================================
