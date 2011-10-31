@@ -186,7 +186,10 @@ class PerspectiveTransform:
     # @param im an pv.Image object
     def transformImage(self,im):
         ''' Transform an image. '''
-        matrix = pv.NumpyToOpenCV(self.matrix)
+        if isinstance(self.matrix,cv.cvmat):
+            matrix = self.matrix
+        else:
+            matrix = pv.NumpyToOpenCV(self.matrix)
         src = im.asOpenCV()
         dst = cv.CreateImage( (self.size[0],self.size[1]), cv.IPL_DEPTH_8U, src.nChannels );
         cv.WarpPerspective( src, dst, matrix)                    
