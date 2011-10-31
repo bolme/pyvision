@@ -372,6 +372,18 @@ class Image:
         draw.line(line,fill=color,width=width)
         del draw
         
+    def annotateLines(self,points,color='red',width=1):
+        '''
+        Draws a line from point1 to point2 on the annotation image
+    
+        @param point1: the starting point as type Point
+        @param point2: the ending point as type Point
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
+        n = len(points)-1
+        for i in range(n):
+            self.annotateLine(points[i],points[i+1],color=color,width=width)
+        
     def annotatePolygon(self,points,color='red',width=1):
         '''
         Draws a line from point1 to point2 on the annotation image
