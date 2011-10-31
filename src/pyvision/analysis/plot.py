@@ -277,6 +277,8 @@ class Plot:
         self.title = title
         self.xlabel = xlabel
         self.ylabel = ylabel
+        self.x_at = None
+        self.x_labels = None
         
         self.xrange = xrange
         if xrange != None:
@@ -357,6 +359,15 @@ class Plot:
         
         return pv.Image(pil)
             
+    def xLabels(self,at,labels=None):
+        at = np.array(at,np.float64)
+        if labels != None:
+            assert len(at) == len(labels)
+            labels = np.array(labels,np.str)
+        else:
+            labels = np.array(at,np.str)
+        self.x_at = at
+        self.x_labels = labels
         
     def x(self,x,bounds):
         minx,maxx,_,_ = bounds
@@ -405,7 +416,10 @@ class Plot:
     def xAxis(self):
         minx,maxx,_,_ = self.range()
         w,_ = self.size
-        at,labels = self.autoAxis(minx,maxx,w)
+        if self.x_at == None:
+            at,labels = self.autoAxis(minx,maxx,w)
+        else:
+            at,labels = self.x_at,self.x_labels
         return at,labels
 
 
