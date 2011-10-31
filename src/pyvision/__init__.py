@@ -1,6 +1,6 @@
 # PyVision License
 #
-# Copyright (c) 2006-2008 David S. Bolme
+# Copyright (c) 2006-2011 David S. Bolme
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -200,6 +200,8 @@ from pyvision.ml.lda import lda
 
 from pyvision.other.surf import surf
 
+from pyvision.other.texture import lbp,LBP_CLASSIC,LBP_RAD1,LBP_RAD2,LBP_RAD3,LBP_RAD4,LBP_RAD8
+
 from pyvision.analysis.bee import parseSigSet,saveSigset,BEE_CODE_MAP,BEE_DONTCARE,BEE_MATCH,BEE_NONMATCH,BEEDistanceMatrix
 
 from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO
@@ -207,6 +209,8 @@ from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO
 from pyvision.analysis.VideoStreamProcessor import *
 
 from analysis.progress_bar import ProgressBar
+
+from analysis.gui_tools import capturePointsFromMouse
 
 
 
