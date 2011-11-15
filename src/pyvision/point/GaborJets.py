@@ -264,10 +264,19 @@ class GaborImage:
         sim = novel.simDisplace(jet)
         #pt = pv.Point(novel.x + d[0], novel.y+d[1])
         #print pt
-
-
         
         return pt,sim,novel
+    
+    def show(self,*args,**kwargs):
+        print self.data.shape
+        tiles = []
+        w,h,n = self.data.shape
+        for i in range(n):
+            mat = self.data[:,:,i]
+            tiles.append(pv.Image(mat.real))
+            tiles.append(pv.Image(mat.imag))
+        mont = pv.ImageMontage(tiles,layout=(8,10),tileSize=(w,h))
+        mont.show(*args,**kwargs)
         
     
 class GaborJet:
