@@ -36,6 +36,7 @@ Created on Mar 14, 2011
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import pyvision as pv
 import cv
+import weakref
 
 class ImageMontage(object):
     '''
@@ -70,7 +71,7 @@ class ImageMontage(object):
         self._txtcolor = (255,255,255)   
         self._imgPtr = 0
         self._nolabels = nolabels
-        
+        self._clickHandler = clickHandler(self)
         #check if we need to allow for scroll-arrow padding
         if self._rows * self._cols < len(imageList):
             if byrow:
@@ -151,9 +152,34 @@ class ImageMontage(object):
         '''
         img = self.asImage()
         cv.NamedWindow(window)
-        cv.SetMouseCallback(window, self._onClick, window)
+        cv.SetMouseCallback(window, self._clickHandler.onClick, window)
         img.show(window=window, pos=pos, delay=delay)
-       
+ 
+    def _checkClickRegion(self, x,y):
+        '''
+        internal method to determine the clicked region of the montage.
+        @return: -1 for decrement region, 1 for increment region, and 0 otherwise
+        '''
+        if self._byrow:
+            #scroll up/down to expose next/prev row
+            decr_rect = pv.Rect(0,0, self._size[0], self._ypad)
+            incr_rect = pv.Rect(0, self._size[1]-self._ypad, self._size[0], self._ypad)
+        else:
+            #scroll left/right to expose next/prev col
+            decr_rect = pv.Rect(0,0, self._xpad, self._size[1])
+            incr_rect = pv.Rect(self._size[0]-self._xpad, 0, self._xpad, self._size[1])
+            
+        pt = pv.Point(x,y)
+        if incr_rect.containsPoint(pt):
+            #print "DEBUG: Increment Region"
+            return 1
+        elif decr_rect.containsPoint(pt):
+            #print "DEBUG: Decrement Region"
+            return -1
+        else:
+            #print "DEBUG: Neither Region"
+            return 0
+               
     def _initDecrementArrow(self):
         '''
         internal method to compute the list of points that represents
@@ -193,23 +219,23 @@ class ImageMontage(object):
             self._incrArrow = [(x1,y1),(x1-self._xpad+2, y1-halfpad),(x1-self._xpad+2,y1+halfpad)]
             
           
-    def _onClick(self, event, x, y, flags, window):
-        '''
-        Handle the mouse click. Increment or Decrement the set of images shown in the montage
-        if appropriate.
-        '''
-        if event == cv.CV_EVENT_LBUTTONDOWN:
-            rc = self._checkClickRegion(x, y)
-            if rc == -1 and self._imgPtr > 0:
-                #user clicked in the decrement region
-                self._decr()
-            elif rc == 1 and self._imgPtr < (len(self._images)-(self._rows*self._cols)):
-                self._incr()
-            else:
-                pass #do nothing
-            
-            self.draw((x,y))
-            cv.ShowImage(window, self._cvMontageImage)
+#    def _onClick(self, event, x, y, flags, window):
+#        '''
+#        Handle the mouse click. Increment or Decrement the set of images shown in the montage
+#        if appropriate.
+#        '''
+#        if event == cv.CV_EVENT_LBUTTONDOWN:
+#            rc = self._checkClickRegion(x, y)
+#            if rc == -1 and self._imgPtr > 0:
+#                #user clicked in the decrement region
+#                self._decr()
+#            elif rc == 1 and self._imgPtr < (len(self._images)-(self._rows*self._cols)):
+#                self._incr()
+#            else:
+#                pass #do nothing
+#            
+#            self.draw((x,y))
+#            cv.ShowImage(window, self._cvMontageImage)
         
     def _decr(self):
         '''
@@ -237,30 +263,7 @@ class ImageMontage(object):
             
         self._imgPtr = tmp_ptr
             
-    def _checkClickRegion(self, x,y):
-        '''
-        internal method to determine the clicked region of the montage.
-        @return: -1 for decrement region, 1 for increment region, and 0 otherwise
-        '''
-        if self._byrow:
-            #scroll up/down to expose next/prev row
-            decr_rect = pv.Rect(0,0, self._size[0], self._ypad)
-            incr_rect = pv.Rect(0, self._size[1]-self._ypad, self._size[0], self._ypad)
-        else:
-            #scroll left/right to expose next/prev col
-            decr_rect = pv.Rect(0,0, self._xpad, self._size[1])
-            incr_rect = pv.Rect(self._size[0]-self._xpad, 0, self._xpad, self._size[1])
-            
-        pt = pv.Point(x,y)
-        if incr_rect.containsPoint(pt):
-            #print "DEBUG: Increment Region"
-            return 1
-        elif decr_rect.containsPoint(pt):
-            #print "DEBUG: Decrement Region"
-            return -1
-        else:
-            #print "DEBUG: Neither Region"
-            return 0
+
             
     def _composite(self, img, pos, imgNum):
         '''
@@ -300,6 +303,38 @@ class ImageMontage(object):
                    
         #reset ROI 
         cv.SetImageROI(cvImg, (0,0,self._size[0],self._size[1]))
+
+
+class clickHandler(object):
+    '''
+    A class for objects designed to handle click events on ImageMontage objects.
+    We separate this out from the ImageMontage object to address a memory leak
+    when using cv.SetMouseCallback(window, self._onClick, window), because we
+    don't want the image data associated with the click handler
+    '''
+    def __init__(self, IM_Object):
+        
+        self.IM = weakref.ref(IM_Object)
+        
+    def onClick(self, event, x, y, flags, window):
+        '''
+        Handle the mouse click for an image montage object.
+        Increment or Decrement the set of images shown in the montage
+        if appropriate.
+        '''
+        IM = self.IM()  #IM object is obtained via weak reference to image montage
+        if event == cv.CV_EVENT_LBUTTONDOWN:
+            rc = IM._checkClickRegion(x, y)
+            if rc == -1 and IM._imgPtr > 0:
+                #user clicked in the decrement region
+                IM._decr()
+            elif rc == 1 and IM._imgPtr < (len(IM._images)-(IM._rows*IM._cols)):
+                IM._incr()
+            else:
+                pass #do nothing
+            
+            IM.draw((x,y))
+            cv.ShowImage(window, IM._cvMontageImage)
         
 class VideoMontage:
     '''
@@ -391,8 +426,10 @@ def demo_videoMontage():
     
     vid1 = pv.Video(TOYCAR_VIDEO)
     vid2 = pv.Video(TAZ_VIDEO)
-    
-    vm = VideoMontage({"V1":vid1,"V2":vid2}, layout=(2,1), tileSize=(256,192))
+    #vid3 = pv.Video(TOYCAR_VIDEO)
+    #vid4 = pv.Video(TAZ_VIDEO)
+    vid_dict = {"V1":vid1, "V2":vid2} #, "V3":vid3, "V4":vid4}
+    vm = VideoMontage(vid_dict, layout=(2,1), tileSize=(256,192))
     for img in vm:
         img.show("Video Montage", delay=60, pos=(10,10))
     
