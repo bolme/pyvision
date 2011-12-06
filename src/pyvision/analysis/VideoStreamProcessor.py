@@ -35,6 +35,27 @@ Created on Mar 18, 2011
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import pyvision as pv
+import cv
+'''
+This module implements various Video Stream Processors, or VSPs for short.
+A VSP is designed to encapsulate a per-frame operation that can be
+applied to a video stream. Examples include displaying the image while
+overlaying the frame number (SimpleVSP), writing the output of a video
+stream to a video file (VideoWriterVSP), and performing motion detection
+on each video frame (MotionDetectionVSP).
+
+The general idea is to chain together a VSP sequence, and then attach
+the head of the chain to a video's play method. We hope that users will
+create and/or contribute many useful subclasses of AbstractVSP.
+
+For example:
+import pyvision as pv
+vsp_write = pv.VideoWriterVSP('tmp.avi',size=(640,480))
+vsp_disp = pv.SimpleVSP(window="Display", nextModule=vsp_write)
+vid = pv.Video(sourceFile)
+vid.play(window=None, delay=25, onNewFrame=vsp_disp)
+'''
+
 
 class AbstractVSP():
     '''AbstractVSP is the abstract class definition of a
@@ -73,13 +94,67 @@ class SimpleVSP(AbstractVSP):
     some simple annotation to show the frame number in upper left corner.
     '''
     def __init__(self, window="Input", nextModule=None):
+        ''' Constructor
+        @param window: The window name to use when displaying this VSP's
+        output. Specify None to suppress showing the output, but note that
+        if you modify the current image with annotations, those will be
+        persisted "downstream" to later processors.
+        @param nextModule: A Video Stream Processor object that should be
+        invoked on every frame after this processor has finished.
+        '''
         AbstractVSP.__init__(self, window=window, nextModule=nextModule)
         
     def _onNewFrame(self, img, fn, key=None, buffer=None, prevModule=None):
         pt = pv.Point(10, 10)
-        img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white")
-        img.annotateLabel(label="Key: %s"%key, point=pv.Point(10,20), color="white")
+        img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white", background="black")
         if self._windowName != None: img.show(window=self._windowName)
+ 
+#TODO: There seems to be a bug in the video writing output when writing
+# frames from some source video objects in some output sizes. The symptom
+# appears as an output video that is "slanted" and grainy.        
+class VideoWriterVSP(AbstractVSP):
+    '''
+    A video stream processor that outputs to a new movie file.
+    If you want to display the frame number in the output, chain this VSP
+    after a SimpleVSP object in the series.
+    '''
+    def __init__(self, filename, window="Input", nextModule=None, fourCC_str="XVID", fps=15, size=None, bw=False):
+        '''
+        Constructor
+        @param filename: The full output filename. Include the extension, such as .avi.
+        @param window: The window name to use when displaying this VSP's
+        output. Specify None to suppress showing the output, but note that
+        if you modify the current image with annotations, those will be
+        persisted "downstream" to later processors.
+        @param nextModule: A Video Stream Processor object that should be
+        invoked on every frame after this processor has finished.
+        @param fourCC_str:  The "Four CC" string that is used to specify the encoder.
+        @param fps: Frames per second. Not all codecs allow you to specify arbitrary frame rates, however.
+        @param size: A tuple (w,h) representing the size of the output frames.
+        @param bw: Specify true if you wish for a black-and-white only output.
+        '''
+        cvFourCC = cv.CV_FOURCC(*fourCC_str)
+        if bw:
+            colorFlag = cv.CV_LOAD_IMAGE_GRAYSCALE
+        else:
+            colorFlag = cv.CV_LOAD_IMAGE_UNCHANGED
+        self._bw = bw
+        self._out = cv.CreateVideoWriter(filename, cvFourCC, fps, size, colorFlag)
+        AbstractVSP.__init__(self, window=window, nextModule=nextModule)
+        
+    def addFrame(self, img):
+        '''
+        @param img: A pyvision img to write out to the video. Note that this will write the annotated version of the image.
+        '''
+        img2 = pv.Image(img.asAnnotated())
+        if self._bw:
+            cv.WriteFrame(self._out, img2.asOpenCVBW())    
+        else:
+            cv.WriteFrame(self._out, img2.asOpenCV())        
+           
+    def _onNewFrame(self, img, fn, key=None, buffer=None, prevModule=None):
+        self.addFrame(img)
+
         
 class MotionDetectionVSP(AbstractVSP):
     def __init__(self, md_object, window="Motion Detection", nextModule=None):
@@ -103,4 +178,5 @@ class MotionDetectionVSP(AbstractVSP):
             if self._windowName != None: img.show(window=self._windowName)
             #img_fg = md.getForegroundPixels()
             #img_fg.show("Foreground")
+            
             
