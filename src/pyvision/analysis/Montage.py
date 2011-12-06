@@ -336,7 +336,7 @@ class clickHandler(object):
             IM.draw((x,y))
             cv.ShowImage(window, IM._cvMontageImage)
         
-class VideoMontage:
+class VideoMontage(pv.Video):
     '''
     Provides a visualization of several videos playing back in
     a single window. This can be very handy, for example, to
@@ -370,7 +370,7 @@ class VideoMontage:
         
     def __iter__(self):
         ''' Return an iterator for this video '''
-        return self  #may not be the best/safest thing to do here
+        return VideoMontage(self.vids, layout=self.layout, tileSize=self.vidsize)
     
     def next(self):
         if len(self.stopped) == len(self.vids.keys()):
