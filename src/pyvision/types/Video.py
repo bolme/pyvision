@@ -69,6 +69,8 @@ class VideoInterface(object):
         method is common to most sources and may not need to be overridden.
         The query() method will typically call this resize() method prior
         to returning the captured image.
+        @param frame: An openCV image (note: not a pyvision image)
+        @return: An openCV image with the new dimensions
         '''
         if self.size == None:
             return frame
@@ -87,6 +89,9 @@ class VideoInterface(object):
         '''
         raise NotImplemented
     
+    #TODO: change onNewFrame function signature so that the buffer= parameter
+    # is renamed to imageBuffer=, to avoid confusion and clash with a reserved built-in use
+    # of 'buffer'.
     def play(self, window="Input", pos=None, delay=20, imageBuffer=None, onNewFrame=None, **kwargs ):
         '''
         Plays the video, calling the onNewFrame function after loading each
@@ -302,9 +307,9 @@ class VideoFromFileList(VideoInterface):
     def query(self):
         if self.idx >= len(self.filelist): return None
         f = self.filelist[self.idx]
-        frame = pv.Image(f)
+        frame = pv.Image(f).asOpenCV()
         self.idx += 1
-        return self.resize(frame)
+        return pv.Image(self.resize(frame))
         
     def __iter__(self):
         ''' Return an iterator for this video '''
@@ -377,9 +382,9 @@ class VideoFromImages(VideoInterface):
         if (self.maxframes == None) or (self.current_frame <= self.maxframes):
             #then we query the next in the sequence until file not exists
             if os.path.exists(f):
-                frame = pv.Image(f)
+                frame = pv.Image(f).asOpenCV()
                 self.current_frame += 1
-                return(self.resize(frame))
+                return( pv.Image(self.resize(frame)) )
             else:
                 print "Image file %s does not exist. Stopping VideoFromImages."%f
         
@@ -397,10 +402,16 @@ class VideoFromImageStack(VideoInterface):
     def __init__(self, imageStack, size=None):
         '''
 	    @param imageStack: The numpy ndarray that represents the image stack. Should be of dimensions (frames,width,height).
+	    Optionally, this can be any object, such as pyvision.ImageBuffer, that implements asStackBW() method that returns
+	    the grayscale image stack.
         @param size: the optional width,height to resize the input frames
         '''
-        (f,_,_) = imageStack.shape
-        self.imageStack = imageStack
+        if str( type(imageStack) ) == "<type 'instance'>":
+            self.imageStack = imageStack.asStackBW()
+        else:
+            self.imageStack = imageStack
+        
+        (f,_,_) = self.imageStack.shape
         self.numFrames = f
         self.current_frame = 0
         self.size = size
@@ -409,7 +420,7 @@ class VideoFromImageStack(VideoInterface):
         if self.current_frame < self.numFrames:
             frame = pv.Image( self.imageStack[self.current_frame,:,:])
             self.current_frame += 1
-            return(self.resize(frame))
+            return( pv.Image(self.resize(frame.asOpenCV()))) 
         return None     
                         
     def __iter__(self):
