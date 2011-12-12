@@ -37,124 +37,39 @@ import pyvision as pv
 import cv
 #from scipy import weave
 
-# TODO: The default camera on linux appears to be zero and 1 on MacOS
-# Video capture is an alterative for windows http://videocapture.sourceforge.net/
-# An option for linux http://code.google.com/p/python-video4linux2/
-# On linux it may be possible to use something like v4lctl to capture in a seperate process.
 
-class Webcam:
-    def __init__(self,camera_num=0,size=(640,480)):
 
-        self.cv_capture = cv.CreateCameraCapture( camera_num )        
-        #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH,1600.0)
-        #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT,1200.0)
-        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH)
-        # print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT)
-        
-        
-        self.size = size
-    
+class VideoInterface(object):
+    '''
+    VideoInterface is an abstract class meant only to define a common interface
+    for all Video subtypes. The VideoInterface defines the methods that every
+    video data source should provide.
+    '''    
     def query(self):
         '''
-        The returned image also include a field named orig_frame which returns 
-        the original image returned before rescaling.
-        
-        @returns: the frame rescaled to a given size.
+        Must be overridden to implement the specific frame-grabbing required
+        by different video sources.
         '''
-        # TODO: Video capture is unreliable under linux.  This may just be a timing issue when running under parallels.
-        frame = cv.QueryFrame( self.cv_capture )
-        im = pv.Image(self.resize(frame))
-        im.orig_frame = pv.Image(frame)
-        im.capture_time = time.time()
-        return im
+        raise NotImplemented
     
-    def grab(self):
-        return cv.GrabFrame( self.cv_capture );
-    
-    def retrieve(self):
+    def next(self):
         '''
-        The returned image also include a field named orig_frame which returns 
-        the original image returned before rescaling.
-        
-        @returns: the frame rescaled to a given size.
+        The next method calls self.query(), so it is common to most video sources
+        and may not need to be overridden.
+        @return: The next frame in the sequence, or raise StopIteration if done.
         '''
-        frame = cv.RetrieveFrame( self.cv_capture );
-        im = pv.Image(self.resize(frame))
-        im.orig_frame = pv.Image(frame)
-        return im
-        
-    def resize(self,frame):
-        if self.size == None:
-            return frame
-        else:
-            depth = frame.depth
-            channels = frame.nChannels
-            w,h = self.size
-            resized = cv.CreateImage( (w,h), depth, channels )
-            cv.Resize( frame, resized, cv.CV_INTER_NN )
-            return resized
-
-class Video:
-    def __init__(self,filename,size=None):
-        self.filename = filename
-        self.cv_capture = cv.CaptureFromFile( filename );
-        self._numframes = cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
-        #print self.cv_capture, self.cv_capture.__hash__, dir(self.cv_capture), repr(self.cv_capture)
-        self.size = size
-        #print filename
-        #print self.size
-        #self.n_frames = cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
-        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH)
-        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT)
-        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_FRAMES)
-        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
-        #while True:
-        #    print cv.QueryFrame(self.cv_capture)
-        #    print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_FRAMES),
-        #    print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_AVI_RATIO),
-        #    print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
-        #print self.n_frames
-        self.current_frame = 0
-        
-    #def __del__(self):
-        #opencv.highgui.cvReleaseCapture(self.cv_capture)
-        
-
-        # cvReleaseCapture interface does not work so use weave this may be fixed in release 1570
-        # TODO: This should be removed when the opencv bug is fixed
-        #capture = self.cv_capture.__int__()
-        #cv.ReleaseCapture(self.cv_capture)
-        #weave.inline(
-        #    '''
-        #    CvCapture* tmp = (CvCapture*) capture;
-        #    cvReleaseCapture(&tmp);
-        #    ''',
-        #    arg_names=['capture'],
-        #    type_converters=weave.converters.blitz,
-        #    include_dirs=['/usr/local/include'],
-        #    headers=['<opencv/cv.h>','<opencv/highgui.h>'],
-        #    library_dirs=['/usr/local/lib'],
-        #    libraries=['cv','highgui']
-        #)
-
-    def query(self):
-        if self.current_frame > 0 and cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_AVI_RATIO) == 1.0:
-            return None
-        frame = cv.QueryFrame( self.cv_capture )
+        frame = self.query()
         if frame == None:
             raise StopIteration("End of video sequence")
-        self.current_frame += 1
-        frame = cv.CloneImage(frame);
-        return pv.Image(self.resize(frame))
-    
-    #def grab(self):
-    #    return cv.GrabFrame( self.cv_capture );
-    
-    #def retrieve(self):
-    #    frame = cv.RetrieveFrame( self.cv_capture );
-    #    return pv.Image(self.resize(frame))
-        
+        return frame
+            
     def resize(self,frame):
+        '''
+        Used to resize the source frame to the desired output size. This
+        method is common to most sources and may not need to be overridden.
+        The query() method will typically call this resize() method prior
+        to returning the captured image.
+        '''
         if self.size == None:
             return frame
         else:
@@ -166,15 +81,12 @@ class Video:
             return resized
     
     def __iter__(self):
-        ''' Return an iterator for this video '''
-        return Video(self.filename,self.size)
-        
-    def next(self):
-        frame = self.query()
-        if frame == None:
-            raise StopIteration("End of video sequence")
-        return frame
-        
+        '''
+        Override to provide an appropriate iterator for your video source
+        so that it can be used in a for loop as "for im in videoX: ..."
+        '''
+        raise NotImplemented
+    
     def play(self, window="Input", pos=None, delay=20, imageBuffer=None, onNewFrame=None, **kwargs ):
         '''
         Plays the video, calling the onNewFrame function after loading each
@@ -279,9 +191,240 @@ class Video:
             #delayObj['current_state'] = "PAUSED"
             return chr(c)
         
+# TODO: The default camera on linux appears to be zero and 1 on MacOS
+#  svohara note on above...I'm not sure this is true. As of OpenCV 2.2 on my iMac,
+#  the built-in webcam is index 0.
+
+# Video capture is an alterative for windows http://videocapture.sourceforge.net/
+# An option for linux http://code.google.com/p/python-video4linux2/
+# On linux it may be possible to use something like v4lctl to capture in a separate process.        
+class Webcam(VideoInterface):
+    def __init__(self,camera_num=0,size=(640,480)):
+        '''
+        Web camera interface for cameras attached to your computer via USB or built-in.
+        For IP/network cameras, use the Video object instead.
+        @param camera_num: The camera index. Usually 0 if you only have a single webcam
+        on your computer. See the OpenCV highgui documentation for details.
+        '''
+        self.cv_capture = cv.CreateCameraCapture( camera_num )        
+        #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH,1600.0)
+        #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT,1200.0)
+        #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH)
+        # print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT)
+        self.size = size
+    
+    def __iter__(self):
+        ''' Return an iterator for this video '''
+        return self
+    
+    def query(self):
+        '''
+        The returned image also include a field named orig_frame which returns 
+        the original image returned before rescaling.
+        
+        @returns: the frame rescaled to a given size.
+        '''
+        # TODO: Video capture is unreliable under linux.  This may just be a timing issue when running under parallels.
+        frame = cv.QueryFrame( self.cv_capture )
+        im = pv.Image(self.resize(frame))
+        im.orig_frame = pv.Image(frame)
+        im.capture_time = time.time()
+        return im
+    
+    def grab(self):
+        return cv.GrabFrame( self.cv_capture );
+    
+    def retrieve(self):
+        '''
+        The returned image also include a field named orig_frame which returns 
+        the original image returned before rescaling.
+        
+        @returns: the frame rescaled to a given size.
+        '''
+        frame = cv.RetrieveFrame( self.cv_capture );
+        im = pv.Image(self.resize(frame))
+        im.orig_frame = pv.Image(frame)
+        return im
+
+      
+class Video(VideoInterface):
+    def __init__(self,filename,size=None):
+        '''
+        The basic video class that is used to play back a movie file.
+        @param filename: The full path name of the video file including extension. Also, with
+        current versions of OpenCV, this can be a url to a network IP camera, but you will need
+        to consult your IP camera manufacturer's documentation as url formats vary.
+        @note: The following is an example of using the Video class with an IP camera.
+        The rtsp url is for a linksys WVC54GCA IP camera. The ip address will need to be changed
+        as appropriate for your local network. Other model cameras use different urls. It can take
+        a few seconds for the feed to be established.
+        cam_url = "rtsp://192.168.2.55/img/video.sav"  
+        vid = Video(cam_url) 
+        vid.play()
+        '''
+        self.filename = filename
+        self.cv_capture = cv.CaptureFromFile( filename );
+        self._numframes = cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
+        self.size = size
+        self.current_frame = 0
+
+    def query(self):
+        if self.current_frame > 0 and cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_AVI_RATIO) == 1.0:
+            return None
+        frame = cv.QueryFrame( self.cv_capture )
+        if frame == None:
+            raise StopIteration("End of video sequence")
+        self.current_frame += 1
+        frame = cv.CloneImage(frame);
+        return pv.Image(self.resize(frame))
+    
+    def __iter__(self):
+        ''' Return an iterator for this video '''
+        return Video(self.filename,self.size)
+
+
+class VideoFromFileList(VideoInterface):
+    '''
+    Given a sorted list of filenames (including full path), this will
+    treat the list as a video sequence.
+    '''
+    def __init__(self, filelist, size=None):
+        '''
+        @param filelist: a list of full file paths to the images that comprise the video.
+        They must be files capable of being loaded into a pv.Image() object, and should
+        be in sorted order for playback.
+        @param size: Optional tuple to indicate the desired playback window size.
+        '''
+        self.filelist = filelist
+        self.idx = 0
+        self.size = size
+            
+    def query(self):
+        if self.idx >= len(self.filelist): return None
+        f = self.filelist[self.idx]
+        frame = pv.Image(f)
+        self.idx += 1
+        return self.resize(frame)
+        
+    def __iter__(self):
+        ''' Return an iterator for this video '''
+        return VideoFromFileList(self.filelist) 
+ 
+        
+class VideoFromImages(VideoInterface):
+    '''
+    This class allows the user to treat a directory of images as a video. It is assumed that
+    the files in the directory are named as follows:
+    {prefix}{num}.{ext}
+    where
+    prefix is any string that is constant for all the files,
+    ext is the file extension/type like jpg, png, etc.
+    num is a zero-padded number like 0001, 0002, ...
+         
+    note: the amount of padded zeros is the minimum required based on the length
+    (num frames) in the video, unless a specific padding is specified. So if you only had
+    120 frames, then it would be 001, 002,...120.
+    
+    We assume the frames are sequential with no gaps, and start at number startnum (with 
+    appropriate padding).
+    '''
+    def __init__(self,dirname,numframes,prefix="frame",ext="jpg", pad=None, startnum=1, size=None):
+        '''
+        The file names are of the format {prefix}{zero-padded num}.{ext}, the amount of
+        zero-padding is determined automatically based on numframes. If there is additional
+        zero-padding required, put it in the prefix.
+        Example: a directory with images: vid_t1_s1_f001.jpg, ..., vid_t1_s1_f999.jpg
+        would have prefix="vid_t1_s1_f", startnum=1, numframes=999, ext="jpg"
+
+        @param dirname: directory where the images comprising the video exist 
+        @param numframes: the number of frames in the video...0 to numframes will be read.
+        specify None to read all images in directory, in which case you must specify
+        a value for the pad parameter.
+        @param prefix: a string which remains as a constant prefix to all frames in video
+        @param ext: the extension of the images, like jpg, png, etc. Do not include the dot.
+        @param pad: the padding (like string.zfill(x)) used on the sequential numbering of
+        the input files. Specify None, and the padding will be determined based on length
+        of numframes. (So if numframes = 1234, then pad=4, 0001,0002,...1234) 
+        @param startnum: the starting number of the first frame, defaults to 1
+        @param size: the optional width,height to resize the input frames
+        '''
+        self.dirname = dirname
+        if numframes == None:
+            #user wants to read all frames, so padding must be specified
+            assert(pad != None and pad>0)
+        
+        if pad == None:
+            pad = len(str(numframes))
+            
+        self.pad = pad                        
+        self.maxframes = numframes
+        self.prefix = prefix
+        self.ext = ext
+        self.size = size  #the optional width,height to resize the input frames
+        self.startnum = startnum
+        self.current_frame = startnum  #we start at frame 1 by default
+        
+        #check that directory exists
+        if not os.path.exists(dirname):
+            print "Error. Directory: %s does not exist."%dirname
+            raise IOError
+        
+    def query(self):      
+        numstr = str(self.current_frame).zfill(self.pad)
+        filename = self.prefix + numstr + "." + self.ext
+        f = os.path.join(self.dirname, filename)
+        
+        if (self.maxframes == None) or (self.current_frame <= self.maxframes):
+            #then we query the next in the sequence until file not exists
+            if os.path.exists(f):
+                frame = pv.Image(f)
+                self.current_frame += 1
+                return(self.resize(frame))
+            else:
+                print "Image file %s does not exist. Stopping VideoFromImages."%f
+        
+        return None
+        
+    def __iter__(self):
+        ''' Return an iterator for this video '''
+        return VideoFromImages(self.dirname, self.maxframes, self.prefix, self.ext, self.pad, self.startnum, self.size) 
+        
+class VideoFromImageStack(VideoInterface):
+    '''
+    This class allows the user to treat a stack of grayscale images in a 3D numpy array as a video.
+	We assume that the dimensions of the array are ordered as (frame #, width, height)
+    '''
+    def __init__(self, imageStack, size=None):
+        '''
+	    @param imageStack: The numpy ndarray that represents the image stack. Should be of dimensions (frames,width,height).
+        @param size: the optional width,height to resize the input frames
+        '''
+        (f,_,_) = imageStack.shape
+        self.imageStack = imageStack
+        self.numFrames = f
+        self.current_frame = 0
+        self.size = size
+
+    def query(self):
+        if self.current_frame < self.numFrames:
+            frame = pv.Image( self.imageStack[self.current_frame,:,:])
+            self.current_frame += 1
+            return(self.resize(frame))
+        return None     
+                        
+    def __iter__(self):
+        ''' Return an iterator for this video '''
+        return VideoFromImageStack(self.imageStack, self.size) 
+                
+        
 class FFMPEGVideo:
     # TODO: there may be a bug with the popen interface
-    
+    '''
+    FFMPEGVideo is an alternate way to capture video from a file,
+    not directly using OpenCV's highgui. This class does not implement
+    the VideoInterface abstract class, and it does not have the same
+    usage pattern.
+    '''
     def __init__(self,filename,size=None,aspect=None,options=""):
         self.filename = filename
         self.size = size
@@ -378,190 +521,3 @@ class FFMPEGVideo:
         except EOFError:
             raise StopIteration("End of video sequence")
         return frame
-
-class VideoFromFileList(Video):
-    '''
-    Given a sorted list of filenames (including full path), this will
-    treat the list as a video sequence.
-    '''
-    def __init__(self, filelist, size=None):
-        '''
-        @param filelist: a list of full file paths to the images that comprise the video.
-        They must be files capable of being loaded into a pv.Image() object, and should
-        be in sorted order for playback.
-        @param size: Optional tuple to indicate the desired playback window size.
-        '''
-        self.filelist = filelist
-        self.idx = 0
-        self.size = size
-        
-    def resize(self,frame):
-        if self.size == None:
-            return frame
-        else:
-            depth = frame.depth
-            channels = frame.channels
-            w,h = self.size
-            resized = cv.CreateImage( (w,h), depth, channels )
-            cv.Resize( frame.asOpenCV(), resized, cv.CV_INTER_LINEAR )
-            return pv.Image(resized)
-            
-    def query(self):
-        if self.idx >= len(self.filelist): return None
-        f = self.filelist[self.idx]
-        frame = pv.Image(f)
-        self.idx += 1
-        return self.resize(frame)
-        
-                    
-    def next(self):
-        frame = self.query()
-        if frame == None:
-            raise StopIteration("End of video sequence")
-        return frame
-        
-    def __iter__(self):
-        ''' Return an iterator for this video '''
-        return VideoFromFileList(self.filelist) 
- 
-        
-class VideoFromImages(Video):
-    '''
-    This class allows the user to treat a directory of images as a video. It is assumed that
-    the files in the directory are named as follows:
-    {prefix}{num}.{ext}
-    where
-    prefix is any string that is constant for all the files,
-    ext is the file extension/type like jpg, png, etc.
-    num is a zero-padded number like 0001, 0002, ...
-         
-    note: the amount of padded zeros is the minimum required based on the length
-    (num frames) in the video, unless a specific padding is specified. So if you only had
-    120 frames, then it would be 001, 002,...120.
-    
-    We assume the frames are sequential with no gaps, and start at number startnum (with 
-    appropriate padding).
-    '''
-    def __init__(self,dirname,numframes,prefix="frame",ext="jpg", pad=None, startnum=1, size=None):
-        '''
-        The file names are of the format {prefix}{zero-padded num}.{ext}, the amount of
-        zero-padding is determined automatically based on numframes. If there is additional
-        zero-padding required, put it in the prefix.
-        Example: a directory with images: vid_t1_s1_f001.jpg, ..., vid_t1_s1_f999.jpg
-        would have prefix="vid_t1_s1_f", startnum=1, numframes=999, ext="jpg"
-
-        @param dirname: directory where the images comprising the video exist 
-        @param numframes: the number of frames in the video...0 to numframes will be read.
-        specify None to read all images in directory, in which case you must specify
-        a value for the pad parameter.
-        @param prefix: a string which remains as a constant prefix to all frames in video
-        @param ext: the extension of the images, like jpg, png, etc. Do not include the dot.
-        @param pad: the padding (like string.zfill(x)) used on the sequential numbering of
-        the input files. Specify None, and the padding will be determined based on length
-        of numframes. (So if numframes = 1234, then pad=4, 0001,0002,...1234) 
-        @param startnum: the starting number of the first frame, defaults to 1
-        @param size: the optional width,height to resize the input frames
-        '''
-        self.dirname = dirname
-        if numframes == None:
-            #user wants to read all frames, so padding must be specified
-            assert(pad != None and pad>0)
-        
-        if pad == None:
-            pad = len(str(numframes))
-            
-        self.pad = pad                        
-        self.maxframes = numframes
-        self.prefix = prefix
-        self.ext = ext
-        self.size = size  #the optional width,height to resize the input frames
-        self.startnum = startnum
-        self.current_frame = startnum  #we start at frame 1 by default
-        
-        #check that directory exists
-        if not os.path.exists(dirname):
-            print "Error. Directory: %s does not exist."%dirname
-            raise IOError
-        
-    def query(self):      
-        numstr = str(self.current_frame).zfill(self.pad)
-        filename = self.prefix + numstr + "." + self.ext
-        f = os.path.join(self.dirname, filename)
-        
-        if (self.maxframes == None) or (self.current_frame <= self.maxframes):
-            #then we query the next in the sequence until file not exists
-            if os.path.exists(f):
-                frame = pv.Image(f)
-                self.current_frame += 1
-                return(self.resize(frame))
-            else:
-                print "Image file %s does not exist. Stopping VideoFromImages."%f
-        
-        return None
-       
-    def resize(self,frame):
-        if self.size == None:
-            return frame
-        else:
-            depth = frame.depth
-            channels = frame.channels
-            w,h = self.size
-            resized = cv.CreateImage( (w,h), depth, channels )
-            cv.Resize( frame.asOpenCV(), resized, cv.CV_INTER_LINEAR )
-            return pv.Image(resized)
-                
-    def next(self):
-        frame = self.query()
-        if frame == None:
-            raise StopIteration("End of video sequence")
-        return frame
-        
-    def __iter__(self):
-        ''' Return an iterator for this video '''
-        return VideoFromImages(self.dirname, self.maxframes, self.prefix, self.ext, self.pad, self.startnum, self.size) 
-        
-class VideoFromImageStack(Video):
-    '''
-    This class allows the user to treat a stack of images in a 3D numpy array as a video.
-	We assume that the dimensions of the array are ordered as (frame #, width, height)
-    '''
-    def __init__(self, imageStack, size=None):
-        '''
-	@param imageStack: The numpy ndarray that represents the image stack. Should be of dimensions (frames,width,height).
-        @param size: the optional width,height to resize the input frames
-        '''
-        (f,_,_) = imageStack.shape
-	self.imageStack = imageStack
-	self.numFrames = f
-	self.current_frame = 0
-        self.size = size
-
-    def query(self):
-        if self.current_frame < self.numFrames:
-		frame = pv.Image( self.imageStack[self.current_frame,:,:])
-                self.current_frame += 1
-                return(self.resize(frame))
-        
-        return None
-       
-    def resize(self,frame):
-        if self.size == None:
-            return frame
-        else:
-            depth = frame.depth
-            channels = frame.channels
-            w,h = self.size
-            resized = cv.CreateImage( (w,h), depth, channels )
-            cv.Resize( frame.asOpenCV(), resized, cv.CV_INTER_LINEAR )
-            return pv.Image(resized)
-                
-    def next(self):
-        frame = self.query()
-        if frame == None:
-            raise StopIteration("End of video sequence")
-        return frame
-        
-    def __iter__(self):
-        ''' Return an iterator for this video '''
-        return VideoFromImageStack(self.imageStack, self.size) 
-                
