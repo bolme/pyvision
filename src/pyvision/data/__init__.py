@@ -19,6 +19,8 @@ TAZ_IMAGE = os.path.join(pv.__path__[0],'data','test','TAZ_0010.jpg')
 TAZ_VIDEO = os.path.join(pv.__path__[0],'data','test','TazSample.m4v')
 
 
+FONT_ARIAL = os.path.join(pv.__path__[0],'config','Arial.ttf')
+
 
 def genderClassifier(clsfy, ilog=None):
     '''
