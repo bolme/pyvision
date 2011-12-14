@@ -464,7 +464,8 @@ class Image:
         @param label: the text to use as a string
         @param color: defined as ('#rrggbb' or 'name') 
         @param mark: of True or ['right', 'left', 'below', or 'above'] then also mark the point with a small circle
-        @param font: An optional PIL.ImageFont font object to use. If None, then the default is used.
+        @param font: An optional PIL.ImageFont font object to use. Alternatively, specify an integer and the label
+        will use Arial font of that size. If None, then the default is used.
         @param background: An optional color that will be used to draw a rectangular background underneath the text.
         '''
         im = self.asAnnotated()
