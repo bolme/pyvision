@@ -47,6 +47,7 @@ import numpy
 import numpy as np
 import cv
 
+
 import unittest
 import os.path
 
@@ -110,6 +111,23 @@ class Image:
         self.annotated = None
         self.bw_annotate = bw_annotate
         
+        # Convert floating point ipl images to numpy arrays
+        if isinstance(data,cv.iplimage) and data.nChannels == 3 and data.depth == 32:
+            w,h = cv.GetSize(data)
+            data = np.frombuffer(data.tostring(),dtype=np.float32)
+            data.shape = (h,w,3)
+            data = data.transpose((2,1,0))
+            data = data[::-1,:,:]
+            
+        # Convert floating point ipl images to numpy arrays
+        if isinstance(data,cv.iplimage) and data.nChannels == 1 and data.depth == 32:
+            w,h = cv.GetSize(data)
+            data = np.frombuffer(data.tostring(),dtype=np.float32)
+            data.shape = (h,w)
+            data = data.transpose((2,1,0))
+            data = data[::-1,:,:]
+            
+        
         if isinstance(data,numpy.ndarray) and len(data.shape) == 2:
             self.type=TYPE_MATRIX_2D
             self.matrix2d = data
@@ -167,11 +185,11 @@ class Image:
             
             self.width = data.width
             self.height = data.height
-            
+                        
             assert data.nChannels in (1,3)
             self.channels = data.nChannels 
             
-            assert data.depth in (8,)
+            assert data.depth == 8
             self.depth = data.depth   
 
         else:
@@ -453,6 +471,8 @@ class Image:
         draw = PIL.ImageDraw.Draw(im)
         if font == None:
             font = ImageFont.load_default()
+        elif isinstance(font,int):
+            font = ImageFont.truetype(pv.FONT_ARIAL, font)
         
         tw,th = draw.textsize(label, font=font)
             
@@ -1058,7 +1078,7 @@ class _TestImage(unittest.TestCase):
         
     def test_MatConvertOpenCVToNumpy(self):
         r,c = 10,20
-        cvmat = cv.CreateMat(r,c,cv.CV_32F)
+        cvmat = cv.CreateMat(r,c,cv.IPL_DEPTH_32F)
         for i in range(r):
             for j in range(c):
                 cvmat[i,j] = i*j
@@ -1068,6 +1088,30 @@ class _TestImage(unittest.TestCase):
             for j in range(c):
                 self.assert_(mat[i,j] == cvmat[i,j])
         
+        
+    def test_ConvertIPLImage32FToPvImage(self):
+        im = pv.Image(pv.LENA)
+        im = im.resize((512,400))
+        cv_im = im.asOpenCV()
+        print cv_im[0,0][0]
+        mat = im.asMatrix3D()
+        #im = pv.Image(mat).show(delay=0)
+        print mat.shape[-2:]
+        cv_32 = cv.CreateImage(cv.GetSize(cv_im),cv.IPL_DEPTH_32F,3)
+        cv.Convert(cv_im,cv_32)
+        
+        for x in range(50):
+            for y in range(50):
+                for c in range(3):
+                    
+                    #print x,y,c,cv_im[y,x][2-c],mat[c,x,y]
+                    self.assertAlmostEqual(cv_im[y,x][2-c],mat[c,x,y])
+                    self.assertAlmostEqual(cv_im[y,x][2-c],cv_32[y,x][2-c])
+                    
+        print cv_32.depth
+        im2 = pv.Image(cv_32)
+        print
+        #im2.show(delay=0)
         
     def test_MatConvertNumpyToOpenCV(self):
         r,c = 10,20
