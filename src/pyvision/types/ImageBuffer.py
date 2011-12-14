@@ -144,14 +144,16 @@ class ImageBuffer:
             
         return stack
     
-    def asMontage(self, N=10):
+    def asMontage(self, layout, tileSize=None, **kwargs):
         (w,h) = self[0].size
-        tw = w/5
-        th = h/5
-        if tw < 64: tw=64
-        if th < 48: th=48
-        im = pv.ImageMontage(self._data, layout=(1,N), tileSize=(tw,th),
-                                        gutter=2, byrow=False)
+        if tileSize == None:
+            tw = w/5
+            th = h/5
+            if tw < 32: tw=32
+            if th < 24: th=24
+            tileSize = (tw,th)
+            
+        im = pv.ImageMontage(self._data, layout=layout, tileSize=tileSize, **kwargs)
         return im
     
     def show(self, N=10, window="Image Buffer", pos=None, delay=0):
@@ -164,9 +166,9 @@ class ImageBuffer:
         if self[0] == None: return
         
         if N <= self._count:
-            im = self.asMontage(N=N)
+            im = self.asMontage(layout=(1,N))
         else:
-            im = self.asMontage(N=self._count)
+            im = self.asMontage(layout=(1,self._count))
         im.show(window, pos, delay)
         #img = im.asImage()
         #img.show(window, pos, delay)
