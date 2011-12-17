@@ -148,6 +148,7 @@ class VideoInterface(object):
                 #user selected quit playback
                 return(fn)
         
+        if window != None: cv.DestroyWindow(window)
         return(fn)
     
     def _pauseAndPlay(self,delayObj={'wait_time':20, 'current_state':'PLAYING'}):

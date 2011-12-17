@@ -860,21 +860,22 @@ class Image:
     def show(self, window="PyVisionImage", pos=None, delay=1, size=None):
         '''
         Displays the annotated version of the image using OpenCV highgui
-        @param window: the name of the highgui window to use, this should
-            already have been created using cv.NamedWindow or set newWindow=True
-        @param pos: If newWindow, then pos is the (x,y) coordinate for the new window 
-        @param delay: A delay in milliseconds to wait for keyboard input (passed to cv.WaitKey).  
-            0 delays indefinitely, 1 is good for live updates and animations.  The window
-            will disappear after the program exits.  
+        @param window: the name of the highgui window to use, if one already exists by this name,
+        or it will create a new highgui window with this name.
+        @param pos: if a new window is being created, the (x,y) coordinate for the new window 
+        @param delay: A delay in milliseconds to wait for keyboard input (passed to cv.WaitKey). 
+            0 delays indefinitely, 30 is good for presenting a series of images like a video.
+            For performance reasons, namely when using the same window to display successive 
+            frames of video, we don't want to tear-down and re-create the window each time. 
+            Thus the window frame will persist beyond the scope of the call to img.show(). The window 
+            will disappear after the program exits, or it can be destroyed with a call to cv.DestroyWindow. 
         @param size: Optional output size for image, None=native size.
-        @returns: a key press event,
+        @returns: the return value of the cv.WaitKey call.
         '''
         cv.NamedWindow(window)
         
         if pos != None:
             cv.MoveWindow(window, pos[0], pos[1])
-            
-            
             
         if size != None:
             x = pyvision.Image(self.resize(size).asAnnotated())
