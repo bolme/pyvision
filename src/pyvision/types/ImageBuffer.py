@@ -123,23 +123,32 @@ class ImageBuffer:
 
         return
 
-    def asStackBW(self):
+    def asStackBW(self, size=None):
         '''
+        Outputs an image buffer as a 3D numpy array ("stack") of grayscale images.
+        @param size: A tuple (w,h) indicating the output size of each frame.
+        If None, then the size of the first image in the buffer will be used.
         @return: a 3D array (stack) of the gray scale version of the images
         in the buffer. The dimensions of the stack are (N,w,h), where N is
         the number of images (buffer size), w and h are the width and height
-        of each image. It is assumed that the images in the buffer are of
-        equal dimension to use this function.
+        of each image.        
         '''
-        #TODO: Add a size=(w,h) option to allow the user to return a stack
-        # with selected dimensions. Would also remove the constraint that
-        # all images in buffer are of equal size.
-        img0 = self[0]        
-        (w,h) = img0.size
+        if size==None:
+            img0 = self[0]        
+            (w,h) = img0.size
+        else:
+            (w,h) = size
+            
         f = self.getCount()
         stack = sp.zeros((f,w,h))
         for i,img in enumerate(self._data):
-            mat = img.asMatrix2D()
+            #if img is not (w,h) in size, then resize first
+            sz = img.size
+            if (w,h) != sz:
+                img2 = img.resize((w,h))
+                mat = img2.asMatrix2D()
+            else:
+                mat = img.asMatrix2D()
             stack[i,:,:] = mat
             
         return stack
