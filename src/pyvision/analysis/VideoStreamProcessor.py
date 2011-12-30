@@ -118,7 +118,8 @@ class VideoWriterVSP(AbstractVSP):
     If you want to display the frame number in the output, chain this VSP
     after a SimpleVSP object in the series.
     '''
-    def __init__(self, filename, window="Input", nextModule=None, fourCC_str="XVID", fps=15, size=None, bw=False):
+    def __init__(self, filename, window="Input", nextModule=None, fourCC_str="XVID", fps=15, size=None, bw=False, 
+                 no_annotations = False):
         '''
         Constructor
         @param filename: The full output filename. Include the extension, such as .avi.
@@ -132,6 +133,7 @@ class VideoWriterVSP(AbstractVSP):
         @param fps: Frames per second. Not all codecs allow you to specify arbitrary frame rates, however.
         @param size: A tuple (w,h) representing the size of the output frames.
         @param bw: Specify true if you wish for a black-and-white only output.
+        @param no_annotations: set to True to output the original, non-annotated version of the image
         '''
         cvFourCC = cv.CV_FOURCC(*fourCC_str)
         if bw:
@@ -140,14 +142,14 @@ class VideoWriterVSP(AbstractVSP):
             colorFlag = cv.CV_LOAD_IMAGE_UNCHANGED
         self._bw = bw
         self._out = cv.CreateVideoWriter(filename, cvFourCC, fps, size, colorFlag)
+        self._no_annotations = no_annotations
         AbstractVSP.__init__(self, window=window, nextModule=nextModule)
         
-    def addFrame(self, img, no_annotations = False):
+    def addFrame(self, img, ):
         '''
-        @param img: A pyvision img to write out to the video.
-        @param no_annotations: set to True to output the original, non-annotated version of the image
+        @param img: A pyvision img to write out to the video.        
         '''
-        if no_annotations:
+        if self._no_annotations:
             img2 = img
         else:
             img2 = pv.Image(img.asAnnotated())
