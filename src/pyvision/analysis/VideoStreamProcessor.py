@@ -145,7 +145,7 @@ class VideoWriterVSP(AbstractVSP):
         self._no_annotations = no_annotations
         AbstractVSP.__init__(self, window=window, nextModule=nextModule)
         
-    def addFrame(self, img, ):
+    def addFrame(self, img):
         '''
         @param img: A pyvision img to write out to the video.        
         '''
