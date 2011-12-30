@@ -142,11 +142,16 @@ class VideoWriterVSP(AbstractVSP):
         self._out = cv.CreateVideoWriter(filename, cvFourCC, fps, size, colorFlag)
         AbstractVSP.__init__(self, window=window, nextModule=nextModule)
         
-    def addFrame(self, img):
+    def addFrame(self, img, no_annotations = False):
         '''
-        @param img: A pyvision img to write out to the video. Note that this will write the annotated version of the image.
+        @param img: A pyvision img to write out to the video.
+        @param no_annotations: set to True to output the original, non-annotated version of the image
         '''
-        img2 = pv.Image(img.asAnnotated())
+        if no_annotations:
+            img2 = img
+        else:
+            img2 = pv.Image(img.asAnnotated())
+            
         if self._bw:
             cv.WriteFrame(self._out, img2.asOpenCVBW())    
         else:
