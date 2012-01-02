@@ -144,9 +144,7 @@ class VideoInterface(object):
                 onNewFrame( img, fn, key=key, buffer=imageBuffer, **kwargs )
                 
             key = self._pauseAndPlay(delayObj)
-            if key == 'q':
-                #user selected quit playback
-                return(fn)
+            if key == 'q': break #user selected quit playback
         
         if window != None: cv.DestroyWindow(window)
         return(fn)
