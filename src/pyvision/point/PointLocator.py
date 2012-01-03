@@ -44,9 +44,9 @@ from pyvision.vector.RidgeRegression import KernelRidgeRegression
     
 class SVMLocator:
     
-    def __init__(self,type=SVM.TYPE_NU_SVR,**kwargs):
-        self.x_svm = SVM.SVM(type=type,**kwargs)
-        self.y_svm = SVM.SVM(type=type,**kwargs)
+    def __init__(self,svm_type=SVM.TYPE_NU_SVR,**kwargs):
+        self.x_svm = SVM.SVM(svm_type=svm_type,**kwargs)
+        self.y_svm = SVM.SVM(svm_type=svm_type,**kwargs)
         self.x_sum = 0.0
         self.y_sum = 0.0
         self.point_count = 0
