@@ -209,7 +209,7 @@ class GaborImage:
 
         return GaborJet(jet,self.kernels,self.k,x,y,pt,subpixel)
     
-    def locatePoint(self,jet,start_pt=None):
+    def locatePoint(self,jet,start_pt=None,method="Simple"):
         '''
         If start_pt == None perform a grid search with a spacing of one half 
         the longest Gabor wavelength. Otherwize start at start_pt and follow
@@ -246,22 +246,22 @@ class GaborImage:
         #print pt
 
         novel = self.extractJet(pt,subpixel=False)
-        d = novel.displace(jet)
+        d = novel.displace(jet,method=method)
         pt = pv.Point(novel.x + d[0], novel.y+d[1])
         #print pt
 
         novel = self.extractJet(pt,subpixel=False)
-        d = novel.displace(jet)
+        d = novel.displace(jet,method=method)
         pt = pv.Point(novel.x + d[0], novel.y+d[1])
         #print pt
 
         novel = self.extractJet(pt,subpixel=False)
-        d = novel.displace(jet)
+        d = novel.displace(jet,method=method)
         pt = pv.Point(novel.x + d[0], novel.y+d[1])
         #print pt
 
         novel = self.extractJet(pt,subpixel=False)
-        sim = novel.simDisplace(jet)
+        sim = novel.simPhase(jet)
         #pt = pv.Point(novel.x + d[0], novel.y+d[1])
         #print pt
         
