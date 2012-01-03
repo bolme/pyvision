@@ -60,6 +60,9 @@ LBP_RAD8 = 8.0*LBP_RAD1
 
 
 def lbp(im,pattern=LBP_CLASSIC):
+    '''
+    Conduct an LBP transformation on the image.
+    '''
     im = pv.Image(im.asOpenCVBW()) #TODO: Use opencv for speed
     
     mat = im.asMatrix2D()

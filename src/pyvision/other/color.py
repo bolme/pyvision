@@ -105,7 +105,7 @@ class Histogram:
             raise NotImplementedError("backProject not implemented for type: %s"%self.hist_type)
 
 
-def hsHist(im,h_bins=32,s_bins=32,mask=None,normalize=True):
+def HSHist(im,h_bins=32,s_bins=32,mask=None,normalize=True):
     '''
     Compute the hue saturation histogram of an image. (Based on OpenCV example code).
     
@@ -150,7 +150,7 @@ def hsHist(im,h_bins=32,s_bins=32,mask=None,normalize=True):
     return pv.Histogram(hist,HIST_HS,h_bins,s_bins,None)
 
 
-def rgbHist(im,r_bins=8,g_bins=8,b_bins=8,mask=None,normalize=True):
+def RGBHist(im,r_bins=8,g_bins=8,b_bins=8,mask=None,normalize=True):
     '''
     Compute the rgb saturation histogram of an image. (Based on OpenCV example code).
     
