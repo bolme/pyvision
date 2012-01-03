@@ -31,3 +31,10 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import pyvision as pv
+
+# Eye coordinate locations and size for reduced face images
+REDUCED_LEYE = pv.Point(128+64,256-20)
+REDUCED_REYE = pv.Point(256+128-64,256-20)
+REDUCED_SIZE = (512,512)
+
