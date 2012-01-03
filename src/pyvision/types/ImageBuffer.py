@@ -36,6 +36,7 @@ Created on Oct 22, 2010
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import scipy as sp
 import pyvision as pv
+import cv
 
 class ImageBuffer:
     '''
