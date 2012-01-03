@@ -42,7 +42,7 @@ class PNorm:
         self.p = float(p)
     
     def __call__(self, points, data):
-        r,c = data.shape
+        _,c = data.shape
         
         dist_mat = []
         if self.p == np.inf:
@@ -72,7 +72,7 @@ class RobustPNorm:
         self.scale = scale
     
     def __call__(self, points, data):
-        r,c = data.shape
+        _,c = data.shape
         
         dist_mat = []
         if self.p == np.inf:
@@ -100,7 +100,7 @@ def chisquared(points, data):
     assert points.min() >= 0.0
     assert data.min() >= 0.0
     
-    r,c = data.shape
+    _,c = data.shape
     
     
     dist_mat = []
@@ -301,8 +301,8 @@ class AKNNTest(unittest.TestCase):
     def testLargeTree(self):
         '''Tests using a large tree.'''
         timer = pv.Timer()
-        N = 300
-        K = 5
+        #N = 300
+        #K = 5
         points = TEST_POINTS_5D
         
         timer.mark("Tree Build Start")
@@ -312,11 +312,11 @@ class AKNNTest(unittest.TestCase):
         timer.mark("Linear Build Time")
 
         timer.mark("Query Start")
-        fdist,fidx = kdtree.query([.05,.3,.9,.6,.2],k=4)
+        fdist,_ = kdtree.query([.05,.3,.9,.6,.2],k=4)
         timer.mark("KDTree Query")
 
         timer.mark("Query Start")
-        bdist,bidx = knn.query([.05,.3,.9,.6,.2],k=fdist[-1])
+        bdist,_ = knn.query([.05,.3,.9,.6,.2],k=fdist[-1])
         timer.mark("Brute Force Query")
         
         print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
