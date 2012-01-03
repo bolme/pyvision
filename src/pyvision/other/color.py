@@ -304,28 +304,28 @@ class ColorTest(unittest.TestCase):
     
     def test01_hsHist(self):
         '''Test hue saturation histogram.'''
-        ilog = pv.ImageLog()
-        im = pv.Image(os.path.join(pv.__path__[0],"data","misc","baboon.jpg"))
+        ilog = None # pv.ImageLog()
+        im = pv.Image(pv.BABOON)
         mask = np.zeros((512,512),dtype=np.bool)
         mask[150:200,128:300] = True
         m = pv.Image(1.0*mask)
-        ilog(im)
-        ilog(m)
-        hist = hsHist(im,mask=m)
-        print hist
-        print dir(hist)
+        hist = HSHist(im,mask=m)
+        #print hist
+        #print dir(hist)
         #print dir(hist.bins),hist.bins.channels
         #for i in range(32):
         #    for j in range(30):
         #        print i,j,cv.QueryHistValue_2D(hist,j,i)
         hist.rescaleMax(255)
         
-        print hist.asMatrix()
+        #print hist.asMatrix()
         #print cv.SetHistBinRanges
         back = hist.backProject(im)
-        ilog(back)
-        
-        ilog.show()
+        if ilog != None:
+            ilog(im)
+            ilog(m)
+            ilog(back)
+            ilog.show()
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
