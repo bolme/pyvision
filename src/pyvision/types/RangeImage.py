@@ -80,7 +80,7 @@ class RangeImage:
         #lines = buffer.split(EOL)
         rows = int(f.next().split()[0])
         cols = int(f.next().split()[0])
-        format = f.next()
+        #format = f.next()
         
         self.width = cols
         self.height = rows
@@ -108,7 +108,7 @@ class RangeImage:
         '''
         @returns: the x coordinates.
         '''
-        xmin,xmax,ymin,ymax,zmin,zmax = self.getRange()
+        xmin,_,_,_,_,_ = self.getRange()
         
         r,c = self.x.shape 
         
@@ -125,7 +125,7 @@ class RangeImage:
         '''
         @returns: the y coordinates.
         '''
-        xmin,xmax,ymin,ymax,zmin,zmax = self.getRange()
+        _,_,ymin,_,_,_ = self.getRange()
         
         r,c = self.x.shape 
         
@@ -142,7 +142,7 @@ class RangeImage:
         '''
         @returns: the z coordinates.
         '''
-        xmin,xmax,ymin,ymax,zmin,zmax = self.getRange()
+        _,_,_,_,zmin,_ = self.getRange()
         
         r,c = self.x.shape 
         
@@ -158,7 +158,7 @@ class RangeImage:
         '''
         @returns: the missing value mask.
         '''
-        xmin,xmax,ymin,ymax,zmin,zmax = self.getRange()
+        _,_,_,_,zmin,_ = self.getRange()
         
         r,c = self.x.shape 
         
@@ -176,7 +176,7 @@ class RangeImage:
         '''
         if approach == 'Smooth':
             # first run a median filter over the array, then smooth the result.
-            xmin,xmax,ymin,ymax,zmin,zmax = self.getRange()
+            #xmin,xmax,ymin,ymax,zmin,zmax = self.getRange()
             mask = np.array(self.flags,dtype=np.bool)
             
             z = self.getZImage().asMatrix2D()

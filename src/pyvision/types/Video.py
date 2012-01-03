@@ -449,7 +449,7 @@ class FFMPEGVideo:
         #popen = subprocess.Popen(args,executable="/opt/local/bin/ffmpeg")
         
         line = self.stdout.readline()
-        print line
+        #print line
         #self.stdout.seek(0,os.SEEK_CUR)
         
         format,w,h,f,t1,aspect,t2,t3 = line.split()

@@ -33,7 +33,6 @@
 
 
 from numpy import array
-import cv
 from math import sqrt
 import numpy as np
 import csv
@@ -132,7 +131,7 @@ class Point:
         y = r*sin(phi)*sin(theta)
         z = r*cos(theta)
         '''
-        x,y,z,w = self.asArray()
+        x,y,z,_ = self.asArray()
         
         r = np.sqrt(x**2+y**2+z**2)
         phi = np.arctan2(y,x)

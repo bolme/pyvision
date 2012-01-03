@@ -36,7 +36,6 @@ Created on Oct 22, 2010
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import scipy as sp
 import pyvision as pv
-import cv
 
 class ImageBuffer:
     '''
@@ -53,7 +52,7 @@ class ImageBuffer:
         '''
         @param N: how many image frames to buffer
         '''
-        self._data = [None for i in xrange(N)]
+        self._data = [None for _ in xrange(N)]
         self._count = 0
         self._max = N
             
@@ -74,7 +73,7 @@ class ImageBuffer:
             return False
             
     def clear(self):
-        self._data = [None for i in xrange(self._max)]
+        self._data = [None for _ in xrange(self._max)]
         self._count = 0
             
     def getCount(self):

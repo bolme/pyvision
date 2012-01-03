@@ -124,9 +124,9 @@ def PerspectiveFromPoints(source, dest, new_size, method=0, ransacReprojThreshol
     
     n_points = len(source)
     
-    s = cv.cvCreateMat(n_points,2,cv.CV_32F)
-    d = cv.cvCreateMat(n_points,2,cv.CV_32F)
-    p = cv.cvCreateMat(3,3,cv.CV_32F)
+    s = cv.CreateMat(n_points,2,cv.CV_32F)
+    d = cv.CreateMat(n_points,2,cv.CV_32F)
+    p = cv.CreateMat(3,3,cv.CV_32F)
     
     for i in range(n_points):
         s[i,0] = source[i].X()
@@ -135,7 +135,7 @@ def PerspectiveFromPoints(source, dest, new_size, method=0, ransacReprojThreshol
         d[i,0] = dest[i].X()
         d[i,1] = dest[i].Y()
         
-    results = cv.cvFindHomography(s,d,p,method,ransacReprojThreshold)
+    results = cv.FindHomography(s,d,p,method,ransacReprojThreshold)
     
     matrix = pv.OpenCVToNumpy(p)
 

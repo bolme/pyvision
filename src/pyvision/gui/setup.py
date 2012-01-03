@@ -7,13 +7,14 @@ python setup.py py2app
 
 from setuptools import setup
 
-APP = ['EyePicker.py']
-DATA_FILES = []
-OPTIONS = {'argv_emulation': True}
-
-setup(
-    app=APP,
-    data_files=DATA_FILES,
-    options={'py2app': OPTIONS},
-    setup_requires=['py2app'],
-)
+if __name__ == "__main__":
+    APP = ['EyePicker.py']
+    DATA_FILES = []
+    OPTIONS = {'argv_emulation': True}
+    
+    setup(
+        app=APP,
+        data_files=DATA_FILES,
+        options={'py2app': OPTIONS},
+        setup_requires=['py2app'],
+    )
