@@ -410,10 +410,10 @@ class ROCTest(unittest.TestCase):
         plot.lines([[0,1],[1,0]])
         eer = roc.getEER()
         plot.point([eer,1-eer])
-        plot.show(delay=100000)
+        plot.asImage()
         
-        print
-        print roc.results()
+        #print
+        #print roc.results()
 
 
         
