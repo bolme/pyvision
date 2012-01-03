@@ -37,7 +37,7 @@ import numpy
 from numpy.linalg import svd
 
 def show(feature):
-    Image(feature.reshape(64,64)).show()
+    pv.Image(feature.reshape(64,64)).show()
 
 
 #####################################################################
@@ -68,9 +68,7 @@ class PCA:
 
     #----------------------------------------------------------------
     def addFeature(self,feature):
-        ''' Add a feature vector to the analysis. '''
-        feat = None
-        
+        ''' Add a feature vector to the analysis. '''        
         feat = self.toVector(feature)
 
         self.features.append(feat)
@@ -103,7 +101,7 @@ class PCA:
         
         features = features.transpose()
 
-        u,d,vt = svd(features,full_matrices=0)
+        u,d,_ = svd(features,full_matrices=0)
         if drop_front:
             u = u[:,drop_front:]
             d = d[drop_front:]

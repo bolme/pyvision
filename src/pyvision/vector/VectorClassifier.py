@@ -304,9 +304,9 @@ class _TestVectorClassifier(unittest.TestCase):
         self.gender = gender
     
     def test_vc_create(self):
-        vc = VectorClassifier(TYPE_TWOCLASS)
-        vc = VectorClassifier(TYPE_MULTICLASS)
-        vc = VectorClassifier(TYPE_REGRESSION)
+        _ = VectorClassifier(TYPE_TWOCLASS)
+        _ = VectorClassifier(TYPE_MULTICLASS)
+        _ = VectorClassifier(TYPE_REGRESSION)
 
     def test_vc_normalize(self):
         # This should test class normalization

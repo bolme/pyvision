@@ -32,27 +32,26 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import tempfile
-import os
 import random
-import unittest
 import csv 
 import pickle
-
+import os
+import unittest
 import numpy as np
 try:
-    from svm import *
+    import svm
 except:
-    from libsvm.svm import *
+    import libsvm.svm as svm
 
-import pyvision
-from pyvision.vector.VectorClassifier import *
+import pyvision as pv
+from pyvision.vector.VectorClassifier import VectorClassifier, TYPE_TWOCLASS, TYPE_MULTICLASS, TYPE_REGRESSION
 from pyvision.analysis.Table import Table
 
 # SVM Types
-TYPE_C_SVC       = C_SVC
-TYPE_NU_SVC      = NU_SVC
-TYPE_EPSILON_SVR = EPSILON_SVR
-TYPE_NU_SVR      = NU_SVR
+TYPE_C_SVC       = svm.C_SVC
+TYPE_NU_SVC      = svm.NU_SVC
+TYPE_EPSILON_SVR = svm.EPSILON_SVR
+TYPE_NU_SVR      = svm.NU_SVR
 
 TYPE_SVC=TYPE_C_SVC
 TYPE_SVR=TYPE_NU_SVR
@@ -63,7 +62,7 @@ KERNEL_RBF='RBF'
 
 
 class SVM(VectorClassifier):
-    def __init__(self, type=TYPE_SVC, kernel=KERNEL_RBF, svr_epsilon=0.1, nu = 0.5, random_seed=None, validation_size=0.33,**kwargs):
+    def __init__(self, svm_type=TYPE_SVC, kernel=KERNEL_RBF, svr_epsilon=0.1, nu = 0.5, random_seed=None, validation_size=0.33,**kwargs):
         '''
         Create an svm.
         
@@ -75,14 +74,14 @@ class SVM(VectorClassifier):
         #TODO: Document constructor
         #TODO: Add an option to specify SVM parameters directly and disable automatic tuning.
         self.svm = None
-        self.svm_type = type
+        self.svm_type = svm_type
         self.kernel = kernel
         self.epsilon=svr_epsilon
         self.nu = nu
         self.random_seed = random_seed
         self.validation_size = validation_size
         
-        if type in (TYPE_C_SVC,TYPE_NU_SVC): 
+        if svm_type in (TYPE_C_SVC,TYPE_NU_SVC): 
             VectorClassifier.__init__(self,TYPE_MULTICLASS,**kwargs)
         else:
             VectorClassifier.__init__(self,TYPE_REGRESSION,**kwargs)
@@ -95,9 +94,9 @@ class SVM(VectorClassifier):
             if key == 'svm':
                 filename = tempfile.mktemp()
                 self.svm.save(filename)
-                buffer = open(filename).read()
+                data_buffer = open(filename).read()
                 os.remove(filename)
-                state[key] = buffer
+                state[key] = data_buffer
                 continue
             
             state[key] = value
@@ -111,7 +110,7 @@ class SVM(VectorClassifier):
             if key == 'svm':
                 filename = tempfile.mktemp()
                 open(filename,'w').write(value)
-                self.svm = svm_model(filename)
+                self.svm = svm.svm_model(filename)
                 os.remove(filename)
                 continue
 
@@ -184,7 +183,7 @@ class SVM(VectorClassifier):
             tmp_labels.append(each[0])
             tmp_vectors.append(each[1])
         
-        prob = svm_problem(tmp_labels,tmp_vectors)
+        prob = svm.svm_problem(tmp_labels,tmp_vectors)
         
         training_info = []
         training_svm = []
@@ -194,9 +193,9 @@ class SVM(VectorClassifier):
         for C in C_range:
             for G in G_range:
                 
-                param = svm_parameter(svm_type=self.svm_type,kernel_type = RBF, C = C, gamma=G,p=self.epsilon,nu=self.nu)
+                param = svm.svm_parameter(svm_type=self.svm_type,kernel_type = svm.RBF, C = C, gamma=G,p=self.epsilon,nu=self.nu)
                 
-                test_svm = svm_model(prob, param)
+                test_svm = svm.svm_model(prob, param)
                 
                 successes = 0.0
                 total = len(validation_data)
@@ -279,7 +278,7 @@ class SVM(VectorClassifier):
             tmp_labels.append(each[0])
             tmp_vectors.append(each[1])
         
-        prob = svm_problem(tmp_labels,tmp_vectors)
+        prob = svm.svm_problem(tmp_labels,tmp_vectors)
         
         training_info = []
         training_svm = []
@@ -290,9 +289,9 @@ class SVM(VectorClassifier):
             for G in G_range:
                 if verbose: print "Testing: %10.5f %10.5f"%(C,G),
                 
-                param = svm_parameter(svm_type=self.svm_type,kernel_type = RBF, C = C, gamma=G,p=self.epsilon,nu=self.nu)
+                param = svm.svm_parameter(svm_type=self.svm_type,kernel_type = svm.RBF, C = C, gamma=G,p=self.epsilon,nu=self.nu)
                 
-                test_svm = svm_model(prob, param)
+                test_svm = svm.svm_model(prob, param)
                 
                 mse = 0.0
                 total = len(validation_data)
@@ -374,7 +373,7 @@ class SVM(VectorClassifier):
             tmp_labels.append(each[0])
             tmp_vectors.append(each[1])
         
-        prob = svm_problem(tmp_labels,tmp_vectors)
+        prob = svm.svm_problem(tmp_labels,tmp_vectors)
         
         training_info = []
         training_svm = []
@@ -383,9 +382,9 @@ class SVM(VectorClassifier):
         i=0
         for C in C_range:
                 
-            param = svm_parameter(svm_type=self.svm_type,kernel_type = LINEAR, C = C, p=self.epsilon,nu=self.nu)
+            param = svm.svm_parameter(svm_type=self.svm_type,kernel_type = svm.LINEAR, C = C, p=self.epsilon,nu=self.nu)
                 
-            test_svm = svm_model(prob, param)
+            test_svm = svm.svm_model(prob, param)
                 
             successes = 0.0
             total = len(validation_data)
@@ -464,7 +463,7 @@ class SVM(VectorClassifier):
             tmp_labels.append(each[0])
             tmp_vectors.append(each[1])
         
-        prob = svm_problem(tmp_labels,tmp_vectors)
+        prob = svm.svm_problem(tmp_labels,tmp_vectors)
         
         training_info = []
         training_svm = []
@@ -473,9 +472,9 @@ class SVM(VectorClassifier):
         i=0
         for C in C_range:
                 
-            param = svm_parameter(svm_type=self.svm_type,kernel_type = LINEAR, C = C, p=self.epsilon,nu=self.nu)
+            param = svm.svm_parameter(svm_type=self.svm_type,kernel_type = svm.LINEAR, C = C, p=self.epsilon,nu=self.nu)
                 
-            test_svm = svm_model(prob, param)
+            test_svm = svm.svm_model(prob, param)
                 
             mse = 0.0
             total = len(validation_data)
@@ -633,8 +632,8 @@ class _TestSVM(unittest.TestCase):
         self.assertEqual(xor.predict([0,1]),0) # ERROR 
 
     def test_sv_regression_rbf(self):
-        rega = SVM(type=TYPE_EPSILON_SVR,kernel=KERNEL_RBF,random_seed=0)
-        filename = os.path.join(pyvision.__path__[0],'data','synthetic','regression.dat')
+        rega = SVM(svm_type=TYPE_EPSILON_SVR,kernel=KERNEL_RBF,random_seed=0)
+        filename = os.path.join(pv.__path__[0],'data','synthetic','regression.dat')
         reg_file = open(filename,'r')
         labels = []
         vectors = []
@@ -660,8 +659,8 @@ class _TestSVM(unittest.TestCase):
         
     def test_sv_regression_linear(self):
         # synthetic linear regression
-        rega = SVM(type=TYPE_EPSILON_SVR,kernel=KERNEL_LINEAR,random_seed=0)
-        filename = os.path.join(pyvision.__path__[0],'data','synthetic','regression.dat')
+        rega = SVM(svm_type=TYPE_EPSILON_SVR,kernel=KERNEL_LINEAR,random_seed=0)
+        filename = os.path.join(pv.__path__[0],'data','synthetic','regression.dat')
         reg_file = open(filename,'r')
         labels = []
         vectors = []
@@ -688,16 +687,16 @@ class _TestSVM(unittest.TestCase):
     def test_gender(self):
         
         # image classification
-        gender = SVM(type=TYPE_SVC,random_seed=0)
-        filename = os.path.join(pyvision.__path__[0],'data','csuScrapShots','gender.txt')
+        gender = SVM(svm_type=TYPE_SVC,random_seed=0)
+        filename = os.path.join(pv.__path__[0],'data','csuScrapShots','gender.txt')
         f = open(filename,'r')
         labels = []
         vectors = []
         for line in f:
             im_name, class_name = line.split()
-            im_name = os.path.join(pyvision.__path__[0],'data','csuScrapShots',im_name)
-            im = Image(im_name)
-            im = Image(im.asPIL().resize((200,200)))
+            im_name = os.path.join(pv.__path__[0],'data','csuScrapShots',im_name)
+            im = pv.Image(im_name)
+            im = pv.Image(im.asPIL().resize((200,200)))
             labels.append(class_name)
             vectors.append(im)
             
@@ -719,7 +718,7 @@ class _TestSVM(unittest.TestCase):
         
 
     def test_svm_breast_cancer_rbf(self):
-        filename = os.path.join(pyvision.__path__[0],'data','ml','breast-cancer-wisconsin.data')
+        filename = os.path.join(pv.__path__[0],'data','ml','breast-cancer-wisconsin.data')
         reader = csv.reader(open(filename, "rb"))
         breast_cancer_labels = []
         breast_cancer_data = []
@@ -733,7 +732,7 @@ class _TestSVM(unittest.TestCase):
             breast_cancer_labels.append(int(row[-1]))
             breast_cancer_data.append(data)
 
-        cancer = SVM(type=TYPE_SVC,random_seed=0)
+        cancer = SVM(svm_type=TYPE_SVC,random_seed=0)
         for i in range(300):
             cancer.addTraining(breast_cancer_labels[i],breast_cancer_data[i])        
         cancer.train()
@@ -754,7 +753,7 @@ class _TestSVM(unittest.TestCase):
 
     
     def test_svm_breast_cancer_lin(self):
-        filename = os.path.join(pyvision.__path__[0],'data','ml','breast-cancer-wisconsin.data')
+        filename = os.path.join(pv.__path__[0],'data','ml','breast-cancer-wisconsin.data')
         reader = csv.reader(open(filename, "rb"))
         breast_cancer_labels = []
         breast_cancer_data = []
@@ -768,7 +767,7 @@ class _TestSVM(unittest.TestCase):
             breast_cancer_labels.append(int(row[-1]))
             breast_cancer_data.append(data)
 
-        cancer = SVM(type=TYPE_SVC,kernel=KERNEL_LINEAR,random_seed=0)
+        cancer = SVM(svm_type=TYPE_SVC,kernel=KERNEL_LINEAR,random_seed=0)
         for i in range(300):
             cancer.addTraining(breast_cancer_labels[i],breast_cancer_data[i])        
         cancer.train()
@@ -788,7 +787,7 @@ class _TestSVM(unittest.TestCase):
 
     
     def test_svm_breast_cancer_nu(self):
-        filename = os.path.join(pyvision.__path__[0],'data','ml','breast-cancer-wisconsin.data')
+        filename = os.path.join(pv.__path__[0],'data','ml','breast-cancer-wisconsin.data')
         reader = csv.reader(open(filename, "rb"))
         breast_cancer_labels = []
         breast_cancer_data = []
@@ -802,7 +801,7 @@ class _TestSVM(unittest.TestCase):
             breast_cancer_labels.append(int(row[-1]))
             breast_cancer_data.append(data)
 
-        cancer = SVM(type=TYPE_NU_SVC,random_seed=0)
+        cancer = SVM(svm_type=TYPE_NU_SVC,random_seed=0)
         for i in range(300):
             cancer.addTraining(breast_cancer_labels[i],breast_cancer_data[i])        
         cancer.train()

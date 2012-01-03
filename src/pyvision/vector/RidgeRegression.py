@@ -52,7 +52,7 @@ class RidgeRegression(VectorClassifier):
         
         VectorClassifier.__init__(self,TYPE_REGRESSION,**kwargs)
         
-    def trainClassifer(self,labels,vectors,verbose=False):
+    def trainClassifer(self,labels,vectors,verbose=False,ilog=None):
         '''
         Do not call this function instead call train.
         '''
@@ -74,7 +74,7 @@ class RidgeRegression(VectorClassifier):
         
         self.w = w = dot(tmp1,tmp2)
 
-    def predictValue(self,data):
+    def predictValue(self,data,ilog=None):
         '''
         Please call predict instead.
         '''
@@ -124,7 +124,7 @@ class KernelRidgeRegression(VectorClassifier):
         
         VectorClassifier.__init__(self,TYPE_REGRESSION,**kwargs)
         
-    def trainClassifer(self,labels,vectors,verbose=False):
+    def trainClassifer(self,labels,vectors,verbose=False,ilog=None):
         '''
         Do not call this function instead call train.
         '''
@@ -237,7 +237,7 @@ class KernelRidgeRegression(VectorClassifier):
         self.w = w = dot(y,inv(kernel_matrix + self.lam*eye(c)))
                             
 
-    def predictValue(self,data):
+    def predictValue(self,data,ilog=None):
         '''
         Please call predict instead.
         '''
