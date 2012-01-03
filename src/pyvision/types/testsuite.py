@@ -8,7 +8,9 @@ Created on Nov 5, 2010
 import unittest
 
 import pyvision as pv
+import numpy as np
 import os.path
+import cv
 
 DATA_DIR = os.path.join(pv.__path__[0],'data','test')
 SYNC_VIDEO = 'video_sync.mov'
@@ -17,6 +19,209 @@ SYNC_FRAMES = ['video_sync_0001.jpg', 'video_sync_0002.jpg', 'video_sync_0003.jp
 BUGS_VIDEO = os.path.join(pv.__path__[0],'data','test','BugsSample.m4v')
 TAZ_VIDEO = os.path.join(pv.__path__[0],'data','test','TazSample.m4v')
 TOYCAR_VIDEO = os.path.join(pv.__path__[0],'data','test','toy_car.m4v')
+
+class _TestImage(unittest.TestCase):
+    
+    def setUp(self):
+        # Assume these work correctly
+        self.im     = pv.Image(os.path.join(pv.__path__[0],"data","nonface","NONFACE_46.jpg"))
+        self.pil    = self.im.asPIL()
+        self.mat    = self.im.asMatrix2D()
+        assert self.mat.shape[0] == 640
+        assert self.mat.shape[1] == 480
+        self.mat3d  = self.im.asMatrix3D()
+        assert self.mat3d.shape[0] == 3
+        assert self.mat3d.shape[1] == 640
+        assert self.mat3d.shape[2] == 480
+        self.opencv = self.im.asOpenCV()
+            
+    def test_PILToBufferGray(self):
+        w,h = self.im.size
+        buffer = self.im.toBufferGray(8)
+        self.assertEqual(len(buffer),w*h)
+        buffer = self.im.toBufferGray(32)
+        self.assertEqual(len(buffer),4*w*h)
+        buffer = self.im.toBufferGray(64)
+        self.assertEqual(len(buffer),8*w*h)
+
+    def test_Matrix3DToBufferGray(self):
+        im = pv.Image(self.mat3d)
+        w,h = im.size
+        buffer = im.toBufferGray(8)
+        self.assertEqual(len(buffer),w*h)
+        buffer = im.toBufferGray(32)
+        self.assertEqual(len(buffer),4*w*h)
+        buffer = im.toBufferGray(64)
+        self.assertEqual(len(buffer),8*w*h)
+
+    def test_Matrix2DToBufferGray(self):
+        im = pv.Image(self.mat)
+        w,h = im.size
+        buffer = im.toBufferGray(8)
+        self.assertEqual(len(buffer),w*h)
+        buffer = im.toBufferGray(32)
+        self.assertEqual(len(buffer),4*w*h)
+        buffer = im.toBufferGray(64)
+        self.assertEqual(len(buffer),8*w*h)
+
+    def test_PILToMatrix2D(self):
+        im = self.im
+        pil = im.asPIL().convert('L')
+        pil = pil.resize((180,120))
+        im = pv.Image(pil)
+        mat = im.asMatrix2D()
+        for i in range(im.width):
+            for j in range(im.height):
+                self.assertAlmostEqual(pil.getpixel((i,j)),mat[i,j])
+        
+    def test_Matrix2DToPIL(self):
+        im = pv.Image(self.mat[:180,:120])
+        pil = im.asPIL()
+        mat = im.asMatrix2D()
+        for i in range(im.width):
+            for j in range(im.height):
+                self.assertAlmostEqual(pil.getpixel((i,j)),mat[i,j])
+
+    def test_PILToMatrix3D(self):
+        pil = self.im.asPIL().resize((180,120))
+        im = pv.Image(pil)
+        mat = im.asMatrix3D()
+        for i in range(im.width):
+            for j in range(im.height):
+                for c in range(3):
+                    self.assertAlmostEqual(pil.getpixel((i,j))[c],mat[c,i,j])
+
+    def test_Matrix3D2PIL(self):
+        im = pv.Image(self.mat3d[:,:180,:120])
+        pil = self.im.asPIL()
+        mat = im.asMatrix3D()
+        for i in range(im.width):
+            for j in range(im.height):
+                for c in range(3):
+                    self.assertAlmostEqual(pil.getpixel((i,j))[c],mat[c,i,j])
+        
+    def test_PILToOpenCV(self):
+        pil = self.im.asPIL().resize((180,120))
+        im = pv.Image(pil)
+        cv = im.asOpenCV()
+        #Uncomment this code to compare saved images
+        #from opencv import highgui
+        #highgui.cvSaveImage('/tmp/cv.png',cv)
+        #pil.show()
+        #Image('/tmp/cv.png').show()
+
+        for i in range(im.width):
+            for j in range(im.height):
+                for c in range(3):
+                    self.assertAlmostEqual(pil.getpixel((i,j))[c],ord(cv.tostring()[i*3+j*im.width*3+2-c]))
+        
+    def test_OpenCVToPIL(self):
+        pil = self.im.asPIL().resize((180,120))
+        im = pv.Image(pil)
+        cv = im.asOpenCV()
+        pil = pv.Image(cv).asPIL()
+
+        for i in range(im.width):
+            for j in range(im.height):
+                for c in range(3):
+                    self.assertAlmostEqual(pil.getpixel((i,j))[c],ord(cv.tostring()[i*3+j*im.width*3+2-c]))
+        
+    def test_OpenCVToPILGray(self):
+        pil = self.im.asPIL().resize((180,120)).convert('L')
+        im = pv.Image(pil)
+        cv = im.asOpenCV()
+        im = pv.Image(cv)
+        pil = im.asPIL()
+        
+        #Uncomment this code to compare saved images
+        #from opencv import highgui
+        #highgui.cvSaveImage('/tmp/cv.png',cv)
+        #pil.show()
+        #Image('/tmp/cv.png').show()
+        
+        # TODO: There seems to be data loss in the conversion from pil to opencv and back.  Why?
+        #for i in range(im.width):
+        #    for j in range(im.height):
+        #        self.assertAlmostEqual(pil.getpixel((i,j)),ord(cv.imageData[i*3+j*im.width*3]))
+        
+    def test_BufferToOpenCV(self):
+        pil = self.im.asPIL().resize((180,120))
+        im = pv.Image(pil)
+        cvim = im.asOpenCV()
+        buffer = im.toBufferRGB(8)
+
+        for i in range(im.width):
+            for j in range(im.height):
+                for c in range(3):
+                    self.assertAlmostEqual(ord(buffer[i*3+j*im.width*3+c]),ord(cvim.tostring()[i*3+j*im.width*3+2-c]))
+     
+    def test_asOpenCVBW(self):
+        pass #TODO: Create tests for this method.
+        
+    def test_MatConvertOpenCVToNumpy(self):
+        r,c = 10,20
+        cvmat = cv.CreateMat(r,c,cv.CV_32F)
+        for i in range(r):
+            for j in range(c):
+                cvmat[i,j] = i*j
+        mat = pv.OpenCVToNumpy(cvmat)
+        self.assert_(mat.shape == (r,c))
+        for i in range(r):
+            for j in range(c):
+                self.assert_(mat[i,j] == cvmat[i,j])
+        
+        
+    def test_ConvertIPLImage32FToPvImage(self):
+        im = pv.Image(pv.LENA)
+        im = im.resize((512,400))
+        cv_im = im.asOpenCV()
+        mat = im.asMatrix3D()
+        cv_32 = cv.CreateImage(cv.GetSize(cv_im),cv.IPL_DEPTH_32F,3)
+        cv.Convert(cv_im,cv_32)
+        
+        for x in range(50):
+            for y in range(50):
+                for c in range(3):
+                    self.assertAlmostEqual(cv_im[y,x][2-c],mat[c,x,y])
+                    self.assertAlmostEqual(cv_im[y,x][2-c],cv_32[y,x][2-c])
+                    
+        im2 = pv.Image(cv_32)
+        
+    def test_MatConvertNumpyToOpenCV(self):
+        r,c = 10,20
+        mat = np.zeros((r,c),dtype=np.float32)
+        for i in range(r):
+            for j in range(c):
+                mat[i,j] = i*j
+        cvmat = pv.NumpyToOpenCV(mat)
+        self.assert_(mat.shape == (r,c))
+        for i in range(r):
+            for j in range(c):
+                self.assert_(mat[i,j] == cvmat[i,j])
+                
+    def test_ImageCropOutofBounds(self):
+        rect = pv.Rect(-3, -2, 35, 70)
+        imcrop = self.im.crop(rect)
+        cropSize = imcrop.size
+        
+        self.assertEquals((35,70), cropSize)
+        
+        rect = pv.Rect(620, 460, 35, 70)
+        imcrop = self.im.crop(rect)
+        cropSize = imcrop.size
+        
+        self.assertEquals((35,70), cropSize)
+        
+    def test_asHSV(self):
+        im = pv.Image(pv.BABOON)
+        hsv = im.asHSV()
+        im = pv.Image(hsv)
+        #im.show(delay=0)
+
+        im = pv.Image(os.path.join(pv.__path__[0],"data","misc","baboon_bw.jpg"))
+        self.assertRaises(Exception, im.asHSV)
+
+
 
 
 class _TestVideo(unittest.TestCase):
