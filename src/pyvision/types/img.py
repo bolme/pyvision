@@ -55,6 +55,13 @@ import os.path
 import pyvision
 import pyvision as pv
 
+try:
+    import pylab
+    import IPython
+except:
+    pass # do nothing
+
+
 TYPE_MATRIX_2D  = "TYPE_MATRIX2D" 
 '''Image was created using a 2D "gray-scale" numpy array'''
 
@@ -69,7 +76,6 @@ TYPE_OPENCV     = "TYPE_OPENCV"
 
 LUMA = [0.299, 0.587, 0.114, 1.0]
 '''Values used when converting color to gray-scale.'''
-
 
 class Image:
     '''
@@ -857,7 +863,7 @@ class Image:
             else:
                 self.asPIL().save(filename)
             
-    def show(self, window="PyVisionImage", pos=None, delay=1, size=None):
+    def show(self, window=None, pos=None, delay=1, size=None):
         '''
         Displays the annotated version of the image using OpenCV highgui
         @param window: the name of the highgui window to use, if one already exists by this name,
@@ -872,20 +878,46 @@ class Image:
         @param size: Optional output size for image, None=native size.
         @returns: the return value of the cv.WaitKey call.
         '''
-        cv.NamedWindow(window)
-        
-        if pos != None:
-            cv.MoveWindow(window, pos[0], pos[1])
+        if window==None and pv.runningInNotebook() and 'pylab' in globals().keys():
+            # If running in notebook, then try to display the image inline.
             
-        if size != None:
-            x = pyvision.Image(self.resize(size).asAnnotated())
+            if size == None:
+                size = self.size
+                
+                # Constrain the size of the output
+                max_dim = max(size[0],size[1])
+                
+                if max_dim > 800:
+                    scale = 800.0/max_dim
+                    size = (int(scale*size[0]),int(scale*size[1]))
+            
+            w,h = size
+            
+            # TODO: Cant quite figure out how figsize works and how to set it to native pixels
+            IPython.core.pylabtools.figsize(1.25*w/72.0,1.25*h/72.0)
+            pylab.imshow(self.asAnnotated(),origin='lower',aspect='auto')
+            
         else:
-            x = pyvision.Image(self.asAnnotated())    
+            # Otherwise, use an opencv window
+            if window == None:
+                window = "PyVisionImage"
+
+            cv.NamedWindow(window)
             
-        cv.ShowImage(window, x.asOpenCV() )
-        key = cv.WaitKey(delay=delay)
-        del x
-        return key
+            if pos != None:
+                cv.MoveWindow(window, pos[0], pos[1])
+                
+                
+                
+            if size != None:
+                x = pyvision.Image(self.resize(size).asAnnotated())
+            else:
+                x = pyvision.Image(self.asAnnotated())    
+                
+            cv.ShowImage(window, x.asOpenCV() )
+            key = cv.WaitKey(delay=delay)
+            del x
+            return key
 ##
 # Convert a 32bit opencv matrix to a numpy matrix
 def OpenCVToNumpy(cvmat):

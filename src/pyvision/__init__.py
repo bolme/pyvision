@@ -192,7 +192,7 @@ from pyvision.analysis.stats import pbinom, qbinom, cibinom, mcnemar_test, Summa
 
 from pyvision.point.GaborJets import GaborFilters, GaborImage, GaborJet, FilterBank, GaborWavelet
 
-from pyvision.other.color import Histogram, hsBackProjectHist, rgbBackProjectHist, rgbHist, hsHist, HIST_HS, HIST_RGB
+from pyvision.other.color import Histogram, hsBackProjectHist, rgbBackProjectHist, RGBHist, HSHist, HIST_HS, HIST_RGB
 
 from pyvision.ml.pca import prcomp, pca
 
@@ -212,7 +212,7 @@ from analysis.progress_bar import ProgressBar
 
 from analysis.gui_tools import capturePointsFromMouse
 
-
+from pyvision.face import REDUCED_LEYE, REDUCED_REYE, REDUCED_SIZE
 
 
 
@@ -225,6 +225,24 @@ def searchNames(text,object):
         if text.upper() in name.upper():
             print name
     
+def runningInNotebook():
+    '''
+    Returns True python interpreter is running in an iPython HTML Notebook.
+    (This may not work on all platforms.)
+    '''
+    # Check that the type of ipython instance is consistent with the notebook.
+    try:
+        import IPython
+        gui = IPython.core.pylabtools.find_gui_and_backend()
+        if 'inline' not in gui:
+            #print 'missing inline'
+            return False
+    except:
+        #print "error importing"
+        return False
+    
+    #print "success in notebook"
+    return True
     
 
 
