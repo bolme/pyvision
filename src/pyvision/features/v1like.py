@@ -417,9 +417,9 @@ def v1like_pool(hin, conv_mode, lsum_ksize, outshape=None, order=1):
         kcol = k1d[:,None]
         for d in xrange(aux.shape[2]):
             if order == 1:
-                aux[:,:,d] = conv(conv(hin[:,:,d], krow, conv_mode,old_behavior=True), kcol, conv_mode,old_behavior=True)
+                aux[:,:,d] = conv(conv(hin[:,:,d], krow, conv_mode), kcol, conv_mode)
             else:
-                aux[:,:,d] = conv(conv(hin[:,:,d]**order, krow, conv_mode,old_behavior=True), kcol, conv_mode,old_behavior=True)**(1./order)
+                aux[:,:,d] = conv(conv(hin[:,:,d]**order, krow, conv_mode), kcol, conv_mode)**(1./order)
 
     else:
         aux = hin
@@ -457,7 +457,7 @@ def v1like_filter(hin, conv_mode, filterbank, use_cache=False):
 
     filt0 = filterbank[0]
     fft_shape = np.array(hin.shape) + np.array(filt0.shape) - 1
-    hin_fft = scipy.signal.fftn(hin, fft_shape)
+    hin_fft = np.fft.fftn(hin, fft_shape)
 
     if conv_mode == "valid":
         hout_shape = list( np.array(hin.shape[:2]) - np.array(filt0.shape[:2]) + 1 ) + [nfilters]
@@ -484,12 +484,12 @@ def v1like_filter(hin, conv_mode, filterbank, use_cache=False):
             if key in fft_cache:
                 filt_fft = fft_cache[key]
             else:
-                filt_fft = scipy.signal.fftn(filt, fft_shape)
+                filt_fft = scipy.fft.fftn(filt, fft_shape)
                 fft_cache[key] = filt_fft
         else:
-            filt_fft = scipy.signal.fftn(filt, fft_shape)
+            filt_fft = np.fft.fftn(filt, fft_shape)
 
-        res_fft = scipy.signal.ifftn(hin_fft*filt_fft)
+        res_fft = np.fft.ifftn(hin_fft*filt_fft)
         res_fft = res_fft[begy:endy, begx:endx]
         hout_new[:,:,i] = np.real(res_fft)
 
@@ -594,9 +594,9 @@ def v1like_norm(hin, conv_mode, kshape, threshold):
                 conv(
                      conv(hsq, kerD, 'valid')[:,:,0].astype(dtype),
                      kerW,
-                     conv_mode,old_behavior=True),
+                     conv_mode),
                 kerH,
-                conv_mode,old_behavior=True).astype(dtype)
+                conv_mode).astype(dtype)
     hssq = hssq[:,:,None]
 
     # compute hnum and hdiv
@@ -611,9 +611,9 @@ def v1like_norm(hin, conv_mode, kshape, threshold):
                      conv(hsrc,
                           kerD, 'valid')[:,:,0].astype(dtype),
                      kerW,
-                     conv_mode,old_behavior=True),
+                     conv_mode),
                 kerH,
-                conv_mode,old_behavior=True).astype(dtype)
+                conv_mode).astype(dtype)
 
     hsum = hsum[:,:,None]
     if conv_mode == 'same':
@@ -777,8 +777,8 @@ def v1like_fromarray(arr, params):
         conv_mode = params['conv_mode']
         if lsum_ksize is not None:
             k = np.ones((lsum_ksize), 'f') / lsum_ksize
-            imga0 = conv(conv(imga0, k[np.newaxis,:], conv_mode,old_behavior=True),
-                          k[:,np.newaxis], conv_mode,old_behavior=True)
+            imga0 = conv(conv(imga0, k[np.newaxis,:], conv_mode),
+                          k[:,np.newaxis], conv_mode)
 
         # whiten full image (assume True)
         if 'whiten' not in params['preproc'] or params['preproc']['whiten']:
