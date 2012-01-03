@@ -53,7 +53,7 @@ class OpticalFlow:
     It can output the frame to frame camera motion as a homography.
     '''
     
-    def __init__(self,tile_size="AUTO"):
+    def __init__(self,tile_size="ORIG"):
         '''
         Create the camera tracker
         

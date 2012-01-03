@@ -36,7 +36,7 @@ Created on Nov 9, 2010
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import pyvision as pv
-from pyvision.surveillance.BackgroundSubtraction import *
+from pyvision.surveillance.BackgroundSubtraction import BG_SUBTRACT_AMF, BG_SUBTRACT_FD, BG_SUBTRACT_MCFD, BG_SUBTRACT_MF
 import cv
 import numpy as np
 
