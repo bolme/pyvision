@@ -319,8 +319,8 @@ class AKNNTest(unittest.TestCase):
         bdist,_ = knn.query([.05,.3,.9,.6,.2],k=fdist[-1])
         timer.mark("Brute Force Query")
         
-        print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
-        print timer
+        #print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
+        #print timer
         
     def testReallyLargeTree(self):
         '''Tests using a really large tree.'''
@@ -343,8 +343,8 @@ class AKNNTest(unittest.TestCase):
         bdist,_ = knn.query([.05,.3,.9,.6,.2],k=fdist[-1])
         timer.mark("Brute Force Query")
         
-        print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
-        print timer
+        #print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
+        #print timer
         
     def testHighDim(self):
         '''test using high dimensions'''
@@ -368,8 +368,8 @@ class AKNNTest(unittest.TestCase):
         bdist,_ = knn.query(query,k=fdist[-1])
         timer.mark("Brute Force Query")
         
-        print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
-        print timer
+        #print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
+        #print timer
         
             
             
@@ -395,8 +395,8 @@ class AKNNTest(unittest.TestCase):
         bdist,_ = knn.query(query,k=fdist[-1])
         timer.mark("Brute Force Query")
         
-        print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
-        print timer
+        #print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
+        #print timer
         
             
             
