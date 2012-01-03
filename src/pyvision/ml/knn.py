@@ -282,6 +282,7 @@ try:
             self.indexing_time = stop-start
             
         def query(self, x, k=1,**kwargs):
+            x = np.array(x)
             if x.shape == (0,):
                 return [],[]  
             results,dists = self.flann.nn_index(x,num_neighbors=k,**kwargs)
