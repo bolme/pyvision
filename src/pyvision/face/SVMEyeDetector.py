@@ -76,8 +76,8 @@ class SVMEyeDetector:
                                 reg_norm=VectorClassifier.REG_NORM_NONE)
         
         # point locators that learn to find the eyes.
-        self.left_locator  = SVMLocator(type=SVM.TYPE_NU_SVR ,normalization=VectorClassifier.NORM_NONE)
-        self.right_locator = SVMLocator(type=SVM.TYPE_NU_SVR ,normalization=VectorClassifier.NORM_NONE)
+        self.left_locator  = SVMLocator(svm_type=SVM.TYPE_NU_SVR ,normalization=VectorClassifier.NORM_NONE)
+        self.right_locator = SVMLocator(svm_type=SVM.TYPE_NU_SVR ,normalization=VectorClassifier.NORM_NONE)
         
         # Number of training images where the face detection did not work.
         self.detection_failures = 0

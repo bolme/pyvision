@@ -1,5 +1,6 @@
 import pyvision as pv
-from pyvision.vector.SVM import SVM,NORM_NONE,TYPE_NU_SVC,TYPE_C_SVC
+from pyvision.vector.SVM import SVM,TYPE_C_SVC
+from pyvision.vector.VectorClassifier import NORM_NONE
 from pyvision.vector.PCA import PCA
 from scipy import ndimage
 import random
