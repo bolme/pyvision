@@ -863,7 +863,7 @@ class Image:
             else:
                 self.asPIL().save(filename)
             
-    def show(self, window=None, pos=None, delay=1, size=None):
+    def show(self, window=None, pos=None, delay=0, size=None):
         '''
         Displays the annotated version of the image using OpenCV highgui
         @param window: the name of the highgui window to use, if one already exists by this name,
@@ -894,6 +894,7 @@ class Image:
             w,h = size
             
             # TODO: Cant quite figure out how figsize works and how to set it to native pixels
+            pylab.figure()
             IPython.core.pylabtools.figsize(1.25*w/72.0,1.25*h/72.0)
             pylab.imshow(self.asAnnotated(),origin='lower',aspect='auto')
             
