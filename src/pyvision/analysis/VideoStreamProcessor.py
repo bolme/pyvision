@@ -78,9 +78,9 @@ class AbstractVSP():
     def __call__(self, img, fn, **kwargs):
         self._onNewFrame(img, fn, **kwargs)
         if self._nextModule != None:
-            self._nextModule(img, fn, prevModule=self, **kwargs)
+            self._nextModule(img, fn, **kwargs)
             
-    def _onNewFrame(self, img, fn, key=None, buffer=None, prevModule=None):
+    def _onNewFrame(self, img, fn, key=None, imageBuffer=None, prevModule=None):
         ''' Override this abstract method with the processing your object
         performs on a per-frame basis. It is recommended that you do not
         directly call this method. Rather, the VSP is a callable object,
@@ -104,10 +104,10 @@ class SimpleVSP(AbstractVSP):
         '''
         AbstractVSP.__init__(self, window=window, nextModule=nextModule)
         
-    def _onNewFrame(self, img, fn, key=None, buffer=None, prevModule=None):
+    def _onNewFrame(self, img, fn, key=None, imageBuffer=None, prevModule=None):
         pt = pv.Point(10, 10)
         img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white", background="black")
-        if self._windowName != None: img.show(window=self._windowName)
+        if self._windowName != None: img.show(window=self._windowName, delay=1)
  
 #TODO: There seems to be a bug in the video writing output when writing
 # frames from some source video objects in some output sizes. The symptom
@@ -159,7 +159,7 @@ class VideoWriterVSP(AbstractVSP):
         else:
             cv.WriteFrame(self._out, img2.asOpenCV())        
            
-    def _onNewFrame(self, img, fn, key=None, buffer=None, prevModule=None):
+    def _onNewFrame(self, img, fn, key=None, imageBuffer=None, prevModule=None):
         self.addFrame(img)
 
         
@@ -174,7 +174,7 @@ class MotionDetectionVSP(AbstractVSP):
         self._md = md_object
         AbstractVSP.__init__(self, window=window, nextModule=nextModule)
         
-    def _onNewFrame(self, img, fn, key=None, buffer=None, prevModule=None):
+    def _onNewFrame(self, img, fn, key=None, imageBuffer=None, prevModule=None):
         ''' Performs motion detection using this object's md object,
         displays the foreground pixels to a window.
         '''
@@ -182,7 +182,7 @@ class MotionDetectionVSP(AbstractVSP):
         rc = md.detect(img)
         if rc > -1:
             md.annotateFrame(img, rect_color="yellow", contour_color=None, flow_color=None)
-            if self._windowName != None: img.show(window=self._windowName)
+            if self._windowName != None: img.show(window=self._windowName, delay=1)
             #img_fg = md.getForegroundPixels()
             #img_fg.show("Foreground")
             

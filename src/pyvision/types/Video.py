@@ -143,10 +143,10 @@ class VideoInterface(object):
                 img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white", background="black")
                 
             if window != None:
-                img.show(window=window,pos=pos)
+                img.show(window=window,pos=pos,delay=1)
             
             if onNewFrame != None:
-                onNewFrame( img, fn, key=key, buffer=imageBuffer, **kwargs )
+                onNewFrame( img, fn, key=key, imageBuffer=imageBuffer, **kwargs )
                 
             key = self._pauseAndPlay(delayObj)
             if key == 'q': break #user selected quit playback
