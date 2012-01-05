@@ -894,8 +894,9 @@ class Image:
             w,h = size
             
             # TODO: Cant quite figure out how figsize works and how to set it to native pixels
-            pylab.figure()
+            #pylab.figure()
             IPython.core.pylabtools.figsize(1.25*w/72.0,1.25*h/72.0)
+            pylab.figure()
             pylab.imshow(self.asAnnotated(),origin='lower',aspect='auto')
             
         else:
