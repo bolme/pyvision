@@ -89,9 +89,6 @@ class VideoInterface(object):
         '''
         raise NotImplemented
     
-    #TODO: change onNewFrame function signature so that the buffer= parameter
-    # is renamed to imageBuffer=, to avoid confusion and clash with a reserved built-in use
-    # of 'buffer'.
     def play(self, window="Input", pos=None, delay=20, 
              annotate=True, imageBuffer=None, onNewFrame=None, **kwargs ):
         '''
