@@ -206,7 +206,7 @@ from pyvision.analysis.bee import parseSigSet,saveSigset,BEE_CODE_MAP,BEE_DONTCA
 
 from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO,FONT_ARIAL
 
-from pyvision.analysis.VideoStreamProcessor import *
+from pyvision.surveillance.VideoStreamProcessor import *
 
 from analysis.progress_bar import ProgressBar
 
@@ -227,7 +227,7 @@ def searchNames(text,object):
     
 def runningInNotebook():
     '''
-    Returns True python interpreter is running in an iPython HTML Notebook.
+    @return: True if python interpreter is running in an iPython HTML Notebook.
     (This may not work on all platforms.)
     '''
     # Check that the type of ipython instance is consistent with the notebook.
@@ -293,7 +293,7 @@ def runningInNotebook():
 #     EBGM
 #     Object Recognition
 #     Neural Networks
-#     Fundimental Matrix and 3D Reconstruction
+#     Fundamental Matrix and 3D Reconstruction
 #     LBP - Texture analysis and face recognition.
 
 class _VersionTest(unittest.TestCase):
