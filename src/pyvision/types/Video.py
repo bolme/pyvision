@@ -92,7 +92,8 @@ class VideoInterface(object):
     #TODO: change onNewFrame function signature so that the buffer= parameter
     # is renamed to imageBuffer=, to avoid confusion and clash with a reserved built-in use
     # of 'buffer'.
-    def play(self, window="Input", pos=None, delay=20, imageBuffer=None, onNewFrame=None, **kwargs ):
+    def play(self, window="Input", pos=None, delay=20, 
+             annotate=True, imageBuffer=None, onNewFrame=None, **kwargs ):
         '''
         Plays the video, calling the onNewFrame function after loading each
          frame from the video. The user may interrupt video playback by
@@ -110,6 +111,8 @@ class VideoInterface(object):
         will wait for keyboard input prior to advancing to the next frame. This
         delay is used by the pauseAndPlay interface, so it will affect the rate
         at which onNewFrame is called as well.
+        @param annotate: If True, the image will be annotated with the frame number
+        in the upper left corner. Set false for no frame number annotation.
         @param imageBuffer: An optional pyvision ImageBuffer object to contain the
         most recent frames. This is useful if a buffer is required for background
         subtraction, for example. The buffer contents is directly modified each
@@ -134,10 +137,12 @@ class VideoInterface(object):
         for fn, img in enumerate(vid):
             if imageBuffer != None:
                 imageBuffer.add(img)
-            
-            if window != None:
+                
+            if annotate:
                 pt = pv.Point(10, 10)
                 img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white", background="black")
+                
+            if window != None:
                 img.show(window=window,pos=pos)
             
             if onNewFrame != None:
