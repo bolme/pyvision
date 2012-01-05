@@ -76,11 +76,16 @@ class AbstractVSP():
         self._nextModule = nextModule
     
     def __call__(self, img, fn, **kwargs):
-        self._onNewFrame(img, fn, **kwargs)
+        newImg = self._onNewFrame(img, fn, **kwargs)
         if self._nextModule != None:
-            self._nextModule(img, fn, **kwargs)
+            if newImg != None:
+                #we have a new image to replace the current one instream
+                kwargs['orig_img']=img #add a new keyword arg to allow access to origininal img
+                self._nextModule(newImg, fn, **kwargs)
+            else:
+                self._nextModule(img, fn, **kwargs)
             
-    def _onNewFrame(self, img, fn, key=None, imageBuffer=None, prevModule=None):
+    def _onNewFrame(self, img, fn, **kwargs):
         ''' Override this abstract method with the processing your object
         performs on a per-frame basis. It is recommended that you do not
         directly call this method. Rather, the VSP is a callable object,
@@ -89,22 +94,11 @@ class AbstractVSP():
         '''
         raise NotImplemented
         
-class SimpleVSP(AbstractVSP):
+class FrameNumberVSP(AbstractVSP):
     '''A simple VSP object simply displays the input video frame with
     some simple annotation to show the frame number in upper left corner.
-    '''
-    def __init__(self, window="Input", nextModule=None):
-        ''' Constructor
-        @param window: The window name to use when displaying this VSP's
-        output. Specify None to suppress showing the output, but note that
-        if you modify the current image with annotations, those will be
-        persisted "downstream" to later processors.
-        @param nextModule: A Video Stream Processor object that should be
-        invoked on every frame after this processor has finished.
-        '''
-        AbstractVSP.__init__(self, window=window, nextModule=nextModule)
-        
-    def _onNewFrame(self, img, fn, key=None, imageBuffer=None, prevModule=None):
+    '''        
+    def _onNewFrame(self, img, fn, **kwargs):
         pt = pv.Point(10, 10)
         img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white", background="black")
         if self._windowName != None: img.show(window=self._windowName, delay=1)
@@ -159,11 +153,26 @@ class VideoWriterVSP(AbstractVSP):
         else:
             cv.WriteFrame(self._out, img2.asOpenCV())        
            
-    def _onNewFrame(self, img, fn, key=None, imageBuffer=None, prevModule=None):
+    def _onNewFrame(self, img, fn, **kwargs):
         self.addFrame(img)
 
+class ResizerVSP(AbstractVSP):
+    '''This VSP resizes each frame of video. Subsequent VSPs in a chain
+    will see the resized image instead of the original.
+    '''
+    def __init__(self, new_size=(320,240), window="Resized Image", nextModule=None):
+        self._newSize = new_size
+        AbstractVSP.__init__(self, window=window, nextModule=nextModule)
+    
+    def _onNewFrame(self, img, fn, **kwargs):
+        img = img.resize(self._newSize)
+        if self._windowName != None: img.show(window=self._windowName, delay=1)
+        return img
         
 class MotionDetectionVSP(AbstractVSP):
+    ''' This VSP uses an existing motion detection object to apply motion
+    detection to each frame of video.
+    '''
     def __init__(self, md_object, window="Motion Detection", nextModule=None):
         ''' Constructor
         @param md_object: The pyvision motion detection object to be used by
@@ -174,7 +183,7 @@ class MotionDetectionVSP(AbstractVSP):
         self._md = md_object
         AbstractVSP.__init__(self, window=window, nextModule=nextModule)
         
-    def _onNewFrame(self, img, fn, key=None, imageBuffer=None, prevModule=None):
+    def _onNewFrame(self, img, fn, **kwargs):
         ''' Performs motion detection using this object's md object,
         displays the foreground pixels to a window.
         '''
@@ -186,4 +195,27 @@ class MotionDetectionVSP(AbstractVSP):
             #img_fg = md.getForegroundPixels()
             #img_fg.show("Foreground")
             
-            
+class PeopleDetectionVSP(AbstractVSP):
+    ''' This Video Stream Processor applies the OpenCV HOG people detector
+    to each frame of video, annotating the detections with red rectangles.
+    '''
+    def _onNewFrame(self, img, fn, **kwargs):
+        rects = self._detectPeople(img)
+        for r in rects: img.annotateRect(r)
+        if self._windowName != None: img.show(window=self._windowName, delay=1)
+        
+    def _detectPeople(self, img):
+        cvim = img.asOpenCV()  #convert to OpenCV format before using OpenCV functions
+        rect_list = []
+        try:
+            found = list(cv.HOGDetectMultiScale(cvim, cv.CreateMemStorage(0)))
+            rect_list = [ pv.Rect(x,y,w,h) for ((x,y),(w,h)) in found]  #python list comprehension            
+        except:
+            #cv.HOGDetectMultiScale can throw exceptions, so return empty list
+            return []
+        
+        return rect_list
+        
+        
+        
+        
