@@ -36,6 +36,7 @@ Created on Mar 14, 2011
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import pyvision as pv
 import cv
+import PIL
 import weakref
 
 class ImageMontage(object):
@@ -45,7 +46,7 @@ class ImageMontage(object):
     than "viewports" in the layout.
     '''
 
-    def __init__(self, imageList, layout=(2,4), tileSize=(64,48), gutter=2, byrow=True, nolabels=False):
+    def __init__(self, imageList, layout=(2,4), tileSize=(64,48), gutter=2, byrow=True, nolabels=False, keep_aspect=False):
         '''
         Constructor
         @param imageList: A list of pyvision images that you wish to display
@@ -60,6 +61,7 @@ class ImageMontage(object):
         @param nolabels: By default, each image in the montage has a numeric label
         in the lower left corner indicating the order of the images. If you wish to
         suppress this label, set nolabels=True.
+        @param keep_aspect: If true the original image aspect ratio will be preserved.
         '''
         self._tileSize = tileSize
         self._rows = layout[0]
@@ -72,6 +74,7 @@ class ImageMontage(object):
         self._imgPtr = 0
         self._nolabels = nolabels
         self._clickHandler = clickHandler(self)
+        self._keep_aspect = keep_aspect
         #check if we need to allow for scroll-arrow padding
         if self._rows * self._cols < len(imageList):
             if byrow:
@@ -275,7 +278,30 @@ class ImageMontage(object):
         of each thumbnail.
         '''
         (row,col) = pos
-        tile = img.resize(self._tileSize)
+        
+        if self._keep_aspect:
+            # Get the current size
+            w,h = img.size
+            
+            # Find the scale
+            scale = min(1.0*self._tileSize[0]/w,1.0*self._tileSize[1]/h)
+            w = int(scale*w)
+            h = int(scale*h)
+            
+            # Resize preserving aspect
+            img = img.resize((w,h)).asPIL()
+            
+            # Create a new image with the old image centered
+            x = (self._tileSize[0]-w)/2
+            y = (self._tileSize[1]-h)/2
+            pil = PIL.Image.new('RGB',self._tileSize,"#000000")
+            pil.paste(img,(x,y,x+w,y+h))
+            
+            # Generate the tile
+            tile = pv.Image(pil)
+        else:
+            tile = img.resize(self._tileSize)
+        
         pos_x = col*(self._tileSize[0] + self._gutter) + self._gutter + self._xpad
         pos_y = row*(self._tileSize[1] + self._gutter) + self._gutter + self._ypad 
         
