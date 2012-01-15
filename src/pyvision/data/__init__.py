@@ -17,6 +17,8 @@ LENA      = os.path.join(pv.__path__[0],'data','misc','lena.jpg')
 LOGO      = os.path.join(pv.__path__[0],'data','misc','logo.jpg')
 TAZ_IMAGE = os.path.join(pv.__path__[0],'data','test','TAZ_0010.jpg')
 TAZ_VIDEO = os.path.join(pv.__path__[0],'data','test','TazSample.m4v')
+CAR_VIDEO = os.path.join(pv.__path__[0],'data','test','toy_car.m4v')
+BUGS_VIDEO = os.path.join(pv.__path__[0],'data','test','BugsSample.m4v')
 
 
 FONT_ARIAL = os.path.join(pv.__path__[0],'config','Arial.ttf')

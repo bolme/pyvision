@@ -408,6 +408,20 @@ class Image:
         for i in range(n):
             self.annotateLine(points[i],points[i+1],color=color,width=width)
         
+    def annotateMask(self,mask,color='red'):
+        '''
+        Shades the contents of a mask.
+    
+        @param mask: a numpy array showing the mask.
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
+        im = self.asAnnotated()
+        draw = PIL.ImageDraw.Draw(im)
+        pil = pv.Image(1.0*mask).asPIL()
+        pil = pil.convert('1')
+        draw.bitmap((0,0), pil, fill=color)
+        del draw
+        
     def annotatePolygon(self,points,color='red',width=1):
         '''
         Draws a line from point1 to point2 on the annotation image
