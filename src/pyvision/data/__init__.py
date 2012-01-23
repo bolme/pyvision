@@ -1,5 +1,5 @@
 '''
-This module contains some standard tests that can be performed with
+This package contains some standard tests that can be performed with
 the test data distributed with pyvision.
 '''
 import pyvision as pv
@@ -7,21 +7,41 @@ import os.path
 from pyvision.analysis.FaceAnalysis.EyesFile import EyesFile
 
 SCRAPS_EYES = EyesFile(os.path.join(pv.__path__[0],'data','csuScrapShots','coords.txt'))
+''' The path to a text file containing coordinates to the scrapshots dataset. '''
+
 
 
 # Common test images
 AIRPLANE  = os.path.join(pv.__path__[0],'data','misc','airplane.jpg')
+''' The path to a commonly use test image of a jet airplane.'''
+
 BABOON    = os.path.join(pv.__path__[0],'data','misc','baboon.jpg')
+''' The path to a commonly use test image of a baboon face.'''
+
 FRUITS    = os.path.join(pv.__path__[0],'data','misc','fruits.jpg')
+''' The path to a commonly use test image of fruit.'''
+
 LENA      = os.path.join(pv.__path__[0],'data','misc','lena.jpg')
+''' The path to a commonly used "Lena" test image.'''
+
 LOGO      = os.path.join(pv.__path__[0],'data','misc','logo.jpg')
+''' The path to a commonly use test image of a butterfly used as the pyvision logo.'''
+
 TAZ_IMAGE = os.path.join(pv.__path__[0],'data','test','TAZ_0010.jpg')
+''' The path to a commonly use test image of a butterfly used as the pyvision logo.'''
+
 TAZ_VIDEO = os.path.join(pv.__path__[0],'data','test','TazSample.m4v')
+''' The path to a test video of a Loony Tunes Taz stuffed animal.'''
+
 CAR_VIDEO = os.path.join(pv.__path__[0],'data','test','toy_car.m4v')
+''' The path to a test video of a small moving car.'''
+
 BUGS_VIDEO = os.path.join(pv.__path__[0],'data','test','BugsSample.m4v')
+''' The path to a test video sequence of bugs crawling through weeds.'''
 
 
 FONT_ARIAL = os.path.join(pv.__path__[0],'config','Arial.ttf')
+''' The path to a file containing the Arial true type font. '''
 
 
 def genderClassifier(clsfy, ilog=None):

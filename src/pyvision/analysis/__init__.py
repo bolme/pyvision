@@ -30,3 +30,10 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+'''
+This package contains classes and functions that aid in the analysis
+of vision algorithms.  This includes vision specific tools such as 
+the image log an also some other nice utility functions like basic 
+statistics and plots.
+'''
