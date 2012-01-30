@@ -214,6 +214,8 @@ from analysis.gui_tools import capturePointsFromMouse
 
 from pyvision.face import REDUCED_LEYE, REDUCED_REYE, REDUCED_SIZE
 
+from types.kinect import Kinect
+
 
 
 #================================== Misc Functions =====================================
