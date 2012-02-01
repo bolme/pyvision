@@ -5,7 +5,7 @@ Created on Jan 13, 2012
 '''
 import pyvision as pv
 from pyvision.face.CascadeDetector import CascadeDetector
-from video_processor import *
+from vtm import *
 import numpy as np
 
 class ChangeDetectionVT(VideoTask):
