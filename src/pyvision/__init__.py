@@ -218,6 +218,10 @@ from types.kinect import Kinect
 
 
 
+# Import the beta components
+import beta
+
+
 #================================== Misc Functions =====================================
 
 
