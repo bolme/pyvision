@@ -68,7 +68,7 @@ def meanStd(matrix):
         is_image = True
     # Otherwize, assume it is a numpy matrix
     matrix = matrix - matrix.mean()
-    matrix = (1.0/matrix.std()) * matrix
+    matrix = (1.0/(matrix.std()+0.000001)) * matrix
     if is_image:
         return pv.Image(matrix)
     return matrix
@@ -118,7 +118,7 @@ def selfQuotientImage(matrix,sigma=5.0):
     denom = ndi.gaussian_filter(matrix,sigma)
 
     # make sure there are no divide by zeros
-    matrix = matrix/denom
+    matrix = matrix/(denom+0.000001)
 
     if is_image:
         return pv.Image(matrix)
