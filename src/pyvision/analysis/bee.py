@@ -637,3 +637,58 @@ class BEEDistanceMatrix:
         '''@returns: the number of rows and columns.'''
         return self.matrix.shape
     
+
+def computeMaskMatrix(target_sigset,query_sigset,target_filename,query_filename,symmetric = True):
+    '''
+    Computes a mask matrix from two sigsets.
+    
+    @param target_sigset: the target sigset to use.
+    @param query_sigset: the query sigset to use.
+    @param symmetric: if true and the sigsets are equal it assumes that the matrix is symmetric and will treat the low left triangle as DONT_CARE's.
+    @returns: a bee mask matrix.
+    '''
+    assert len(target_sigset) > 0
+    assert len(query_sigset) > 0
+    target_subid = np.array([each[0] for each in target_sigset])  
+    query_subid = np.array([each[0] for each in query_sigset])
+    target_recid = np.array([each[1][0]['name'] for each in target_sigset])  
+    query_recid = np.array([each[1][0]['name'] for each in query_sigset])
+
+    cols = target_subid.shape[0]
+    rows = query_subid.shape[0]
+    
+    target_subid.shape = (1,cols)
+    query_subid.shape = (rows,1)
+    target_recid.shape = (1,cols)
+    query_recid.shape = (rows,1)
+    
+    # Initialize matrix to non match
+    mat = np.zeros((rows,cols),dtype=np.byte)
+    mat[:,:] = pv.BEE_NONMATCH
+    
+    # Set matches to match
+    matches = target_subid == query_subid
+    mat[matches] = pv.BEE_MATCH
+    
+    # Set duplicates to don't care.
+    duplicates = target_recid == query_recid
+    mat[duplicates] = pv.BEE_DONTCARE
+    
+    # Check for symetric matrix
+    if symmetric and rows == cols:
+        ts = target_recid.flatten()
+        qs = query_recid.flatten()
+        if (ts == qs).sum() == rows:
+            # Exclude the lower triangle
+            r = np.arange(rows)
+            c = np.arange(cols)
+            r.shape = (rows,1)
+            c.shape = (1,cols)
+            tmp = r > c
+            mat[tmp] = pv.BEE_DONTCARE
+    
+    return pv.BEEDistanceMatrix(mat, query_filename, target_filename)
+
+
+
+

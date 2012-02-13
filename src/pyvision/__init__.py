@@ -202,7 +202,7 @@ from pyvision.other.surf import surf
 
 from pyvision.other.texture import lbp,LBP_CLASSIC,LBP_RAD1,LBP_RAD2,LBP_RAD3,LBP_RAD4,LBP_RAD8
 
-from pyvision.analysis.bee import parseSigSet,saveSigset,BEE_CODE_MAP,BEE_DONTCARE,BEE_MATCH,BEE_NONMATCH,BEEDistanceMatrix
+from pyvision.analysis.bee import parseSigSet,saveSigset,computeMaskMatrix,BEE_CODE_MAP,BEE_DONTCARE,BEE_MATCH,BEE_NONMATCH,BEEDistanceMatrix
 
 from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO,FONT_ARIAL,BUGS_VIDEO,CAR_VIDEO
 
