@@ -497,30 +497,29 @@ class Image:
         
         tw,th = draw.textsize(label, font=font)
             
-        if background != None:
-            point2 = pv.Point( point.x + tw, point.y+th)
-            draw.rectangle([point.asTuple(), point2.asTuple()], fill=background)
-            
         if mark in [True, 'right']:
-            draw.text([point.X()+5,point.Y()-th/2],label,fill=color, font=font)
+            textpt = pv.Point(point.X()+5,point.Y()-th/2)
             box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
-            draw.ellipse(box,outline=color)
         elif mark in ['left']:
-            draw.text([point.X()-tw-5,point.Y()-th/2],label,fill=color, font=font)
+            textpt = pv.Point(point.X()-tw-5,point.Y()-th/2)
             box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
-            draw.ellipse(box,outline=color)
         elif mark in ['below']:
-            draw.text([point.X()-tw/2,point.Y()+5],label,fill=color, font=font)
-            box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
-            draw.ellipse(box,outline=color)
+            textpt = pv.Point(point.X()-tw/2,point.Y()+5)
+            box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]            
         elif mark in ['above']:
-            draw.text([point.X()-tw/2,point.Y()-th-5],label,fill=color, font=font)
+            textpt = pv.Point(point.X()-tw/2,point.Y()-th-5)
             box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
-            draw.ellipse(box,outline=color)
         else:
-            draw.text([point.X(),point.Y()],label,fill=color, font=font)
-
-
+            textpt = point
+            
+        if background != None:
+            point2 = pv.Point( textpt.x + tw, textpt.y+th)
+            draw.rectangle([textpt.asTuple(), point2.asTuple()], fill=background)
+        
+        draw.text([textpt.x,textpt.y],label,fill=color, font=font)    
+        
+        if mark != False:           
+            draw.ellipse(box,outline=color)
 
         del draw
 
