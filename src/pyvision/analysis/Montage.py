@@ -349,6 +349,8 @@ class clickHandler(object):
         if appropriate.
         '''
         IM = self.IM()  #IM object is obtained via weak reference to image montage
+        if IM is None: return #if the reference was deleted already...
+        
         if event == cv.CV_EVENT_LBUTTONDOWN:
             rc = IM._checkClickRegion(x, y)
             if rc == -1 and IM._imgPtr > 0:
