@@ -46,7 +46,8 @@ class ImageMontage(object):
     than "viewports" in the layout.
     '''
 
-    def __init__(self, imageList, layout=(2,4), tileSize=(64,48), gutter=2, byrow=True, nolabels=False, keep_aspect=False):
+    def __init__(self, imageList, layout=(2,4), tileSize=(64,48), gutter=2, byrow=True, labels='index', 
+                keep_aspect=False):
         '''
         Constructor
         @param imageList: A list of pyvision images that you wish to display
@@ -58,9 +59,10 @@ class ImageMontage(object):
         @param byrow: If true, the image tiles are placed in row-major order, that
         is, one row of the montage is filled before moving to the next. If false,
         then column order is used instead.
-        @param nolabels: By default, each image in the montage has a numeric label
-        in the lower left corner indicating the order of the images. If you wish to
-        suppress this label, set nolabels=True.
+        @param labels: Used to show a label at the lower left corner of each image in the montage.
+        If this parameter is a list, then it should be the same length as len(imageList) and contain
+        the label to be used for the corresponding image. If labels == 'index', then the image
+        montage will simply display the index of the image in imageList. Set labels to None to suppress labels.
         @param keep_aspect: If true the original image aspect ratio will be preserved.
         '''
         self._tileSize = tileSize
@@ -72,7 +74,7 @@ class ImageMontage(object):
         self._txtfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 0.5,0.5)
         self._txtcolor = (255,255,255)   
         self._imgPtr = 0
-        self._nolabels = nolabels
+        self._labels = labels
         self._clickHandler = clickHandler(self)
         self._keep_aspect = keep_aspect
         #check if we need to allow for scroll-arrow padding
@@ -220,25 +222,6 @@ class ImageMontage(object):
             y1 = self._size[1]/2
             halfpad = self._xpad / 2
             self._incrArrow = [(x1,y1),(x1-self._xpad+2, y1-halfpad),(x1-self._xpad+2,y1+halfpad)]
-            
-          
-#    def _onClick(self, event, x, y, flags, window):
-#        '''
-#        Handle the mouse click. Increment or Decrement the set of images shown in the montage
-#        if appropriate.
-#        '''
-#        if event == cv.CV_EVENT_LBUTTONDOWN:
-#            rc = self._checkClickRegion(x, y)
-#            if rc == -1 and self._imgPtr > 0:
-#                #user clicked in the decrement region
-#                self._decr()
-#            elif rc == 1 and self._imgPtr < (len(self._images)-(self._rows*self._cols)):
-#                self._incr()
-#            else:
-#                pass #do nothing
-#            
-#            self.draw((x,y))
-#            cv.ShowImage(window, self._cvMontageImage)
         
     def _decr(self):
         '''
@@ -266,7 +249,6 @@ class ImageMontage(object):
             
         self._imgPtr = tmp_ptr
             
-
             
     def _composite(self, img, pos, imgNum):
         '''
@@ -274,8 +256,8 @@ class ImageMontage(object):
         correct position, given by (row,col).
         @param img: The image from which a thumbnail will be composited onto the montage
         @param pos: A tuple (row,col) for the position in the montage layout
-        @param imgNum: The image number used to draw a text label in the lower left corner
-        of each thumbnail.
+        @param imgNum: The image index of the tile being drawn, this helps us display the
+        appropriate label in the lower left corner if self._labels is not None.
         '''
         (row,col) = pos
         
@@ -317,15 +299,22 @@ class ImageMontage(object):
         else:
             cv.Copy(cvTile,cvImg)  #should respect the ROI
 
-        if not self._nolabels:
+        if self._labels == 'index':
             #draw image number in lower left corner, respective to ROI
-            ((tw,th),_) = cv.GetTextSize("%d"%imgNum, self._txtfont)
+            lbltext = "%d"%imgNum
+        elif type(self._labels) == list:
+            lbltext = str( self._labels[imgNum])
+        else:
+            lbltext = None
+            
+        if not lbltext is None:
+            ((tw,th),_) = cv.GetTextSize(lbltext, self._txtfont)
             #print "DEBUG: tw, th = %d,%d"%(tw,th)
             if tw>0 and th>0:
                 cv.Rectangle(cvImg, (0,self._tileSize[1]-1),(tw+1,self._tileSize[1]-(th+1)-self._gutter), (0,0,0), thickness=cv.CV_FILLED )
                 font = self._txtfont
                 color = self._txtcolor
-                cv.PutText(cvImg, "%d"%imgNum, (1,self._tileSize[1]-self._gutter-2), font, color)                        
+                cv.PutText(cvImg, lbltext, (1,self._tileSize[1]-self._gutter-2), font, color)                        
                    
         #reset ROI 
         cv.SetImageROI(cvImg, (0,0,self._size[0],self._size[1]))
@@ -423,7 +412,7 @@ class VideoMontage(pv.Video):
         for k in keys:
             imageList.append( self.imgs[k] )
             
-        im = ImageMontage(imageList, self.layout, self.vidsize, gutter=2, byrow=True)      
+        im = ImageMontage(imageList, self.layout, self.vidsize, gutter=2, byrow=True, labels=keys)      
         return im.asImage()
     
 def demo_imageMontage():
@@ -462,13 +451,12 @@ def demo_videoMontage():
         img.show("Video Montage", delay=60, pos=(10,10))
     
 #if __name__ == '__main__':
-#    pass
 
-#print "Demo of an Image Montage..."
-#demo_imageMontage()
-
-#print "Demo of a Video Montage..."
-#demo_videoMontage()
+#    print "Demo of an Image Montage..."
+#    demo_imageMontage()
+    
+#    print "Demo of a Video Montage..."
+#    demo_videoMontage()
 
 
 
