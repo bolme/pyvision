@@ -198,6 +198,8 @@ from pyvision.ml.pca import prcomp, pca
 
 from pyvision.ml.lda import lda
 
+from pyvision.ml.regression import LogisticRegression
+
 from pyvision.other.surf import surf
 
 from pyvision.other.texture import lbp,LBP_CLASSIC,LBP_RAD1,LBP_RAD2,LBP_RAD3,LBP_RAD4,LBP_RAD8
