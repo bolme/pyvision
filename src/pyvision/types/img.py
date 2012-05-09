@@ -43,6 +43,8 @@ import ImageFont
 
 from PIL.Image import BICUBIC, ANTIALIAS
 
+import exif
+
 import numpy
 import numpy as np
 import cv
@@ -332,6 +334,35 @@ class Image:
         cv.CvtColor(cvim, dst, cv.CV_BGR2Lab)
         
         return dst
+    
+    def getExif(self,output='simple'):
+        '''
+        This function returns the exif headers for an image.  This only works 
+        for images that have been read from disk.
+        
+        @param output: select 'simple' or 'full'. 'full' output contains additional metadata.
+        @returns: a dictionary of EXIF data.
+        '''
+        if self.type == TYPE_PIL and self.filename != None:
+            result = {}
+            info = self.pil._getexif()
+            for key,value in info.iteritems():
+                tag = "ukn_%s"%key
+                if exif.EXIF_TAGS.has_key(key):
+                    tag = exif.EXIF_TAGS[key][0]
+                    datatype = exif.EXIF_TAGS[key][1]
+                    category = exif.EXIF_TAGS[key][2]
+                    description = exif.EXIF_TAGS[key][3]
+                    
+                if isinstance(value,tuple) and len(value) == 2 and value[1] > 0:
+                    value = float(value[0])/float(value[1])
+                if output == 'simple': 
+                    result[tag] = value
+                else:   
+                    result[tag] = (value,key,datatype,category,description)
+            return result
+        else:
+            return None    
         
         
     def annotateRect(self,rect,color='red', fill_color=None):
@@ -933,6 +964,9 @@ class Image:
             key = cv.WaitKey(delay=delay)
             del x
             return key
+    def __repr__(self):
+        
+        return "pv.Image(w=%d,h=%d,c=%d,type=%s)"%(self.width,self.height,self.channels,self.type)
 ##
 # Convert a 32bit opencv matrix to a numpy matrix
 def OpenCVToNumpy(cvmat):
