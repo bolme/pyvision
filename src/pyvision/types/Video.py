@@ -90,7 +90,8 @@ class VideoInterface(object):
         raise NotImplemented
     
     def play(self, window="Input", pos=None, delay=20, 
-             annotate=True, imageBuffer=None, onNewFrame=None, **kwargs ):
+             annotate=True, imageBuffer=None, startframe=0, endframe=None,
+             onNewFrame=None, **kwargs ):
         '''
         Plays the video, calling the onNewFrame function after loading each
          frame from the video. The user may interrupt video playback by
@@ -115,6 +116,12 @@ class VideoInterface(object):
         subtraction, for example. The buffer contents is directly modified each
         time a new image is captured from the video, and a reference to the buffer
         is passed to the onNewFrame function (defined below).
+        @param startframe: If > 0, then the video will cue itself by quickly fast-forwarding
+        to the desired start frame before any images are shown. During the cueing process,
+        any _onNewFrame function callbacks (or VideoStreamProcessor objects) will NOT be
+        activated.
+        @param endframe: If not None, then the playback will end after this frame has
+        been processed.
         @param onNewFrame: A python callable object (function) with a
         signature of 'foo( pvImage, frameNum, key=None, buffer=None )', where key is
         the key pressed by the user (if any) during the pauseAndPlay interface, and
@@ -132,6 +139,10 @@ class VideoInterface(object):
             delayObj = {'wait_time':delay, 'current_state':'PLAYING'}
         key=''
         for fn, img in enumerate(vid):
+            if fn == 0 and startframe > 0: print "Cueing video to start at %d"%startframe
+            if fn < startframe: continue
+            if not endframe is None and fn > endframe: break
+            
             if imageBuffer != None:
                 imageBuffer.add(img)
                 
