@@ -102,6 +102,7 @@ class FrameNumberVSP(AbstractVSP):
         pt = pv.Point(10, 10)
         img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white", background="black")
         if self._windowName != None: img.show(window=self._windowName, delay=1)
+        return img
  
 #TODO: There seems to be a bug in the video writing output when writing
 # frames from some source video objects in some output sizes. The symptom
@@ -155,6 +156,7 @@ class VideoWriterVSP(AbstractVSP):
            
     def _onNewFrame(self, img, fn, **kwargs):
         self.addFrame(img)
+        return img
 
 class ResizerVSP(AbstractVSP):
     '''This VSP resizes each frame of video. Subsequent VSPs in a chain
@@ -194,6 +196,7 @@ class MotionDetectionVSP(AbstractVSP):
             if self._windowName != None: img.show(window=self._windowName, delay=1)
             #img_fg = md.getForegroundPixels()
             #img_fg.show("Foreground")
+        return img
             
 class PeopleDetectionVSP(AbstractVSP):
     ''' This Video Stream Processor applies the OpenCV HOG people detector
@@ -203,6 +206,7 @@ class PeopleDetectionVSP(AbstractVSP):
         rects = self._detectPeople(img)
         for r in rects: img.annotateRect(r)
         if self._windowName != None: img.show(window=self._windowName, delay=1)
+        return img
         
     def _detectPeople(self, img):
         cvim = img.asOpenCV()  #convert to OpenCV format before using OpenCV functions
