@@ -346,6 +346,8 @@ class Image:
         if self.type == TYPE_PIL and self.filename != None:
             result = {}
             info = self.pil._getexif()
+            if info == None:
+                return None
             for key,value in info.iteritems():
                 tag = "ukn_%s"%key
                 if exif.EXIF_TAGS.has_key(key):
