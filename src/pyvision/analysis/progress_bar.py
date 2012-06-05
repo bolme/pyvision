@@ -23,7 +23,13 @@ class ProgressBar:
         self.amount = 0       # When amount == max, we are 100% done 
         self.updateAmount(0)  # Build progress bar string
 
-    def updateAmount(self, newAmount = 0):
+    def updateAmount(self, newAmount = None):
+        '''
+        Update the progress bar.  By default this will increment the amount by 1.
+        
+        After calling this make sure to call show() to display the progress bar. 
+        '''
+        if newAmount == None: newAmount = self.amount + 1
         if newAmount < self.min: newAmount = self.min
         if newAmount > self.max: newAmount = self.max
         self.amount = newAmount
