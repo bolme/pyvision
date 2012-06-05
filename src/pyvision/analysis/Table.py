@@ -185,6 +185,42 @@ class Table:
                 return text + " "*pad
 
         return text #TODO:
+
+    def asHtml(self, print_col_headers = True, print_row_headers = False, equal_cols = False, style='simple'):
+        result = "<TABLE CELLPADDING=6 CELLSPACING=0>\n"
+        result += '  <TR BGCOLOR="#D3C6AD">\n'
+        result += '    '
+        for col in self.col_headers:
+            result += '<TH>%s</TH>'%col
+        result += '\n'
+        result += '  </TR>\n'
+        
+        i = 0
+        for row in self.row_headers:
+            bgcolor = '#FBEBCE'
+            if i % 2 == 1:
+                bgcolor = '#EFE0C4'
+            result += '  <TR BGCOLOR="%s">\n'%bgcolor
+            result += '    '
+            for col in self.col_headers:
+                align = 'LEFT'
+                try:
+                    #Check to see if the text looks like a number
+                    val = float(self[row,col])
+                    align = 'RIGHT'
+                except:
+                    # Default, justify left
+                    pass
+
+                val = self.elementAsText(row,col)
+                result += '<TD ALIGN=%s>%s</TD>'%(align,val)
+            result += '\n'
+            result += '  </TR>\n'
+            i += 1
+        result += "</TABLE>\n"
+        return result
+        
+
     
     def asPlainText(self, print_col_headers = True, print_row_headers = True, equal_cols = False, separator="|"):
         '''Returns a text string which is a formated table.''' 
