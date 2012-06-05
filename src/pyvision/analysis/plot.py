@@ -9,6 +9,7 @@ import numpy as np
 import PIL
 import os.path
 import PIL.ImageFont
+import copy
 random = np.random
 
 arial_path = os.path.join(pv.__path__[0],'config','Arial.ttf')
@@ -94,8 +95,9 @@ class Label:
         
 
 class Points:
-    def __init__(self,points,color='black',shape=0,size=3,label=None,lty=None,width=1):
+    def __init__(self,points,type,color='black',shape=0,size=3,label=None,lty=None,width=1):
         ''''''
+        self.type = type
         self.points = points
         self.color = color
         self.shape = shape
@@ -109,12 +111,14 @@ class Points:
         ''''''
         points = [ (plot.x(x,bounds),plot.y(y,bounds)) for x,y in self.points]
         
-        if self.lty != None:
+        if self.type == 'lines':
             self.drawCurve(points,buffer)
-
-        if self.shape != None:
+        elif self.type == 'points':
             self.drawPoints(points,buffer)
-
+        elif self.type == 'polygon':
+            self.drawPolygon(points,buffer)
+        else:
+            raise ValueError("unknown type: %s"%(self.type,))
 
     def drawCurve(self,points,buffer):
         draw = PIL.ImageDraw.Draw(buffer)
@@ -123,6 +127,13 @@ class Points:
             draw.line([prev_x,prev_y,x,y],fill=self.color,width=self.width)
             prev_x = x
             prev_y = y
+        del draw        
+        
+    def drawPolygon(self,points,buffer):
+        if len(points) < 3:
+            return # No Op
+        draw = PIL.ImageDraw.Draw(buffer)
+        draw.polygon(points, fill=self.color)
         del draw        
         
     def drawPoints(self,points,buffer):
@@ -320,7 +331,7 @@ class Plot:
         pil.paste(buffer,(self.left,self.top))
         
         draw = PIL.ImageDraw.Draw(pil)
-        draw.rectangle((self.left,self.top,self.left+w,self.top+w),outline='black',fill=None)
+        draw.rectangle((self.left,self.top,self.left+w,self.top+h),outline='black',fill=None)
         del draw
         
         # Draw the X axis labels
@@ -487,19 +498,25 @@ class Plot:
     def points(self,points,color='black',shape=0,size=3,label=None,lty=None,width=1):
         ''' render multiple points'''
         points = self.convertPoints(points)
-        points = Points(points,color=color,shape=shape,size=size,label=label,lty=lty,width=width)
+        points = Points(points,'points',color=color,shape=shape,size=size,label=label,lty=lty,width=width)
         self.graphics.append(points)
     
     def point(self,point,color='black',shape=0,size=3,label=None,lty=None,width=1):
         ''' render a single point '''
         points = self.convertPoints([point])
-        points = Points(points,color=color,shape=shape,size=size,label=label,lty=lty,width=width)
+        points = Points(points,'points',color=color,shape=shape,size=size,label=label,lty=lty,width=width)
         self.graphics.append(points)
     
     def lines(self,points,color='black',shape=None,size=3,label=None,lty=1,width=1):
         ''' render a single point '''
         points = self.convertPoints(points)
-        points = Points(points,color=color,shape=shape,size=size,label=label,lty=lty,width=width)
+        points = Points(points,'lines',color=color,shape=shape,size=size,label=label,lty=lty,width=width)
+        self.graphics.append(points)
+        
+    def polygon(self,points,color='black',shape=None,size=3,label=None,lty=1,width=1):
+        ''' render a single point '''
+        points = self.convertPoints(points)
+        points = Points(points,'polygon',color=color,shape=shape,size=size,label=label,lty=lty,width=width)
         self.graphics.append(points)
         
     def show(self,**kwargs):
