@@ -64,6 +64,7 @@ CELEB2_CASCADE=os.path.join(pv.__path__[0],"config","facedetector_celebdb2.xml")
 FULLBODY_CASCADE=os.path.join(pv.__path__[0],"config","haarcascade_fullbody.xml")
 UPPERBODY_CASCADE=os.path.join(pv.__path__[0],"config","haarcascade_upperbody.xml")
 LOWERBODY_CASCADE=os.path.join(pv.__path__[0],"config","haarcascade_lowerbody.xml")
+UPPERBODY_MCS_CASCADE=os.path.join(pv.__path__[0],"config","haarcascade_mcs_upperbody.xml")
 
 DEFAULT_NEGATIVE=os.path.join(pv.__path__[0],"data","nonface")
 
