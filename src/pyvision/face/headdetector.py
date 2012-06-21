@@ -38,7 +38,7 @@ class HeadDetector(object):
     detect faces.  The goal is to be slow but accurate.
     '''
     
-    def __init__(self,prescale=0.25,weights=WEIGHTS):
+    def __init__(self,prescale=0.25,weights=WEIGHTS,default=True):
         ''' Initialize the detector with default parameters. '''
         # Look for very small faces
         self.fd = cd.CascadeDetector(min_size=(30,30))
@@ -48,6 +48,9 @@ class HeadDetector(object):
 
         # Scale
         self.prescale = prescale
+        
+        # Returns a detection that can be used as a default if no other detections are avalible
+        self.default = default
         
         # This regression will provide a quality score for the detector.
         self.quality = pv.LogisticRegression()
@@ -68,9 +71,17 @@ class HeadDetector(object):
             # Assign a qualty score to each detection.
             score = self.quality.predict(each[2:])
             rect.detector = each[1]
-            rect.score = score
+            rect.score = score[0]
             faces.append(rect)
             
+        # Add a default
+        if self.default == True:
+            w,h = im.size
+            s = 0.75*min(w,h)
+            default = pv.CenteredRect(0.5*w,0.5*h,s,s)
+            default.score = 0.0
+            default.detector = "DEFAULT"
+            faces.append(default)
         # Order the list by score.            
         faces.sort(lambda x,y: -cmp(x.score,y.score))
         
