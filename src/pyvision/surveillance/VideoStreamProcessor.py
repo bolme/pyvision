@@ -36,6 +36,7 @@ Created on Mar 18, 2011
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import pyvision as pv
 import cv
+
 '''
 This module implements various Video Stream Processors, or VSPs for short.
 A VSP is designed to encapsulate a per-frame operation that can be
@@ -56,6 +57,7 @@ vid = pv.Video(sourceFile)
 vid.play(window=None, delay=25, onNewFrame=vsp_disp)
 '''
 
+VSP_SWALLOW_IMG = -1 #special return onNewFrame to indicate that the frame should be skipped, and not passed downstream
 
 class AbstractVSP():
     '''AbstractVSP is the abstract class definition of a
@@ -76,14 +78,27 @@ class AbstractVSP():
         self._nextModule = nextModule
     
     def __call__(self, img, fn, **kwargs):
-        newImg = self._onNewFrame(img, fn, **kwargs)
-        if self._nextModule != None:
-            if newImg != None:
-                #we have a new image to replace the current one instream
-                kwargs['orig_img']=img #add a new keyword arg to allow access to origininal img
-                self._nextModule(newImg, fn, **kwargs)
-            else:
-                self._nextModule(img, fn, **kwargs)
+        rc = self._onNewFrame(img, fn, **kwargs)
+        if type(rc) == list or type(rc) == tuple:
+            #then we should have (newImg, newFn)
+            (newImg, fn) = rc  #we overwrite the fn parameter that downstream modules will see
+        else:
+            #rc should be just newImg to pass on to next Module
+            newImg = rc
+            
+        if newImg == VSP_SWALLOW_IMG:
+            #special return indicates that the nextModule should
+            # not be called at this iteration...the current input image
+            # should be swallowed with no output
+            pass
+        else:
+            if self._nextModule != None:
+                if newImg != None:
+                    #we have a new image to replace the current one instream
+                    kwargs['orig_img']=img #add a new keyword arg to allow access to origininal img
+                    self._nextModule(newImg, fn, **kwargs)
+                else:
+                    self._nextModule(img, fn, **kwargs)
             
     def _onNewFrame(self, img, fn, **kwargs):
         ''' Override this abstract method with the processing your object
@@ -97,10 +112,25 @@ class AbstractVSP():
 class FrameNumberVSP(AbstractVSP):
     '''A simple VSP object simply displays the input video frame with
     some simple annotation to show the frame number in upper left corner.
+    NOTE: The vid.play(...) method will automatically add a frame number
+    annotation to the source image, which can be problematic for downstream
+    processing. Instead, call vid.play(...,annotate=False) to suppress
+    the frame number display, and then use this FrameNumberVSP as a final
+    step to put the frame number on the video after any processing has
+    occurred.
     '''        
+    def __init__(self, display_pad=4, window=None, nextModule=None):
+        '''
+        Constructor
+        @param display_pad: Pads the frame number with leading zeros
+        in order to have at least this many digits.
+        '''
+        self.pad = display_pad
+        AbstractVSP.__init__(self, window, nextModule)
+        
     def _onNewFrame(self, img, fn, **kwargs):
         pt = pv.Point(10, 10)
-        img.annotateLabel(label="Frame: %d"%(fn+1), point=pt, color="white", background="black")
+        img.annotateLabel(label="Frame: %s"%str(fn+1).zfill(self.pad), point=pt, color="white", background="black")
         if self._windowName != None: img.show(window=self._windowName, delay=1)
         return img
  
@@ -170,6 +200,43 @@ class ResizerVSP(AbstractVSP):
         img = img.resize(self._newSize)
         if self._windowName != None: img.show(window=self._windowName, delay=1)
         return img
+        
+class FrameSkipperVSP(AbstractVSP):
+    '''
+    This is a video stream processor that is used to skip every k frames
+    in a source video. You might put this vsp as the first step in processing
+    if you need to adjust a 60fps video, for example, to skip every other frame
+    so that downstream processing sees 30fps input.
+    
+    Downstream modules will see a renumbered video stream. For example, if every-other
+    frame was being skipped, the nextModule would still see its frame number input as 0,1,2,3,...
+    even though in reality it is receiving frames 0,2,4,... from the source video.
+    '''
+    def __init__(self, skip_param=0, nextModule=None):
+        '''
+        Constructor
+        @param skip_param: If 0, then no frames are skipped. Otherwise a frame
+        is skipped if (frame_number + 1) modulo skip_param == 0. For example, with
+        skip_param of 2, then frames 1,3,5,7,... will be dropped.
+        '''
+        self.skip_param = skip_param
+        if skip_param == 1:
+            print "Warning, you specified a skip_param of 1 for the frame skipper VSP."
+            print "This means ALL frames will be suppressed."
+            
+        pv.AbstractVSP.__init__(self, window=None, nextModule=nextModule)
+             
+    def _onNewFrame(self, img, fn, **kwargs):
+        if self.skip_param == 0:
+            #special case, do nothing
+            return img
+        
+        if ( (fn+1) % self.skip_param ) == 0:
+            return VSP_SWALLOW_IMG
+        else:
+            newFn = int( round( (1 - (1.0/self.skip_param))*fn) )
+            return (img, newFn) #let this one through, provide new frame number
+            
         
 class MotionDetectionVSP(AbstractVSP):
     ''' This VSP uses an existing motion detection object to apply motion
