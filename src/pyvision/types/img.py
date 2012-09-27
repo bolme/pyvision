@@ -509,6 +509,23 @@ class Image:
         draw.ellipse(box,outline=color,fill=fill)
         del draw
         
+    def annotateArc(self,point, radius=3, startangle=0, endangle=360, color='red'):
+        '''
+        Draws a circular arc on the image.
+        @param point: the center of the circle as type Point
+        @param radius: the radius of the circle
+        @param startangle: the starting angle of the arc segment to be drawn, in degrees
+        @param endangle: the ending angle in degrees. Arc will be drawn clockwise from
+        starting angle to ending angle.
+        @param color: defined as ('#rrggbb' or 'name') 
+        '''
+        im = self.asAnnotated()
+        draw = PIL.ImageDraw.Draw(im)
+        box = [int(point.X()-radius),int(point.Y()-radius),
+               int(point.X()+radius),int(point.Y()+radius)]
+        draw.arc(box, int(startangle), int(endangle), fill=color)
+        del draw
+                
     def annotateLabel(self,point,label,color='red',mark=False, font=None, background=None):        
         '''
         Marks a point in the image with text 
