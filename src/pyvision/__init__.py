@@ -218,6 +218,7 @@ from pyvision.face import REDUCED_LEYE, REDUCED_REYE, REDUCED_SIZE
 
 from types.kinect import Kinect
 
+from pyvision.surveillance.kalman import KalmanFilter
 
 
 # Import the beta components
