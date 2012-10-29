@@ -83,7 +83,7 @@ if __name__ == '__main__':
     
     #Demonstrate use of ImageMontage class to show a few small images in a single window
     print "Have the image montage focused in UI and hit spacebar to continue..."
-    imontage = pv.ImageMontage([im,edges,logo,logo_surf], layout=(2,2), tileSize=im.size, gutter=3, byrow=True, nolabels=True)
+    imontage = pv.ImageMontage([im,edges,logo,logo_surf], layout=(2,2), tileSize=im.size, gutter=3, byrow=True, labels=None)
     imontage.show(window="Image Montage", delay=0)
     
     #Show the images stored to the image log object
