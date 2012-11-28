@@ -33,6 +33,7 @@
 
 import csv
 import StringIO
+import pyvision as pv
 
 def convertVal(val):
     if val in ("True","False"):
@@ -348,6 +349,34 @@ class Table:
                 tmp.append(self.element(row,col))
             result.append(tmp)
         
+        return result
+        
+        
+    def head(self,N=10):
+        '''Returns a table from the first N rows.'''
+        rows = self.row_headers
+        cols = self.col_headers
+        
+        result = pv.Table()
+        
+        for row in rows[:N]:
+            for col in cols:
+                result[row,col] = self[row,col]
+            
+        return result
+        
+        
+    def tail(self,N=10):
+        '''Returns a table from the last N rows.'''
+        rows = self.row_headers
+        cols = self.col_headers
+        
+        result = pv.Table()
+        
+        for row in rows[-N:]:
+            for col in cols:
+                result[row,col] = self[row,col]
+            
         return result
         
         
