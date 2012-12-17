@@ -191,6 +191,9 @@ class Table:
         result = "<TABLE CELLPADDING=6 CELLSPACING=0>\n"
         result += '  <TR BGCOLOR="#D3C6AD">\n'
         result += '    '
+        if print_row_headers:
+            result += '<TD ALIGN=LEFT></TD>'
+        
         for col in self.col_headers:
             result += '<TH>%s</TH>'%col
         result += '\n'
@@ -203,6 +206,8 @@ class Table:
                 bgcolor = '#EFE0C4'
             result += '  <TR BGCOLOR="%s">\n'%bgcolor
             result += '    '
+            if print_row_headers:
+                result += '<TD ALIGN=LEFT>%s</TD>'%(row,)
             for col in self.col_headers:
                 align = 'LEFT'
                 try:
