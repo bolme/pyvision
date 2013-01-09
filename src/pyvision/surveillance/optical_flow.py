@@ -68,7 +68,7 @@ class OpticalFlow:
         # Divide the image in to gridXgrid regions
         self.grid = 5
         
-        # Require a minimum number of points per grid
+        # Require a minimum number of points_b per grid
         self.min_points = 5
         
         self.n = 0
@@ -80,8 +80,8 @@ class OpticalFlow:
         
     def update(self,frame):
         '''
-        This tracks the points to the next frame using the LK tracker.
-        Add more good points to track.
+        This tracks the points_b to the next frame using the LK tracker.
+        Add more good points_b to track.
         
         @param frame: update optical flow for the frame.
         @type frame: pv.Image
@@ -132,7 +132,7 @@ class OpticalFlow:
             cv.Resize(cvim,self.frame)
         
         
-            # Track the points (optical flow)
+            # Track the points_b (optical flow)
             new_tracks = self._opticalFlow()
         
             
@@ -157,7 +157,7 @@ class OpticalFlow:
             cv.FindHomography(dst_points,src_points,self.homography_rev,cv.CV_LMEDS,1.5,mask)
             cv.FindHomography(src_points,dst_points,self.homography,cv.CV_LMEDS,1.5,mask)
             
-            # Drop bad points
+            # Drop bad points_b
             self.tracks = []
             self.bad_points = []
             for i in range(n):
@@ -168,7 +168,7 @@ class OpticalFlow:
                     
             self.n = len(self.tracks)
             
-            # Add new points
+            # Add new points_b
             self._selectTrackingPoints(self.frame)
             
             self.prev_input.to_next = self.asHomography(forward = False)
@@ -180,7 +180,7 @@ class OpticalFlow:
             
     def _selectTrackingPoints(self,frame):
         '''
-        This uses the OpenCV get good features to track to initialize a set of tracking points.
+        This uses the OpenCV get good features to track to initialize a set of tracking points_b.
         '''
         quality = 0.01
         min_distance = 15
@@ -207,10 +207,10 @@ class OpticalFlow:
                     eig = cv.CreateImage ((tw,th), 32, 1)
                     temp = cv.CreateImage ((tw,th), 32, 1)
                 
-                    # search the good points
-                    points = cv.GoodFeaturesToTrack (gray, eig, temp, 2*self.min_points, quality, min_distance, None, 3, 0, 0.04)
+                    # search the good points_b
+                    points_b = cv.GoodFeaturesToTrack (gray, eig, temp, 2*self.min_points, quality, min_distance, None, 3, 0, 0.04)
                     
-                    for pt in points:
+                    for pt in points_b:
                         self.tracks.append(ul+pv.Point(pt))
                                         
         
@@ -233,7 +233,7 @@ class OpticalFlow:
         for each in self.tracks:
             cv_points.append((each.X(),each.Y()))
         
-        points, status, errors,= cv.CalcOpticalFlowPyrLK (
+        points_b, status, errors,= cv.CalcOpticalFlowPyrLK (
                     prev_grey, 
                     grey, 
                     prev_pyramid, 
@@ -245,7 +245,7 @@ class OpticalFlow:
                     flags)
                 
         result = []
-        for pt in points:
+        for pt in points_b:
             result.append(pv.Point(pt))
     
         return result

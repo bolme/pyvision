@@ -18,13 +18,13 @@ class VideoTask(object):
     '''
     
     # TODO: optional args should also be added which are included if avalible but will not delay execution if they are not avalible. 
-    def __init__(self,frame_id,required_args=[]):
+    def __init__(self,frame_id,args=[]):
         '''
         @param frame_id: the frame_id associated with this task.
-        @param required_args: specification of the data that is required to execute the task.
+        @param args: specification of the data that is required to execute the task.
         '''
         self.frame_id = frame_id
-        self.required_args = required_args
+        self.args = args
     
     def getFrameId(self):
         '''
@@ -36,7 +36,7 @@ class VideoTask(object):
         '''
         @returns: the list of required data.
         '''
-        return self.required_args
+        return self.args
         
     def execute(self, *args, **kwargs):
         '''
@@ -109,7 +109,7 @@ class VideoTaskManager(object):
     that data becomes available the task will be executed.
     '''
     
-    def __init__(self,debug_level=0, buffer_size=10):
+    def __init__(self,debug_level=0, buffer_size=10, show = False):
         '''
         Create a task manager.
         
@@ -128,6 +128,7 @@ class VideoTaskManager(object):
         self.buffer_size = buffer_size
         
         self.frame_list = []
+        self.show = show
         
         if self.debug_level >= 3:
             print "TaskManager[INFO]: Initialized"
@@ -217,7 +218,8 @@ class VideoTaskManager(object):
         
         @returns: false if task should be deleted and true otherwise.
         '''
-        if task.getFrameId() < self.frame_id - self.buffer_size:
+        #print "task check = ",self.frame_id - task.getFrameId(),self.buffer_size
+        if self.frame_id - task.getFrameId() > self.buffer_size:
             if self.debug_level >= 2: 
                 print "TaskManager[WARNING]: Task %s for frame %d was not executed."%(task,task.getFrameId())
             
@@ -227,7 +229,18 @@ class VideoTaskManager(object):
         # Attempt to fetch the data needed by this task.
         try:
             data_request = task.required()
-            data_items = [self.data_cache[key] for key in data_request]
+            # data_items = [self.data_cache[key] for key in data_request]
+            data_items = []
+            for key in data_request:
+                if self.data_cache.has_key(key[:2]):
+                    data_items.append(self.data_cache[key[:2]])
+                elif len(key) > 2:
+                    # Use the default value
+                    data_items.append(_VideoDataItem(key))
+                else:
+                    # Data is not yet available
+                    return True
+                
             # Create an argument list
             args = [each.getData() for each in data_items]
             # Mark these items as touched
@@ -242,7 +255,14 @@ class VideoTaskManager(object):
         # Run the task.
         start = time.time()
         result = task.execute(*args)
+        try:
+            len(result)
+        except:
+            raise Exception("Task did not return a valid list of data.\n    Task: %s\n    Data:%s"%(task,result))
+                            
         for data_item in result:
+            if len(data_item) != 3:
+                raise Exception("Task returned a data item that does not have 3 elements.\n    Task: %s\n    Data: %s"%(task,data_item))
             key = data_item[:2]
             self.data_cache[key] = _VideoDataItem(data_item)
         stop = time.time() - start
@@ -290,7 +310,8 @@ class VideoTaskManager(object):
             frame = frame_data.getData()
             task_count = self._remainingTasksForFrame(frame_id)
             if task_count == 0:
-                frame.show(delay=30)
+                if self.show:
+                    frame.show(delay=30)
                 if ilog != None:
                     ilog(frame,format='jpg')
                 del self.frame_list[0]

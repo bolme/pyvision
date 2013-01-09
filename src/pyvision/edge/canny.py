@@ -49,11 +49,13 @@ def canny(im,threshold1=40.0,threshold2=100.0,aperture_size=3,sigma=None):
     '''
     gray = im.asOpenCVBW()
     edges = cv.CreateImage( cv.GetSize(gray), 8, 1 );
+    
 
     if sigma!=None:
-        cv.Smooth(gray,gray,cv.CV_GAUSSIAN,int(sigma)*4+1,int(sigma)*4+1,sigma,sigma)
-    
-    cv.Canny(gray,edges,threshold1,threshold2,aperture_size)
+        cv.Smooth(gray,gray,cv.CV_GAUSSIAN,int(sigma+1)*4+1,int(sigma+1)*4+1,sigma,sigma)
+    if threshold1 < threshold2:
+        threshold1, threshold2 = threshold2,threshold1
+    cv.Canny(gray,edges,threshold1,threshold2   ,aperture_size)
     
     return pv.Image(edges)
     
@@ -62,7 +64,7 @@ class _TestCanny(unittest.TestCase):
     ''' Unit tests for the canny detector'''
     
     def setUp(self):
-        self.show_results = False
+        self.show_results = True
         pass
         
     def test_canny1(self):

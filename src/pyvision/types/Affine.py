@@ -66,39 +66,39 @@ from pyvision.types.Rect import Rect
 from pyvision.vector.RANSAC import RANSAC,LMeDs
 
 
-def AffineNormalizePoints(points):
+def AffineNormalizePoints(points_b):
     '''
-    Create a transform that centers a set of points such that there mean is (0,0)
+    Create a transform that centers a set of points_b such that there mean is (0,0)
     and then scale such that there average distance from (0,0) is 1.0
      
-    @param points: list of link.Point to normalize
+    @param points_b: list of link.Point to normalize
     @returns: an AffineTransform object
     '''
     # compute the center
     mean = Point(0,0)
     count = 0
-    for point in points:
+    for point in points_b:
         mean += point
         count += 1
     mean = (1.0/count)*mean
     
-    # mean center the points
+    # mean center the points_b
     center = AffineTranslate(-mean.X(),-mean.Y(),(0,0))
-    points = center.transformPoints(points)
+    points_b = center.transformPoints(points_b)
     
     # Compute the mean distance
     mean_dist = 0.0
     count = 0
-    for point in points:
+    for point in points_b:
         x,y = point.X(),point.Y()
         dist = sqrt(x*x+y*y)
         mean_dist += dist
         count += 1
     mean_dist = (1.0/count)*mean_dist
     
-    # Rescale the points
+    # Rescale the points_b
     scale = AffineScale(1.0/mean_dist,(0,0))
-    points = scale.transformPoints(points)
+    points_b = scale.transformPoints(points_b)
     
     # compute the composite transform
     norm = scale*center
@@ -211,15 +211,15 @@ def AffineFromTile(center,new_size,filter=BILINEAR):
 def AffineFromPoints(src1,src2,dst1,dst2,new_size,filter=BILINEAR):
     ''' 
     An affine transform that will rotate, translate, and scale to map one 
-    set of points to the other. For example, to align eye coordinates in face images.
+    set of points_b to the other. For example, to align eye coordinates in face images.
      
-    Find a transform (a,b,tx,ty) such that it maps the source points to the 
-    destination points::
+    Find a transform (a,b,tx,ty) such that it maps the source points_b to the 
+    destination points_b::
      
         a*x1-b*y1+tx = x2
         b*x1+a*y1+ty = y2
      
-    The mapping between the two points creates a set of  four linear equations 
+    The mapping between the two points_b creates a set of  four linear equations 
     with four unknowns. This set of equations is solved to find the transform.
     
     @param src1: the first link.Point in the source image.
@@ -250,16 +250,16 @@ def AffineFromPoints(src1,src2,dst1,dst2,new_size,filter=BILINEAR):
 def AffineFromPointsLS(src,dst,new_size,filter=BILINEAR, normalize=True):  
     '''
      An affine transform that will rotate, translate, and scale to map one 
-     set of points to the other. For example, to align eye coordinates in face images.
+     set of points_b to the other. For example, to align eye coordinates in face images.
      
-     Find a transform (a,b,tx,ty) such that it maps the source points to the 
-     destination points::
+     Find a transform (a,b,tx,ty) such that it maps the source points_b to the 
+     destination points_b::
      
          a*x1-b*y1+tx = x2
          b*x1+a*y1+ty = y2
      
      This method minimizes the squared error to find an optimal fit between the 
-     points.
+     points_b.
     
      @param src: a list of link.Points in the source image.
      @param dst: a list of link.Points in the destination image.
@@ -297,19 +297,69 @@ def AffineFromPointsLS(src,dst,new_size,filter=BILINEAR, normalize=True):
     return AffineTransform(matrix,new_size,filter)
 
 
+def AffineFromPointsLS(src,dst,new_size,filter=BILINEAR, normalize=True):  
+    '''
+     An affine transform that will rotate, translate, and scale to map one 
+     set of points_b to the other. For example, to align eye coordinates in face images.
+     
+     Find a transform (a,b,tx,ty) such that it maps the source points_b to the 
+     destination points_b::
+     
+         a*x1+(-b+c)*y1+tx = x2
+         (b+d)*x1+a*y1+ty = y2
+     
+     This method minimizes the squared error to find an optimal fit between the 
+     points_b.
+    
+     @param src: a list of link.Points in the source image.
+     @param dst: a list of link.Points in the destination image.
+     @param new_size: new size for the image.
+     @param filter: PIL filter to use.
+    '''  
+    if normalize:
+        # Normalize Points
+        src_norm = AffineNormalizePoints(src)
+        src = src_norm.transformPoints(src)
+        dst_norm = AffineNormalizePoints(dst)
+        dst = dst_norm.transformPoints(dst)
+    
+    # Compute the transformation parameters
+    A = []
+    b = []
+    for i in range(len(src)):
+        A.append([src[i].X(),-src[i].Y(),src[i].Y(),0,1,0])
+        A.append([src[i].Y(), src[i].X(),0,1])
+        b.append(dst[i].X())
+        b.append(dst[i].Y())
+         
+    A = array(A)
+    b = array(b)
+        
+    result,resids,rank,s = lstsq(A,b)
+    
+    a,b,c,d,tx,ty = result    
+    # Create the transform matrix
+    matrix = array([[a,-b+c,tx],[b+d,a,ty],[0,0,1]],'d')
+    
+    if normalize:
+        matrix = dot(dst_norm.inverse,dot(matrix,src_norm.matrix))
+
+    return AffineTransform(matrix,new_size,filter)
+
+
 def AffineFromPointsRANSAC(src,dst,new_size,filter=BILINEAR, normalize=True,tol=0.15):
     '''
     An affine transform that will rotate, translate, and scale to map one 
-    set of points to the other. For example, to align eye coordinates in face images.
+    set of points_b to the other. For example, to align eye coordinates in face images.
      
-    Find a transform (a,b,tx,ty) such that it maps the source points to the 
-    destination points::
+    Find a transform (a,b,tx,ty) such that it maps the source points_b to the 
+    destination points_b::
         
         a*x1-b*y1+tx = x2
         b*x1+a*y1+ty = y2
      
     This method minimizes the squared error to find an optimal fit between the 
-    points.  Instead of a LS solver the RANSAC solver is used to
+    points_b.  Instead of a LS solver the RANSAC solver is used to
     produce a transformation that is robust to outliers.
     
     @param src: a list of link.Points in the source image.
@@ -353,16 +403,16 @@ def AffineFromPointsRANSAC(src,dst,new_size,filter=BILINEAR, normalize=True,tol=
 def AffineFromPointsLMeDs(src,dst,new_size,filter=BILINEAR, normalize=True):
     '''
     An affine transform that will rotate, translate, and scale to map one 
-    set of points to the other. For example, to align eye coordinates in face images.
+    set of points_b to the other. For example, to align eye coordinates in face images.
      
-    Find a transform (a,b,tx,ty) such that it maps the source points to the 
-    destination points::
+    Find a transform (a,b,tx,ty) such that it maps the source points_b to the 
+    destination points_b::
         
         a*x1-b*y1+tx = x2
         b*x1+a*y1+ty = y2
      
     This method minimizes the squared error to find an optimal fit between the 
-    points.  Instead of a LS solver the RANSAC solver is used to
+    points_b.  Instead of a LS solver the RANSAC solver is used to
     produce a transformation that is robust to outliers.
     
     @param src: a list of link.Points in the source image.
@@ -450,7 +500,7 @@ def AffinePerturb(Dscale, Drotate, Dtranslate, new_size, mirror=False, flip=Fals
 
 class AffineTransform:
     '''
-    The AffineTransform class is used to transform images and points back and
+    The AffineTransform class is used to transform images and points_b back and
     and forth between different coordinate systems. 
     '''
 
@@ -470,41 +520,41 @@ class AffineTransform:
         
     def __call__(self,data):
         '''
-        This is a simple interface to transform images or points.  Simply
+        This is a simple interface to transform images or points_b.  Simply
         call the affine transform like a function and it will try to automatically 
         transform the argument.
         
-        @param data: an image, point, or list of points.
+        @param data: an image, point, or list of points_b.
         '''
         if isinstance(data,pv.Image):
             return self.transformImage(data)
         elif isinstance(data,pv.Point):
             return self.transformPoint(data)
-        else: # assume this is a list of points
+        else: # assume this is a list of points_b
             return self.transformPoints(data)
     
     def invert(self,data):
         '''
-        This is a simple interface to transform images or points.  Simply
-        call invert with the points or list of points and it will automatically
+        This is a simple interface to transform images or points_b.  Simply
+        call invert with the points_b or list of points_b and it will automatically
         call the correct function.
         
-        @param data: an image, point, or list of points.
+        @param data: an image, point, or list of points_b.
         '''
         if isinstance(data,pv.Image):
             return self.invertImage(data)
         elif isinstance(data,pv.Point):
             return self.invertPoint(data)
-        else: # assume this is a list of points
+        else: # assume this is a list of points_b
             return self.invertPoints(data)
     
-    def invertImage(self,im, use_orig=True):
+    def invertImage(self,im_a, use_orig=True):
         '''
         Perform the inverse affine transformation on the image.
         '''
-        return self.transformImage(im,use_orig=use_orig,inverse=True)
+        return self.transformImage(im_a,use_orig=use_orig,inverse=True)
 
-    def transformImage(self,im, use_orig=True, inverse=False):
+    def transformImage(self,im_a, use_orig=True, inverse=False):
         ''' 
         Transforms an image into the new coordinate system.
         
@@ -517,12 +567,12 @@ class AffineTransform:
         parameter.
         
         
-        @param im: an Image object
+        @param im_a: an Image object
         @param use_orig: (True or False) attempts to find and use the original image as the source to avoid an accumulation of errors.
         @returns: the transformed image
         '''
         #TODO: does not support opencv images.  see Perspective.py
-        prev_im = im
+        prev_im = im_a
         
         if inverse:
             inverse = self.matrix
@@ -541,7 +591,7 @@ class AffineTransform:
                 for i in range(len(prev_im.aff_prev)):
                     ref,cmat = prev_im.aff_prev[i]
                     if not found_prev and ref():
-                        im = ref()
+                        im_a = ref()
                         mat = np.eye(3)
                         found_prev = True
                         
@@ -551,19 +601,19 @@ class AffineTransform:
                 if found_prev:
                     inverse = np.dot(mat,inverse) 
             
-        if im.getType() == TYPE_PIL:
+        if im_a.getType() == TYPE_PIL:
             data = inverse[:2,:].flatten()
             #data = (matrix[0,0],matrix[0,1],matrix[0,2],matrix[1,0],matrix[1,1],matrix[1,2])
-            pil = im.asPIL().transform(self.size, AFFINE, data, self.filter)
+            pil = im_a.asPIL().transform(self.size, AFFINE, data, self.filter)
             result = Image(pil)
-        elif im.getType() == TYPE_MATRIX_2D:
-            mat = im.asMatrix2D()
+        elif im_a.getType() == TYPE_MATRIX_2D:
+            mat = im_a.asMatrix2D()
 
             mat = affine_transform(mat, self.inverse[:2,:2], offset=self.inverse[:2,2])
-            result = Image(mat)
-        elif im.getType() == TYPE_OPENCV:
+            result = Image(mat[:self.size[0],:self.size[1]])
+        elif im_a.getType() == TYPE_OPENCV:
             matrix = pv.NumpyToOpenCV(self.matrix)
-            src = im.asOpenCV()
+            src = im_a.asOpenCV()
             dst = cv.CreateImage( (self.size[0],self.size[1]), cv.IPL_DEPTH_8U, src.nChannels );
             cv.WarpPerspective( src, dst, matrix, cv.CV_INTER_LINEAR+cv.CV_WARP_FILL_OUTLIERS,cv.ScalarAll(128))                    
             result = pv.Image(dst)
@@ -598,10 +648,10 @@ class AffineTransform:
 
     def transformPoints(self,pts):
         ''' 
-        Transform a set of points from the old image to the new image.
+        Transform a set of points_b from the old image to the new image.
         
-        @param pts: a list of points.
-        @returns: a list of transformed points.
+        @param pts: a list of points_b.
+        @returns: a list of transformed points_b.
         '''
         return [ self.transformPoint(pt) for pt in pts ]
         
@@ -661,8 +711,8 @@ class _AffineTest(unittest.TestCase):
     
     def test_rotation(self):
         transform = AffineRotate(3.14/8,(640,480))
-        im = transform.transformImage(self.test_image)
-        # im.show()
+        im_a = transform.transformImage(self.test_image)
+        # im_a.show()
         
         pt = transform.transformPoint(Point(320,240))
         self.assertAlmostEqual(pt.X(),203.86594448424472)
@@ -674,8 +724,8 @@ class _AffineTest(unittest.TestCase):
         
     def test_scale(self):
         transform = AffineScale(1.5,(640,480))
-        im = transform.transformImage(self.test_image)
-        #im.show()
+        im_a = transform.transformImage(self.test_image)
+        #im_a.show()
         
         pt = transform.transformPoint(Point(320,240))
         self.assertAlmostEqual(pt.X(),480.)
@@ -687,8 +737,8 @@ class _AffineTest(unittest.TestCase):
         
     def test_translate(self):
         transform = AffineTranslate(10.,15.,(640,480))
-        im = transform.transformImage(self.test_image)
-        #im.show()
+        im_a = transform.transformImage(self.test_image)
+        #im_a.show()
         
         pt = transform.transformPoint(Point(320,240))
         self.assertAlmostEqual(pt.X(),330.)
@@ -701,8 +751,8 @@ class _AffineTest(unittest.TestCase):
     def test_from_rect(self):
                 
         transform = AffineFromRect(Rect(100,100,300,300),(100,100))
-        im = transform.transformImage(self.test_image)
-        #im.show()
+        im_a = transform.transformImage(self.test_image)
+        #im_a.show()
         
         pt = transform.transformPoint(Point(320,240))
         self.assertAlmostEqual(pt.X(),73.333333333333329)
@@ -738,13 +788,13 @@ class _AffineTest(unittest.TestCase):
         
     def test_prev_ref1(self):
         fname = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_13.jpg')
-        im = Image(fname)
-        ref  = weakref.ref(im)
+        im_a = Image(fname)
+        ref  = weakref.ref(im_a)
 
-        self.assertEquals(ref(), im)
+        self.assertEquals(ref(), im_a)
         
-        tmp = im
-        del im
+        tmp = im_a
+        del im_a
         
         self.assertEquals(ref(), tmp)
         
@@ -755,12 +805,12 @@ class _AffineTest(unittest.TestCase):
  
     def test_prev_ref2(self):
         fname = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_13.jpg')
-        im = Image(fname)
-        #im.show()
-        w,h = im.size
+        im_a = Image(fname)
+        #im_a.show()
+        w,h = im_a.size
         
         # Try scaling down and then scaling back up
-        tmp1 = AffineScale(0.1,(w/10,h/10)).transformImage(im)
+        tmp1 = AffineScale(0.1,(w/10,h/10)).transformImage(im_a)
         #tmp1.show()
         
         tmp2 = AffineScale(10.0,(w,h)).transformImage(tmp1,use_orig=False)
@@ -771,7 +821,7 @@ class _AffineTest(unittest.TestCase):
         tmp3.annotateLabel(pv.Point(10,10), "This image should be sharp.")
         #tmp3.show()
         
-        del im
+        del im_a
         
         tmp4 = AffineScale(10.0,(w,h)).transformImage(tmp1,use_orig=True)
         tmp4.annotateLabel(pv.Point(10,10), "This image should be blurry.")
@@ -779,16 +829,16 @@ class _AffineTest(unittest.TestCase):
         
     def test_prev_ref3(self):
         fname = os.path.join(pv.__path__[0],'data','nonface','NONFACE_13.jpg')
-        torig = tprev = taccu = im = Image(fname)
-        #im.show()
-        w,h = im.size
+        torig = tprev = taccu = im_a = Image(fname)
+        #im_a.show()
+        w,h = im_a.size
         
         # Scale
         aff = AffineScale(0.5,(w/2,h/2))
         accu = aff
         torig = aff.transformImage(torig)
         tprev = aff.transformImage(tprev,use_orig=False)
-        taccu = accu.transformImage(im)
+        taccu = accu.transformImage(im_a)
         
         torig.annotateLabel(pv.Point(10,10), "use_orig = True")
         tprev.annotateLabel(pv.Point(10,10), "use_orig = False")
@@ -803,7 +853,7 @@ class _AffineTest(unittest.TestCase):
         accu = aff*accu
         torig = aff.transformImage(torig)
         tprev = aff.transformImage(tprev,use_orig=False)
-        taccu = accu.transformImage(im)
+        taccu = accu.transformImage(im_a)
         
         torig.annotateLabel(pv.Point(10,10), "use_orig = True")
         tprev.annotateLabel(pv.Point(10,10), "use_orig = False")
@@ -819,7 +869,7 @@ class _AffineTest(unittest.TestCase):
         accu = aff*accu
         torig = aff.transformImage(torig)
         tprev = aff.transformImage(tprev,use_orig=False)
-        taccu = accu.transformImage(im)
+        taccu = accu.transformImage(im_a)
         
         torig.annotateLabel(pv.Point(10,10), "use_orig = True")
         tprev.annotateLabel(pv.Point(10,10), "use_orig = False")
@@ -836,7 +886,7 @@ class _AffineTest(unittest.TestCase):
         accu = aff*accu
         torig = aff.transformImage(torig)
         tprev = aff.transformImage(tprev,use_orig=False)
-        taccu = accu.transformImage(im)
+        taccu = accu.transformImage(im_a)
         
         torig.annotateLabel(pv.Point(10,10), "use_orig = True")
         tprev.annotateLabel(pv.Point(10,10), "use_orig = False")
@@ -852,7 +902,7 @@ class _AffineTest(unittest.TestCase):
         accu = aff*accu
         torig = aff.transformImage(torig)
         tprev = aff.transformImage(tprev,use_orig=False)
-        taccu = accu.transformImage(im)
+        taccu = accu.transformImage(im_a)
         
         torig.annotateLabel(pv.Point(10,10), "use_orig = True")
         tprev.annotateLabel(pv.Point(10,10), "use_orig = False")

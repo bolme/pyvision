@@ -119,6 +119,9 @@ class Point:
     def asTuple(self):
         return (self.X(),self.Y())
     
+    def asArray3D(self):
+        return np.array((self.X(),self.Y(),self.Z()))
+    
     def asSpherical(self):
         ''' 
         Computes and returns a representation of this point in spherical coordinates: (r,phi,theta). 

@@ -455,7 +455,7 @@ class Image:
         draw.bitmap((0,0), pil, fill=color)
         del draw
         
-    def annotatePolygon(self,points,color='red',width=1):
+    def annotatePolygon(self,points,color='red',width=1,fill=None):
         '''
         Draws a line from point1 to point2 on the annotation image
     
@@ -463,10 +463,18 @@ class Image:
         @param color: defined as ('#rrggbb' or 'name') 
         @param width: the line width
         '''
-        n = len(points)
-        for i in range(n):
-            j = (i+1)%n 
-            self.annotateLine(points[i],points[j],color=color,width=width)
+        if fill != None:
+            im = self.asAnnotated()
+            draw = PIL.ImageDraw.Draw(im)
+            poly = [(point.X(),point.Y()) for point in points]
+            draw.polygon(poly,outline=None,fill=fill)
+            del draw
+            
+        if color != None:
+            n = len(points)
+            for i in range(n):
+                j = (i+1)%n 
+                self.annotateLine(points[i],points[j],color=color,width=width)
         
     def annotatePoint(self,point,color='red'):
         '''

@@ -49,14 +49,17 @@ class CaptureClicks:
     This object handles the data mangagement and display of the capture clicks window.
     '''
     
-    def __init__(self,im,keep_window_open = False):
+    def __init__(self,im,default_points=[],keep_window_open = False):
         '''
         Initialize the data.
         '''
         self.im = im.copy()
         self.keep_window_open = keep_window_open
         self.reset()
-        
+        print default_points
+        for pt in default_points:
+            self.mouseCallback(cv.CV_EVENT_LBUTTONDOWN,pt.X(),pt.Y(),None,None)
+            
     def display(self):
         '''
         Display the window and run the main event loop.

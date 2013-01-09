@@ -216,14 +216,16 @@ class VideoInterface(object):
 # An option for linux http://code.google.com/p/python-video4linux2/
 # On linux it may be possible to use something like v4lctl to capture in a separate process.        
 class Webcam(VideoInterface):
-    def __init__(self,camera_num=0,size=(640,480)):
+    def __init__(self,camera_num=0,size=(640,480),flipped=False):
         '''
         Web camera interface for cameras attached to your computer via USB or built-in.
         For IP/network cameras, use the Video object instead.
         @param camera_num: The camera index. Usually 0 if you only have a single webcam
         on your computer. See the OpenCV highgui documentation for details.
+        @param flipped: Set to true if camera is installed upside-down.
         '''
-        self.cv_capture = cv.CreateCameraCapture( camera_num )        
+        self.cv_capture = cv.CreateCameraCapture( camera_num )  
+        self.flipped = flipped      
         #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH,1600.0)
         #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT,1200.0)
         #print cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH)
@@ -243,6 +245,8 @@ class Webcam(VideoInterface):
         '''
         # TODO: Video capture is unreliable under linux.  This may just be a timing issue when running under parallels.
         frame = cv.QueryFrame( self.cv_capture )
+        if self.flipped:
+            cv.Flip(frame,frame,-1)
         im = pv.Image(self.resize(frame))
         im.orig_frame = pv.Image(frame)
         im.capture_time = time.time()

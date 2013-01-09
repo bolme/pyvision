@@ -70,8 +70,8 @@ Genetic Algorithm     optimization        pyvision.optimize.GeneticAlgorithm
 import unittest
 import sys
 
-__version__ = "0.9.0 $Rev$"
-__info__ = "$Id$"
+__version__ = "0.9.0 $Rev: 446 $"
+__info__ = "$Id: __init__.py 446 2012-10-25 03:24:15Z bolme $"
 __license__= '''
 PyVision License
 
@@ -180,7 +180,7 @@ from pyvision.surveillance.optical_flow import OpticalFlow
 
 from pyvision.other.normalize import clipRange, meanStd, meanUnit, unit, selfQuotientImage, lowPassFilter, highPassFilter, bandPassFilter, gaussianFilter
 
-from pyvision.other.distance import boolToUbyte, ubyteToBool, hamming
+from pyvision.other.distance import boolToUbyte, ubyteToBool, hamming, hamming_table
 
 from pyvision.ml.knn import RobustPNorm,PNorm,correlation,chisquared,KNearestNeighbors,FLANNTree,FLANN_IMPORTED
 
@@ -220,6 +220,9 @@ from types.kinect import Kinect
 
 from pyvision.surveillance.kalman import KalmanFilter
 
+
+# Beta components place holders
+VideoTask = None
 
 # Import the beta components
 import beta

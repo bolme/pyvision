@@ -126,7 +126,11 @@ def selfQuotientImage(matrix,sigma=5.0):
 
 
 def gaussianFilter(im,sigma):
-    cvim = cv.CreateImage(im.size,cv.IPL_DEPTH_8U,3)
+    '''
+    Smooth an image using a Gaussian filter.
+    '''    
+    cvim = cv.CreateImage(im.size,cv.IPL_DEPTH_8U,im.channels)
+
     cv.Smooth(im.asOpenCV(),cvim,cv.CV_GAUSSIAN,0,0,sigma)
     return pv.Image(cvim)
 

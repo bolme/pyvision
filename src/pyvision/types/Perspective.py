@@ -211,7 +211,22 @@ class PerspectiveTransform:
     # @param pts a list of link.Points
     def transformPoints(self,pts):
         ''' Transform a point from the old image to the new image '''
-        return [ self.transformPoint(pt) for pt in pts ]
+        if len(pts) == 0:
+            return []
+        elif isinstance(pts[0],pv.Point):
+            # Transform pyvision points
+            return [ self.transformPoint(pt) for pt in pts ]
+        else:
+            # Transform a numpy array
+            pts = np.array(pts.T,dtype=np.float64)
+            r,c = pts.shape
+            pad = np.ones((1,c),dtype=np.float64)
+            pts = np.concatenate((pts,pad),axis=0)
+            #print pts
+            pts = np.dot(self.matrix,pts)
+            pts /= pts[2:3,:]
+            #print pts
+            return pts[:2,:].T
         
     ##
     # Transforms a link.Point from the new coordinate system to

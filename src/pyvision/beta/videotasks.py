@@ -15,7 +15,7 @@ class ChangeDetectionVT(VideoTask):
         This is a change detection task that computes the difference between the current and previous frames.
         '''
         # request the current and previous frames.
-        VideoTask.__init__(self, frame_id, required_args=[("FRAME",frame_id),("FRAME",frame_id-1)])
+        VideoTask.__init__(self, frame_id, args=[("FRAME",frame_id),("FRAME",frame_id-1)])
         
     def execute(self, curr, prev):
         '''
@@ -39,7 +39,7 @@ class ChangeDetectionAnnotationVT(VideoTask):
         '''
         Register for the current and previous frames.
         '''
-        VideoTask.__init__(self, frame_id, required_args=[("FRAME",frame_id),("CHANGE_MASK",frame_id)])
+        VideoTask.__init__(self, frame_id, args=[("FRAME",frame_id),("CHANGE_MASK",frame_id)])
         
     def execute(self, frame, mask):
         '''
@@ -59,12 +59,12 @@ class FaceDetectorVT(VideoTask):
     def __init__(self,frame_id):
         if frame_id == 0:
             # The first frame only requires the frame
-            VideoTask.__init__(self,frame_id,required_args=[("FRAME",frame_id)])
+            VideoTask.__init__(self,frame_id,args=[("FRAME",frame_id)])
         else:
             # Each additional frame requires an initialized detector.
             # The underscore in _FACE_DETECTOR indicates this is not shared
             # data.
-            VideoTask.__init__(self,frame_id,required_args=[("FRAME",frame_id),("_FACE_DETECTOR",frame_id-1)])
+            VideoTask.__init__(self,frame_id,args=[("FRAME",frame_id),("_FACE_DETECTOR",frame_id-1)])
     
     def execute(self,frame,detector=None):
         if detector == None:

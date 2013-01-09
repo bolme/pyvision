@@ -277,7 +277,7 @@ class SVR(Regression):
         
         
         # Create the svm parameter data and problem description
-        param = svm.svm_parameter(svm_type=svm.EPSILON_SVR,kernel_type = svm.RBF, p = self._epsilon, gamma=self._gamma)
+        param = svm.svm_parameter(svm_type=svm.EPSILON_SVR,kernel_type = svm.RBF, eps = self._epsilon, gamma=self._gamma)
         prob = svm.svm_problem(labels.tolist(),data.tolist())
         
         # train the svm

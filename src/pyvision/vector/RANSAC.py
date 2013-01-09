@@ -132,7 +132,7 @@ def _quantile(errors,quantile):
 # M.A. Fischler and R.C. Bolles.  Random sample consensus: A paradigm for 
 # model fitting with applications to image analysis and automated cartography.  
 # Communication of Association for Computing Machinery, 24(6): 381--395, 1981.
-def LMeDs(A,b,quantile=0.75,verbose=True):
+def LMeDs(A,b,quantile=0.75,N = None,verbose=True):
     #n = len(y.flatten())
     n,k = A.shape
     tmp = arange(n)
@@ -141,7 +141,10 @@ def LMeDs(A,b,quantile=0.75,verbose=True):
     x = bestx = lstsq(A,b)[0]
     best_error = _quantile(abs(b - dot(A,x)),quantile)
     #print "LMeDs Error:",best_error
-    for i in range(n):
+    if N == None:
+        N = n
+        
+    for i in range(N):
         sample = random.sample(tmp,k)
 
         ty = b[sample,:]

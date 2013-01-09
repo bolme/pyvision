@@ -62,6 +62,7 @@ def boolToUbyte(x):
     out = out.astype(np.ubyte)
     return out
 
+
 def ubyteToBool(x):
     "Convert a byte vector to a bool vector."
     assert isinstance(x,np.ndarray)
@@ -82,8 +83,6 @@ def ubyteToBool(x):
     return out
           
     
-    
-
 def hamming(a,b):
     if a.dtype == np.bool and b.dtype == bool:
         return (a ^ b).sum()
@@ -92,14 +91,17 @@ def hamming(a,b):
     else:
         raise NotImplementedError("Unsupported array types %s and %s",a.dtype,b.dtype)
 
+
 def l1(a,b):
     ''' Compute the l1 distance measure '''
     return abs(a - b).sum()
+
 
 def l2(a,b):
     ''' compute the l2 distance '''
     d = (a - b)
     return sqrt( (d*d).sum() )
+
     
 def correlation(a,b):
     ''' Compute the correlation of two vectors '''

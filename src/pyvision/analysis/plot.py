@@ -497,6 +497,8 @@ class Plot:
     
     def points(self,points,color='black',shape=0,size=3,label=None,lty=None,width=1):
         ''' render multiple points'''
+        if len(points) < 1:
+            return
         points = self.convertPoints(points)
         points = Points(points,'points',color=color,shape=shape,size=size,label=label,lty=lty,width=width)
         self.graphics.append(points)
@@ -509,12 +511,16 @@ class Plot:
     
     def lines(self,points,color='black',shape=None,size=3,label=None,lty=1,width=1):
         ''' render a single point '''
+        if len(points) < 1:
+            return
         points = self.convertPoints(points)
         points = Points(points,'lines',color=color,shape=shape,size=size,label=label,lty=lty,width=width)
         self.graphics.append(points)
         
     def polygon(self,points,color='black',shape=None,size=3,label=None,lty=1,width=1):
         ''' render a single point '''
+        if len(points) < 1:
+            return
         points = self.convertPoints(points)
         points = Points(points,'polygon',color=color,shape=shape,size=size,label=label,lty=lty,width=width)
         self.graphics.append(points)
