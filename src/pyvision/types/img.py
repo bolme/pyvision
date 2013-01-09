@@ -48,6 +48,7 @@ import exif
 import numpy
 import numpy as np
 import cv
+import cv2
 
 
 import unittest
@@ -74,6 +75,12 @@ TYPE_PIL        = "TYPE_PIL"
 '''Image was created using a PIL image instance'''
 
 TYPE_OPENCV     = "TYPE_OPENCV"
+'''Image was created using a OpenCV image instance'''
+
+TYPE_OPENCV2     = "TYPE_OPENCV2"
+'''Image was created using a OpenCV image instance'''
+
+TYPE_OPENCV2BW     = "TYPE_OPENCV2BW"
 '''Image was created using a OpenCV image instance'''
 
 LUMA = [0.299, 0.587, 0.114, 1.0]
@@ -116,6 +123,8 @@ class Image:
         self.matrix2d = None
         self.matrix3d = None
         self.opencv = None
+        self.opencv2 = None
+        self.opencv2bw = None
         self.annotated = None
         self.bw_annotate = bw_annotate
         
@@ -245,6 +254,22 @@ class Image:
         if self.opencv == None:
             self._generateOpenCV()
         return self.opencv
+        
+    def asOpenCV2(self):
+        '''
+        @return: the image data in an OpenCV format that is a numpy array of shape (h,w,3) of uint8
+        '''
+        if self.opencv2 == None:
+            self._generateOpenCV2()
+        return self.opencv2
+        
+    def asOpenCV2BW(self):
+        '''
+        @return: the image data in an OpenCV format that is a numpy array of shape (h,w,1) of uint8
+        '''
+        if self.opencv2bw == None:
+            self._generateOpenCV2BW()
+        return self.opencv2bw
         
     def asOpenCVBW(self):
         '''
@@ -595,6 +620,7 @@ class Image:
         draw.point([point.X(),point.Y()],fill=color)
         del draw
         
+        
     #------------------------------------------------------------------------
     def valueNormalize(self):
         '''TODO: Deprecated remove this sometime.'''
@@ -676,6 +702,22 @@ class Image:
         else:
             raise NotImplementedError("Cannot convert image from type: %s"%self.type)
                 
+    def _generateOpenCV2(self):
+        '''
+        Create a matrix version of the image compatible with OpenCV 2 (cv2) in BGR format.
+        '''
+        data_buffer = self.toBufferRGB(8)
+        self.opencv2 = cv2.cvtColor(numpy.frombuffer(data_buffer,numpy.uint8).reshape(self.height,self.width,3),cv2.COLOR_RGB2BGR)            
+
+
+    def _generateOpenCV2BW(self):
+        '''
+        Create a matrix version of the image compatible with OpenCV 2 (cv2) in BGR format.
+        '''
+        data_buffer = self.toBufferGray(8)
+        self.opencv2bw = numpy.frombuffer(data_buffer,numpy.uint8).reshape(self.height,self.width,1)            
+
+
         
     def toBufferGray(self,depth):
         '''
