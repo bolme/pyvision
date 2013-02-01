@@ -35,6 +35,7 @@ import time
 import os
 import pyvision as pv
 import cv
+import random
 #from scipy import weave
 
 
@@ -51,6 +52,13 @@ class VideoInterface(object):
         by different video sources.
         '''
         raise NotImplemented
+    
+    def grab(self):
+        '''
+        This is a placeholder for the open cv webcam interface that sometimes 
+        requires this call.
+        '''
+        pass
     
     def next(self):
         '''
@@ -319,6 +327,9 @@ class VideoFromFileList(VideoInterface):
         self.filelist = filelist
         self.idx = 0
         self.size = size
+        
+    def grab(self):
+        pass
             
     def query(self):
         if self.idx >= len(self.filelist): return None
@@ -331,6 +342,93 @@ class VideoFromFileList(VideoInterface):
         ''' Return an iterator for this video '''
         return VideoFromFileList(self.filelist) 
  
+        
+class VideoFromDirectory(VideoInterface):
+    '''
+    This class allows the user to treat a directory of images as a video. 
+    
+    This class will recursively search the directories and will load 
+    and return any image with an image extension: JPG,PNG,TIF,TIFF,GIF,BMP,PPM,PGM
+    '''
+    
+    def __init__(self,dirname,order='ascending',limit=None,size=None):
+        '''
+        Recursively scans a directory for images and returns all images that
+        could be loaded. 
+
+        Example:
+            images = pv.VideoFromDirectory(dirname)
+            for im in images:
+                do something
+        
+        
+        @param dirname: directory where the images comprising the video exist 
+        @type dirname: str
+        @param order: return the images in a random order using the randam.shuffle function.
+        @type order: 'random' | 'ascending'
+        @param limit: limit the number of images returned.
+        @type limit: int
+        @param size: resize all images to this size.
+        @type: (int,int)
+        '''
+        self._dirname = dirname
+        self._order = order
+        self._limit = limit
+        self._size = size
+        self._counter = 0
+
+        self._image_paths = []
+                
+        self._scanImageDir()
+        
+        if self._order == 'ascending':
+            self._image_paths.sort()
+        elif self._order == 'random':
+            random.shuffle(self._image_paths)
+        else:
+            raise ValueError("unknown ordering type: %s"%(self._order,))    
+      
+    def _checkExtension(self,filename):
+        '''
+        Check the extension on a filename to see if it is in the list.
+        '''
+        parts = filename.split('.')
+        if len(parts) > 0:
+            ext = parts[-1].upper()
+        return ext in ("JPG","PNG","TIF","TIFF","GIF","BMP","PPM","PGM")
+    
+    
+    def _scanImageDir(self):
+        '''
+        Scan the directory and populate image_paths.
+        '''
+        for dirpath,_,filenames in os.walk(self._dirname):
+            for filename in filenames:
+                if self._checkExtension(filename):
+                    path = os.path.join(dirpath,filename)
+                    self._image_paths.append(path)
+
+    
+    def query(self):      
+        while True:
+            im_path = None
+            try:
+                if self._counter >= len(self._image_paths) or self._counter >= self._limit:
+                    return None
+                im_path = self._image_paths[self._counter]
+                self._counter += 1
+                im = pv.Image(im_path)
+                if self._size != None:
+                    im = im.resize(self.size)
+                return im
+            except:
+                print "Warning: could not process image:",im_path
+                raise
+                
+    def __iter__(self):
+        ''' Return an iterator for this video '''
+        return VideoFromDirectory(self._dirname, self._order, self._limit, self._size) 
+    
         
 class VideoFromImages(VideoInterface):
     '''
