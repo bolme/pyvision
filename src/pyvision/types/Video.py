@@ -413,7 +413,7 @@ class VideoFromDirectory(VideoInterface):
         while True:
             im_path = None
             try:
-                if self._counter >= len(self._image_paths) or self._counter >= self._limit:
+                if self._counter >= len(self._image_paths) or (self._limit != None and self._counter >= self._limit):
                     return None
                 im_path = self._image_paths[self._counter]
                 self._counter += 1
@@ -423,7 +423,6 @@ class VideoFromDirectory(VideoInterface):
                 return im
             except:
                 print "Warning: could not process image:",im_path
-                raise
                 
     def __iter__(self):
         ''' Return an iterator for this video '''
