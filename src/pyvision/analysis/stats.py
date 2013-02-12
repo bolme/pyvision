@@ -75,20 +75,20 @@ def cibinom(size,success,alpha=0.05):
         
     # find the upper limit
     lower_prob = 0.0
-    lower_p    = pbinom(success,size,lower_prob)
+    #lower_p    = pbinom(success,size,lower_prob)
     upper_prob = 1.0
-    upper_p    = pbinom(success,size,upper_prob)
+    #upper_p    = pbinom(success,size,upper_prob)
         
-    for i in range(32):
+    for _ in range(32):
         new_prob = (lower_prob + upper_prob)*0.5
         new_p    = pbinom(success,size,new_prob)
         
         if new_p < goal:
             upper_prob = new_prob
-            upper_p = new_p
+            #upper_p = new_p
         else:
             lower_prob = new_prob
-            lower_p = new_p
+            #lower_p = new_p
             
     ub = upper_prob
        
@@ -97,20 +97,20 @@ def cibinom(size,success,alpha=0.05):
     #find the lower limit
     success = size - success
     lower_prob = 0.0
-    lower_p    = pbinom(success,size,lower_prob)
+    #lower_p    = pbinom(success,size,lower_prob)
     upper_prob = 1.0
-    upper_p    = pbinom(success,size,upper_prob)
+    #upper_p    = pbinom(success,size,upper_prob)
         
-    for i in range(64):
+    for _ in range(64):
         new_prob = (lower_prob + upper_prob)*0.5
         new_p    = pbinom(success,size,new_prob)
         
         if new_p < goal:
             upper_prob = new_prob
-            upper_p = new_p
+            #upper_p = new_p
         else:
             lower_prob = new_prob
-            lower_p = new_p
+            #lower_p = new_p
             
     lb = 1-upper_prob
     
@@ -244,7 +244,7 @@ def fitWeibull(x,ilog=None):
         plot = pv.Plot(title="Weibull CDF")
         plot.points(points)
         
-        cdf = cdfWeibull(x, shape, scale)
+        #cdf = cdfWeibull(x, shape, scale)
         
         lines = [[0,0]] + [ [x[i],cdfWeibull(x[i], shape, scale)] for i in range(n)]
         plot.lines(lines)
@@ -374,7 +374,7 @@ class SummaryStats:
         data = self.asTable()
         title = "Summary of %s"%self.name
         
-        title_length = len(title)
+        #title_length = len(title)
         key_length = 0
         value_length = 0
         
@@ -619,7 +619,7 @@ class _TestStats(unittest.TestCase):
             ilog.show()
             
     def test_cov(self):
-        t = cov(self.longley)
+        cov(self.longley)
         
     def test_cor2cov(self):
         v = cov(self.longley)
