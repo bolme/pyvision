@@ -49,10 +49,11 @@ class CaptureClicks:
     This object handles the data mangagement and display of the capture clicks window.
     '''
     
-    def __init__(self,im,default_points=[],keep_window_open = False):
+    def __init__(self,im,default_points=[],keep_window_open = False,window="PyVision Capture Points"):
         '''
         Initialize the data.
         '''
+        self.window = window
         self.im = im.copy()
         self.keep_window_open = keep_window_open
         self.reset()
@@ -65,11 +66,11 @@ class CaptureClicks:
         Display the window and run the main event loop.
         '''
         # Setup the mouse callback to handle mause events (optional)
-        cv.NamedWindow("PyVision Capture Points")
-        cv.SetMouseCallback("PyVision Capture Points", self.mouseCallback)
+        cv.NamedWindow(self.window)
+        cv.SetMouseCallback(self.window, self.mouseCallback)
         
         while True:
-            key_press = self.im.show("PyVision Capture Points",delay=100)
+            key_press = self.im.show(self.window,delay=100)
             
             # Handle key press events.
             if key_press == ord(' '):
@@ -79,7 +80,8 @@ class CaptureClicks:
                 self.reset()
                 
         if not self.keep_window_open:
-            cv.DestroyWindow("PyVision Capture Points")
+            cv.DestroyWindow(self.window)
+            
         return self.points
                 
     def reset(self):
