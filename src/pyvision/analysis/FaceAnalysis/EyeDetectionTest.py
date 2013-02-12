@@ -31,7 +31,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import copy
+#import copy
 import time
 import math
 
@@ -311,7 +311,7 @@ def summarizeEyeDetectionTests(tests):
     Create a summary table for a list containing FaceDetectionTest objects.
     '''
     print 'Creating summaries...'
-    summary25 = Table()
+    summary25 = pv.Table()
     summary25.setColumnFormat('Face_Rate','%0.4f')
     summary25.setColumnFormat('Rate_25','%0.4f')
     summary25.setColumnFormat('Lower95_25','%0.4f')
@@ -326,7 +326,7 @@ def summarizeEyeDetectionTests(tests):
         summary25.setElement(test.name,'Time',test.elapse_time)
         
         
-    summary10 = Table()
+    summary10 = pv.Table()
     summary10.setColumnFormat('Face_Rate','%0.4f')
     summary10.setColumnFormat('Rate_10','%0.4f')
     summary10.setColumnFormat('Lower95_10','%0.4f')
@@ -340,7 +340,7 @@ def summarizeEyeDetectionTests(tests):
         summary10.setElement(test.name,'Time',test.elapse_time)
         
         
-    summary05 = Table()
+    summary05 = pv.Table()
     summary05.setColumnFormat('Face_Rate','%0.4f')
     summary05.setColumnFormat('Rate_05','%0.4f')
     summary05.setColumnFormat('Lower95_05','%0.4f')
@@ -354,3 +354,8 @@ def summarizeEyeDetectionTests(tests):
         summary05.setElement(test.name,'Time',test.elapse_time)
         
     return summary05,summary10,summary25
+
+
+
+
+

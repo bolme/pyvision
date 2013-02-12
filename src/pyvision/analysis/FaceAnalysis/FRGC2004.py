@@ -38,16 +38,16 @@ Created on May 15, 2009
 @author: bolme
 '''
 
-import BEE
+#import BEE
 from FaceDatabase import FaceDatabase
-import os.path
+#import os.path
 import os
 import copy
 import pyvision as pv
 import xml.etree.cElementTree as et
 import shutil
 import time
-from pyvision.analysis.FaceAnalysis.BEE import BEEDistanceMatrix
+#from pyvision.analysis.FaceAnalysis.BEE import BEEDistanceMatrix
 
 REDUCED_LEYE = pv.Point(128+64,256-20)
 REDUCED_REYE = pv.Point(256+128-64,256-20)
@@ -112,10 +112,10 @@ class FRGC_Exp4(FaceDatabase):
         self.target_sigset_path   = os.path.join(self.location,"BEE_DIST","FRGC2.0","signature_sets","experiments","FRGC_Exp_2.0.4_Target.xml")
         self.training_sigset_path = os.path.join(self.location,"BEE_DIST","FRGC2.0","signature_sets","experiments","FRGC_Exp_2.0.4_Training.xml")
 
-        self.orig_sigset     = BEE.parseSigSet(self.orig_sigset_path)
-        self.query_sigset    = BEE.parseSigSet(self.query_sigset_path)
-        self.target_sigset   = BEE.parseSigSet(self.target_sigset_path)
-        self.training_sigset = BEE.parseSigSet(self.training_sigset_path)
+        self.orig_sigset     = pv.parseSigSet(self.orig_sigset_path)
+        self.query_sigset    = pv.parseSigSet(self.query_sigset_path)
+        self.target_sigset   = pv.parseSigSet(self.target_sigset_path)
+        self.training_sigset = pv.parseSigSet(self.training_sigset_path)
         
         self.orig_sigset_map     = dict([ (data[0]['name'],[key,data]) for key,data in self.orig_sigset ])
         self.query_sigset_map    = dict([ (data[0]['name'],[key,data]) for key,data in self.query_sigset ])
@@ -230,7 +230,7 @@ class FRGC_V1(FaceDatabase):
     def readSigsets(self):
         self.orig_sigset_path     = os.path.join(self.location,"BEE_DIST","FRGC1.0","signature_sets","all.xml")
 
-        self.orig_sigset     = BEE.parseSigSet(self.orig_sigset_path)
+        self.orig_sigset     = pv.parseSigSet(self.orig_sigset_path)
         #print self.orig_sigset
         
         self.orig_sigset = filter(lambda x: len(x[1]) > 0, self.orig_sigset)
@@ -332,10 +332,10 @@ class FRGC_Exp4_Reduced(FaceDatabase):
         self.target_sigset_path   = os.path.join(self.location,"sigsets","FRGC_Exp_2.0.4_Target.xml")
         self.training_sigset_path = os.path.join(self.location,"sigsets","FRGC_Exp_2.0.4_Training.xml")
 
-        self.orig_sigset     = BEE.parseSigSet(self.orig_sigset_path)
-        self.query_sigset    = BEE.parseSigSet(self.query_sigset_path)
-        self.target_sigset   = BEE.parseSigSet(self.target_sigset_path)
-        self.training_sigset = BEE.parseSigSet(self.training_sigset_path)
+        self.orig_sigset     = pv.parseSigSet(self.orig_sigset_path)
+        self.query_sigset    = pv.parseSigSet(self.query_sigset_path)
+        self.target_sigset   = pv.parseSigSet(self.target_sigset_path)
+        self.training_sigset = pv.parseSigSet(self.training_sigset_path)
         
         self.orig_sigset_map     = dict([ (data[0]['name'],[key,data]) for key,data in self.orig_sigset ])
         self.query_sigset_map    = dict([ (data[0]['name'],[key,data]) for key,data in self.query_sigset ])
@@ -488,7 +488,7 @@ def FRGCExp4Test(database, algorithm, face_detector=None, eye_locator=None, n=No
     print "Completing task..."
     print mat.shape
     
-    bee_mat = BEEDistanceMatrix(mat,"FRGC_Exp_2.0.4_Query.xml", "FRGC_Exp_2.0.4_Target.xml", sigset_dir=database.sigset_dir, is_distance=False)
+    bee_mat = pv.BEEDistanceMatrix(mat,"FRGC_Exp_2.0.4_Query.xml", "FRGC_Exp_2.0.4_Target.xml", sigset_dir=database.sigset_dir, is_distance=False)
     
     if ilog != None:
         ilog(timer)

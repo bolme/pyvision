@@ -35,17 +35,10 @@
 import unittest
 import os.path
 
-from scipy.ndimage import convolve
-from scipy.ndimage import gaussian_filter,maximum_filter
+import numpy as np
 
-from numpy import array,ones,zeros,nonzero #TODO: Remove This
-import numpy
-
-try:
-    import opencv as cv
-except:
-    import cv
-
+import cv
+import scipy.ndimage as ndi
 import pyvision as pv
 from pyvision.point.DetectorROI import DetectorROI
 
@@ -71,17 +64,17 @@ class DetectorHarris(DetectorROI):
     
         cv.CornerHarris(gray,corners,self.block_size,self.aperture_size,self.k)
 
-        buffer = corners.tostring()
-        corners = numpy.frombuffer(buffer,numpy.float32).reshape(corners.height,corners.width).transpose()        
+        data_buffer = corners.tostring()
+        corners = np.frombuffer(data_buffer,np.float32).reshape(corners.height,corners.width).transpose()        
         
-        footprint = ones((3,3))
-        mx = maximum_filter(corners, footprint = footprint)
-        local_maxima = (corners == mx) * (corners != zeros(corners.shape)) # make sure to remove completly dark points
+        footprint = np.ones((3,3))
+        mx = ndi.maximum_filter(corners, footprint = footprint)
+        local_maxima = (corners == mx) * (corners != np.zeros(corners.shape)) # make sure to remove completly dark points
 
-        points = nonzero(local_maxima)
+        points = np.nonzero(local_maxima)
         del local_maxima
         
-        points = array([points[0],points[1]]).transpose()
+        points = np.array([points[0],points[1]]).transpose()
         L = []
         for each in points:
             L.append((corners[each[0],each[1]],each[0],each[1],None))
@@ -101,7 +94,7 @@ class _HarrisTest(unittest.TestCase):
         im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
           
         if self.SHOW_IMAGES: im.show()  
@@ -113,7 +106,7 @@ class _HarrisTest(unittest.TestCase):
         im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
@@ -125,7 +118,7 @@ class _HarrisTest(unittest.TestCase):
         im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
@@ -137,7 +130,7 @@ class _HarrisTest(unittest.TestCase):
         im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
@@ -149,7 +142,7 @@ class _HarrisTest(unittest.TestCase):
         im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
@@ -161,7 +154,7 @@ class _HarrisTest(unittest.TestCase):
         im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         

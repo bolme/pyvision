@@ -36,7 +36,7 @@ Created on Jan 27, 2011
 @author: bolme
 '''
 import numpy as np
-import scipy as sp
+#import scipy as sp
 import scipy.linalg as la
 
 
@@ -83,7 +83,6 @@ def lda(data,labels,reg=0.0):
     assert Sb.shape == (D,D)
     
     # Compute the within class cov
-    Sw = None
     
     data_w = data.copy()
     for key in classes:

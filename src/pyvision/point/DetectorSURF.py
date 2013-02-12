@@ -25,11 +25,11 @@ def ExtractSURF(im,min_hessian=300):
     # class is filtering out the addtnl data that SURF points provide?
     
     #TODO: Now that we have the descriptors, we need to return them to user if desired.
-    (keypts, descriptors) = cv.ExtractSURF(cvim, None, cv.CreateMemStorage(), (0, min_hessian, 3, 1))
+    (keypts, _) = cv.ExtractSURF(cvim, None, cv.CreateMemStorage(), (0, min_hessian, 3, 1))
     
     keypoints = list()
-    for ((x, y), laplacian, size, dir, hessian) in keypts:
-        keypoints.append((hessian,x,y,size,dir,laplacian) )
+    for ((x, y), laplacian, size, direction, hessian) in keypts:
+        keypoints.append((hessian,x,y,size,direction,laplacian) )
     
     return keypoints
 #   keypoints = weave.inline(

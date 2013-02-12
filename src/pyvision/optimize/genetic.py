@@ -48,14 +48,14 @@ This class also has some examples in the unit tests.
 '''
 
 import random
-import unittest
+#import unittest
 import math
 import multiprocessing as mp
-import sys
+#import sys
 import traceback
 import numpy as np
 import copy
-import time
+#import time
 import pyvision as pv
 
 # Genetic algorithm message types

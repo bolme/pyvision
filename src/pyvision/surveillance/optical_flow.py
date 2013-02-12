@@ -233,7 +233,7 @@ class OpticalFlow:
         for each in self.tracks:
             cv_points.append((each.X(),each.Y()))
         
-        points_b, status, errors,= cv.CalcOpticalFlowPyrLK (
+        points_b, _, _,= cv.CalcOpticalFlowPyrLK (
                     prev_grey, 
                     grey, 
                     prev_pyramid, 
@@ -278,7 +278,7 @@ class OpticalFlow:
         return perspective
 
         
-    def annotateFrame(self,frame,type="TRACKING",color='white'):
+    def annotateFrame(self,frame,color='white'):
         '''
         Renders optical flow information to the frame.
         
@@ -294,12 +294,11 @@ class OpticalFlow:
         for pt in affine.transformPoints(self.tracks[:self.n]):
             frame.annotatePoint(pt,color=color)
 
-        if type != "TRACKING": 
-            for pt in affine.transformPoints(self.tracks[self.n:]):
-                frame.annotatePoint(pt,color='red')
-                
-            for pt in affine.transformPoints(self.bad_points):
-                frame.annotatePoint(pt,color='gray')
+        for pt in affine.transformPoints(self.tracks[self.n:]):
+            frame.annotatePoint(pt,color='red')
+            
+        for pt in affine.transformPoints(self.bad_points):
+            frame.annotatePoint(pt,color='gray')
             
         
         if self.homography != None:

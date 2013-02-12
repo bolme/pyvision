@@ -33,12 +33,12 @@ class MotionDetectTest(unittest.TestCase):
         
         i = 0
         for frame in video:            
-            count = md.detect(frame)
+            _ = md.detect(frame)
 
-            rects = md.getStandardizedRects()
-            boxes = md.getBoundingRects()
+            _ = md.getStandardizedRects()
+            _ = md.getBoundingRects()
             
-            polygons = md.getPolygons(return_all=True)
+            _ = md.getPolygons(return_all=True)
             
             if ilog != None:
                 print "Processing Frame:",i
@@ -66,12 +66,12 @@ class MotionDetectTest(unittest.TestCase):
         
         i = 0
         for frame in video:            
-            count = md.detect(frame)
+            _ = md.detect(frame)
 
-            rects = md.getStandardizedRects()
-            boxes = md.getBoundingRects()
+            _ = md.getStandardizedRects()
+            _ = md.getBoundingRects()
             
-            polygons = md.getPolygons(return_all=True)
+            _ = md.getPolygons(return_all=True)
             
             if ilog != None:
                 print "Processing Frame:",i
@@ -100,12 +100,12 @@ class MotionDetectTest(unittest.TestCase):
         
         i = 0
         for frame in video:            
-            count = md.detect(frame)
+            _ = md.detect(frame)
 
-            rects = md.getStandardizedRects()
-            boxes = md.getBoundingRects()
+            _ = md.getStandardizedRects()
+            _ = md.getBoundingRects()
             
-            polygons = md.getPolygons(return_all=True)
+            _ = md.getPolygons(return_all=True)
             
             if ilog != None:
                 print "Processing Frame:",i
@@ -203,12 +203,12 @@ class OpticalFlowTest(unittest.TestCase):
             if ilog != None:
                 print "Processing Frame:",i  
                 if hasattr(frame,'to_prev'):
-                    prev = frame.to_prev(frame)
-                    ilog(prev,'back',format='jpg')
+                    prev_im = frame.to_prev(frame)
+                    ilog(prev_im,'back',format='jpg')
                     
                 if prev_frame != None:
-                    next = prev_frame.to_next(prev_frame)
-                    ilog(next,'forward',format='jpg')
+                    forward_im = prev_frame.to_next(prev_frame)
+                    ilog(forward_im,'forward',format='jpg')
                 
                 ilog(frame,"current",format='jpg')
 

@@ -127,9 +127,7 @@ class FaceRecognitionTest:
         self.total_probes  += 1
         self.total_gallery = max(self.total_gallery,rank)
 
-        success = False
         if best_match_rank==0:
-            success = True
             self.rank1_success += 1
                 
         self.probes_table.setElement(probe_id,'MatchId',best_match_id)
