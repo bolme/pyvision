@@ -51,8 +51,8 @@ import cv
 import cv2
 
 
-import unittest
-import os.path
+#import unittest
+#import os.path
 
 
 import pyvision
@@ -144,8 +144,8 @@ class Image:
             data = data.transpose((2,1,0))
             data = data[::-1,:,:]
             
-        
-        if isinstance(data,numpy.ndarray) and len(data.shape) == 2:
+        # Numpy format
+        if isinstance(data,numpy.ndarray) and len(data.shape) == 2 and data.dtype != np.uint8:
             self.type=TYPE_MATRIX_2D
             self.matrix2d = data
             
@@ -159,7 +159,17 @@ class Image:
             else:
                 raise TypeError("Unsuppoted format for ndarray images: %s"%self.matrix2d.dtype)
             
-        elif isinstance(data,numpy.ndarray) and len(data.shape) == 3 and data.shape[0]==3:
+        # OpenCV2 gray scale format
+        elif isinstance(data,numpy.ndarray) and len(data.shape) == 2 and data.dtype == np.uint8:
+            self.type=TYPE_OPENCV2BW
+            self.opencv2bw = data
+            
+            self.height,self.width = self.opencv2bw.shape
+            self.channels = 1
+            self.depth=8
+            
+        # Numpy color format    
+        elif isinstance(data,numpy.ndarray) and len(data.shape) == 3 and data.shape[0]==3 and data.dtype != np.uint8:
             self.type=TYPE_MATRIX_RGB
             self.matrix3d = data
             self.channels=3
@@ -171,6 +181,15 @@ class Image:
                 self.depth=64
             else:
                 raise TypeError("Unsuppoted format for ndarray images: %s"%self.matrix2d.dtype)
+            
+        # OpenCV2 color format    
+        elif isinstance(data,numpy.ndarray) and len(data.shape) == 3 and data.shape[2]==3 and data.dtype == np.uint8:
+            self.type=TYPE_MATRIX_RGB
+            self.matrix3d = data
+            self.channels=3
+            self.width = self.matrix3d.shape[1]
+            self.height = self.matrix3d.shape[0]
+            self.depth=8
             
         elif isinstance(data,PIL.Image.Image) or type(data) == str:
             if type(data) == str:
@@ -723,41 +742,46 @@ class Image:
         '''
             returns the image data as a binary python string.
         '''
-        buffer = None
+        image_buffer = None
         if self.type == TYPE_PIL:
             pil = self.pil
             if pil.mode != 'L':
                 pil = pil.convert('L')
-            buffer = pil.tostring()
+            image_buffer = pil.tostring()
         elif self.type == TYPE_MATRIX_2D:
-            buffer = self.matrix2d.transpose().tostring()
+            image_buffer = self.matrix2d.transpose().tostring()
+        elif self.type == TYPE_OPENCV2BW:
+            image_buffer = self.opencv2bw.tostring()
+        elif self.type == TYPE_OPENCV2:
+            tmp = cv2.cvtColor(self.opencv2, cv2.cv.CV_BGR2GRAY)
+            image_buffer = tmp.tostring()
         elif self.type == TYPE_MATRIX_RGB:
             mat = self.matrix3d
             mat = LUMA[0]*mat[0] + LUMA[1]*mat[1] + LUMA[2]*mat[2]
-            buffer = mat.transpose().tostring()
+            image_buffer = mat.transpose().tostring()
         elif self.type == TYPE_OPENCV:
             if self.channels == 1:
-                buffer = self.opencv.tostring()
+                image_buffer = self.opencv.tostring()
             elif self.channels == 3:
                 w,h = self.width,self.height
                 gray = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,1)
                 cv.CvtColor( self.opencv, gray, cv.CV_BGR2GRAY );
-                buffer = gray.tostring()
+                image_buffer = gray.tostring()
             else:
                 raise TypeError("Operation not supported for image type.")
         else:
             raise TypeError("Operation not supported for image type.")
         
-        assert buffer
+        assert image_buffer
             
         if depth == self.depth:
-            return buffer
+            return image_buffer
         
         else:
             types = {8:numpy.uint8,32:numpy.float32,64:numpy.float64}
             
-            # convert the buffer to data
-            data = numpy.frombuffer(buffer,types[self.depth])
+            # convert the image_buffer to data
+            data = numpy.frombuffer(image_buffer,types[self.depth])
             
             if depth==8:
                 # Make sure the data is in a valid range
@@ -782,47 +806,53 @@ class Image:
         '''
             returns the image data as a binary python string.
         '''
-        buffer = None
+        image_buffer = None
         if self.type == TYPE_PIL:
             pil = self.pil
             if pil.mode != 'RGB':
                 pil = pil.convert('RGB')
-            buffer = pil.tostring()
+            image_buffer = pil.tostring()
         elif self.type == TYPE_MATRIX_2D:
             mat = self.matrix2d.transpose()
             tmp = np.zeros((3,self.height,self.width),numpy.float32)
             tmp[0,:] = mat
             tmp[1,:] = mat
             tmp[2,:] = mat
-            buffer = mat.tostring()            
+            image_buffer = mat.tostring()
+        elif self.type == TYPE_OPENCV2BW:
+            tmp = cv2.cvtColor(self.opencv2bw, cv2.cv.CV_GRAY2RGB)
+            image_buffer = tmp.tostring()
+        elif self.type == TYPE_OPENCV2:
+            tmp = cv2.cvtColor(self.opencv2, cv2.cv.CV_BGR2RGB)
+            image_buffer = tmp.tostring() 
         elif self.type == TYPE_MATRIX_RGB:
             mat = self.matrix3d.transpose()
-            buffer = mat.tostring()
+            image_buffer = mat.tostring()
         elif self.type == TYPE_OPENCV:
             w,h = self.width,self.height
             if self.channels == 3:
                 rgb = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
                 cv.CvtColor( self.opencv, rgb, cv.CV_BGR2RGB );
-                buffer = rgb.tostring()
+                image_buffer = rgb.tostring()
             elif self.channels == 1:
                 rgb = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
                 cv.CvtColor( self.opencv, rgb, cv.CV_GRAY2RGB );
-                buffer = rgb.tostring()
+                image_buffer = rgb.tostring()
             else:
                 raise TypeError("Operation not supported for image type.")
         else:
             raise TypeError("Operation not supported for image type.")
         
-        assert buffer
+        assert image_buffer
             
         if depth == self.depth:
-            return buffer
+            return image_buffer
         
         else:
             types = {8:numpy.uint8,32:numpy.float32,64:numpy.float64}
             
-            # convert the buffer to data
-            data = numpy.frombuffer(buffer,types[self.depth])
+            # convert the image_buffer to data
+            data = numpy.frombuffer(image_buffer,types[self.depth])
             
             if depth==8:
                 # Make sure the data is in a valid range
