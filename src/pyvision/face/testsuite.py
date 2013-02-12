@@ -17,7 +17,7 @@ from pyvision.analysis.FaceAnalysis.EyeDetectionTest import EyeDetectionTest
 from pyvision.face.CascadeDetector                   import CascadeDetector
 from pyvision.face.FilterEyeLocator                  import FilterEyeLocator
 
-from pyvision.analysis.roc                           import ROC
+#from pyvision.analysis.roc                           import ROC
 
 class TestFilterEyeLocator(unittest.TestCase):
     

@@ -245,7 +245,7 @@ class ROC:
     def getEER(self):
         _,curve = self.getCurve(method=ROC_PRECISE_SAMPLED)
         
-        for score,frr,far,trr,tar in curve:
+        for _,frr,far,_,_ in curve:
             if far > frr:
                 break
         

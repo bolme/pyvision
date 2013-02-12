@@ -31,21 +31,25 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os.path
+#import os.path
 #from PIL.Image import ANTIALIAS
-import scipy
+#import scipy as sp
+import numpy as np
+import os
 import unittest
 #from scipy.signal import fft2
 
 from pyvision.face.FaceRecognizer import FaceRecognizer
 from pyvision.analysis.FaceAnalysis import FaceRecognitionTest
 import pyvision.vector.PCA
-from pyvision.other.normalize import *
-from pyvision.types.img import Image
-from pyvision.types.Point import Point
+#from pyvision.other.normalize import *
+#from pyvision.types.img import Image
+#from pyvision.types.Point import Point
 from pyvision.analysis.face import EyesFile
-from pyvision.analysis.roc import *
-from pyvision.types.Affine import *
+#from pyvision.analysis.roc import *
+#from pyvision.types.Affine import *
+
+import pyvision as pv
 
 PCA_L1      = 1
 PCA_L2      = 2
@@ -59,7 +63,7 @@ PCA_UNIT_NORM = 4
 class PCA(FaceRecognizer):
     ''' This is a basic implementation of PCA'''
     
-    def __init__(self, face_size=(128,128), left_eye=Point(32,52), right_eye=Point(96,52), normalize=PCA_MEAN_STD_NORM, measure=PCA_COS, whiten=True, drop_front=2, basis_vectors=100):
+    def __init__(self, face_size=(128,128), left_eye=pv.Point(32,52), right_eye=pv.Point(96,52), normalize=PCA_MEAN_STD_NORM, measure=PCA_COS, whiten=True, drop_front=2, basis_vectors=100):
         '''Crate a PCA classifier'''
         FaceRecognizer.__init__(self)
         
@@ -77,7 +81,7 @@ class PCA(FaceRecognizer):
 
     def cropFace(self,im,eyes):
         left,right = eyes
-        affine = AffineFromPoints(left,right,self.left_eye,self.right_eye,self.face_size)
+        affine = pv.AffineFromPoints(left,right,self.left_eye,self.right_eye,self.face_size)
         im = affine.transformImage(im)
         return im
     
@@ -97,7 +101,7 @@ class PCA(FaceRecognizer):
         vec = self.computeVector(img)
         fir = self.pca.project(vec,whiten=True)
         if self.measure == PCA_COS:
-            scale = scipy.sqrt((fir*fir).sum())
+            scale = np.sqrt((fir*fir).sum())
             fir = (1.0/scale)*fir
         return fir
     
@@ -107,11 +111,11 @@ class PCA(FaceRecognizer):
         vec  = img.asMatrix2D().flatten()
         
         if self.norm == PCA_MEAN_STD_NORM:
-            vec = meanStd(vec)
+            vec = pv.meanStd(vec)
         if self.norm == PCA_MEAN_UNIT_NORM:
-            vec = meanUnit(vec)
+            vec = pv.meanUnit(vec)
         if self.norm == PCA_UNIT_NORM:
-            vec = unit(vec)
+            vec = pv.unit(vec)
             
         return vec
     
@@ -119,7 +123,7 @@ class PCA(FaceRecognizer):
         '''Train the PCA classifier'''
         assert self.trained == False
         
-        for img,rect,eyes,id in self.training_data:
+        for img,_,eyes,_ in self.training_data:
             img = self.cropFace(img,eyes) 
             vec = self.computeVector(img)
             self.pca.addFeature(vec)
@@ -134,10 +138,10 @@ class PCA(FaceRecognizer):
         assert self.trained == True
 
         if self.measure == PCA_L1:
-            return (scipy.abs(fir1-fir2)).sum()
+            return (np.abs(fir1-fir2)).sum()
 
         if self.measure == PCA_L2:
-            return scipy.sqrt(((fir1-fir2)*(fir1-fir2)).sum())
+            return np.sqrt(((fir1-fir2)*(fir1-fir2)).sum())
 
         if self.measure == PCA_COS:
             return (fir1*fir2).sum()
@@ -150,11 +154,11 @@ class PCA(FaceRecognizer):
         images = []
         
         print basis.shape
-        r,c = basis.shape
+        r,_ = basis.shape
         for i in range(r):
             im = basis[i,:]
             im = im.reshape(self.face_size)
-            im = Image(im)
+            im = pv.Image(im)
             images.append(im)
         print len(images)
         return images
@@ -173,7 +177,7 @@ class _TestFacePCA(unittest.TestCase):
         
         self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
         for filename in self.eyes.files():
-            img = Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
+            img = pv.Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
             self.images.append(img)
             self.names.append(filename)
         
@@ -185,7 +189,7 @@ class _TestFacePCA(unittest.TestCase):
         pca = PCA(drop_front=2,basis_vectors=55)
         
         for im_name in self.eyes.files():
-            im = Image(os.path.join(SCRAPS_FACE_DATA, im_name + ".pgm"))
+            im = pv.Image(os.path.join(SCRAPS_FACE_DATA, im_name + ".pgm"))
             rect = self.eyes.getFaces(im_name)
             eyes = self.eyes.getEyes(im_name)
             pca.addTraining(im,rect=rect[0],eyes=eyes[0])
@@ -194,7 +198,7 @@ class _TestFacePCA(unittest.TestCase):
                 
         face_records = {}
         for im_name in self.eyes.files():
-            im = Image(os.path.join(SCRAPS_FACE_DATA, im_name + ".pgm"))
+            im = pv.Image(os.path.join(SCRAPS_FACE_DATA, im_name + ".pgm"))
             rect = self.eyes.getFaces(im_name)
             eyes = self.eyes.getEyes(im_name)
             fr = pca.computeFaceRecord(im,rect=rect[0],eyes=eyes[0])
@@ -215,7 +219,7 @@ class _TestFacePCA(unittest.TestCase):
         roc = face_test.getROCAnalysis()        
 
         # Test based of fpr=0.01
-        roc_point = roc.getFAR(far=0.01)
+        _ = roc.getFAR(far=0.01)
         #TODO: does not work... 
         #self.assertAlmostEqual(1.0-roc_point.frr,0.16481069042316257)
 

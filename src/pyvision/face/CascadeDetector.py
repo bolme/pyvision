@@ -34,9 +34,7 @@
 import cv
 
 import os
-import os.path
 import subprocess
-import sys
 import random
 import tempfile
 import unittest
@@ -199,7 +197,7 @@ def trainHaarClassifier(pos_rects,
     os.makedirs(training_dir, 0700)
 
     random_name = "haar_"
-    for i in range(8):
+    for _ in range(8):
         random_name += random.choice('abcdefghijklmnopqrstuvwxyz')
     cascade_name  = random_name+"_cascade"
     pos_name      = random_name+"_pos.txt"
@@ -311,8 +309,8 @@ def trainHaarClassifier(pos_rects,
 
     else:
         print "Problem with return code:",proc.returncode
-        levels = os.listdir(os.path.join(training_dir,cascade_name))
-        nlevels = len(levels)
+        #levels = os.listdir(os.path.join(training_dir,cascade_name))
+        #nlevels = len(levels)
 
     
     # Load the detector if training was successful.
@@ -320,15 +318,8 @@ def trainHaarClassifier(pos_rects,
     if success:
         detector = CascadeDetector(os.path.join(training_dir,cascade_name+'.xml')) 
     else:
-        levels = os.listdir(os.path.join(training_dir,cascade_name))
-        nlevels = len(levels)
-        if nlevels > 0:
-            print "Loading partail cascade..."
-            cascade = cvLoadHaarClassifierCascade( os.path.join(training_dir,cascade_name), cvSize(tile_size[0],tile_size[1]))
-            cvSave(os.path.join(training_dir,cascade_name+'.xml'),cascade)
-            detector = CascadeDetector(os.path.join(training_dir,cascade_name+'.xml'),orig_size=tile_size) 
-        else:
-            print "Cascade Failure. Could not create classifier."            
+        # TODO: loading a partial cascade.  Maybe training should be removed from this module all together
+        print "Cascade Failure. Could not create classifier."            
 
     # Clean up the temporary files   
     os.system("rm -rf %s"%training_dir)
@@ -360,8 +351,8 @@ class _TestCascadeDetector(unittest.TestCase):
         
         fdt = FaceDetectionTest(name='scraps')
 
-        buffer = pickle.dumps(fd)
-        fd = pickle.loads(buffer)
+        data_buffer = pickle.dumps(fd)
+        fd = pickle.loads(data_buffer)
         
         self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
         for filename in self.eyes.files():
