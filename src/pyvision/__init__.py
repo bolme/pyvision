@@ -333,8 +333,15 @@ class _VersionTest(unittest.TestCase):
                      or major == rmajor and minor == rminor and sub >= sub)
 
     def test_opencv_version(self):
-        ver = int(cv.__version__.split()[1])
-        self.assert_(ver >= 3051) 
+        import cv2
+        major,minor,sub = cv2.__version__.split('.')[:3]
+        rmajor,rminor,rsub = 2,4,2 # 2008/03/20
+        major,minor,sub = int(major),int(minor),int(sub)
+        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        sys.stderr.flush()
+        self.assert_(major > rmajor 
+                     or major == rmajor and minor >= rminor 
+                     or major == rmajor and minor == rminor and sub >= sub)
 
     def test_scipy__version(self):
         import scipy

@@ -99,7 +99,7 @@ import unittest
 
 class _PolyTest(unittest.TestCase):
     def test_buildrow(self):
-        poly = Polynomial2D(ord=3)
+        poly = Polynomial2D(order=3)
         row = array(poly.buildRow(2,2))
         error = row-array([1.0,2.0,2.0,4.0,4.0,4.0,8.0,8.0,8.0,8.0])
         sse = (error*error).sum()
@@ -116,7 +116,7 @@ class _PolyTest(unittest.TestCase):
         self.assert_(sse < 0.001)
 
     def test_train(self):
-        poly = Polynomial2D(ord=2)
+        poly = Polynomial2D(order=2)
         for x in range(-8,9):
             for y in range(-8,9):
                 val = -5 + 3*y + 2*x - 4*y*y + 2*y*x+ x*x
