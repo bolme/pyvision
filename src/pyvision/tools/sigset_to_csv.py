@@ -37,8 +37,8 @@ Created on Jan 14, 2011
 
 Convert a simple sigset into a comma sep value file.  Does not currently support complex sigests.
 '''
-#import pyvision as pv
-import pyvision.analysis.FaceAnalysis.BEE as bee
+import pyvision as pv
+#import pyvision.analysis.FaceAnalysis.BEE as bee
 import optparse
 import csv
 
@@ -62,7 +62,7 @@ def parseOptions():
 if __name__ == '__main__':
     options,args = parseOptions()
 
-    sigset = bee.parseSigSet(args[0])
+    sigset = pv.parseSigSet(args[0])
     
     rows = []
     header = ["sub_id","rec_id","filename","modality","file_format"]

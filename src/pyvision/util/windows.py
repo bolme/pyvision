@@ -31,7 +31,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from numpy import *
+import numpy as np
 
 def hammingWindow(size):
     '''
@@ -39,12 +39,12 @@ def hammingWindow(size):
     http://en.wikipedia.org/wiki/Window_function
     '''
     w,h = size
-    X = arange(w).reshape(w,1)
-    Y = arange(h).reshape(1,h)
-    X = X*ones((1,h),'d')
-    Y = Y*ones((w,1),'d')
+    X = np.arange(w).reshape(w,1)
+    Y = np.arange(h).reshape(1,h)
+    X = X*np.ones((1,h),'d')
+    Y = Y*np.ones((w,1),'d')
     
-    window = (5.3836-0.46164*cos(2*pi*X/(w-1.0)))*(5.3836-0.46164*cos(2*pi*Y/(h-1.0)))
+    window = (5.3836-0.46164*np.cos(2*np.pi*X/(w-1.0)))*(5.3836-0.46164*np.cos(2*np.pi*Y/(h-1.0)))
     return window
 
 
@@ -54,12 +54,12 @@ def hannWindow(size):
     http://en.wikipedia.org/wiki/Window_function
     '''
     w,h = size
-    X = arange(w).reshape(w,1)
-    Y = arange(h).reshape(1,h)
-    X = X*ones((1,h),'d')
-    Y = Y*ones((w,1),'d')
+    X = np.arange(w).reshape(w,1)
+    Y = np.arange(h).reshape(1,h)
+    X = X*np.ones((1,h),'d')
+    Y = Y*np.ones((w,1),'d')
     
-    window = (0.5*(1-cos(2*pi*X/(w-1.0))))*(0.5*(1-cos(2*pi*Y/(h-1.0))))
+    window = (0.5*(1-np.cos(2*np.pi*X/(w-1.0))))*(0.5*(1-np.cos(2*np.pi*Y/(h-1.0))))
     return window
 
 def cosineWindow(size):
@@ -68,10 +68,14 @@ def cosineWindow(size):
     http://en.wikipedia.org/wiki/Window_function
     '''
     w,h = size
-    X = arange(w).reshape(w,1)
-    Y = arange(h).reshape(1,h)
-    X = X*ones((1,h),'d')
-    Y = Y*ones((w,1),'d')
+    X = np.arange(w).reshape(w,1)
+    Y = np.arange(h).reshape(1,h)
+    X = X*np.ones((1,h),'d')
+    Y = Y*np.ones((w,1),'d')
     
-    window = (sin(pi*X/(w-1.0)))*(sin(pi*Y/(h-1.0)))
+    window = (np.sin(np.pi*X/(w-1.0)))*(np.sin(np.pi*Y/(h-1.0)))
     return window
+
+
+
+

@@ -31,17 +31,17 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from pyvision.vector.VectorClassifier import *
+from pyvision.vector.VectorClassifier import VectorClassifier,TYPE_REGRESSION
 from numpy import array,dot
 from numpy.linalg import lstsq
 
 class Polynomial2D(VectorClassifier):
-    def __init__(self,ord=2,**kwargs):
+    def __init__(self,order=2,**kwargs):
         #FIXME: DOcument this code
         '''
         This class fits a polynomial to a function of 2 variables.
         '''
-        self.ord = ord
+        self.order = order
         self.x = None
         VectorClassifier.__init__(self,TYPE_REGRESSION,**kwargs)
         
@@ -80,7 +80,7 @@ class Polynomial2D(VectorClassifier):
         Method for private use only.
         '''
         row = [1.0]
-        for o in range(1,self.ord+1):
+        for o in range(1,self.order+1):
             for i in range(o+1):
                 row.append(float(x)**i*float(y)**(o-i))
         return row

@@ -39,7 +39,7 @@
 
 import unittest
 import os.path
-import math
+#import math
 
 import cv    
 import numpy as np
@@ -66,7 +66,7 @@ def logPolar(im,center=None,radius=None,M=None,size=(64,128)):
     if center == None:
         center = pv.Point(0.5*w,0.5*h)
     src = im.asOpenCV()
-    dst = cv.cvCreateImage( cv.cvSize(size[0],size[1]), 8, 3 );
+    dst = cv.cvCreateImage( cv.cvSize(size[0],size[1]), 8, 3 )
     cv.cvLogPolar( src, dst, center.asOpenCV(), M, cv.CV_INTER_LINEAR+cv.CV_WARP_FILL_OUTLIERS )
     return pv.Image(dst)
     
@@ -153,15 +153,15 @@ def PerspectiveFromPoints(source, dest, new_size, method=0, ransacReprojThreshol
 #
 # @param matrix a 3-by-3 matrix that defines the transformation.
 # @param new_size the size of any new images created by this affine transform.
-# @keyparam filter the image filtering function used for interpolating between pixels.
+# @keyparam interpolate the image filtering function used for interpolating between pixels.
 # @return an AffineTransform object
 class PerspectiveTransform:
 
-    def __init__(self,matrix,new_size,filter=None):
+    def __init__(self,matrix,new_size,interpolate=None):
         self.matrix = matrix
         self.inverse = la.inv(matrix)
         self.size = new_size
-        self.filter = filter
+        self.interpolate = interpolate
     
     
     def __call__(self,data):
@@ -265,7 +265,7 @@ class PerspectiveTransform:
     # @return a single link.AffineTransform which is the the same as 
     #         both affine transforms.
     def __mul__(self,affine):
-        return PerspectiveTransform(np.dot(self.matrix,affine.matrix),self.size,self.filter)
+        return PerspectiveTransform(np.dot(self.matrix,affine.matrix),self.size,self.interpolate)
 
 # TODO: Add unit tests
 class _PerspectiveTest(unittest.TestCase):
@@ -290,20 +290,20 @@ class _PerspectiveTest(unittest.TestCase):
             
     def test_four_points_a(self):
         p = PerspectiveFromPoints(self.corners_a,self.corners_t,(640,480))
-        pts = p.transformPoints(self.corners_a)
+        _ = p.transformPoints(self.corners_a)
         #for pt in pts:
         #    print "Point: %7.2f %7.2f"%(pt.X(), pt.Y())
             
-        im = p.transformImage(self.im_a)
+        _ = p.transformImage(self.im_a)
         #im.show()
 
     def test_four_points_b(self):
         p = PerspectiveFromPoints(self.corners_b,self.corners_t,(640,480))
-        pts = p.transformPoints(self.corners_b)
+        _ = p.transformPoints(self.corners_b)
         #for pt in pts:
         #    print "Point: %7.2f %7.2f"%(pt.X(), pt.Y())
             
-        im = p.transformImage(self.im_b)
+        _ = p.transformImage(self.im_b)
         #im.show()
         
     def test_four_points_ab(self):
@@ -312,7 +312,7 @@ class _PerspectiveTest(unittest.TestCase):
         #for pt in pts:
         #    print "Point: %7.2f %7.2f"%(pt.X(), pt.Y())
             
-        im = p.transformImage(self.im_a)
+        _ = p.transformImage(self.im_a)
         #im.show()
         #self.im_b.show()
         

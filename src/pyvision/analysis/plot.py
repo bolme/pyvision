@@ -9,6 +9,7 @@ import numpy as np
 #import PIL
 import os.path
 import PIL.ImageFont
+import PIL.ImageDraw
 #import copy
 random = np.random
 

@@ -216,7 +216,7 @@ from analysis.gui_tools import capturePointsFromMouse
 
 from pyvision.face import REDUCED_LEYE, REDUCED_REYE, REDUCED_SIZE
 
-from types.kinect import Kinect
+from pyvision.types.kinect import Kinect
 
 from pyvision.surveillance.kalman import KalmanFilter
 
@@ -231,9 +231,9 @@ import beta
 #================================== Misc Functions =====================================
 
 
-def searchNames(text,object):
+def searchNames(text,item):
     '''Search dir(object) for patterns matching text'''
-    for name in dir(object):
+    for name in dir(item):
         if text.upper() in name.upper():
             print name
     
@@ -245,7 +245,7 @@ def runningInNotebook():
     # Check that the type of ipython instance is consistent with the notebook.
     try:
         import IPython
-        gui = IPython.core.pylabtools.find_gui_and_backend()
+        gui = IPython.core.pylabtools.find_gui_and_backend() #@UndefinedVariable
         if 'inline' not in gui:
             #print 'missing inline'
             return False
@@ -312,7 +312,6 @@ class _VersionTest(unittest.TestCase):
     ''' Check the installed versions of the dependencies '''
     
     def test_python_version(self):
-        import sys
         major,minor,sub = sys.version.split(' ')[0].split('.')[:3]
         rmajor,rminor,rsub = 2,3,0 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
@@ -323,7 +322,6 @@ class _VersionTest(unittest.TestCase):
                      or major == rmajor and minor == rminor and sub >= sub)
 
     def test_pil_version(self):
-        import sys
         import PIL.Image
         major,minor,sub = PIL.Image.VERSION.split('.')[:3]
         rmajor,rminor,rsub = 1,1,5 # 2008/03/20
@@ -335,13 +333,10 @@ class _VersionTest(unittest.TestCase):
                      or major == rmajor and minor == rminor and sub >= sub)
 
     def test_opencv_version(self):
-        import sys
-        import cv
         ver = int(cv.__version__.split()[1])
         self.assert_(ver >= 3051) 
 
     def test_scipy__version(self):
-        import sys
         import scipy
         major,minor,sub = scipy.__version__.split('.')[:3]
         rmajor,rminor,rsub = 0,7,0 # 2008/03/20
@@ -353,7 +348,6 @@ class _VersionTest(unittest.TestCase):
                      or major == rmajor and minor == rminor and sub >= sub)
         
     def test_numpy__version(self):
-        import sys
         import numpy
         major,minor,sub = numpy.__version__.split('.')[:3]
         rmajor,rminor,rsub = 1,0,4 # 2008/03/20
@@ -365,10 +359,9 @@ class _VersionTest(unittest.TestCase):
                      or major == rmajor and minor == rminor and sub >= sub)
         
     def test_libsvm_version(self):
-        import sys
         import svm
         #major,minor,sub = svm.__version__.split('.')[:3]
-        rmajor,rminor,rsub = 2,86,0 # 2008/03/20
+        rmajor,rminor,_ = 2,86,0 # 2008/03/20
         #major,minor,sub = int(major),int(minor),int(sub)
         #print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
         print >> sys.stderr, "No way to get version numbers >= %d.%d "%(rmajor,rminor),
@@ -386,7 +379,7 @@ def test():
     from pyvision.types.Affine import _AffineTest
     affine_suite = unittest.TestLoader().loadTestsFromTestCase(_AffineTest)
     
-    from pyvision.types.img import _TestImage
+    from pyvision.types.testsuite import _TestImage
     image_suite = unittest.TestLoader().loadTestsFromTestCase(_TestImage)
 
     from pyvision.vector.VectorClassifier import _TestVectorClassifier

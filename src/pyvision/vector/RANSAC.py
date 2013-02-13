@@ -1,11 +1,11 @@
-from numpy import nonzero, dot, arange, abs
-from numpy.linalg import lstsq
+#from numpy import np.dot, arange, abs
+#from numpy.linalg import lstsq
 import numpy as np
 import random
 
 
 def computeErrorAndCount(A,b,x,group,tol):
-    error = abs(b - dot(A,x))
+    error = np.abs(b - np.dot(A,x))
     tot_error = 0.0
     count = 0
     inliers = np.zeros(b.shape,dtype=np.bool)
@@ -38,12 +38,12 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
     assert group > 0
     assert n % group == 0
     assert n >= k
-    tmp = arange(n/group)
+    tmp = np.arange(n/group)
     
     if niter == None:
         niter = n/group
     
-    bestx = lstsq(A,b)[0]
+    bestx = np.linalg.lstsq(A,b)[0]
     besterror,bestcount,bestinliers = computeErrorAndCount(A,b,bestx,group,tol)
     if verbose: print "New Best (LS):",bestcount,besterror,float(bestcount*group)/n
     
@@ -55,7 +55,7 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
         
     #bestcount = 0
     #besterror = 0.0
-    for i in range(niter):
+    for _ in xrange(niter):
         sample = random.sample(tmp,k/group)
         
         new_sample = []
@@ -71,7 +71,7 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
         #print tX.shape,ty.shape
 
         try:
-            x = lstsq(tX,ty)[0]
+            x = np.linalg.lstsq(tX,ty)[0]
         except:
             continue
         
@@ -91,11 +91,11 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
     #refine the estimate
     #error,count,inliers = computeErrorAndCount(A,b,bestx,group,tol)
     inliers = bestinliers
-    for i in range(10):
+    for _ in xrange(10):
         ty = b[inliers,:]
         tX = A[inliers,:]
         try:
-            x = lstsq(tX,ty)[0]        
+            x = np.linalg.lstsq(tX,ty)[0]        
         except:
             continue
         error,count,inliers = computeErrorAndCount(A,b,x,group,tol)
@@ -107,7 +107,7 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
             bestinliers = inliers
             if verbose: print "Improved Best:",bestcount,besterror,float(bestcount*group)/n
         
-        #new_inliers = nonzero(abs(b - dot(A,x)) < tol)[0]
+        #new_inliers = nonzero(abs(b - np.dot(A,x)) < tol)[0]
         #if list(new_inliers) == list(inliers):
         #    break
         #inliers = new_inliers
@@ -135,11 +135,11 @@ def _quantile(errors,quantile):
 def LMeDs(A,b,quantile=0.75,N = None,verbose=True):
     #n = len(y.flatten())
     n,k = A.shape
-    tmp = arange(n)
+    tmp = np.arange(n)
 
     best_sample = tmp
-    x = bestx = lstsq(A,b)[0]
-    best_error = _quantile(abs(b - dot(A,x)),quantile)
+    x = bestx = np.linalg.lstsq(A,b)[0]
+    best_error = _quantile(np.abs(b - np.dot(A,x)),quantile)
     #print "LMeDs Error:",best_error
     if N == None:
         N = n
@@ -151,11 +151,11 @@ def LMeDs(A,b,quantile=0.75,N = None,verbose=True):
         tX = A[sample,:]
 
         try:
-            x = lstsq(tX,ty)[0]
+            x = np.linalg.lstsq(tX,ty)[0]
         except:
             continue
         
-        med_error = _quantile(abs(b - dot(A,x)),quantile)
+        med_error = _quantile(np.abs(b - np.dot(A,x)),quantile)
         
         if med_error < best_error:
             #print "      Error:",best_error
@@ -186,11 +186,11 @@ def LMeDs(A,b,quantile=0.75,N = None,verbose=True):
             tX = A[sample,:]
             
             try:
-                x = lstsq(tX,ty)[0]
+                x = np.linalg.lstsq(tX,ty)[0]
             except:
                 continue
             
-            med_error = _quantile(abs(b - dot(A,x)),quantile)
+            med_error = _quantile(np.abs(b - np.dot(A,x)),quantile)
             
             if med_error < best_error or (med_error == best_error and best_sample.sum() < sample.sum()):
                 #print "      Error:",best_error
@@ -199,12 +199,12 @@ def LMeDs(A,b,quantile=0.75,N = None,verbose=True):
                 best_error = med_error
                 bestx = x
     
-    #inliers = nonzero(abs(b - dot(A,x)) < tol)[0]
+    #inliers = nonzero(np.abs(b - np.dot(A,x)) < tol)[0]
     #for i in range(10):
     #    ty = b[inliers,:]
     #    tX = A[inliers,:]
-    #    x = lstsq(tX,ty)[0]
-    #    new_inliers = nonzero(abs(b - dot(A,x)) < tol)[0]
+    #    x = np.linalg.lstsq(tX,ty)[0]
+    #    new_inliers = nonzero(np.abs(b - np.dot(A,x)) < tol)[0]
     #    if list(new_inliers) == list(inliers):
     #        break
     #    inliers = new_inliers
@@ -225,7 +225,7 @@ if __name__ == '__main__':
     b = np.array(b)
     b[0] = -20
     
-    print lstsq(A,b)[0]
+    print np.linalg.lstsq(A,b)[0]
     print RANSAC(A,b,tol=6.0)
     
 
@@ -242,7 +242,7 @@ if __name__ == '__main__':
     b = np.array(b)
     b[0] = -200000.
     
-    print lstsq(A,b)[0]
+    print np.linalg.lstsq(A,b)[0]
     print RANSAC(A,b,group=2,tol=6,full_output = True,verbose=True)
     
 

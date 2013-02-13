@@ -39,9 +39,9 @@ import os
 import unittest
 import numpy as np
 try:
-    import svm
+    import svm #@UnusedImport
 except:
-    import libsvm.svm as svm
+    import libsvm.svm as svm #@UnresolvedImport @Reimport
 
 import pyvision as pv
 from pyvision.vector.VectorClassifier import VectorClassifier, TYPE_TWOCLASS, TYPE_MULTICLASS, TYPE_REGRESSION
@@ -581,7 +581,7 @@ class _TestSVM(unittest.TestCase):
     def test_sv_xor_rbf(self):
         # a simple binary two class
         xor = SVM(random_seed=0)
-        for i in range(20):
+        for _ in xrange(20):
             xor.addTraining(0,[0,0])
             xor.addTraining(0,[1,1])
             xor.addTraining(1,[0,1])
@@ -597,7 +597,7 @@ class _TestSVM(unittest.TestCase):
     def test_sv_pickle(self):
         # a simple binary two class
         xor = SVM(random_seed=0)
-        for i in range(20):
+        for _ in xrange(20):
             xor.addTraining(0,[0,0])
             xor.addTraining(0,[1,1])
             xor.addTraining(1,[0,1])
@@ -616,7 +616,7 @@ class _TestSVM(unittest.TestCase):
     def test_sv_xor_linear(self):
         # a simple binary two class
         xor = SVM(kernel=KERNEL_LINEAR,random_seed=1)
-        for i in range(20):
+        for _ in xrange(20):
             xor.addTraining(0,[0,0])
             xor.addTraining(0,[1,1])
             xor.addTraining(1,[0,1])
@@ -647,7 +647,6 @@ class _TestSVM(unittest.TestCase):
         rega.train()
         
         mse = 0.0
-        total = 0
         for i in range(50,len(labels)):
             p = rega.predict(vectors[i])
             e = p - labels[i]
@@ -674,7 +673,6 @@ class _TestSVM(unittest.TestCase):
         rega.train()
 
         mse = 0.0
-        total = 0
         for i in range(50,len(labels)):
             p = rega.predict(vectors[i])
             e = p - labels[i]

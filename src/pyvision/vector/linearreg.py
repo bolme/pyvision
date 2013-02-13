@@ -34,8 +34,8 @@
 '''
 Implementation of linear regression.
 '''
-import unittest
-import random
+#import unittest
+#import random
 import numpy
 from numpy import dot,sqrt
 from numpy.linalg.linalg import pinv
@@ -75,13 +75,13 @@ class LinearReg:
         
         return self.RMSE
     
-    def map(self, input):
-        X = numpy.concatenate([numpy.ones((1,)),input.flatten()])
+    def map(self, data):
+        X = numpy.concatenate([numpy.ones((1,)),data.flatten()])
         #print X
         return dot(self.mat,X)
 
-    def __call__(self,input):
-        return self.map(input)
+    def __call__(self,data):
+        return self.map(data)
         
         
         
