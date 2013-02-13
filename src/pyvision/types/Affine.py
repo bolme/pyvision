@@ -59,8 +59,9 @@ import pyvision
 import pyvision as pv
 import numpy as np
 import cv
+import cv2
 
-from pyvision.types.img import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_OPENCV
+from pyvision.types.img import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_MATRIX_RGB, TYPE_OPENCV, TYPE_OPENCV2, TYPE_OPENCV2BW
 from pyvision.types.Point import Point
 from pyvision.types.Rect import Rect
 from pyvision.vector.RANSAC import RANSAC,LMeDs
@@ -558,16 +559,42 @@ class AffineTransform:
             #data = (matrix[0,0],matrix[0,1],matrix[0,2],matrix[1,0],matrix[1,1],matrix[1,2])
             pil = im_a.asPIL().transform(self.size, AFFINE, data, self.interpolate)
             result = Image(pil)
+            
         elif im_a.getType() == TYPE_MATRIX_2D:
+            # Transform a matrix 2d
             mat = im_a.asMatrix2D()
-
             mat = affine_transform(mat, self.inverse[:2,:2], offset=self.inverse[:2,2])
             result = Image(mat[:self.size[0],:self.size[1]])
+            
+        elif im_a.getType() == TYPE_MATRIX_RGB:
+            # Transform a matrix 3d
+            mat = im_a.asMatrix3D()
+            c0 = mat[0,:,:]
+            c1 = mat[1,:,:]
+            c2 = mat[2,:,:]
+            c0 = affine_transform(c0, self.inverse[:2,:2], offset=self.inverse[:2,2])
+            c1 = affine_transform(c1, self.inverse[:2,:2], offset=self.inverse[:2,2])
+            c2 = affine_transform(c2, self.inverse[:2,:2], offset=self.inverse[:2,2])
+            mat = np.array([c0,c1,c2],dtype=np.float32)
+            result = Image(mat[:,:self.size[0],:self.size[1]])
+            
         elif im_a.getType() == TYPE_OPENCV:
             matrix = pv.NumpyToOpenCV(self.matrix)
             src = im_a.asOpenCV()
             dst = cv.CreateImage( (self.size[0],self.size[1]), cv.IPL_DEPTH_8U, src.nChannels );
             cv.WarpPerspective( src, dst, matrix, cv.CV_INTER_LINEAR+cv.CV_WARP_FILL_OUTLIERS,cv.ScalarAll(128))                    
+            result = pv.Image(dst)
+
+        elif im_a.getType() == TYPE_OPENCV2:
+            # Transform an opencv 2 image
+            src = im_a.asOpenCV2()
+            dst = cv2.warpPerspective(src, self.matrix, self.size)
+            result = pv.Image(dst)
+
+        elif im_a.getType() == TYPE_OPENCV2BW:
+            # Transform a bw opencv 2 image
+            src = im_a.asOpenCV2BW()
+            dst = cv2.warpPerspective(src, self.matrix, self.size)
             result = pv.Image(dst)
 
         else:
@@ -730,10 +757,74 @@ class _AffineTest(unittest.TestCase):
         # TODO: FIx this test
         pass
         
-    def test_affine_numpy(self):
-        # TODO: FIx this  test
-        pass
+    def test_affine_Matrix2D(self):
+        im = pv.Image(pv.BABOON)
+        test_im = pv.Image(im.asMatrix2D())
+        affine = pv.AffineFromRect(pv.CenteredRect(256,256,128,128),(64,64))
+
+        # Transform the images
+        im = affine(im)
+        test_im = affine(test_im)
+
+        # Correlate the resulting images
+        vec1 = pv.unit(im.asMatrix2D().flatten())
+        vec2 = pv.unit(test_im.asMatrix2D().flatten())
+        score = np.dot(vec1,vec2)
         
+        self.assertGreater(score, 0.998)
+
+
+    def test_affine_OpenCV2BW(self):
+        im = pv.Image(pv.BABOON)
+        test_im = pv.Image(im.asOpenCV2BW())
+        affine = pv.AffineFromRect(pv.CenteredRect(256,256,128,128),(64,64))
+
+        # Transform the images
+        im = affine(im)
+        test_im = affine(test_im)
+
+        # Correlate the resulting images
+        vec1 = pv.unit(im.asMatrix2D().flatten())
+        vec2 = pv.unit(test_im.asMatrix2D().flatten())
+        score = np.dot(vec1,vec2)
+        
+        self.assertGreater(score, 0.998)
+
+
+    def test_affine_OpenCV2(self):
+        im = pv.Image(pv.BABOON)
+        test_im = pv.Image(im.asOpenCV2())
+        affine = pv.AffineFromRect(pv.CenteredRect(256,256,128,128),(64,64))
+
+        # Transform the images
+        im = affine(im)
+        test_im = affine(test_im)
+
+        # Correlate the resulting images
+        vec1 = pv.unit(im.asMatrix3D().flatten())
+        vec2 = pv.unit(test_im.asMatrix3D().flatten())
+        score = np.dot(vec1,vec2)
+        
+        self.assertGreater(score, 0.998)
+
+
+    def test_affine_Matrix3D(self):
+        im = pv.Image(pv.BABOON)
+        test_im = pv.Image(im.asMatrix3D())
+        affine = pv.AffineFromRect(pv.CenteredRect(256,256,128,128),(64,64))
+
+        # Transform the images
+        im = affine(im)
+        test_im = affine(test_im)
+
+        # Correlate the resulting images
+        vec1 = pv.unit(im.asMatrix3D().flatten())
+        vec2 = pv.unit(test_im.asMatrix3D().flatten())
+        score = np.dot(vec1,vec2)
+        
+        self.assertGreater(score, 0.998)
+
+
     def test_affine_opencv(self):
         # TODO: FIx this test
         pass
