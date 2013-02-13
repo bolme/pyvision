@@ -58,6 +58,8 @@ class GaborWavelet:
         
     def mask(self,size):
         w,h = size
+
+        #m = np.zeros(size,np.complex64)
         x = np.arange(-w/2,w/2).reshape(w,1)*np.ones(size)
         x = np.concatenate((x[w/2:,:],x[:w/2,:]),axis=0)
         y = np.arange(-h/2,h/2).reshape(1,h)*np.ones(size)
@@ -401,7 +403,7 @@ class GaborJet:
         return d[0,0],d[1,0]
 
 
-    def displaceIter(self,gj,iterator=8):
+    def displaceIter(self,gj,N=8):
         m1 = self.mag
         m2 = gj.mag
         p1 = self.phase
@@ -411,7 +413,7 @@ class GaborJet:
         k = self.k      
         d = np.array([[0.],[0.]])
             
-        for _ in range(iterator):
+        for _ in range(N):
             correction = np.dot(k,d).flatten()   
 
             p = p1 - p2 - correction

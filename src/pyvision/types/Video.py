@@ -566,7 +566,7 @@ class FFMPEGVideo:
         #print line
         #self.stdout.seek(0,os.SEEK_CUR)
         
-        format,w,h,f,t1,aspect,t2,t3 = line.split()
+        _,w,h,_,_,aspect,_,_ = line.split()
         
         # I am not sure what all this means but I am checking it anyway
         assert format=='YUV4MPEG2'
@@ -606,7 +606,7 @@ class FFMPEGVideo:
         
         
     def frame(self):
-        line = self.stdout.readline()
+        _ = self.stdout.readline()
         #print line
         #print self.w,self.h
         y = self.stdout.read(self.w*self.h)

@@ -1,7 +1,7 @@
 import pyvision as pv
 from EyesFile import EyesFile
 import os.path
-import numpy as np
+#import numpy as np
 
 def faceFromEyes(eye1, eye2):
     '''

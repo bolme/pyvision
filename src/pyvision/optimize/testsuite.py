@@ -9,7 +9,7 @@ import unittest
 
 import pyvision as pv
 import pyvision.optimize.genetic as ga
-import scipy as sp
+#import scipy as sp
 import numpy as np
 import random
 
@@ -167,7 +167,7 @@ class FitnessNapsack:
         values = values[order]
         density = density[order]
         
-        solution,score,remaining = self.greedy(weights,values,self.max_weight)
+        _ = self.greedy(weights,values,self.max_weight)
         #score = self.greedy_soft(weights,values,self.max_weight)
         #print "Greedy",score,remaining,solution
         #print "GreedySoft",self.greedy_soft(weights, values, self.max_weight)
@@ -257,37 +257,37 @@ class GeneticAlgorithmTest(unittest.TestCase):
 
     def dtest2DSurfaceFloatMP(self):
         alg = ga.GeneticAlgorithm(Fitness(),[ga.GAFloat(0.0,10.0),ga.GAFloat(0.0,10.0)],n_processes=4)
-        score,args,kwargs = alg.optimize(max_iter=1000)
+        _ = alg.optimize(max_iter=1000)
         #print "test2DSurfaceFloatMP",score,args,kwargs
         
     def dtest2DSurfaceFloatSP(self):
         alg = ga.GeneticAlgorithm(Fitness(),[ga.GAFloat(0.0,10.0),ga.GAFloat(0.0,10.0)],n_processes=1)
-        score,args,kwargs = alg.optimize(max_iter=5000,callback=callback)
+        _ = alg.optimize(max_iter=5000,callback=callback)
         #print "test2DSurfaceFloatSP",score,args,kwargs
         
     def dtest2DSurfaceIntSP(self):
         alg = ga.GeneticAlgorithm(FitnessInt(),[ga.GAInteger(0,1000),ga.GAInteger(0,1000)],n_processes=1)
-        score,args,kwargs = alg.optimize(max_iter=1000)
+        _ = alg.optimize(max_iter=1000)
         #print "test2DSurfaceIntSP",score,args,kwargs
         
     def dtestNapsack(self):
         fitness = FitnessNapsack()
         #fitness.solve()
-        alg = ga.GeneticAlgorithm(FitnessNapsack(),[ga.GARanking(100)],n_processes=1)
-        score,args,kwargs = alg.optimize(max_iter=1000)
+        alg = ga.GeneticAlgorithm(fitness,[ga.GARanking(100)],n_processes=1)
+        _ = alg.optimize(max_iter=1000)
         #print "testNapsack",score,args,kwargs
 
     def testGAUnitVector(self):
         #print "Running unitrect test"
         alg = ga.GeneticAlgorithm(fitnessUnitVector,[ga.GAUnitVector(9)],population_size=20,n_processes=1)
-        score,args,kwargs = alg.optimize(max_iter=10000)
+        _ = alg.optimize(max_iter=10000)
         #print "testGAUnitVector",score,args,kwargs
         
     
     def dtestGAUnitRect(self):
         #print "Running unitrect test"
         alg = ga.GeneticAlgorithm(fitnessUnitRect,[ga.GAUnitRect2(min_width=0.05,min_height=0.05,max_height=1.0,max_width=1.0)],population_size=20,n_processes=4)
-        score,args,kwargs = alg.optimize(max_iter=10000,callback=unitRectCallback)
+        _ = alg.optimize(max_iter=10000,callback=unitRectCallback)
         #print "testGAUnitRect",score,args,kwargs
         
         
@@ -301,18 +301,18 @@ class GeneticAlgorithmTest(unittest.TestCase):
         
     def dtestGAAngle(self):
         # Test random
-        for i in range(100):
+        for _ in range(100):
             ang = ga.GAAngle()
             #print ang
         # Test mutate
-        for i in range(100):
+        for _ in range(100):
             ang = ga.GAAngle(mutation_rate=0.5)
             #print ang,
             ang.mutate()
             #print ang
             
         # Test Combine
-        for i in range(100):
+        for _ in range(100):
             ang1 = ga.GAAngle()
             ang2 = ga.GAAngle()
             ang2.value = ang1.value + 0.1
@@ -322,7 +322,7 @@ class GeneticAlgorithmTest(unittest.TestCase):
             #print ang1
         
         # Test Combine
-        for i in range(100):
+        for _ in range(100):
             ang1 = ga.GAAngle()
             ang2 = ga.GAAngle()
             ang2.value = ang1.value + 1

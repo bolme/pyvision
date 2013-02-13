@@ -46,7 +46,7 @@ import os.path
 import struct
 import binascii
 import numpy as np
-import scipy as sp
+#import scipy as sp
 import scipy.io as spio
 import pyvision as pv
 import pyvision.analysis.roc as roc
@@ -179,10 +179,10 @@ def sigset2array(ss):
         #print signature[1][0]
         
         mode = signature[1][0]['modality']
-        format = signature[1][0]['file-format']
+        file_format = signature[1][0]['file-format']
         rec_id = signature[1][0]['name']
         filename = signature[1][0]['file-name']
-        result.append([sub_id,mode,format,rec_id,filename])
+        result.append([sub_id,mode,file_format,rec_id,filename])
     return result
         
     
@@ -285,7 +285,7 @@ class BEEDistanceMatrix:
         # read and process line 4 (MF n_queries n_targets magic_number)
         line = f.readline().split()
         assert line[0] in ['MF','MB']
-        type = line[0][1]
+        file_type = line[0][1]
         
         self.n_queries = int(line[1])
         self.n_targets = int(line[2])
@@ -305,14 +305,14 @@ class BEEDistanceMatrix:
             raise ValueError("Unknown magic number in similarity matrix.")
         
         # Read the matrix data
-        if type=='F':
+        if file_type=='F':
             self.matrix = np.fromfile(f,dtype=np.float32)
-        elif type=='B':
+        elif file_type=='B':
             self.matrix = np.fromfile(f,dtype=np.byte)
         else:
-            raise TypeError("Unknown matrix type: %s"%type)
+            raise TypeError("Unknown matrix file_type: %s"%file_type)
         
-        if type=='F' and byteswap:
+        if file_type=='F' and byteswap:
             self.matrix = self.matrix.byteswap()
         assert self.matrix.shape[0] == self.n_targets*self.n_queries
         self.matrix = self.matrix.reshape(self.n_queries,self.n_targets)
@@ -536,35 +536,35 @@ class BEEDistanceMatrix:
         
     def saveBeeFormat(self,filename):
         #maybe check for overwrite? and add param for allowing overwrite
-        file = open(filename, "wb")
+        f = open(filename, "wb")
         
-        # write line 1 : type and version
-        type = 'D'
+        # write line 1 : file_type and version
+        file_type = 'D'
         if self.matrix.dtype == np.byte:    
-            type = 'M'
+            file_type = 'M'
         elif self.is_distance:
-            type = 'D'
+            file_type = 'D'
         else:
-            type = 'S'
+            file_type = 'S'
             
-        file.write(type)
-        file.write("2\x0a")
+        f.write(file_type)
+        f.write("2\x0a")
         
         # write lines 2 and 3 (target and query sigsets)
-        file.write(self.target_filename+"\x0a")
-        file.write(self.query_filename+"\x0a")
+        f.write(self.target_filename+"\x0a")
+        f.write(self.query_filename+"\x0a")
         
         # write line 4 (MF n_queries n_targets magic_number)
         magic_number = struct.pack('=I',0x12345678)
         assert len(magic_number) == 4 # Bug fix: verify the magic number is really 4 bytes
-        if type == 'M':
-            file.write("MB %d %d %s\x0a" %(self.n_queries, self.n_targets, magic_number))
+        if file_type == 'M':
+            f.write("MB %d %d %s\x0a" %(self.n_queries, self.n_targets, magic_number))
         else:
-            file.write("MF %d %d %s\x0a" %(self.n_queries, self.n_targets, magic_number))
+            f.write("MF %d %d %s\x0a" %(self.n_queries, self.n_targets, magic_number))
         
         # write the data
-        file.write(self.matrix)
-        file.close()
+        f.write(self.matrix)
+        f.close()
 
     def histogram(self,value_range=None,bins=100,normed=True,mask=None):
         match_scores = self.getMatchScores(mask=mask)
@@ -572,7 +572,7 @@ class BEEDistanceMatrix:
         if value_range == None:
             value_range = (self.matrix.min(),self.matrix.max())
 
-        match_counts,vals = np.histogram(match_scores,range=value_range,bins=bins,normed=normed)
+        match_counts,_ = np.histogram(match_scores,range=value_range,bins=bins,normed=normed)
         nonmatch_counts,vals = np.histogram(nonmatch_scores,range=value_range,bins=bins,normed=normed)
                        
         hist = pv.Table()
@@ -591,10 +591,10 @@ class BEEDistanceMatrix:
         return roc.ROC(match,nonmatch,is_distance=self.is_distance)
     
     def getRank1(self,mask=None):
-        rows,cols = self.matrix.shape
+        rows,_ = self.matrix.shape
         
-        queries = np.array([ name for name,sig in self.queries ])
-        targets = np.array([ name for name,sig in self.targets ])
+        queries = np.array([ name for name,_ in self.queries ])
+        targets = np.array([ name for name,_ in self.targets ])
 
         success = 0.0
         count = 0.0
@@ -626,8 +626,8 @@ class BEEDistanceMatrix:
         '''
         Returns a string describing the matrix.
         '''
-        type = {True:"Distance",False:"Similarity"}[self.is_distance]
-        return "BEE[file=%s;type=%s]"%(self.shortname,type)
+        file_type = {True:"Distance",False:"Similarity"}[self.is_distance]
+        return "BEE[file=%s;type=%s]"%(self.shortname,file_type)
     
     def __getitem__(self,index):
         '''An accessor to quickly read matrix data'''

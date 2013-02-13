@@ -73,19 +73,31 @@ class ImageLog:
         else:
             self.pickle(item,*args,**kwargs) 
         
-    def log(self,image,label="NOLABEL",format='png'):
+    def log(self,image,label="NOLABEL",ext='png',**kwargs):
         '''
         Save a pyvision image to the log.
         '''
-        image.asAnnotated().save(self.dir+'/%06d_%s.%s'%(self.count,label,format),quality=95)
+        if kwargs.has_key('format'):
+            sys.stderr.write("WARNING: the format option to ImageLog.plot is no longer supported. Please use 'ext'")
+            ext = kwargs['format']
+            del kwargs[format]
+        if len(kwargs) > 0:
+            raise ValueError("Unsupported keyword arguments: %s"(kwargs.keys(),))
+        image.asAnnotated().save(self.dir+'/%06d_%s.%s'%(self.count,label,ext),quality=95)
         self.count += 1
         #print message
     
-    def plot(self,plot,label="NOLABEL",format='png'):
+    def plot(self,plot,label="NOLABEL",ext='png',**kwargs):
         '''
         Save a pyvision plot to the log.
         '''
-        plot.asImage().asAnnotated().save(self.dir+'/%06d_%s.%s'%(self.count,label,format),quality=95)
+        if kwargs.has_key('format'):
+            sys.stderr.write("WARNING: the format option to ImageLog.plot is no longer supported. Please use 'ext'")
+            ext = kwargs['format']
+            del kwargs[format]
+        if len(kwargs) > 0:
+            raise ValueError("Unsupported keyword arguments: %s"(kwargs.keys(),))
+        plot.asImage().asAnnotated().save(self.dir+'/%06d_%s.%s'%(self.count,label,ext),quality=95)
         self.count += 1
         #print message
     
@@ -109,15 +121,15 @@ class ImageLog:
         self.count += 1
         #print message
     
-    def pickle(self,object,label="NOLABEL"):
+    def pickle(self,data,label="NOLABEL"):
         '''
-        Pickle a python object to the log directory.  This may not be supported 
+        Pickle a python data to the log directory.  This may not be supported 
         by all objects. 
         
         '''
         filename = join(self.dir,'%06d_%s.pkl'%(self.count,label))
         f = open(filename,'wb')
-        cPickle.dump(object, f, protocol=2)
+        cPickle.dump(data, f, protocol=2)
         f.close()
         self.count += 1
         

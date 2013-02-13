@@ -94,7 +94,7 @@ class LogisticRegression(object):
         data = np.concatenate((data,np.ones((N,1),dtype=np.float64)),axis=1)
         
         # get an estimate least squares fit
-        x,ordinate_vals,rank,singular_vals = np.linalg.lstsq(data, r)
+        x,_,_,_ = np.linalg.lstsq(data, r)
         x.shape = (D+1,1)
         
         if method == 'fast':

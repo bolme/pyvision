@@ -41,22 +41,22 @@ from scipy.ndimage import convolve
 from scipy.ndimage import gaussian_filter,maximum_filter
 # TODO: At some point it would be nice to have the options of prewitt or sobel as filters.
 # from scipy.ndimage import prewitt,sobel
-from numpy.linalg import det
+#from numpy.linalg import det
 
-import pyvision
+import pyvision as pv
 from pyvision.point.DetectorROI import DetectorROI
-from pyvision.types.img import Image
-from pyvision.types.Point import Point
+#from pyvision.types.img import Image
+#from pyvision.types.Point import Point
 
 
 conv2 = convolve
 
 class DetectorCorner(DetectorROI):
-    def __init__(self,filter = [[-1,0,1]], radius=9, sigma=0.7, k=0.04, **kwargs):
+    def __init__(self,mask = [[-1,0,1]], radius=9, sigma=0.7, k=0.04, **kwargs):
         '''
         Corner Detector
         
-        filter   - first dirivitive filter
+        mask   - first dirivitive filter
         radius   - radius of the max filter
         sigma    - sigma of the smoothing gaussian.
         k        - not sure what this parameter means.
@@ -85,7 +85,7 @@ class DetectorCorner(DetectorROI):
         '''
         DetectorROI.__init__(self,**kwargs)
         
-        self.filter = filter
+        self.mask = mask
         self.radius = radius
         self.sigma = sigma
         self.k = k
@@ -93,19 +93,19 @@ class DetectorCorner(DetectorROI):
     def _detect(self,image):
         # Asssumes a two dimensional array
         A = None
-        if isinstance(image,Image):
+        if isinstance(image,pv.Image):
             A = image.asMatrix2D()
         elif isinstance(image,array) and len(image.shape)==2:
             A = image
         else:
             raise TypeError("ERROR Unknown Type (%s) - Only arrays and pyvision images supported."%type(image))
     
-        filter = array(self.filter)
-        assert len(filter.shape) == 2
+        mask = array(self.mask)
+        assert len(mask.shape) == 2
         
         #feature window calculation
-        del_A_1 = conv2(A,filter) 
-        del_A_2 = conv2(A,filter.transpose())
+        del_A_1 = conv2(A,mask) 
+        del_A_2 = conv2(A,mask.transpose())
     
     
         del_A_1_1 = del_A_1 * del_A_1
@@ -155,11 +155,11 @@ class _CornerTest(unittest.TestCase):
         
     def testDetectorCorner1(self):
         detector = DetectorCorner()
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_1.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_1.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
@@ -167,11 +167,11 @@ class _CornerTest(unittest.TestCase):
 
     def testDetectorCorner2(self):
         detector = DetectorCorner()
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_19.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_19.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
@@ -179,11 +179,11 @@ class _CornerTest(unittest.TestCase):
 
     def testDetectorCorner3(self):
         detector = DetectorCorner()
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_22.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_22.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
@@ -191,11 +191,11 @@ class _CornerTest(unittest.TestCase):
 
     def testDetectorCorner4(self):
         detector = DetectorCorner()
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_37.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
@@ -203,11 +203,11 @@ class _CornerTest(unittest.TestCase):
 
     def testDetectorCorner5(self):
         detector = DetectorCorner(selector='best')
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_37.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
@@ -215,11 +215,11 @@ class _CornerTest(unittest.TestCase):
         
     def testDetectorCorner6(self):
         detector = DetectorCorner(selector='all')
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_37.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  

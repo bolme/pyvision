@@ -148,14 +148,14 @@ class CaptureClicksVideo:
                 self.prev()
 
             if key_press == ord('P'):
-                for i in range(10):
+                for _ in range(10):
                     self.prev()
                 
             if key_press == ord(' ') or key_press == ord('n'):
                 self.next()
 
             if key_press == ord('N'):
-                for i in range(10):
+                for _ in range(10):
                     self.next()
                 
             if key_press == ord('q'):

@@ -37,32 +37,32 @@ class _TestImage(unittest.TestCase):
             
     def test_PILToBufferGray(self):
         w,h = self.im.size
-        buffer = self.im.toBufferGray(8)
-        self.assertEqual(len(buffer),w*h)
-        buffer = self.im.toBufferGray(32)
-        self.assertEqual(len(buffer),4*w*h)
-        buffer = self.im.toBufferGray(64)
-        self.assertEqual(len(buffer),8*w*h)
+        data_buffer = self.im.toBufferGray(8)
+        self.assertEqual(len(data_buffer),w*h)
+        data_buffer = self.im.toBufferGray(32)
+        self.assertEqual(len(data_buffer),4*w*h)
+        data_buffer = self.im.toBufferGray(64)
+        self.assertEqual(len(data_buffer),8*w*h)
 
     def test_Matrix3DToBufferGray(self):
         im = pv.Image(self.mat3d)
         w,h = im.size
-        buffer = im.toBufferGray(8)
-        self.assertEqual(len(buffer),w*h)
-        buffer = im.toBufferGray(32)
-        self.assertEqual(len(buffer),4*w*h)
-        buffer = im.toBufferGray(64)
-        self.assertEqual(len(buffer),8*w*h)
+        data_buffer = im.toBufferGray(8)
+        self.assertEqual(len(data_buffer),w*h)
+        data_buffer = im.toBufferGray(32)
+        self.assertEqual(len(data_buffer),4*w*h)
+        data_buffer = im.toBufferGray(64)
+        self.assertEqual(len(data_buffer),8*w*h)
 
     def test_Matrix2DToBufferGray(self):
         im = pv.Image(self.mat)
         w,h = im.size
-        buffer = im.toBufferGray(8)
-        self.assertEqual(len(buffer),w*h)
-        buffer = im.toBufferGray(32)
-        self.assertEqual(len(buffer),4*w*h)
-        buffer = im.toBufferGray(64)
-        self.assertEqual(len(buffer),8*w*h)
+        data_buffer = im.toBufferGray(8)
+        self.assertEqual(len(data_buffer),w*h)
+        data_buffer = im.toBufferGray(32)
+        self.assertEqual(len(data_buffer),4*w*h)
+        data_buffer = im.toBufferGray(64)
+        self.assertEqual(len(data_buffer),8*w*h)
 
     def test_PILToMatrix2D(self):
         im = self.im
@@ -148,12 +148,12 @@ class _TestImage(unittest.TestCase):
         pil = self.im.asPIL().resize((180,120))
         im = pv.Image(pil)
         cvim = im.asOpenCV()
-        buffer = im.toBufferRGB(8)
+        data_buffer = im.toBufferRGB(8)
 
         for i in range(im.width):
             for j in range(im.height):
                 for c in range(3):
-                    self.assertAlmostEqual(ord(buffer[i*3+j*im.width*3+c]),ord(cvim.tostring()[i*3+j*im.width*3+2-c]))
+                    self.assertAlmostEqual(ord(data_buffer[i*3+j*im.width*3+c]),ord(cvim.tostring()[i*3+j*im.width*3+2-c]))
      
     def test_asOpenCVBW(self):
         pass #TODO: Create tests for this method.
@@ -185,7 +185,7 @@ class _TestImage(unittest.TestCase):
                     self.assertAlmostEqual(cv_im[y,x][2-c],mat[c,x,y])
                     self.assertAlmostEqual(cv_im[y,x][2-c],cv_32[y,x][2-c])
                     
-        im2 = pv.Image(cv_32)
+        _ = pv.Image(cv_32)
         
     def test_MatConvertNumpyToOpenCV(self):
         r,c = 10,20

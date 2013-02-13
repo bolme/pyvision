@@ -105,7 +105,7 @@ class HeadDetector(object):
         hfaces = []
         for each in heads:
             # Get the center of the head location
-            x,y,w,h = each.asCenteredTuple()
+            x,y,w,_ = each.asCenteredTuple()
             y = y - 0.10*w
             w = 0.33*w
             hfaces.append([scale*pv.CenteredRect(x,y,w,w),'HEAD'])

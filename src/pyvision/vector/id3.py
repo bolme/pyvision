@@ -129,7 +129,7 @@ class ID3:
         correct = 0
         wrong = 0
         for label,feature in data:
-            c,w = self.classify(feature)
+            c,_ = self.classify(feature)
             if c == label:
                 correct += 1
             else:
@@ -171,7 +171,7 @@ class Node:
         for i in range(no_feature):
             gain = self.entropy
             s = splitFeatures(i,features)
-            for key,vals in s.iteritems():
+            for _,vals in s.iteritems():
                 scale = float(len(vals))/float(len(features))
                 e = entropy(getLabels(vals))
                 #print "Split %3d:"%i,key,len(vals), e
@@ -203,7 +203,7 @@ class Node:
             
 def toBits(val,bits = 4):
     result = []
-    for i in range(bits):
+    for _ in range(bits):
         result.append(val&1)
         val = val >> 1
     

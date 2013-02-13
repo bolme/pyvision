@@ -85,6 +85,10 @@ Notes:
 	    Jan 25, 2007 18:19:21 UTC by rstanchak
 	
 Releases:
+	1.0.0 - Many interface things have been cleaned up.
+	        Function arguments that are keywords have been change and may not 
+	        work as in previous version.  These include: buffer, type, filter, iter
+	        All warnings and errors from the code analysis have been fixed.
 	0.8.1 - Released in July 2010.	This is the last release before a major 
 	        upgrade and the last version to support OpenCV 1.0 with the swig 
 	        bindings.

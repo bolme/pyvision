@@ -31,10 +31,9 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from os.path import basename,splitext
-from pyvision.types.Point import Point
-from pyvision.types.Rect import *
-from pyvision.analysis.FaceAnalysis.FaceDetectionTest import is_success,face_from_eyes
+import os
+import pyvision as pv
+from pyvision.analysis.FaceAnalysis.FaceDetectionTest import is_success
 
 class EyesFile:
     '''
@@ -73,7 +72,7 @@ class EyesFile:
         if self.images.has_key(fname):
             faces = self.images[fname]
             boxes = []
-            for img,left,right,box in faces:
+            for _,_,_,box in faces:
                 boxes.append(box)
             return boxes
         return []
@@ -83,7 +82,7 @@ class EyesFile:
         if self.images.has_key(fname):
             faces = self.images[fname]
             eyes = []
-            for img,left,right,box in faces:
+            for _,left,right,_ in faces:
                 eyes.append([left,right])
             return eyes
         return []
@@ -98,10 +97,10 @@ class EyesFile:
                 #print line,
                 line = line.split(',')
                 fname = self._parseName(line[0])
-                eye1 = Point(float(line[1]),float(line[2]))
-                eye2 = Point(float(line[3]),float(line[4]))
+                eye1 = pv.Point(float(line[1]),float(line[2]))
+                eye2 = pv.Point(float(line[3]),float(line[4]))
                 
-                truth_rect = BoundingRect(eye1,eye2)
+                truth_rect = pv.BoundingRect(eye1,eye2)
                 truth_rect.w = 2.0 * truth_rect.w
                 truth_rect.h = truth_rect.w
                 truth_rect.x = truth_rect.x - 0.25*truth_rect.w
@@ -120,10 +119,10 @@ class EyesFile:
                 #print line,
                 line = line.split()
                 fname = self._parseName(line[0])
-                eye1 = Point(float(line[1]),float(line[2]))
-                eye2 = Point(float(line[3]),float(line[4]))
+                eye1 = pv.Point(float(line[1]),float(line[2]))
+                eye2 = pv.Point(float(line[3]),float(line[4]))
                 
-                truth_rect = BoundingRect(eye1,eye2)
+                truth_rect = pv.BoundingRect(eye1,eye2)
                 truth_rect.w = 2.0 * truth_rect.w
                 truth_rect.h = truth_rect.w
                 truth_rect.x = truth_rect.x - 0.25*truth_rect.w
@@ -140,8 +139,8 @@ class EyesFile:
         '''
         Private: Do not call directly.  Parses the base filename.
         '''
-        fname = basename(fname)
-        fname = splitext(fname)[0]
+        fname = os.path.basename(fname)
+        fname = os.path.splitext(fname)[0]
         return fname
     
             
@@ -192,7 +191,7 @@ class CSU_SRT:
         
 class CSU_Dist:
     def __init__(self,directory,srt,extention='.sfi'):
-        names = srt.getNames()
+        #names = srt.getNames()
         self.matrix = {}
         self.srt = srt
         
@@ -236,11 +235,9 @@ if __name__ == "__main__":
     pca_pos,  pca_neg  = pca_dist.getPosNeg()
     
     from pyvis.analysis.roc import *
-    ebgm_curve = computeRoc(ebgm_pos,ebgm_neg)
-    pca_curve = computeRoc(pca_pos,pca_neg)
+    ebgm_roc = pv.ROC(ebgm_pos,ebgm_neg)
+    pca_roc = pv.ROC(pca_pos,pca_neg)
     
-    writeRocFile(ebgm_curve,"/Users/bolme/ebgm_faceperf.txt")
-    writeRocFile(pca_curve,"/Users/bolme/pca_faceperf.txt")
     
         
     

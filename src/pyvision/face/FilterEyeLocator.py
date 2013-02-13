@@ -81,7 +81,7 @@ if pv.WARN_COMMERCIAL_USE:
 
 #TODO: Add a quality estimate
 
-def saveFilterEyeLocator(filename, el, comment="",copyright=""):
+def saveFilterEyeLocator(filename, el, comment="",copyright_str=""):
     '''
     File Format
         - Line 1: CFEL 
@@ -98,7 +98,7 @@ def saveFilterEyeLocator(filename, el, comment="",copyright=""):
     f = open(filename,'wb')
     f.write("CFEL\n")
     f.write(comment.strip()+"\n")
-    f.write(copyright.strip()+"\n")
+    f.write(copyright_str.strip()+"\n")
     f.write("%d %d\n"%(r,c))
     f.write("%d %d %d %d\n"%(el.left_rect.x,el.left_rect.y,el.left_rect.width,el.left_rect.height))
     f.write("%d %d %d %d\n"%(el.right_rect.x,el.right_rect.y,el.right_rect.width,el.right_rect.height))
@@ -426,7 +426,7 @@ class _TestFilterEyeLocator(unittest.TestCase):
             pred_eyes = eye_locator(im,faces)
             
             truth_eyes = [[face.left_eye,face.right_eye]]
-            pred_eyes = [ [leye,reye] for rect,leye,reye in pred_eyes]
+            pred_eyes = [ [leye,reye] for _,leye,reye in pred_eyes]
             
             # Add to eye detection test
             edt.addSample(truth_eyes, pred_eyes, im=im, annotate=False)

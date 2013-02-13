@@ -32,7 +32,7 @@ def prcomp(data,center=True,scale=False):
         data = data/scl 
         
     # decompose the data using svd
-    u,val,vt = la.svd(data,full_matrices=False)
+    _,val,vt = la.svd(data,full_matrices=False)
 
     # compute the standard deviations from the singular values
     standard_dev = val/np.sqrt(r-1)

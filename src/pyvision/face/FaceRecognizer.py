@@ -65,9 +65,9 @@ class FaceRecognizer:
                     nonmatches.append([self.training_data[i],self.training_data[j]])
         return nonmatches
     
-    def addTraining(self,img,rect=None,eyes=None,id=None):
+    def addTraining(self,img,rect=None,eyes=None,sub_id=None):
         '''Adds a training face for the algorithm.'''
-        self.training_data.append([img,rect,eyes,id])
+        self.training_data.append([img,rect,eyes,sub_id])
         
 
     def distance(self, fr1, fr2):

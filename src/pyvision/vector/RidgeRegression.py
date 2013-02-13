@@ -1,9 +1,12 @@
-from pyvision.vector.VectorClassifier import *
-from numpy import array,zeros,eye,dot,exp
-from numpy.linalg import pinv,inv
+from pyvision.vector.VectorClassifier import VectorClassifier,TYPE_REGRESSION
+import numpy as np
+#from numpy import array,zeros,eye,dot,exp
+#from numpy.linalg import pinv,inv
 from pyvision.analysis.Table import Table
 import pyvision
 import random
+import os
+import unittest
 
 
 class RBF:
@@ -17,7 +20,7 @@ class RBF:
     def __call__(self,X,y):
         #TODO: print X.shape,y.shape
         tmp = X-y
-        return exp(-self.gamma*(tmp*tmp).sum(axis=0))
+        return np.exp(-self.gamma*(tmp*tmp).sum(axis=0))
 
     def __str__(self):
         return "RBF(%f)"%self.gamma
@@ -31,7 +34,7 @@ class LINEAR:
         pass
         
     def __call__(self,X,y):
-        return dot(X.transpose(),y).flatten()
+        return np.dot(X.transpose(),y).flatten()
     
     def __str__(self):
         return "LINEAR()"
@@ -61,26 +64,26 @@ class RidgeRegression(VectorClassifier):
         c = len(labels)
         r = len(vectors[0])
         
-        y = array(labels,'d')
+        y = np.array(labels,'d')
         
-        X = zeros((r,c),'d')
+        X = np.zeros((r,c),'d')
         
         for i in range(len(vectors)):
             X[:,i] = vectors[i]
 
-        tmp1 = inv(self.lam*eye(r) + dot(X,X.transpose()))
+        tmp1 = np.linalg.inv(self.lam*np.eye(r) + np.dot(X,X.transpose()))
         
-        tmp2 = dot(y,X.transpose())
+        tmp2 = np.dot(y,X.transpose())
         
-        self.w = w = dot(tmp1,tmp2)
+        self.w = np.dot(tmp1,tmp2)
 
     def predictValue(self,data,ilog=None):
         '''
         Please call predict instead.
         '''
-        x = array(data,'d')
+        x = np.array(data,'d')
 
-        return dot(self.w,x)
+        return np.dot(self.w,x)
 
                             
 class KernelRidgeRegression(VectorClassifier):
@@ -167,9 +170,9 @@ class KernelRidgeRegression(VectorClassifier):
             
             self.c = c
             self.r = r
-            y = array(train_labels,'d')
+            y = np.array(train_labels,'d')
             
-            X = zeros((r,c),'d')
+            X = np.zeros((r,c),'d')
             for i in range(len(train_vectors)):
                 X[:,i] = train_vectors[i]
     
@@ -178,7 +181,7 @@ class KernelRidgeRegression(VectorClassifier):
             for kernel in self.kernels:
                 self.kernel = kernel
                 
-                kernel_matrix = zeros((c,c),'d')
+                kernel_matrix = np.zeros((c,c),'d')
                 for i in range(c):
                     kernel_matrix[i,:] = self.kernel(X,X[:,i:i+1])
 
@@ -186,7 +189,7 @@ class KernelRidgeRegression(VectorClassifier):
                 for lam in self.lams:
                     self.lam = lam
 
-                    self.w = w = dot(y,inv(kernel_matrix + self.lam*eye(c)))
+                    self.w = np.dot(y,np.linalg.inv(kernel_matrix + self.lam*np.eye(c)))
                     
                     n = len(verify_labels)
                     mse = 0.0
@@ -222,30 +225,30 @@ class KernelRidgeRegression(VectorClassifier):
         
         self.c = c
         self.r = r
-        y = array(labels,'d')
+        y = np.array(labels,'d')
         
-        X = zeros((r,c),'d')
+        X = np.zeros((r,c),'d')
         for i in range(len(vectors)):
             X[:,i] = vectors[i]
 
         self.X = X
         
-        kernel_matrix = zeros((c,c),'d')
+        kernel_matrix = np.zeros((c,c),'d')
         for i in range(c):
             kernel_matrix[:,i] = self.kernel(X,X[:,i:i+1])
 
-        self.w = w = dot(y,inv(kernel_matrix + self.lam*eye(c)))
+        self.w = np.dot(y,np.linalg.inv(kernel_matrix + self.lam*np.eye(c)))
                             
 
     def predictValue(self,data,ilog=None):
         '''
         Please call predict instead.
         '''
-        x = array(data)
+        x = np.array(data)
         x = x.reshape((self.r,1))
         k = self.kernel(self.X,x)
 
-        return dot(self.w,k)
+        return np.dot(self.w,k)
 
 
 
@@ -272,13 +275,11 @@ class _TestKRR(unittest.TestCase):
         rega.train()
         
         mse = 0.0
-        total = 0
         for i in range(50,len(labels)):
             p = rega.predict(vectors[i])
             e = p - labels[i]
             mse += e*e
         mse = mse/(len(labels)-50)
-        #print "Regression Error:",mse
         
         self.assertAlmostEqual(mse,0.24301122718491874,places=4)
 
@@ -302,7 +303,6 @@ class _TestKRR(unittest.TestCase):
         
         mse = 0.0
         ase = 0.0
-        total = 0
         for i in range(50,len(labels)):
             p = rega.predict(vectors[i])
             e = p - labels[i]
@@ -336,7 +336,6 @@ class _TestKRR(unittest.TestCase):
         
         mse = 0.0
         ase = 0.0
-        total = 0
         for i in range(50,len(labels)):
             p = rega.predict(vectors[i])
             e = p - labels[i]
@@ -370,7 +369,6 @@ class _TestKRR(unittest.TestCase):
         
         mse = 0.0
         ase = 0.0
-        total = 0
         table = Table()
         for i in range(100,len(labels)):
             p = rega.predict(vectors[i])
@@ -415,7 +413,6 @@ class _TestKRR(unittest.TestCase):
         
         mse = 0.0
         ase = 0.0
-        total = 0
         table = Table()
         for i in range(100,len(labels)):
             p = rega.predict(vectors[i])
@@ -460,7 +457,6 @@ class _TestKRR(unittest.TestCase):
         
         mse = 0.0
         ase = 0.0
-        total = 0
         table = Table()
         for i in range(100,len(labels)):
             p = rega.predict(vectors[i])
@@ -505,7 +501,6 @@ class _TestKRR(unittest.TestCase):
         
         mse = 0.0
         ase = 0.0
-        total = 0
         table = Table()
         for i in range(100,len(labels)):
             p = rega.predict(vectors[i])
@@ -547,7 +542,6 @@ class _TestKRR(unittest.TestCase):
         rega.train()
 
         mse = 0.0
-        total = 0
         table = Table()
         for i in range(50,len(labels)):
             p = rega.predict(vectors[i])
@@ -564,5 +558,7 @@ class _TestKRR(unittest.TestCase):
         mse = mse/(len(labels)-50)
         self.assertAlmostEqual(mse,0.24301122718491874,places=4)
         
-
- 
+        
+        
+        
+        

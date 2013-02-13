@@ -31,8 +31,8 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from pyvision.types.img import Image
-from pyvision.types.Point import Point
+import pyvision as pv
+import numpy as np
 
 class DetectorROI:
     '''
@@ -64,9 +64,9 @@ class DetectorROI:
         '''
         # TODO: Call subclass
         A = None
-        if isinstance(image,Image):
+        if isinstance(image,pv.Image):
             A = image.asMatrix2D()
-        elif isinstance(image,array) and len(image.shape)==2:
+        elif isinstance(image,np.array) and len(image.shape)==2:
             A = image
         else:
             raise TypeError("ERROR Unknown Type (%s) - Only arrays and pyvision images supported."%type(image))
@@ -86,22 +86,22 @@ class DetectorROI:
             for xmin in range(0,A.shape[0],self.bin_size):
                 xmax = xmin + self.bin_size
                 for ymin in range(0,A.shape[1],self.bin_size):
-                    bin = []
+                    bin_data = []
                     ymax = ymin + self.bin_size
                     for each in L:
                         #print each
                         if xmin <= each[1] and each[1] < xmax and ymin <= each[2] and each[2] < ymax:
-                            bin.append(each)
-                            if len(bin) >= npts:
+                            bin_data.append(each)
+                            if len(bin_data) >= npts:
                                 break
-                    corners += bin
+                    corners += bin_data
             L = corners
         else: # TODO: assume all
             pass
             
         roi = []                   
         for each in L:
-            roi.append([each[0],Point(each[1],each[2]),each[3]])
+            roi.append([each[0],pv.Point(each[1],each[2]),each[3]])
             
         #L = concatenate((L.transpose,ones((1,L.shape[0]))))
         return roi

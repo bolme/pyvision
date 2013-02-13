@@ -179,7 +179,7 @@ class SVMEyeDetector:
             affine = pv.AffineFromRect(rect,self.tile_size)
             cropped = affine.transformImage(im)
             
-            for p in range(self.n_iter):
+            for _ in range(self.n_iter):
                 cropped = pv.meanStd(cropped)
                 # Find the eyes
                 data = cropped.asMatrix2D().flatten()   

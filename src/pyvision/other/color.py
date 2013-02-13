@@ -299,7 +299,7 @@ def rgbBackProjectHist(im,fg_hist,bg_hist=None):
     return pv.Image(output)
 
 import unittest
-import os.path
+
 class ColorTest(unittest.TestCase):
     
     def test01_hsHist(self):

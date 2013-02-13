@@ -31,7 +31,6 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import copy
 import numpy as np
 import pyvision as pv
 import unittest
@@ -170,7 +169,7 @@ class ROC:
     def getFAR(self,far):
         match = self.match
         nonmatch = self.nonmatch
-        orig_far = far
+        #orig_far = far
         
         m = len(match)
         n = len(nonmatch)
@@ -246,7 +245,7 @@ class ROC:
     def getEER(self):
         _,curve = self.getCurve(method=ROC_PRECISE_SAMPLED)
         
-        for score,frr,far,trr,tar in curve:
+        for _,frr,far,_,_ in curve:
             if far > frr:
                 break
         
@@ -412,27 +411,9 @@ class ROCTest(unittest.TestCase):
         plot.point([eer,1-eer])
         plot.asImage()
         
-        #print
-        #print roc.results()
 
 
         
-if __name__ == '__main__':
-    filenames,matrix = readCsuDistanceMatrix("/Users/bolme/vision/data/celeb_db/distances/PCA_EU")
-    print len(filenames),len(matrix),len(matrix[0])
-    positive,negative = buildPositiveNegativeLists(filenames,matrix,lambda x,y: x[:10] == y[:10])
-    
-    print len(positive), len(negative)    
-    curve = computeRoc(positive,negative)
-    
-    positive.sort()
-    negative.sort()
-    tmp1 = positive[::len(positive)/100]
-    tmp2 = negative[::len(negative)/100]
-    
-    writeRocFile(curve,"/Users/bolme/pca_eu.txt")
-    #print curve   
-    
     
     
     

@@ -50,7 +50,7 @@ class Kinect(object):
         Initialize a Kinect device.
         '''
         # Try importing the freenect library.  
-        import freenect as fn
+        import freenect as fn #@UnresolvedImport
         self.fn = fn
         self.fn.init()
         

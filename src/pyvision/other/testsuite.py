@@ -11,8 +11,8 @@ import unittest
 import pyvision as pv
 import numpy as np
 #from optic_flow import *
-from distance import *
-import cv
+#from distance import *
+#import cv
 
 import os.path
 
@@ -218,17 +218,17 @@ class _TestDistance(unittest.TestCase):
     def test_1_bool2Ubyte(self):
         '''distance::boolToUbyte ...........................................'''
         a = np.random.randint(2,size=16) > 0
-        b = boolToUbyte(a)
-        c = ubyteToBool(b)
-        d = boolToUbyte(c)
+        b = pv.boolToUbyte(a)
+        c = pv.ubyteToBool(b)
+        d = pv.boolToUbyte(c)
 
         self.assert_((a == c).sum() == 16)
         self.assert_((b == d).sum() == 2)
         
         a = np.random.randint(2,size=5000) > 0
-        b = boolToUbyte(a)
-        c = ubyteToBool(b)
-        d = boolToUbyte(c)
+        b = pv.boolToUbyte(a)
+        c = pv.ubyteToBool(b)
+        d = pv.boolToUbyte(c)
 
         self.assert_((a == c).sum() == 5000)
         self.assert_((b == d).sum() == 625)
@@ -241,12 +241,12 @@ class _TestDistance(unittest.TestCase):
         a = np.random.randint(2,size=16) > 0
         b = np.random.randint(2,size=16) > 0
         
-        bin_hamming = hamming(a,b)
+        bin_hamming = pv.hamming(a,b)
 
-        a = boolToUbyte(a)
-        b = boolToUbyte(b)
+        a = pv.boolToUbyte(a)
+        b = pv.boolToUbyte(b)
         
-        byte_hamming = hamming(a,b)
+        byte_hamming = pv.hamming(a,b)
         
         self.assertEquals(bin_hamming,byte_hamming)
         
@@ -256,12 +256,12 @@ class _TestDistance(unittest.TestCase):
         a = np.random.randint(2,size=1769472) > 0
         b = np.random.randint(2,size=1769472) > 0
         
-        bin_hamming = hamming(a,b)
+        bin_hamming = pv.hamming(a,b)
 
-        a = boolToUbyte(a)
-        b = boolToUbyte(b)
+        a = pv.boolToUbyte(a)
+        b = pv.boolToUbyte(b)
         
-        byte_hamming = hamming(a,b)
+        byte_hamming = pv.hamming(a,b)
         
         self.assertEquals(bin_hamming,byte_hamming)
         

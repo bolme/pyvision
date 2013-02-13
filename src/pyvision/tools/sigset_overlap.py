@@ -39,8 +39,8 @@ Reads in two sigsets and computes overlap statistics.
 '''
 import pyvision as pv
 import optparse
-import csv
-import os.path
+#import csv
+#import os.path
 
 
 def parseOptions():

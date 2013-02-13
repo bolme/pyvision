@@ -316,7 +316,7 @@ class AKNNTest(unittest.TestCase):
         timer.mark("KDTree Query")
 
         timer.mark("Query Start")
-        bdist,_ = knn.query([.05,.3,.9,.6,.2],k=fdist[-1])
+        _,_ = knn.query([.05,.3,.9,.6,.2],k=fdist[-1])
         timer.mark("Brute Force Query")
         
         #print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
@@ -340,7 +340,7 @@ class AKNNTest(unittest.TestCase):
         timer.mark("KDTree Query")
 
         timer.mark("Query Start")
-        bdist,_ = knn.query([.05,.3,.9,.6,.2],k=fdist[-1])
+        _,_ = knn.query([.05,.3,.9,.6,.2],k=fdist[-1])
         timer.mark("Brute Force Query")
         
         #print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
@@ -365,7 +365,7 @@ class AKNNTest(unittest.TestCase):
         timer.mark("KDTree Query")
 
         timer.mark("Query Start")
-        bdist,_ = knn.query(query,k=fdist[-1])
+        _,_ = knn.query(query,k=fdist[-1])
         timer.mark("Brute Force Query")
         
         #print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))
@@ -392,7 +392,7 @@ class AKNNTest(unittest.TestCase):
         timer.mark("KDTree Query")
 
         timer.mark("Query Start")
-        bdist,_ = knn.query(query,k=fdist[-1])
+        _,_ = knn.query(query,k=fdist[-1])
         timer.mark("Brute Force Query")
         
         #print "\nRatio %d/%d = %f"%(len(fdist),len(bdist),float(len(fdist))/len(bdist))

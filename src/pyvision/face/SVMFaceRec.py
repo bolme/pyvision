@@ -1,9 +1,9 @@
 import pyvision as pv
 from pyvision.vector.SVM import SVM,TYPE_C_SVC
-from pyvision.vector.VectorClassifier import NORM_NONE
-from pyvision.vector.PCA import PCA
+#from pyvision.vector.VectorClassifier import NORM_NONE
+#from pyvision.vector.PCA import PCA
 from scipy import ndimage
-import random
+#import random
 
 
 class SVMFaceRec:
@@ -40,14 +40,14 @@ class SVMFaceRec:
         
         return tile
         
-    def addTraining(self,im,leye,reye,id,ilog=None):
+    def addTraining(self,im,leye,reye,sub_id,ilog=None):
         self.svm = None
         
         tile = self.preprocess(im,leye,reye,ilog)
-        if not self.training_data.has_key(id):
-            self.training_data[id] = []
+        if not self.training_data.has_key(sub_id):
+            self.training_data[sub_id] = []
         
-        self.training_data[id].append(tile)
+        self.training_data[sub_id].append(tile)
 
         self.n_labels = len(self.training_data)
         self.n_faces += 1
@@ -58,9 +58,9 @@ class SVMFaceRec:
         self.svm = SVM(type=TYPE_C_SVC)
         
         # Add training data
-        for id, tiles in self.training_data.iteritems():
+        for sub_id, tiles in self.training_data.iteritems():
             for tile in tiles:
-                self.svm.addTraining(id,tile)
+                self.svm.addTraining(sub_id,tile)
                 
         # Train the SVM
         if C != None and Gamma != None:
