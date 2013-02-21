@@ -57,7 +57,6 @@ class CaptureClicks:
         self.im = im.copy()
         self.keep_window_open = keep_window_open
         self.reset()
-        print default_points
         for pt in default_points:
             self.mouseCallback(cv.CV_EVENT_LBUTTONDOWN,pt.X(),pt.Y(),None,None)
             
@@ -100,7 +99,6 @@ class CaptureClicks:
         Call back function for mouse events.
         '''
         if event in [cv.CV_EVENT_LBUTTONDOWN]:
-            print "Mouse Event:",event,x,y
             point = pv.Point(x,y)
             self.im.annotateLabel(point,str(len(self.points)),mark='below')
             self.points.append(point)
@@ -187,7 +185,6 @@ class CaptureClicksVideo:
         if self.callback != None:
             self.callback(self.im,self.frame)
         
-        print self.im.size
         self.im.annotateLabel(pv.Point(10,h+10), "Frame: %d"%self.frame,color='yellow')
         self.im.annotateLabel(pv.Point(10,h+20), "Click anywhere in the image to select a point.",color='yellow')
         self.im.annotateLabel(pv.Point(10,h+30), "Press 'r' to reset.",color='yellow')
@@ -223,7 +220,6 @@ class CaptureClicksVideo:
         else:
             self.buffer_index -= 1
             self.frame -= 1
-        print self.buffer_index,self.frame,len(self.buffer),self.points
         self.render()
         
             
@@ -232,7 +228,6 @@ class CaptureClicksVideo:
         Call back function for mouse events.
         '''
         if event in [cv.CV_EVENT_LBUTTONDOWN]:
-            print "Mouse Event:",event,x,y
             if not self.points.has_key(self.frame):
                 self.points[self.frame] = []
             points = self.points[self.frame]

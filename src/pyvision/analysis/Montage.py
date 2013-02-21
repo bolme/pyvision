@@ -36,7 +36,7 @@ Created on Mar 14, 2011
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import pyvision as pv
 import cv
-import PIL
+import PIL.Image
 import weakref
 
 class ImageMontage(object):
@@ -46,31 +46,31 @@ class ImageMontage(object):
     than "viewports" in the layout.
     '''
 
-    def __init__(self, imageList, layout=(2,4), tileSize=(64,48), gutter=2, byrow=True, labels='index', 
-                keep_aspect=False):
+    def __init__(self, image_list, layout=(2,4), tile_size=(64,48), gutter=2, by_row=True, labels='index', 
+                keep_aspect=True):
         '''
         Constructor
-        @param imageList: A list of pyvision images that you wish to display
+        @param image_list: A list of pyvision images that you wish to display
         as a montage.
         @param rows: The number of rows in the montage layout
         @param cols: The number of columns in the montage layout
-        @param tileSize: The size of each thumbnail image to display in the montage.
+        @param tile_size: The size of each thumbnail image to display in the montage.
         @param gutter: The width in pixels of the gutter between thumbnails.
-        @param byrow: If true, the image tiles are placed in row-major order, that
+        @param by_row: If true, the image tiles are placed in row-major order, that
         is, one row of the montage is filled before moving to the next. If false,
         then column order is used instead.
         @param labels: Used to show a label at the lower left corner of each image in the montage.
-        If this parameter is a list, then it should be the same length as len(imageList) and contain
+        If this parameter is a list, then it should be the same length as len(image_list) and contain
         the label to be used for the corresponding image. If labels == 'index', then the image
-        montage will simply display the index of the image in imageList. Set labels to None to suppress labels.
+        montage will simply display the index of the image in image_list. Set labels to None to suppress labels.
         @param keep_aspect: If true the original image aspect ratio will be preserved.
         '''
-        self._tileSize = tileSize
+        self._tileSize = tile_size
         self._rows = layout[0]
         self._cols = layout[1]
-        self._images = imageList
+        self._images = image_list
         self._gutter = gutter
-        self._byrow = byrow
+        self._by_row = by_row
         self._txtfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 0.5,0.5)
         self._txtcolor = (255,255,255)   
         self._imgPtr = 0
@@ -78,8 +78,8 @@ class ImageMontage(object):
         self._clickHandler = clickHandler(self)
         self._keep_aspect = keep_aspect
         #check if we need to allow for scroll-arrow padding
-        if self._rows * self._cols < len(imageList):
-            if byrow:
+        if self._rows * self._cols < len(image_list):
+            if by_row:
                 self._xpad = 0
                 self._ypad = 25
             else: 
@@ -90,8 +90,8 @@ class ImageMontage(object):
             self._xpad = 0
             self._ypad = 0
                 
-        imgWidth = self._cols*( tileSize[0] + gutter ) + gutter + 2*self._xpad
-        imgHeight = self._rows * (tileSize[1] + gutter) + gutter + 2*self._ypad
+        imgWidth = self._cols*( tile_size[0] + gutter ) + gutter + 2*self._xpad
+        imgHeight = self._rows * (tile_size[1] + gutter) + gutter + 2*self._ypad
         self._size = (imgWidth, imgHeight)
 
         cvimg = cv.CreateImage(self._size, cv.IPL_DEPTH_8U, 3)
@@ -121,7 +121,7 @@ class ImageMontage(object):
             cv.FillConvexPoly(self._cvMontageImage, self._incrArrow, (125,125,125))
         
         
-        if self._byrow:
+        if self._by_row:
             for row in range(self._rows):
                 for col in range(self._cols):
                     if img_ptr > len(self._images)-1: break
@@ -165,7 +165,7 @@ class ImageMontage(object):
         internal method to determine the clicked region of the montage.
         @return: -1 for decrement region, 1 for increment region, and 0 otherwise
         '''
-        if self._byrow:
+        if self._by_row:
             #scroll up/down to expose next/prev row
             decr_rect = pv.Rect(0,0, self._size[0], self._ypad)
             incr_rect = pv.Rect(0, self._size[1]-self._ypad, self._size[0], self._ypad)
@@ -191,7 +191,7 @@ class ImageMontage(object):
         the appropriate decrement arrow (leftwards or upwards) depending
         on the image montage layout.
         '''
-        if self._byrow:
+        if self._by_row:
             #decrement upwards
             x1 = self._size[0]/2
             y1 = 2
@@ -210,7 +210,7 @@ class ImageMontage(object):
         the appropriate increment arrow (rightwards or downwards) depending
         on the image montage layout.
         '''
-        if self._byrow:
+        if self._by_row:
             #increment downwards
             x1 = self._size[0]/2
             y1 = self._size[1] - 3
@@ -228,7 +228,7 @@ class ImageMontage(object):
         internal method used by _onClick to compute the new imgPtr location after a decrement
         '''
         tmp_ptr = self._imgPtr        
-        if self._byrow:
+        if self._by_row:
             tmp_ptr -= self._cols
         else:
             tmp_ptr -= self._rows            
@@ -242,7 +242,7 @@ class ImageMontage(object):
         internal method used by _onClick to compute the new imgPtr location after an increment
         '''
         tmp_ptr = self._imgPtr        
-        if self._byrow:
+        if self._by_row:
             tmp_ptr += self._cols
         else:
             tmp_ptr += self._rows
