@@ -5,6 +5,8 @@ the test data distributed with pyvision.
 import pyvision as pv
 import os
 from pyvision.analysis.FaceAnalysis.EyesFile import EyesFile
+import csv
+import numpy as np
 
 SCRAPS_EYES = EyesFile(os.path.join(pv.__path__[0],'data','csuScrapShots','coords.txt'))
 ''' The path to a text file containing coordinates to the scrapshots dataset. '''
@@ -42,6 +44,12 @@ BUGS_VIDEO = os.path.join(pv.__path__[0],'data','test','BugsSample.m4v')
 
 FONT_ARIAL = os.path.join(pv.__path__[0],'config','Arial.ttf')
 ''' The path to a file containing the Arial true type font. '''
+
+IRIS_PATH = os.path.join(pv.__path__[0],'data','ml','iris.csv')
+IRIS_DATA = np.array(list(csv.reader(open(IRIS_PATH,'rb'))))
+IRIS_LABELS = IRIS_DATA[1:,5]
+IRIS_DATA = np.array(IRIS_DATA[1:,1:5],dtype=np.float32)
+
 
 
 def genderClassifier(clsfy, ilog=None):

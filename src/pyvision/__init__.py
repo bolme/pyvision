@@ -206,7 +206,7 @@ from pyvision.other.texture import lbp,LBP_CLASSIC,LBP_RAD1,LBP_RAD2,LBP_RAD3,LB
 
 from pyvision.analysis.bee import parseSigSet,saveSigset,computeMaskMatrix,BEE_CODE_MAP,BEE_DONTCARE,BEE_MATCH,BEE_NONMATCH,BEEDistanceMatrix
 
-from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO,FONT_ARIAL,BUGS_VIDEO,CAR_VIDEO
+from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO,FONT_ARIAL,BUGS_VIDEO,CAR_VIDEO, IRIS_DATA, IRIS_LABELS
 
 from pyvision.surveillance.VideoStreamProcessor import *
 
@@ -219,6 +219,8 @@ from pyvision.face import REDUCED_LEYE, REDUCED_REYE, REDUCED_SIZE
 from pyvision.types.kinect import Kinect
 
 from pyvision.surveillance.kalman import KalmanFilter
+
+from pyvision.ml.opencv_ml import svc_linear, svc_rbf, svr_linear, svr_rbf
 
 
 # Beta components place holders
