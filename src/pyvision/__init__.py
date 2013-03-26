@@ -220,7 +220,7 @@ from pyvision.types.kinect import Kinect
 
 from pyvision.surveillance.kalman import KalmanFilter
 
-from pyvision.ml.opencv_ml import svc_linear, svc_rbf, svr_linear, svr_rbf
+from pyvision.ml.opencv_ml import svc_linear, svc_rbf, svr_linear, svr_rbf, random_forest, boost, gbtrees
 
 
 # Beta components place holders

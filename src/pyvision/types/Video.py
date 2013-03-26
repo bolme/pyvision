@@ -395,7 +395,7 @@ class VideoFromDirectory(VideoInterface):
         parts = filename.split('.')
         if len(parts) > 0:
             ext = parts[-1].upper()
-        return ext in ("JPG","PNG","TIF","TIFF","GIF","BMP","PPM","PGM")
+        return ext in ("JPG",'JPEG',"PNG","TIF","TIFF","GIF","BMP","PPM","PGM")
     
     
     def _scanImageDir(self):
