@@ -222,6 +222,7 @@ from pyvision.surveillance.kalman import KalmanFilter
 
 from pyvision.ml.opencv_ml import svc_linear, svc_rbf, svr_linear, svr_rbf, random_forest, boost, gbtrees
 
+from pyvision.beta.vtm import VideoTaskManager, VideoTask, _VideoDataItem
 
 # Beta components place holders
 VideoTask = None
