@@ -69,6 +69,7 @@ Genetic Algorithm     optimization        pyvision.optimize.GeneticAlgorithm
 
 import unittest
 import sys
+import cPickle as pkl
 
 __version__ = "0.9.0 $Rev: 446 $"
 __info__ = "$Id: __init__.py 446 2012-10-25 03:24:15Z bolme $"
@@ -240,6 +241,125 @@ def searchNames(text,item):
         if text.upper() in name.upper():
             print name
     
+def getTypeName(item):
+    '''
+    Return a short name describing the type.
+    '''
+    try:
+        if isinstance(item,list):
+            type_list = set([getTypeName(each) for each in item])
+            type_name = 'list:%d('%len(item)
+            for each in type_list:
+                type_name += each+","
+            type_name = type_name[:-1]
+            type_name += ")"
+        elif isinstance(item,tuple):
+            type_list = set([getTypeName(each) for each in item])
+            type_name = 'tuple:%d('%len(item)
+            for each in type_list:
+                type_name += each+","
+            type_name = type_name[:-1]
+            type_name += ")"
+        elif isinstance(item,dict):
+            type_list = set([getTypeName(each) for key,each in item.iteritems()])
+            type_name = 'dict:%d('%len(item)
+            for each in type_list:
+                type_name += each+","
+            type_name = type_name[:-1]
+            type_name += ")"
+        elif isinstance(item,str):
+            type_name = 'str'
+        elif isinstance(item,int):
+            type_name = 'int'
+        elif isinstance(item,float):
+            type_name = 'float'
+        elif 'instance' in repr(type(item)):
+            type_name = 'instance'
+        else:
+            type_name = str(type(item))
+            if type_name.startswith('<class'):
+                type_name = type_name[8:-2]
+                type_name = type_name.split('.')[-1]
+            if type_name.startswith('<type'):
+                type_name = type_name[7:-2]
+                type_name = type_name.split('.')[-1]
+
+            if type_name == 'ndarray':
+                type_name += ":%s:%s"%(item.shape,item.dtype)
+                type_name = "".join(type_name.split())
+    except:
+        type_name = 'unknown'
+        
+    return type_name
+    
+    
+def inspectObject(item,name='<top>',max_depth=5,verbose=False,print_depth=0,info=None):
+    '''
+    Produce a pv.Table describing this object and its members.
+    '''
+    if max_depth < 0:
+        return
+    
+    if not verbose and name[:2] == '__':
+        return
+    if 'function' in str(type(item)):
+        return
+    if 'method' in str(type(item)):
+        return
+    
+    if info == None:
+        info = pv.Table()
+        info.setColumnFormat('name','%s')
+        print dir(info)
+    i = info.nRows()
+
+    info[i,'name'] = ('    '*print_depth) + name
+    try:
+        
+        # Add info about the type
+        type_name = getTypeName(item)
+        info[i,'type'] = type_name
+    
+        value = " ".join(repr(item).split())
+        if len(value) > 30:
+            value = value[:27]+'...'
+        info[i,'value'] = value
+        
+        try:
+            item_size = len(pkl.dumps(item, protocol=2))
+        except:
+            item_size = 'error'
+            
+        info[i,'pickle size'] = item_size
+        
+        if type_name in ['int','float','str']:
+            return info
+        if type_name.startswith('ndarray'):
+            return info
+        
+        for each in dir(item):
+            inspectObject(getattr(item,each),name=each,max_depth=max_depth-1,verbose=verbose,print_depth=print_depth+1,info=info)
+            
+    
+        if isinstance(item,list) or isinstance(item,tuple):
+            processed_types = set()
+            for each in item:
+                if type(each) in processed_types:
+                    continue
+                processed_types.add(type(each))
+                inspectObject(each,name='<sample item>',max_depth=max_depth-1,verbose=verbose,print_depth=print_depth+1,info=info)
+                
+        if isinstance(item,dict):
+            processed_types = set()
+            for key,each in item.iteritems():
+                if type(each) in processed_types:
+                    continue
+                processed_types.add(type(each))
+                inspectObject(each,name='<sample item>',max_depth=max_depth-1,verbose=verbose,print_depth=print_depth+1,info=info)
+    except:
+        info[i,'error'] = "Could not process this object."    
+    return info
+
 def runningInNotebook():
     '''
     @return: True if python interpreter is running in an iPython HTML Notebook.

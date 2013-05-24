@@ -296,7 +296,7 @@ class Table:
                 text = self.elementAsText(row,col)
                 try:
                     #Check to see if the text looks like a number
-                    #val = float(text)
+                    val = float(text)
                     # Numbers should be justifed right.
                     text = self.justifyText(text,col_widths[col],'r')
                 except:
