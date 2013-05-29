@@ -875,7 +875,17 @@ class GeneticAlgorithm:
     
     
     def addIndividual(self,score,args,kwargs,ilog=None):
-        if score == np.inf:
+        # This try block allows multiple values to be returned by the fitness function. 
+        # Everything except the score will be stored in extra and should be picklible.
+        extras = []
+        try:
+            extras = score[1:]
+            score = score[0]
+        except:
+            # this means score must be a single value
+            pass
+        
+        if not np.isfinite(score):
             return
         
         if score < self.best_score:
@@ -905,7 +915,13 @@ class GeneticAlgorithm:
             self.printPopulation()
             
             ilog.pickle([score,args,kwargs],"Fitness_%0.8f"%score)
-            
+            for i in xrange(len(extras)):
+                extra = extras[i]
+                if isinstance(extra,pv.Image):
+                    ilog(extra,"extra_%02d_%0.8f"%(i,score))
+                else:
+                    ilog.pickle(extra,"extra_%02d_%0.8f"%(i,score))
+                
             if self.iter % 25 == 0:
                 plot = pv.Plot(title="Population Statistics",xlabel="Iteration",ylabel="Score")
                 data = [ [i,self.bests[i]] for i in range(len(self.bests)) ]
