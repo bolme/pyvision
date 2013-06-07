@@ -25,7 +25,7 @@ def skintone(im,low_thresh=0.02511,high_thresh=0.1177):
     #pv.Image(e).show()
     mask = (e > low_thresh) & (e < high_thresh) & (g > 0.05)  & (g < 0.98)
     #mask = (e > low_thresh) 
-    print low_thresh,high_thresh,mask.sum(),e.min(),e.max()
+    #print low_thresh,high_thresh,mask.sum(),e.min(),e.max()
     #mask = (e < high_thresh)
     
     #mask = g > 0.5
