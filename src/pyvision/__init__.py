@@ -231,6 +231,7 @@ VideoTask = None
 # Import the beta components
 import beta
 
+IMAGE_EXTENSIONS = ['.JPG','.JPEG','.GIF','.TIF','.TIFF','.PNG','.BMP','.PGM','.PPM',]
 
 #================================== Misc Functions =====================================
 
@@ -359,6 +360,16 @@ def inspectObject(item,name='<top>',max_depth=5,verbose=False,print_depth=0,info
     except:
         info[i,'error'] = "Could not process this object."    
     return info
+
+def isImage(filename):
+    '''
+    Determines if the filename corresponds to a known image extension.
+    '''
+    for ext in IMAGE_EXTENSIONS:
+        if filename.upper().endswith(ext):
+            return True
+    return False
+
 
 def runningInNotebook():
     '''

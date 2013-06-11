@@ -348,7 +348,7 @@ class VideoFromDirectory(VideoInterface):
     This class allows the user to treat a directory of images as a video. 
     
     This class will recursively search the directories and will load 
-    and return any image with an image extension: JPG,PNG,TIF,TIFF,GIF,BMP,PPM,PGM
+    and return any image with an image extension: JPG,JPEG,PNG,TIF,TIFF,GIF,BMP,PPM,PGM
     '''
     
     def __init__(self,dirname,order='ascending',limit=None,size=None):

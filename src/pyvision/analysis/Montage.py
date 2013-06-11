@@ -77,6 +77,9 @@ class ImageMontage(object):
         self._labels = labels
         self._clickHandler = clickHandler(self)
         self._keep_aspect = keep_aspect
+        self._image_positions = []
+        self._select_handler = None
+        
         #check if we need to allow for scroll-arrow padding
         if self._rows * self._cols < len(image_list):
             if by_row:
@@ -120,7 +123,7 @@ class ImageMontage(object):
             #so display increment arrow
             cv.FillConvexPoly(self._cvMontageImage, self._incrArrow, (125,125,125))
         
-        
+        self._image_positions = []
         if self._by_row:
             for row in range(self._rows):
                 for col in range(self._cols):
@@ -159,6 +162,13 @@ class ImageMontage(object):
         cv.NamedWindow(window)
         cv.SetMouseCallback(window, self._clickHandler.onClick, window)
         img.show(window=window, pos=pos, delay=delay)
+        
+    def setSelectHandler(self,handler):
+        '''
+        Add a function that will be called when an image is selected.
+        The handler function should take an image, the image index, and a dictionary of other info.
+        '''
+        self._select_handler = handler
  
     def _checkClickRegion(self, x,y):
         '''
@@ -174,6 +184,8 @@ class ImageMontage(object):
             decr_rect = pv.Rect(0,0, self._xpad, self._size[1])
             incr_rect = pv.Rect(self._size[0]-self._xpad, 0, self._xpad, self._size[1])
             
+        
+            
         pt = pv.Point(x,y)
         if incr_rect.containsPoint(pt):
             #print "DEBUG: Increment Region"
@@ -183,6 +195,11 @@ class ImageMontage(object):
             return -1
         else:
             #print "DEBUG: Neither Region"
+            if self._select_handler != None:
+                for img,imgNum,rect in self._image_positions:
+                    if rect.containsPoint(pt):
+                        self._select_handler(img,imgNum,{})
+                        
             return 0
                
     def _initDecrementArrow(self):
@@ -248,7 +265,8 @@ class ImageMontage(object):
             tmp_ptr += self._rows
             
         self._imgPtr = tmp_ptr
-            
+        
+    
             
     def _composite(self, img, pos, imgNum):
         '''
@@ -271,14 +289,14 @@ class ImageMontage(object):
             h = int(scale*h)
             
             # Resize preserving aspect
-            img = img.resize((w,h)).asPIL()
+            img2 = img.resize((w,h)).asPIL()
             
             # Create a new image with the old image centered
             x = (self._tileSize[0]-w)/2
             y = (self._tileSize[1]-h)/2
             pil = PIL.Image.new('RGB',self._tileSize,"#000000")
-            pil.paste(img,(x,y,x+w,y+h))
-            
+            pil.paste(img2,(x,y,x+w,y+h))
+                        
             # Generate the tile
             tile = pv.Image(pil)
         else:
@@ -290,6 +308,10 @@ class ImageMontage(object):
         cvImg = self._cvMontageImage
         cvTile = tile.asOpenCV()
         cv.SetImageROI(cvImg, (pos_x,pos_y,self._tileSize[0],self._tileSize[1]))
+        
+        # Save the position of this image
+        self._image_positions.append([self._images[imgNum],imgNum,pv.Rect(pos_x,pos_y,self._tileSize[0],self._tileSize[1])])
+
         
         depth = cvTile.nChannels
         if depth==1:
@@ -340,6 +362,7 @@ class clickHandler(object):
         IM = self.IM()  #IM object is obtained via weak reference to image montage
         if IM is None: return #if the reference was deleted already...
         
+        print "event",event
         if event == cv.CV_EVENT_LBUTTONDOWN:
             rc = IM._checkClickRegion(x, y)
             if rc == -1 and IM._imgPtr > 0:

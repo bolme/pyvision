@@ -426,6 +426,33 @@ class Image:
         draw.rectangle(box,outline=color,fill=fill_color)
         del draw
         
+    def annotateImage(self,im,rect,color='red', fill_color=None):
+        '''
+        Draws an image
+        
+        @param im: the image to render
+        @param rect: a rectangle of type Rect
+        @param color: defined as ('#rrggbb' or 'name') 
+        @param fill_color: defined as per color, but indicates the color
+        used to fill the rectangle. Specify None for no fill.
+        '''
+        thumb = im.thumbnail((rect.w,rect.h))
+        x = int(rect.x + rect.w/2 - thumb.size[0]/2)
+        y = int(rect.y + rect.h/2 - thumb.size[1]/2)
+        
+        pil = self.asAnnotated()
+        draw = PIL.ImageDraw.Draw(pil)
+        box = [rect.x,rect.y,rect.x+rect.w,rect.y+rect.h]
+        draw.rectangle(box,outline=None,fill=fill_color)
+        del draw
+        
+        pil.paste(im.asPIL(),(x,y))
+
+        draw = PIL.ImageDraw.Draw(pil)
+        box = [rect.x,rect.y,rect.x+rect.w,rect.y+rect.h]
+        draw.rectangle(box,outline=color,fill=None)
+        del draw
+        
     def annotateThickRect(self,rect,color='red',width=5):
         '''
         Draws a rectangle on the annotation image
@@ -585,7 +612,7 @@ class Image:
         @param point: the point to mark as type Point
         @param label: the text to use as a string
         @param color: defined as ('#rrggbb' or 'name') 
-        @param mark: of True or ['right', 'left', 'below', or 'above'] then also mark the point with a small circle
+        @param mark: of True or ['right', 'left', 'below', or 'above','centered'] then also mark the point with a small circle
         @param font: An optional PIL.ImageFont font object to use. Alternatively, specify an integer and the label
         will use Arial font of that size. If None, then the default is used.
         @param background: An optional color that will be used to draw a rectangular background underneath the text.
@@ -611,6 +638,8 @@ class Image:
         elif mark in ['above']:
             textpt = pv.Point(point.X()-tw/2,point.Y()-th-5)
             box = [point.X()-3,point.Y()-3,point.X()+3,point.Y()+3]
+        elif mark in ['centered']:
+            textpt = pv.Point(point.X()-tw/2,point.Y()-th/2)
         else:
             textpt = point
             
@@ -620,7 +649,7 @@ class Image:
         
         draw.text([textpt.x,textpt.y],label,fill=color, font=font)    
         
-        if mark != False:           
+        if mark not in [None,'centered']:           
             draw.ellipse(box,outline=color)
 
         del draw
@@ -879,6 +908,19 @@ class Image:
             TODO: Not yet implemented
         '''
 
+    def thumbnail(self, newSize):
+        ''' Returns a resized version of the image that fits in new_size but preserves the aspect ratio.
+
+        @param newSize: tuple (new_width, new_height)
+        @returns: a new pyvision image that is the resized version of this image.
+        ''' 
+        w,h = self.size
+        s1 = float(newSize[0])/w
+        s2 = float(newSize[1])/h
+        s = min(s1,s2)
+        return self.scale(s)
+
+    
     def resize(self, newSize):
         ''' Returns a resized version of the image. This is a convenience function.
         For more control, look at the Affine class for arbitrary transformations.
