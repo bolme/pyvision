@@ -70,13 +70,13 @@ def random_forest(data,responses,n_trees=100):
     return model
     
     
-def boost(data,responses,weak_count=100,max_depth=20):
+def boost(data,responses,weak_count=100,max_depth=20,boost_type=cv2.BOOST_DISCRETE):
     '''
     Auto trains an OpenCV SVM.
     '''
     np.float32(data)
     np.float32(responses) 
-    params = dict(boost_type=cv2.BOOST_DISCRETE,weak_count=weak_count,max_depth=max_depth)
+    params = dict(boost_type=boost_type,weak_count=weak_count,max_depth=max_depth)
     model = cv2.Boost()
     model.train(data,cv2.CV_ROW_SAMPLE,responses,params=params)
     return model
