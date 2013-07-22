@@ -40,6 +40,7 @@ __version__ = "$Revision$"
 import PIL.ImageDraw
 import PIL.Image
 import ImageFont
+import cStringIO
 
 from PIL.Image import BICUBIC, ANTIALIAS
 
@@ -49,6 +50,7 @@ import numpy
 import numpy as np
 import cv
 import cv2
+import os
 
 
 #import unittest
@@ -198,6 +200,7 @@ class Image:
                 #       Those errors should be corrected.
                 self.filename = data
                 data = PIL.Image.open(data)
+                    
             self.type=TYPE_PIL
             self.pil = data
             self.width,self.height = self.pil.size
@@ -206,12 +209,14 @@ class Image:
                 self.channels = 1
             elif self.pil.mode == 'RGB':
                 self.channels = 3
-            elif self.pil.mode == 'RGBA':
+            #elif self.pil.mode == 'RGBA':
                 # 
-                self.pil = self.pil.convert('RGB')
-                self.channels = 3
+            #    self.pil = self.pil.convert('RGB')
+            #    self.channels = 3
             else:
-                raise TypeError("Unsuppoted format for PIL images: %s"%self.pil.mode)
+                self.pil.convert('RGB')
+                self.channels = 3
+             #   raise TypeError("Unsuppoted format for PIL images: %s"%self.pil.mode)
             
             self.depth = 8
                         
