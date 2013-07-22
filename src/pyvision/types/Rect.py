@@ -36,37 +36,44 @@ import numpy as np
 
 def BoundingRect(*points):
     '''
-    Create a rectangle that includes all of the points.
+    Create a rectangle that includes all of the points or rectangles.
     '''
     xs = []
     ys = []
     for each in points:
         if type(each) == list or type(each) == tuple:
+            # if the first argument is a list of points
             rect = BoundingRect(*each)
             xs.append(rect.x)
             xs.append(rect.x+rect.w)
             ys.append(rect.y)
             ys.append(rect.y+rect.h)
         elif isinstance(each, pv.Rect):
+            # If this is a list of rects
             rect = each
             xs.append(rect.x)
             xs.append(rect.x+rect.w)
             ys.append(rect.y)
             ys.append(rect.y+rect.h)
         elif isinstance(each,pv.Point):
+            # if it is a pv point
             xs.append(each.X())
             ys.append(each.Y())
         else:
             raise TypeError("Cannot create bounding rect for geometry of type: %s"%each.__class__)
-        
+    
+    # Find the mins an maxs
     assert len(xs) > 0
     minx = min(*xs)
     maxx = max(*xs)
     miny = min(*ys)
     maxy = max(*ys)
+    
+    # Create the rect
     return Rect(minx,miny,maxx-minx,maxy-miny)
 
 def CenteredRect(cx,cy,w,h):
+    '''Specify a rectangle using a center point and a width and height.'''
     return pv.Rect(cx-0.5*w,cy-0.5*h,w,h)
 
 
@@ -96,34 +103,36 @@ class Rect:
         
         @returns: a rectangle representing the intersection.
         '''
+        # define rect 1 and rect 2
         r1 = self
         r2 = rect
         
+        # find rect 1 coordinates
         r1_x1 = r1.x
         r1_x2 = r1.x + r1.w
         r1_y1 = r1.y
         r1_y2 = r1.y + r1.h
 
+        # find rect 2 coordinates
         r2_x1 = r2.x
         r2_x2 = r2.x + r2.w
         r2_y1 = r2.y
         r2_y2 = r2.y + r2.h
-        
-        #print r1_x1,r1_x2,r1_y1,r1_y2
-        #print r2_x1,r2_x2,r2_y1,r2_y2
-        
+
+        # find the bounds of the intersection
         r3_x1 = max(r1_x1,r2_x1)
         r3_x2 = min(r1_x2,r2_x2)
         r3_y1 = max(r1_y1,r2_y1)
         r3_y2 = min(r1_y2,r2_y2)
 
-        #print r3_x1,r3_x2,r3_y1,r3_y2
+        # translate to width and height
         r3_w = r3_x2-r3_x1 
         r3_h = r3_y2-r3_y1
         
         if r3_w < 0.0 or r3_h < 0.0:
             return None
         
+        # Return the intersection
         return Rect(r3_x1,r3_y1,r3_w, r3_h)
     
     def containsRect(self,rect):
@@ -299,6 +308,7 @@ class Rect:
 
 def test():
     '''
+    Run some simple rectangle tests.
     '''
     p1 = pv.Point(1,1)
     p2 = pv.Point(4,4)
@@ -313,6 +323,7 @@ def test():
     print r1.intersect(r2)
     print r3.intersect(r2)
     
+# A main function that runs tests.
 if __name__ == "__main__":
     test()
 

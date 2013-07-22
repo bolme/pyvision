@@ -52,14 +52,8 @@ class Point:
         scale: scale selection
         rotation: rotation selection
         '''
-        #if isinstance(x,cv.Point):
-        #    self.x = float(x.x)
-        #    self.y = float(x.y)
-        #    self.z = 0.0
-        #    self.w = 1.0
-        #    self.scale = 1.0
-        #    self.rotation = 0.0
         if isinstance(x,tuple):
+            # Initialize from a tuple
             self.x = float(x[0])
             self.y = float(x[1])
             self.z = 0.0
@@ -68,14 +62,8 @@ class Point:
                 self.z = x[3]
             if len(x) > 3:
                 self.w = x[4]
-        #elif isinstance(x,cv.Point2D32f):
-        #    self.x = float(x.x)
-        #    self.y = float(x.y)
-        #    self.z = 0.0
-        #    self.w = 1.0
-        #    self.scale = 1.0
-        #    self.rotation = 0.0
         else:
+            # Initialize from coordinates.
             self.x = float(x)
             self.y = float(y)
             self.z = float(z)
@@ -84,12 +72,15 @@ class Point:
             self.rotation = rotation
         
     def X(self):
+        '''Return the x coordiante.'''
         return float(self.x)/self.w
     
     def Y(self):
+        '''Return the y coordinate.'''
         return float(self.y)/self.w
     
     def Z(self):
+        '''Return the z coordinate.'''
         return float(self.z)/self.w
     
     def asArray(self,homogenious=False):
@@ -114,12 +105,15 @@ class Point:
         return array([[self.x],[self.y],[self.z],[self.w]])
     
     def asOpenCV(self):
+        '''Return as a point compatible with OpenCV'''
         return (self.X(), self.Y()) #cv.cvPoint(int(round(self.X())),int(round(self.Y())))
     
     def asTuple(self):
+        '''Return as a 2 tuple.'''
         return (self.X(),self.Y())
     
     def asArray3D(self):
+        '''Return as an array of three elements.'''
         return np.array((self.X(),self.Y(),self.Z()))
     
     def asSpherical(self):
@@ -143,6 +137,7 @@ class Point:
         return r,phi,theta
 
     def l2(self,point):
+        ''' Compute the Euclidian distance between two points. '''
         dx = self.X()-point.X()
         dy = self.Y()-point.Y()
         dz = self.Z()-point.Z()
@@ -164,6 +159,7 @@ class Point:
         return (1.0/l)*self 
     
     def magnitude(self):
+        ''' Compute the magnitude of the point (distance from origin). '''
         x = self.X()
         y = self.Y()
         z = self.Z()
@@ -172,23 +168,29 @@ class Point:
         
         
     def __sub__(self,point):
+        ''' Subtract two points '''
         return Point(self.X()-point.X(),self.Y()-point.Y(),self.Z()-point.Z())
     
     def __add__(self,point):
+        ''' Add two points. '''
         return Point(self.X()+point.X(),self.Y()+point.Y(),self.Z()+point.Z())
     
     def __mul__(self,val):
+        ''' Multiply the point by a value. '''
         if isinstance(val,float) or isinstance(val,int): 
             return Point(self.X()*val,self.Y()*val,self.Z()*val)
 
     def __rmul__(self,val):
+        ''' Multiply the point by a value. '''
         if isinstance(val,float) or isinstance(val,int): 
             return Point(self.X()*val,self.Y()*val,self.Z()*val)
     
     def __str__(self):
+        ''' Return a string representing the point. '''
         return "pv.Point(%f,%f,%f)"%(self.X(),self.Y(),self.Z())
     
     def __repr__(self):
+        ''' Return a string representing the point. '''
         return "pv.Point(%f,%f,%f)"%(self.X(),self.Y(),self.Z())
     
     
