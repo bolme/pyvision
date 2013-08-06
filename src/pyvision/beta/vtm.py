@@ -313,7 +313,7 @@ class VideoTaskManager(object):
                 if self.show:
                     frame.show(delay=30)
                 if ilog != None:
-                    ilog(frame,format='jpg')
+                    ilog(frame,ext='jpg')
                 del self.frame_list[0]
             else:
                 break

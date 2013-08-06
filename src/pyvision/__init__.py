@@ -225,8 +225,6 @@ from pyvision.ml.opencv_ml import svc_linear, svc_rbf, svr_linear, svr_rbf, rand
 
 from pyvision.beta.vtm import VideoTaskManager, VideoTask, _VideoDataItem
 
-# Beta components place holders
-VideoTask = None
 
 # Import the beta components
 import beta
