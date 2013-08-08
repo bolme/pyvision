@@ -134,7 +134,7 @@ class VideoTaskManager(object):
             print "TaskManager[INFO]: Initialized"
             
 
-    def addTaskFactory(self,task_factory):
+    def addTaskFactory(self,task_factory,*args,**kwargs):
         '''
         This function add a task factory function to the video task manager.
         The function is called once for every frame processed by the 
@@ -149,11 +149,15 @@ class VideoTaskManager(object):
            create and return a task.
          - Any other object that implements the __call__ method which 
            returns a task instance.
+         
+        Any additional arguments or keyword arguments passed to this 
+        to this function will be pased after the frame_id argument
+        to the task factory
         
         @param task_factory: a function or callible object that returns a task.
         @type  task_factory: callable 
         '''
-        self.task_factories.append(task_factory)
+        self.task_factories.append((task_factory,args,kwargs))
         
         
     def addFrame(self,frame,ilog=None):
@@ -191,8 +195,8 @@ class VideoTaskManager(object):
         '''
         start = time.time()
         count = 0
-        for factory in self.task_factories:
-            task = factory(frame_id)
+        for factory,args,kwargs in self.task_factories:
+            task = factory(frame_id,*args,**kwargs)
             count += 1
             self.task_list += [task]
         stop = time.time() - start
