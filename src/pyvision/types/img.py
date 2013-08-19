@@ -680,7 +680,7 @@ class Image:
         # Render the text
         draw.text([textpt.x,textpt.y],label,fill=color, font=font)    
         
-        if mark not in [None,'centered']:           
+        if mark not in [False,None,'centered']:           
             draw.ellipse(box,outline=color)
 
         del draw
