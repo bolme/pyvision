@@ -5,6 +5,7 @@ Created on Oct 21, 2011
 '''
 
 import time
+from collections import defaultdict
 
 #############################################################################
 # Video tasks are opperations to be run on a frame.
@@ -130,6 +131,10 @@ class VideoTaskManager(object):
         self.frame_list = []
         self.show = show
         
+        self.flow = defaultdict(set)
+        self.task_set = set()
+        self.data_set = set()
+        
         if self.debug_level >= 3:
             print "TaskManager[INFO]: Initialized"
             
@@ -222,6 +227,7 @@ class VideoTaskManager(object):
         
         @returns: false if task should be deleted and true otherwise.
         '''
+        self.task_set .add(task.__class__.__name__)
         #print "task check = ",self.frame_id - task.getFrameId(),self.buffer_size
         if self.frame_id - task.getFrameId() > self.buffer_size:
             if self.debug_level >= 2: 
@@ -247,6 +253,12 @@ class VideoTaskManager(object):
                 
             # Create an argument list
             args = [each.getData() for each in data_items]
+            
+            # Compute the dataflow
+            for each in data_items:
+                self.flow[(each.getKey()[0],task.__class__.__name__)].add(each.getKey()[1]-task.getFrameId())
+                self.data_set.add(each.getKey()[0])
+
             # Mark these items as touched
             for each in data_items: each.touch()
         except KeyError:
@@ -259,6 +271,11 @@ class VideoTaskManager(object):
         # Run the task.
         start = time.time()
         result = task.execute(*args)
+        
+        for each in result:
+            self.flow[(task.__class__.__name__,each[0])].add(0)
+            self.data_set.add(each[0])
+                
         try:
             len(result)
         except:
@@ -322,4 +339,52 @@ class VideoTaskManager(object):
             else:
                 break
     
+    def asGraph(self,as_image=False):
+        '''
+        This uses runtime analysis to create a dataflow graph for this VTM.
+        '''
+        import pydot
+        import pyvision as pv
+        import PIL.Image
+        from cStringIO import StringIO
+        
+        def formatNum(n):
+            if n == 0:
+                return '0'
+            else:
+                return "%+d"%n
+            
+        
+        graph = pydot.Dot(graph_type='digraph')#,rankdir="LR")
+        graph.add_node(pydot.Node("Video Input",shape='invhouse',style='filled',fillcolor='#ffCC99'))
+        #graph.add_node(pydot.Node("FRAME",shape='note',color='blue'))
+        graph.add_edge(pydot.Edge("Video Input","FRAME"))
+        
+        for each in self.task_set:
+            #print "TMP",str(each[0].__name__)
+            graph.add_node(pydot.Node(each,shape='box',style='filled',fillcolor='#99CC99'))
+
+        for each in self.data_set:
+            #print "TMP",str(each[0].__name__)
+            graph.add_node(pydot.Node(each,shape='ellipse',style='filled',fillcolor='#9999ff'))
+            
+        for each,offsets in self.flow.iteritems():
+            offsets = list(offsets)
+            if len(offsets) == 1 and list(offsets)[0] == 0:
+                graph.add_edge(pydot.Edge(each[0],each[1]))
+            else:
+                offsets.sort()
+                offsets = [formatNum(tmp) for tmp in offsets]
+                offsets = " ("+",".join(offsets) + ")"
+                #graph.add_edge(pydot.Edge(each[0],each[1]))
+                graph.add_edge(pydot.Edge(each[0],each[1],label=offsets,label_scheme=2,labeldistance=2,labelfloat=False))
+                
+        if as_image:
+            data = graph.create_png()
+            f = StringIO(data)
+            im = pv.Image(PIL.Image.open(f))
+            return im
+        return graph
+
+
 
