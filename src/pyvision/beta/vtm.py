@@ -6,6 +6,7 @@ Created on Oct 21, 2011
 
 import time
 from collections import defaultdict
+import cProfile
 
 #############################################################################
 # Video tasks are opperations to be run on a frame.
@@ -49,10 +50,10 @@ class VideoTask(object):
         raise NotImplementedError("Abstract Method")
 
 
-#############################################################################
-# This class keeps track of data items and when they are used.
-#############################################################################
 class _VideoDataItem(object):
+    '''
+    This class keeps track of data items and when they are used.
+    '''
     def __init__(self,data_tuple):
         self._data_type = data_tuple[0] 
         self._frame_id = data_tuple[1]
@@ -60,21 +61,27 @@ class _VideoDataItem(object):
         self._touched = 0
     
     def getType(self):
+        ''' Get the item type. '''
         return self._data_type
     
     def getFrameId(self):
+        ''' Get the frame id. '''
         return self._frame_id
     
     def getData(self):
+        ''' Get the actual data. '''
         return self._data
     
     def getKey(self):
+        ''' Get the key. '''
         return (self._data_type,self._frame_id)
     
     def touch(self):
+        ''' Count the number of times this data was touched. '''
         self._touched += 1
         
     def getTouched(self):
+        ''' Return the number of times the data was touched. '''
         return self._touched
 
 
@@ -89,19 +96,19 @@ class VideoTaskManager(object):
     loops can be complicated because data needs to persist across many frame
     and many operations or tasks need to be completed to solve a video analysis
     problem.  This class allows for many small and simple tasks to be managed 
-    in a way that can produce a complex and powerful system. 
+    in a way that can produce a complex and powerful system. #
         
     Tasks request only the data they need, which keeps the complexity of tasks 
     as simple as possible.  This also reduces the coupling between tasks and 
     eliminates complex video processing loops. The video task manager handles 
     much of the complexity of the video processing system like data buffering, 
-    and insures that each task gets its required data.
+    and insures that each task gets its required data. #
 
     This class manages tasks that are run on video frames.  The video task 
     manager maintains a list of data objects and task objects.  Each task is 
     a listener for data objects.  When the data objects are avalible required 
     to execute a task the tasks execute method will be called and the required 
-    data items will be passed as arguments.
+    data items will be passed as arguments. #
     
     New frames are added using the addFrame method.  When a frame is added 
     it creates a data item that includes a frame_id, a data type of "FRAME",
@@ -121,16 +128,17 @@ class VideoTaskManager(object):
         '''
         self.debug_level = debug_level
         
+        # Initialize data.
         self.frame_id = 0
         self.task_list = []
         self.task_factories = []
         self.data_cache = {}
-        # TODO: _DataCache(buffer_size=buffer_size,debug_level=debug_level)
         self.buffer_size = buffer_size
         
         self.frame_list = []
         self.show = show
         
+        # Initialize information for flow analysis.
         self.flow = defaultdict(set)
         self.task_set = set()
         self.data_set = set()
@@ -146,7 +154,7 @@ class VideoTaskManager(object):
         VideoTaskManager.  This function should take one argument which
         is the frame_id of that frame.  The task factory should return an
         instance of the VideoTask class that will perform processing on this
-        frame.  There are three options for implementing a task factory.
+        frame.  There are three options for implementing a task factory. #
          - A class object for a VideoTask which has a constructor that takes 
            a frame_id as an argument.  When called the constructor for that 
            class and will create a task.
@@ -157,12 +165,19 @@ class VideoTaskManager(object):
          
         Any additional arguments or keyword arguments passed to this 
         to this function will be pased after the frame_id argument
-        to the task factory
+        to the task factory. #
         
         @param task_factory: a function or callible object that returns a task.
         @type  task_factory: callable 
+        @param profile: Keyword argument.  If true, profile data will be 
+                        generated for each call to this task.
+        @type profile: True | False
         '''
-        self.task_factories.append((task_factory,args,kwargs))
+        profile = False
+        if kwargs.has_key('profile'):
+            profile = kwargs['profile']
+            del kwargs['profile']
+        self.task_factories.append((task_factory,args,kwargs,profile))
         
         
     def addFrame(self,frame,ilog=None):
@@ -180,13 +195,17 @@ class VideoTaskManager(object):
         self._createTasksForFrame(self.frame_id)
         self.frame_list.append(frame_data)
         
+        # Run any tasks that can be completed with the current data.
         self._runTasks()
         
+        # Delete old data
         self._cleanUp()
 
-        self.frame_id += 1
         
         stop = time.time()
+        
+        # Set up for the next frame and display the results.
+        self.frame_id += 1
 
         self.showFrames(ilog=ilog)
         
@@ -200,8 +219,9 @@ class VideoTaskManager(object):
         '''
         start = time.time()
         count = 0
-        for factory,args,kwargs in self.task_factories:
+        for factory,args,kwargs,profile in self.task_factories:
             task = factory(frame_id,*args,**kwargs)
+            task.profile=profile
             count += 1
             self.task_list += [task]
         stop = time.time() - start
@@ -216,7 +236,11 @@ class VideoTaskManager(object):
         if self.debug_level >= 3: print "TaskManager[INFO]: Running Tasks..."
         while True:
             start_count = len(self.task_list)
-            self.task_list = filter(self._evaluateTask,self.task_list)
+            remaining_tasks = []
+            for task in self.task_list:
+                if self._evaluateTask(task):
+                    remaining_tasks.append(task)
+            self.task_list = remaining_tasks
             if start_count == len(self.task_list):
                 break
 
@@ -270,17 +294,35 @@ class VideoTaskManager(object):
         
         # Run the task.
         start = time.time()
+        
+        # Start the profiler
+        if task.profile:
+            prof = cProfile.Profile()
+            prof.enable()
+            
+        # RUN THE TASK
         result = task.execute(*args)
         
+        # Stop the profiler and show that information.
+        if task.profile:
+            prof.disable()
+            print
+            print "Profiled task:",task.__class__.__name__
+            prof.print_stats(sort='cumtime')
+            print
+            
+        # Record the dataflow information.
         for each in result:
             self.flow[(task.__class__.__name__,each[0])].add(0)
             self.data_set.add(each[0])
                 
+        # Check that the task did return a list.
         try:
             len(result)
         except:
             raise Exception("Task did not return a valid list of data.\n    Task: %s\n    Data:%s"%(task,result))
                             
+        # Add the data to the cache.
         for data_item in result:
             if len(data_item) != 3:
                 raise Exception("Task returned a data item that does not have 3 elements.\n    Task: %s\n    Data: %s"%(task,data_item))
@@ -330,9 +372,10 @@ class VideoTaskManager(object):
             frame_id = frame_data.getFrameId()
             frame = frame_data.getData()
             task_count = self._remainingTasksForFrame(frame_id)
+            # If the frame is complete then show it.
             if task_count == 0:
                 if self.show:
-                    frame.show(delay=30)
+                    frame.show(delay=1)
                 if ilog != None:
                     ilog(frame,ext='jpg')
                 del self.frame_list[0]
@@ -349,25 +392,28 @@ class VideoTaskManager(object):
         from cStringIO import StringIO
         
         def formatNum(n):
+            '''
+            This formats frame offsets correctly: -1,0,+1
+            '''
             if n == 0:
                 return '0'
             else:
                 return "%+d"%n
             
-        
-        graph = pydot.Dot(graph_type='digraph')#,rankdir="LR")
+        # Create the graph.
+        graph = pydot.Dot(graph_type='digraph')
         graph.add_node(pydot.Node("Video Input",shape='invhouse',style='filled',fillcolor='#ffCC99'))
-        #graph.add_node(pydot.Node("FRAME",shape='note',color='blue'))
         graph.add_edge(pydot.Edge("Video Input","FRAME"))
-        
+
+        # Add task nodes        
         for each in self.task_set:
-            #print "TMP",str(each[0].__name__)
             graph.add_node(pydot.Node(each,shape='box',style='filled',fillcolor='#99CC99'))
 
+        # Add Data Nodes
         for each in self.data_set:
-            #print "TMP",str(each[0].__name__)
             graph.add_node(pydot.Node(each,shape='ellipse',style='filled',fillcolor='#9999ff'))
             
+        # Add edges.
         for each,offsets in self.flow.iteritems():
             offsets = list(offsets)
             if len(offsets) == 1 and list(offsets)[0] == 0:
@@ -376,9 +422,9 @@ class VideoTaskManager(object):
                 offsets.sort()
                 offsets = [formatNum(tmp) for tmp in offsets]
                 offsets = " ("+",".join(offsets) + ")"
-                #graph.add_edge(pydot.Edge(each[0],each[1]))
                 graph.add_edge(pydot.Edge(each[0],each[1],label=offsets,label_scheme=2,labeldistance=2,labelfloat=False))
-                
+
+        # Create a pv.Image containing the graph.                
         if as_image:
             data = graph.create_png()
             f = StringIO(data)
