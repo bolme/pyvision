@@ -308,7 +308,7 @@ class VideoTaskManager(object):
             prof.disable()
             print
             print "Profiled task:",task.__class__.__name__
-            prof.print_stats(sort='cumtime')
+            prof.print_stats('time')
             print
             
         # Record the dataflow information.
