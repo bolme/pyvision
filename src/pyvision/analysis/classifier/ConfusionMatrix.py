@@ -33,23 +33,16 @@
 
 import unittest
 
-from pyvision.analysis.stats import pbinom,qbinom,cibinom
-from pyvision.analysis.Table import Table
+#from pyvision.analysis.stats import cibinom
+#from pyvision.analysis.Table import Table
 
-class McnemarsExactTest:
-    def __init__(self,algorithm_a=None, algorithm_b=None,test_name="Unknown"):
-        self.algorithm_name = algorithm_name
-        self.test_name = test_name
-        
-    def addData(self,alg1,alg2,weight=1):
-        ''' Add data from a test '''
-        
+import pyvision as pv
         
         
 
-class ConfusionMatrix(Table):
+class ConfusionMatrix(pv.Table):
     def __init__(self, algorithm_name=None, test_name=None):
-        Table.__init__(self,default_value=0)
+        pv.Table.__init__(self,default_value=0)
 
         self.algorithm_name = algorithm_name
         self.test_name = test_name
@@ -93,7 +86,7 @@ class ConfusionMatrix(Table):
         Returns the estimated a confidence interval for the success update_rate by 
         modeling the success update_rate as a binomial distribution.
         '''
-        return cibinom(self.total,self.successes,alpha=alpha)
+        return pv.cibinom(self.total,self.successes,alpha=alpha)
 
 
     def computeRates(self,alpha=0.05):
@@ -115,8 +108,8 @@ class ConfusionMatrix(Table):
             rate = float(successes)/total
             self.setData(row,'Rate',rate)
             self.setData(row,'Bar',"#"*int(10*rate+0.5))
-            self.setData(row,'Lower',cibinom(total,successes,alpha)[0])
-            self.setData(row,'Upper',cibinom(total,successes,alpha)[1])
+            self.setData(row,'Lower',pv.cibinom(total,successes,alpha)[0])
+            self.setData(row,'Upper',pv.cibinom(total,successes,alpha)[1])
         
         for col in self.classes:
             successes = 0

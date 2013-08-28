@@ -3,7 +3,7 @@ This package contains some standard tests that can be performed with
 the test data distributed with pyvision.
 '''
 import pyvision as pv
-import os.path
+import os
 from pyvision.analysis.FaceAnalysis.EyesFile import EyesFile
 
 SCRAPS_EYES = EyesFile(os.path.join(pv.__path__[0],'data','csuScrapShots','coords.txt'))
@@ -95,7 +95,7 @@ def genderClassifier(clsfy, ilog=None):
     clsfy.train(ilog=ilog)
     
     table = pv.Table()
-    values = {0:[],1:[]}
+    #values = {0:[],1:[]}
 
     correct = 0
     total = 0

@@ -142,9 +142,9 @@ class SVC(Classifier):
             if key == '_model':
                 filename = tempfile.mktemp()
                 self._model.save(filename)
-                buffer = open(filename).read()
+                data_buffer = open(filename).read()
                 os.remove(filename)
-                state[key] = buffer
+                state[key] = data_buffer
                 continue
             
             state[key] = value
@@ -233,9 +233,9 @@ class SVR(Regression):
             if key == '_model':
                 filename = tempfile.mktemp()
                 self._model.save(filename)
-                buffer = open(filename).read()
+                data_buffer = open(filename).read()
                 os.remove(filename)
-                state[key] = buffer
+                state[key] = data_buffer
                 continue
             
             state[key] = value

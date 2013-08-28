@@ -5,17 +5,17 @@ Created on Jan 13, 2012
 '''
 import pyvision as pv
 from pyvision.face.CascadeDetector import CascadeDetector
-from vtm import *
+import vtm
 import numpy as np
 
-class ChangeDetectionVT(VideoTask):
+class ChangeDetectionVT(vtm.VideoTask):
     
     def __init__(self,frame_id):
         '''
         This is a change detection task that computes the difference between the current and previous frames.
         '''
         # request the current and previous frames.
-        VideoTask.__init__(self, frame_id, args=[("FRAME",frame_id),("FRAME",frame_id-1)])
+        vtm.VideoTask.__init__(self, frame_id, args=[("FRAME",frame_id),("FRAME",frame_id-1)])
         
     def execute(self, curr, prev):
         '''
@@ -33,13 +33,13 @@ class ChangeDetectionVT(VideoTask):
         return [("CHANGE_MASK",self.getFrameId(),mask)]
     
     
-class ChangeDetectionAnnotationVT(VideoTask):
+class ChangeDetectionAnnotationVT(vtm.VideoTask):
     
     def __init__(self,frame_id):
         '''
         Register for the current and previous frames.
         '''
-        VideoTask.__init__(self, frame_id, args=[("FRAME",frame_id),("CHANGE_MASK",frame_id)])
+        vtm.VideoTask.__init__(self, frame_id, args=[("FRAME",frame_id),("CHANGE_MASK",frame_id)])
         
     def execute(self, frame, mask):
         '''
@@ -51,7 +51,7 @@ class ChangeDetectionAnnotationVT(VideoTask):
         # Return an empty list because no new items were created.
         return []
     
-class FaceDetectorVT(VideoTask):
+class FaceDetectorVT(vtm.VideoTask):
     '''
     This tasks illustrates one way to initialize data in the first frame by 
     changing the number of required arguments required by additional frames.
@@ -59,12 +59,12 @@ class FaceDetectorVT(VideoTask):
     def __init__(self,frame_id):
         if frame_id == 0:
             # The first frame only requires the frame
-            VideoTask.__init__(self,frame_id,args=[("FRAME",frame_id)])
+            vtm.VideoTask.__init__(self,frame_id,args=[("FRAME",frame_id)])
         else:
             # Each additional frame requires an initialized detector.
             # The underscore in _FACE_DETECTOR indicates this is not shared
             # data.
-            VideoTask.__init__(self,frame_id,args=[("FRAME",frame_id),("_FACE_DETECTOR",frame_id-1)])
+            vtm.VideoTask.__init__(self,frame_id,args=[("FRAME",frame_id),("_FACE_DETECTOR",frame_id-1)])
     
     def execute(self,frame,detector=None):
         if detector == None:
@@ -81,7 +81,7 @@ class FaceDetectorVT(VideoTask):
 def runChangeDetectionExample():
     video = pv.Video(pv.BUGS_VIDEO)
     
-    vtm = VideoTaskManager(buffer_size=2,debug_level=2)
+    vtm = vtm.VideoTaskManager(buffer_size=2,debug_level=2)
     vtm.addTaskFactory(ChangeDetectionVT)
     vtm.addTaskFactory(ChangeDetectionAnnotationVT)
     
@@ -91,7 +91,7 @@ def runChangeDetectionExample():
 def runFaceDetectionExample():
     video = pv.Webcam()
     
-    vtm = VideoTaskManager(buffer_size=2,debug_level=3)
+    vtm = vtm.VideoTaskManager(buffer_size=2,debug_level=3)
     vtm.addTaskFactory(FaceDetectorVT)
     
     for frame in video:

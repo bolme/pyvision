@@ -34,17 +34,14 @@
 import copy
 import time
 
-from pyvision.types.Rect import Rect,BoundingRect
-from pyvision.types.img import Image
-from pyvision.analysis import Table
-from pyvision.analysis.stats import cibinom
+import pyvision as pv
 
 def face_from_eyes(eye1, eye2):
     '''
     Given eye coordinates estimate the face rectangle
     Assumes the face is reasonably horizontal.
     '''
-    truth_rect = BoundingRect(eye1, eye2)
+    truth_rect = pv.BoundingRect(eye1, eye2)
     truth_rect.w = 3.0 * truth_rect.w
     truth_rect.h = truth_rect.w
     truth_rect.x = truth_rect.x - 0.33 * truth_rect.w
@@ -94,8 +91,8 @@ class FaceDetectionTest:
         self.threshold=threshold
         self.sample_id = 1
         
-        self.table = Table.Table()
-        self.summary_table = Table.Table()
+        self.table = pv.Table()
+        self.summary_table = pv.Table()
         
         # Cumulative statistic
         self.images = 0
@@ -127,7 +124,7 @@ class FaceDetectionTest:
         name = None
         detected_rects = copy.copy(detected_rects)
         
-        if isinstance(im,Image):
+        if isinstance(im,pv.Image):
             name = im.filename
             if self.pixels != None:
                 self.pixels += im.asPIL().size[0] * im.asPIL().size[1]
@@ -168,15 +165,12 @@ class FaceDetectionTest:
             
             if success:
                 self.successes += 1
-            if annotate and isinstance(im,Image):
+            if annotate and isinstance(im,pv.Image):
                 if success:
                     im.annotateEllipse(truth,color='green')
                 else:
                     im.annotateEllipse(truth,color='red')
                 
-                if best_detecion != None:
-                    im.annototeRect(detected_rects[best_detection],color='green')
-
 
             # Remove the best detection if success
             if best_detection != None:
@@ -194,7 +188,7 @@ class FaceDetectionTest:
         # Update summary statistics
         if self.positives > 0:
             self.pos_rate = float(self.successes)/self.positives
-            self.pos_bounds = cibinom(self.positives,self.successes,alpha=0.05)
+            self.pos_bounds = pv.cibinom(self.positives,self.successes,alpha=0.05)
         if self.pixels != None:
             self.neg_rate = float(self.negatives)/float(1.0e-6*self.pixels)  
             
@@ -223,7 +217,7 @@ def summarizeDetectionTests(tests):
     '''
     Create a summary table for a list containing FaceDetectionTest objects.
     '''
-    summary = Table.Table()
+    summary = pv.Table()
     summary.setColumnFormat('PosRate','%0.4f')
     summary.setColumnFormat('Lower95','%0.4f')
     summary.setColumnFormat('Upper95','%0.4f')

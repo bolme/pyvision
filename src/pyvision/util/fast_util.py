@@ -8,7 +8,7 @@ class LocalMaximumDetector:
         self.maxes = np.zeros((max_length,2),dtype=np.int)
         self.vals = np.zeros((max_length,),dtype=np.float)
     
-    def __call__(self, mat, threshold = None, sorted = True):
+    def __call__(self, mat, threshold = None, sort_results = True):
         '''
         All any local maximum that are greater than threshhold up to a total of 
         max_length.
@@ -20,14 +20,12 @@ class LocalMaximumDetector:
         
         @param mat: 2d Real Matrix input.
         @param threshold: Mininum value of local maxima.
-        @param sorted: set to False to save time and return an unorderd list.
+        @param sort_results: set to False to save time and return an unorderd list.
         
         @returns: maxes,vals
         '''
-        r,c = mat.shape
         maxes = self.maxes
         vals = self.vals
-        max_length = self.max_length
         
         if threshold != None:
             count = weave.inline(
@@ -105,7 +103,7 @@ class LocalMaximumDetector:
                 type_converters=weave.converters.blitz,
             )
         
-        if sorted == False:
+        if sort_results == False:
             return maxes[:count,:].copy(),vals[:count].copy()
         
         order = np.argsort(vals[:count])[::-1]

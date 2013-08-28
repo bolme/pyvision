@@ -184,11 +184,11 @@ class Image:
             
         # OpenCV2 color format    
         elif isinstance(data,numpy.ndarray) and len(data.shape) == 3 and data.shape[2]==3 and data.dtype == np.uint8:
-            self.type=TYPE_MATRIX_RGB
-            self.matrix3d = data
+            self.type=TYPE_OPENCV2
+            self.opencv2 = data
             self.channels=3
-            self.width = self.matrix3d.shape[1]
-            self.height = self.matrix3d.shape[0]
+            self.width = self.opencv2.shape[1]
+            self.height = self.opencv2.shape[0]
             self.depth=8
             
         elif isinstance(data,PIL.Image.Image) or type(data) == str:
@@ -734,7 +734,7 @@ class Image:
         Create a matrix version of the image compatible with OpenCV 2 (cv2) in BGR format.
         '''
         data_buffer = self.toBufferGray(8)
-        self.opencv2bw = numpy.frombuffer(data_buffer,numpy.uint8).reshape(self.height,self.width,1)            
+        self.opencv2bw = numpy.frombuffer(data_buffer,numpy.uint8).reshape(self.height,self.width)            
 
 
         
@@ -1038,7 +1038,7 @@ class Image:
             
             # TODO: Cant quite figure out how figsize works and how to set it to native pixels
             #pylab.figure()
-            IPython.core.pylabtools.figsize(1.25*w/72.0,1.25*h/72.0)
+            IPython.core.pylabtools.figsize(1.25*w/72.0,1.25*h/72.0) #@UndefinedVariable
             pylab.figure()
             pylab.imshow(self.asAnnotated(),origin='lower',aspect='auto')
             

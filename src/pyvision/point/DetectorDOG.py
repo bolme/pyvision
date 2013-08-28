@@ -48,16 +48,16 @@ David Bolme 2008.
 from pyvision.point.DetectorROI import DetectorROI
 import unittest
 import os.path
-import pyvision
-from pyvision.types.img import Image
-from pyvision.types.Point import Point
+import pyvision as pv
+#from pyvision.types.img import Image
+#from pyvision.types.Point import Point
 from scipy.ndimage.interpolation import zoom
 from scipy.ndimage.filters import gaussian_filter,maximum_filter,minimum_filter
 from scipy.linalg import lstsq
 
-from pyvision.analysis.ImageLog import ImageLog
+#from pyvision.analysis.ImageLog import ImageLog
 from numpy import sqrt,array,nonzero
-from numpy.lib.polynomial import polyfit
+#from numpy.lib.polynomial import polyfit
 
 
 EXTREMA_SIZE=3
@@ -95,7 +95,7 @@ class DetectorDOG(DetectorROI):
         for level in levels:
             gs = []
             sigma = self.sigma
-            for each in range(self.scales+3):
+            for _ in range(self.scales+3):
                 g = gaussian_filter(level,sigma)
                 gs.append(g)
                 sigma = k*sigma
@@ -111,7 +111,7 @@ class DetectorDOG(DetectorROI):
             dogs.append(ds)
         #dogs = array(dogs,'d')
         
-        points = []
+        #points = []
         sigma = 2*k*self.sigma # approx 95% bounds       
         extrema = []
         scale = 1
@@ -208,14 +208,14 @@ def TaylorFit(block):
                 row = [s*s,x*x,y*y,x*y,s,x,y,1]
                 A.append(row)
                 b.append([z])
-    params,resids,rank,s = lstsq(A,b)
+    params,_,_,s = lstsq(A,b)
     return params.flatten()
     
 def TaylorSubpixel(params):
     '''
     a*s*s + b*x*x + c*y*y + d*x*y + e*s + f*x + g*y + h
     '''
-    a,b,c,d,e,f,g,h = params
+    a,b,c,_,e,f,g,_ = params
     s = -e/(2*a)
     x = -f/(2*b)
     y = -g/(2*c)
@@ -237,67 +237,67 @@ class _DetectorDOGTestCase(unittest.TestCase):
         
     def testDetectorDOG1(self):
         detector = DetectorDOG(selector='best',n=100)
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_1.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_1.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
         #print len(points)
-        for score,pt,radius in points:
+        for _,pt,radius in points:
             im.annotateCircle(pt,radius)
         #im.show()
         self.assertEquals(len(points),100)
 
     def testDetectorDOG2(self):
         detector = DetectorDOG(selector='best')
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_19.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_19.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         self.assertEquals(len(points),250)
 
     def testDetectorDOG3(self):
         detector = DetectorDOG()
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_22.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_22.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         self.assertEquals(len(points),326)
 
     def testDetectorDOG4(self):
         detector = DetectorDOG()
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_37.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         self.assertEquals(len(points),295)
 
     def testDetectorDOG5(self):
         detector = DetectorDOG(selector='best')
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_37.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         self.assertEquals(len(points),250)
         
     def testDetectorDOG6(self):
         detector = DetectorDOG(selector='all')
-        filename = os.path.join(pyvision.__path__[0],'data','nonface','NONFACE_37.jpg')
-        im = Image(filename,bw_annotate=True)
+        filename = os.path.join(pv.__path__[0],'data','nonface','NONFACE_37.jpg')
+        im = pv.Image(filename,bw_annotate=True)
         
         points = detector.detect(im)
-        for score,pt,radius in points:
+        for _,pt,_ in points:
             im.annotatePoint(pt)
             
         self.assertEquals(len(points),561)

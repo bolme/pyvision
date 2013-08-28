@@ -31,8 +31,8 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from math import *
-import scipy as sp
+#from math import *
+#import scipy as sp
 import scipy.ndimage as ndi
 import numpy as np
 import pyvision as pv
@@ -80,7 +80,7 @@ def meanUnit(matrix):
         matrix = matrix.asMatrix2D()
         is_image = True
     matrix = matrix - matrix.mean()
-    length = sqrt( (matrix*matrix).sum() )
+    length = np.sqrt( (matrix*matrix).sum() )
     if length > 0.0:
         matrix = (1.0/length) * matrix
         
@@ -94,7 +94,7 @@ def unit(matrix):
     if isinstance(matrix,pv.Image):
         matrix = matrix.asMatrix2D()
         is_image = True
-    length = sqrt( (matrix*matrix).sum() )
+    length = np.sqrt( (matrix*matrix).sum() )
     if length < 0.00001: #Prevent divide by zero
         length = 0.00001
     matrix = (1.0/length) * matrix

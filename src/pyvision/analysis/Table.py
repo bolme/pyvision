@@ -107,13 +107,13 @@ class Table:
         self.setData(row,col,new_value)
 
 
-    def setColumnFormat(self,col,format):
-        if format == None and self.col_format.has_key(col):
+    def setColumnFormat(self,col,format_str):
+        if format_str == None and self.col_format.has_key(col):
             # Clear formating for that column
             del self.col_format[col]
         else:
             # Set the formating for that column
-            self.col_format[col] = format
+            self.col_format[col] = format_str
             
     def __setitem__(self,key,value):
         return self.setElement(key[0],key[1],value)
@@ -246,7 +246,7 @@ class Table:
                 if w > col_widths[col]:
                     col_widths[col] = w
         if equal_cols:
-            new_widths = {}
+            #new_widths = {}
             max_width = 0
             for key,value in col_widths.iteritems():
                 max_width = max(max_width,value)
@@ -296,7 +296,7 @@ class Table:
                 text = self.elementAsText(row,col)
                 try:
                     #Check to see if the text looks like a number
-                    val = float(text)
+                    #val = float(text)
                     # Numbers should be justifed right.
                     text = self.justifyText(text,col_widths[col],'r')
                 except:
@@ -466,4 +466,5 @@ class _TestTable(unittest.TestCase):
         tab.sortByRowHeader()
         #print tab
         
-     
+        
+        

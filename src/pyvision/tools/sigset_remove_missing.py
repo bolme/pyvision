@@ -37,10 +37,10 @@ Created on Jan 14, 2011
 
 Convert a simple sigset into a comma sep value file.  Does not currently support complex sigests.
 '''
-#import pyvision as pv
-import pyvision.analysis.FaceAnalysis.BEE as bee
+import pyvision as pv
+#import pyvision.analysis.FaceAnalysis.BEE as bee
 import optparse
-import csv
+#import csv
 
 
 import os.path
@@ -59,7 +59,7 @@ def parseBasename(path):
     if path == None:
         return None
     
-    dirname,filename = os.path.split(path)
+    _,filename = os.path.split(path)
     # Adaptation for FERET sigsets
     basename = filename.split('.')[0]
     #basename,extname = os.path.splitext(filename)
@@ -93,7 +93,7 @@ def locateFiles(sigset,imdir):
             
     n_images = 0
     
-    for rootdir,dirs,files in os.walk(imdir):
+    for rootdir,_,files in os.walk(imdir):
         for filename in files:
             basename,ext = os.path.splitext(filename)
             if ext.upper() not in IMAGE_EXTENSIONS:
@@ -148,12 +148,12 @@ def parseOptions():
 if __name__ == '__main__':
     options,args = parseOptions()
 
-    sigset = bee.parseSigSet(args[0])
+    sigset = pv.parseSigSet(args[0])
     imdir = args[1]
     found,missing = locateFiles(sigset,imdir)
-    bee.saveSigset(found, args[2])
+    pv.saveSigset(found, args[2])
     if len(args) >= 4:
-        bee.saveSigset(missing, args[3])
+        pv.saveSigset(missing, args[3])
     
     
     

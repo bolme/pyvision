@@ -6,10 +6,11 @@ A very simple 2D plotting package that outputs images.
 
 import pyvision as pv
 import numpy as np
-import PIL
+#import PIL
 import os.path
 import PIL.ImageFont
-import copy
+import PIL.ImageDraw
+#import copy
 random = np.random
 
 arial_path = os.path.join(pv.__path__[0],'config','Arial.ttf')
@@ -18,9 +19,9 @@ large_font = PIL.ImageFont.truetype(arial_path, 18)
 small_font = PIL.ImageFont.truetype(arial_path, 12)
 
 
-def drawLabel(buffer, pt, label, size='small',align='center',rotate=False,color='black'):
+def drawLabel(plot_image, pt, label, size='small',align='center',rotate=False,color='black'):
     '''
-    @param buffer: a PIL image to use as a buffer
+    @param plot_image: a PIL image to use as a plot_image
     '''
     font = small_font
     if size == 'large':
@@ -59,15 +60,11 @@ def drawLabel(buffer, pt, label, size='small',align='center',rotate=False,color=
         y = y
     else:
         raise ValueError("Unknown alignment: %s"%align)
-    draw = PIL.ImageDraw.Draw(buffer)
+    draw = PIL.ImageDraw.Draw(plot_image)
     draw.bitmap((x,y),im,fill=color)
     del draw
-    #buffer.(color,(x,y,x+w,y+h),im)
+    #plot_image.(color,(x,y,x+w,y+h),im)
     
-    def range(self):
-        x,y = self.point
-
-        return x,x,y,y
 
 
 
@@ -80,11 +77,11 @@ class Label:
         self.rotate = rotate
         self.color = color
         
-    def draw(self,plot,buffer,bounds):
+    def draw(self,plot,plot_image,bounds):
         x,y = self.point
         x = plot.x(x,bounds)
         y = plot.y(y,bounds)
-        drawLabel(buffer,[x,y],self.label,size=self.size,align=self.align,rotate=self.rotate,color=self.color)
+        drawLabel(plot_image,[x,y],self.label,size=self.size,align=self.align,rotate=self.rotate,color=self.color)
         
     def range(self):
         x,y = self.point
@@ -95,9 +92,9 @@ class Label:
         
 
 class Points:
-    def __init__(self,points,type,color='black',shape=0,size=3,label=None,lty=None,width=1):
+    def __init__(self,points,graphic_type,color='black',shape=0,size=3,label=None,lty=None,width=1):
         ''''''
-        self.type = type
+        self.graphic_type = graphic_type
         self.points = points
         self.color = color
         self.shape = shape
@@ -107,21 +104,21 @@ class Points:
         self.lty = lty
         
         
-    def draw(self,plot,buffer,bounds):
+    def draw(self,plot,plot_image,bounds):
         ''''''
         points = [ (plot.x(x,bounds),plot.y(y,bounds)) for x,y in self.points]
         
-        if self.type == 'lines':
-            self.drawCurve(points,buffer)
-        elif self.type == 'points':
-            self.drawPoints(points,buffer)
-        elif self.type == 'polygon':
-            self.drawPolygon(points,buffer)
+        if self.graphic_type == 'lines':
+            self.drawCurve(points,plot_image)
+        elif self.graphic_type == 'points':
+            self.drawPoints(points,plot_image)
+        elif self.graphic_type == 'polygon':
+            self.drawPolygon(points,plot_image)
         else:
-            raise ValueError("unknown type: %s"%(self.type,))
+            raise ValueError("unknown graphic_type: %s"%(self.graphic_type,))
 
-    def drawCurve(self,points,buffer):
-        draw = PIL.ImageDraw.Draw(buffer)
+    def drawCurve(self,points,plot_image):
+        draw = PIL.ImageDraw.Draw(plot_image)
         prev_x,prev_y = points[0]
         for x,y in points[1:]:
             draw.line([prev_x,prev_y,x,y],fill=self.color,width=self.width)
@@ -129,20 +126,20 @@ class Points:
             prev_y = y
         del draw        
         
-    def drawPolygon(self,points,buffer):
+    def drawPolygon(self,points,plot_image):
         if len(points) < 3:
             return # No Op
-        draw = PIL.ImageDraw.Draw(buffer)
+        draw = PIL.ImageDraw.Draw(plot_image)
         draw.polygon(points, fill=self.color)
         del draw        
         
-    def drawPoints(self,points,buffer):
+    def drawPoints(self,points,plot_image):
         ''' Render points on the plot '''
         shape = self.shape
         size = self.size
         color = self.color
 
-        draw = PIL.ImageDraw.Draw(buffer)
+        draw = PIL.ImageDraw.Draw(plot_image)
         
         for i in range(len(points)):
             x,y = points[i]
@@ -252,9 +249,9 @@ class Points:
             elif type(shape) == str:
                 # render as a text label
                 if size < 6:
-                    drawLabel(buffer, (x,y), shape, size='small',align='center',rotate=False,color=color)
+                    drawLabel(plot_image, (x,y), shape, size='small',align='center',rotate=False,color=color)
                 else:
-                    drawLabel(buffer, (x,y), shape, size='large',align='center',rotate=False,color=color)
+                    drawLabel(plot_image, (x,y), shape, size='large',align='center',rotate=False,color=color)
             else:
                 # fill in a pixel
                 draw.point((x,y),fill=color)
@@ -282,7 +279,7 @@ class Points:
 
 
 class Plot:
-    def __init__(self,size=(600,600),xrange=None,yrange=None,title="No Title",ylabel="Y Axis",xlabel="X Axis",pad=True):
+    def __init__(self,size=(600,600),x_range=None,y_range=None,title="No Title",ylabel="Y Axis",xlabel="X Axis",pad=True):
         # Save plot information
         self.size = size
         self.title = title
@@ -291,13 +288,13 @@ class Plot:
         self.x_at = None
         self.x_labels = None
         
-        self.xrange = xrange
-        if xrange != None:
-            self.xrange = (np.min(xrange),np.max(xrange))
+        self.x_range = x_range
+        if x_range != None:
+            self.x_range = (np.min(x_range),np.max(x_range))
         
-        self.yrange = yrange
-        if yrange != None:
-            self.yrange = (np.min(yrange),np.max(yrange))
+        self.y_range = y_range
+        if y_range != None:
+            self.y_range = (np.min(y_range),np.max(y_range))
         
         self.top = 60
         self.left = 60
@@ -323,12 +320,12 @@ class Plot:
         drawLabel(pil,(5,self.top+0.5*h),self.ylabel,align='right',size='large',rotate=True)
         drawLabel(pil,(self.left+0.5*w,fh-5),self.xlabel,align='above',size='large',rotate=False)
         
-        buffer = PIL.Image.new("RGB",(w,h),'white')
+        tmp_image = PIL.Image.new("RGB",(w,h),'white')
         bounds = self.range()
         for each in self.graphics:
-            each.draw(self,buffer,bounds)
+            each.draw(self,tmp_image,bounds)
             
-        pil.paste(buffer,(self.left,self.top))
+        pil.paste(tmp_image,(self.left,self.top))
         
         draw = PIL.ImageDraw.Draw(pil)
         draw.rectangle((self.left,self.top,self.left+w,self.top+h),outline='black',fill=None)
@@ -402,15 +399,15 @@ class Plot:
                 ymin = np.min([ymin,t3])
                 ymax = np.max([ymax,t4])
         
-        # Override default xrange
-        if self.xrange != None:
-            xmin,xmax = self.xrange
+        # Override default x_range
+        if self.x_range != None:
+            xmin,xmax = self.x_range
 
-        # Override default yrange        
-        if self.yrange != None:
-            ymin,ymax = self.yrange
+        # Override default y_range        
+        if self.y_range != None:
+            ymin,ymax = self.y_range
         
-        #print "Range:", self.xrange
+        #print "Range:", self.x_range
         #print "Range:", xmin,xmax,ymin,ymax
         if self.pad:
             rg = xmax-xmin
@@ -465,11 +462,11 @@ class Plot:
                 best_at = tmp*scale
                 
         if f10 >= 1.0:
-            format = "%0.0f"
-            labels = [format%x for x in best_at]
+            label_format = "%0.0f"
+            labels = [label_format%x for x in best_at]
         else:
-            format = "%0." + "%d"%(-int(f10-1)) + "f"
-            labels = [format%x for x in best_at]
+            label_format = "%0." + "%d"%(-int(f10-1)) + "f"
+            labels = [label_format%x for x in best_at]
         
         return best_at,labels
     
@@ -537,23 +534,12 @@ class TestPlot(unittest.TestCase):
     def testAutoAxis(self):
         "Plot: Auto Axis"
         plot = Plot()
-        at = plot.autoAxis(0.0,10.0,600)
-        #print at
-
-        at = plot.autoAxis(-1.0,100.0,600)
-        #print at
-
-        at = plot.autoAxis(-1.0,1.0,600)
-        #print at
-
-        at = plot.autoAxis(-10.0,20.,600)
-        #print at
-
-        at = plot.autoAxis(200.0,500.,600)
-        #print at
-        
-        at = plot.autoAxis(.210,.500,600)
-        #print at
+        plot.autoAxis(0.0,10.0,600)
+        plot.autoAxis(-1.0,100.0,600)
+        plot.autoAxis(-1.0,1.0,600)
+        plot.autoAxis(-10.0,20.,600)
+        plot.autoAxis(200.0,500.,600)
+        plot.autoAxis(.210,.500,600)
         
     def testRangeZero(self):
         "Plot: Range = 0"

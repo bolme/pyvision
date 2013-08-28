@@ -47,7 +47,7 @@ Created on May 29, 2011
 import numpy as np
 import scipy.signal
 conv = scipy.signal.convolve
-import pyvision as pv
+#import pyvision as pv
 
 class V1Processing:
     

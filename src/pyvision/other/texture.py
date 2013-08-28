@@ -38,7 +38,7 @@ Created on Jan 15, 2011
 
 import pyvision as pv
 import numpy as np
-import time
+#import time
 
 LBP_CLASSIC = [
             [-1.0,-1.0],

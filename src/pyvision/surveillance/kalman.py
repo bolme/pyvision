@@ -94,9 +94,9 @@ class KalmanFilter:
         
     def predict(self, u=None):
         # Check and convert inputs
-        m = self.m
+        #m = self.m
         b = self.b
-        d = self.d
+        #d = self.d
                 
         if u == None:
             u = np.zeros((b,))

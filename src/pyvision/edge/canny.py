@@ -64,8 +64,8 @@ class _TestCanny(unittest.TestCase):
     ''' Unit tests for the canny detector'''
     
     def setUp(self):
-        self.show_results = True
-        pass
+        self.show_results = False
+        
         
     def test_canny1(self):
         '''
