@@ -646,7 +646,53 @@ class GAUnitVector(GAVariable):
 
 class GAWeighting(GAVariable):
     ''' A positive vector that sums to 1.0. '''
-    pass # implement this
+    
+    def __init__(self,n_elements,**kwargs):
+        GAVariable.__init__(self, **kwargs)
+        self.n_elements = n_elements
+        self.random()
+        
+    def clipRange(self):
+        self.value = self.value*(self.value > 0)
+        weight = self.value.sum()
+        
+        # prevent divide by zero
+        weight = max(weight,0.0001)
+        
+        self.value = self.value/weight
+        
+        
+    def random(self):
+        ''' Initialize this variable randomly '''
+        self.value = np.random.random(size=[self.n_elements])
+        self.clipRange()
+    
+    def combine(self,other):
+        '''combine this variable with other.'''
+        for i in range(len(self.value)):
+            dist = np.abs(self.value[i] - other.value[i])+0.000001
+            if random.randint(0,1) == 0:
+                self.value[i] = other.value[i]
+            self.value[i] += np.random.normal(0,dist/3.0)
+        self.clipRange()
+        
+    def mutate(self):
+        '''introduce mutations into the variable.'''
+        if random.random() < self.mutation_rate:
+            for i in range(len(self.value)):
+                self.value[i] += np.random.normal(0,1)/(50.0*self.n_elements)
+        self.clipRange()
+        
+    
+    def generate(self):
+        '''generate the actual value that will be populated in the arguments'''
+        return self.value
+    
+    def flatValue(self):
+        return list(self.value.flatten())
+    
+    def __repr__(self):
+        return str(self.value)
         
 
 class GASequence:
@@ -702,10 +748,12 @@ def _gaWork(data):
         
 class GeneticAlgorithm:
     
-    def __init__(self,fitness,args=[],kwargs={},population_size=100,n_processes="AUTO"):
+    def __init__(self,fitness,args=[],kwargs={},initializer=None,initargs=[],population_size=100,n_processes="AUTO"):
         self.fitness = fitness
         self.args = args
         self.kwargs = kwargs
+        self.initializer = initializer
+        self.initargs=initargs
         self.population_size = population_size
         self.n_processes = n_processes
         if self.n_processes == "AUTO":
@@ -827,7 +875,17 @@ class GeneticAlgorithm:
     
     
     def addIndividual(self,score,args,kwargs,ilog=None):
-        if score == np.inf:
+        # This try block allows multiple values to be returned by the fitness function. 
+        # Everything except the score will be stored in extra and should be picklible.
+        extras = []
+        try:
+            extras = score[1:]
+            score = score[0]
+        except:
+            # this means score must be a single value
+            pass
+        
+        if not np.isfinite(score):
             return
         
         if score < self.best_score:
@@ -857,7 +915,13 @@ class GeneticAlgorithm:
             self.printPopulation()
             
             ilog.pickle([score,args,kwargs],"Fitness_%0.8f"%score)
-            
+            for i in xrange(len(extras)):
+                extra = extras[i]
+                if isinstance(extra,pv.Image):
+                    ilog(extra,"extra_%02d_%0.8f"%(i,score))
+                else:
+                    ilog.pickle(extra,"extra_%02d_%0.8f"%(i,score))
+                
             if self.iter % 25 == 0:
                 plot = pv.Plot(title="Population Statistics",xlabel="Iteration",ylabel="Score")
                 data = [ [i,self.bests[i]] for i in range(len(self.bests)) ]
@@ -887,7 +951,8 @@ class GeneticAlgorithm:
         
         # Create worker process pool
         if self.n_processes > 1: 
-            pool = mp.Pool(self.n_processes)    
+            print "Init Params:",self.initializer, self.initargs
+            pool = mp.Pool(self.n_processes,initializer=self.initializer,initargs=self.initargs)    
             
         # Initialize the population with random members
         work = []

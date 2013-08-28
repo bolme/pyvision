@@ -6,12 +6,12 @@ A very simple 2D plotting package that outputs images.
 
 import pyvision as pv
 import numpy as np
-#import PIL
 import os.path
 import PIL.ImageFont
 import PIL.ImageDraw
-#import copy
 random = np.random
+import StringIO
+import sys
 
 arial_path = os.path.join(pv.__path__[0],'config','Arial.ttf')
 huge_font = PIL.ImageFont.truetype(arial_path, 36)
@@ -65,8 +65,21 @@ def drawLabel(plot_image, pt, label, size='small',align='center',rotate=False,co
     del draw
     #plot_image.(color,(x,y,x+w,y+h),im)
     
-
-
+    
+def dataToFormatedList(data):
+    out = ""
+    # group data into rows of 8
+    for i in range(0,len(data),8):
+        part = data[i:i+8]
+        for each in part:
+            out += "%s,"%each
+        if i + 8 >= len(data):
+            # Finish
+            out = out[:-1] # Remove the last comma
+        else:
+            # Continue with next row
+            out += "\n        "
+    return out
 
 class Label:
     def __init__(self,point,label,size='small',align='center',rotate=False,color='black'):
@@ -83,12 +96,14 @@ class Label:
         y = plot.y(y,bounds)
         drawLabel(plot_image,[x,y],self.label,size=self.size,align=self.align,rotate=self.rotate,color=self.color)
         
+    def drawR(self,f):
+        sys.stderr.write("WARNING> Plot draw label is not implemented for R.\n")
+        
     def range(self):
         x,y = self.point
 
         return x,x,y,y
 
-        
         
 
 class Points:
@@ -114,6 +129,27 @@ class Points:
             self.drawPoints(points,plot_image)
         elif self.graphic_type == 'polygon':
             self.drawPolygon(points,plot_image)
+        else:
+            raise ValueError("unknown graphic_type: %s"%(self.graphic_type,))
+
+    def drawR(self,f):
+        ''''''
+        xpoints = [ float(x) for x,y in self.points]
+        ypoints = [ float(y) for x,y in self.points]
+        
+        f.write("xpoints=c(%s)\n"%(dataToFormatedList(xpoints),))
+        f.write("\n")
+        f.write("ypoints=c(%s)\n"%(dataToFormatedList(ypoints),))
+        f.write("\n")
+        
+        if self.graphic_type == 'lines':
+            f.write("lines(xpoints,ypoints,lty=%s,col='%s',lwd='%s')"%(self.lty,self.color,self.width))
+        elif self.graphic_type == 'points':
+            f.write("points(xpoints,ypoints,col='%s',pch=%s,cex=%s,lwd=%s)"%(self.color,repr(self.shape),self.size/3.0,self.width))
+        elif self.graphic_type == 'polygon':
+            xpoints.append(xpoints[0])
+            ypoints.append(ypoints[0])
+            f.write("lines(xpoints,ypoints,lty=%s,col='%s',lwd='%s')"%(self.lty,self.color,self.width))
         else:
             raise ValueError("unknown graphic_type: %s"%(self.graphic_type,))
 
@@ -488,7 +524,7 @@ class Plot:
                 #raise ValueError("Could not read points.")
 
     def label(self,point,label,**kwargs):
-        ''' render multiple points'''
+        ''' render a label at multiple points'''
         label = Label(point,label,**kwargs)
         self.graphics.append(label)
     
@@ -507,7 +543,7 @@ class Plot:
         self.graphics.append(points)
     
     def lines(self,points,color='black',shape=None,size=3,label=None,lty=1,width=1):
-        ''' render a single point '''
+        ''' render some lines '''
         if len(points) < 1:
             return
         points = self.convertPoints(points)
@@ -515,7 +551,7 @@ class Plot:
         self.graphics.append(points)
         
     def polygon(self,points,color='black',shape=None,size=3,label=None,lty=1,width=1):
-        ''' render a single point '''
+        ''' render a closed polygon '''
         if len(points) < 1:
             return
         points = self.convertPoints(points)
@@ -524,6 +560,69 @@ class Plot:
         
     def show(self,**kwargs):
         self.asImage().show(**kwargs)
+        
+    def asR(self,plot_pdf=os.getcwd()+"out.pdf"):
+        '''
+        Generate an R script that will reproduce this plot.
+        '''
+        # Create a file object for output
+        f = StringIO.StringIO()
+        
+        # Generate Configuration
+        f.write("# This is an R script that will generate a plot.\n")
+        f.write("# These first few lines are configuration options.\n")
+        f.write("filename='%s';\n"%plot_pdf)
+        f.write("plot_width=6; # width in inches\n")
+        f.write("plot_height=6; # height in inches\n")
+        f.write("title='%s'\n"%self.title)
+        f.write("xlabel='%s'\n"%self.xlabel)
+        f.write("ylabel='%s'\n"%self.ylabel)
+        f.write("xrange=c(%f,%f)\n"%self.range()[:2])
+        f.write("yrange=c(%f,%f)\n"%self.range()[2:])
+        f.write("\n")
+        f.write("\n")
+        f.write("\n")
+        f.write("\n")
+        
+        # Create the plot
+        f.write("pdf(file=filename,width=plot_width,height=plot_height)\n")
+        f.write("\n")
+        f.write("par(mai=c(0.5,0.5,0.5,0.1)) # minimal inner margin\n")
+        f.write("par(mgp=c(1.5,0.5,0.0)) # small axes label spacing\n")
+        f.write("\n")
+        f.write("plot(xrange,yrange,type='n',main=title,xlab=xlabel,ylab=ylabel)\n")
+        f.write("# Log scale...\n")
+        f.write("# Custom axis...\n")
+        f.write("\n")
+        
+        # Generate stubs for common plot additions such as labels.
+        f.write("\n")
+        f.write("# axis(1,at=c(1,3,4),labels =c(1,3,4)) # xaxis.  Also add xaxt='n' to the plot command.\n")
+        f.write("# axis(2,at=c(1,3,4),labels =c(1,3,4)) # yaxis.  Also add yaxt='n' to the plot command.\n")
+        f.write("# legend('topright',c('Label 1','Label 2')),fill=c('blue','green'))\n")
+        f.write("\n")
+        
+        # Render the data
+        for each in self.graphics:
+            f.write("# DRAWING: %s\n"%(each.__class__))
+            each.drawR(f)
+            f.write("\n")
+            #print each
+
+        # Finish up
+        f.write("dev.off()\n")
+        f.write("\n")
+        f.write("\n")
+
+        f.flush()
+        
+        p_in,p_out = os.popen2("R --no-save")
+        p_in.write(f.getvalue())
+        p_in.close()
+        print p_out.read()
+        p_out.close()
+        
+        return f.getvalue()
     
     
         
@@ -550,6 +649,22 @@ class TestPlot(unittest.TestCase):
         "Plot: No Data"
         plot = Plot()
         plot.asImage()
+        
+        
+    def testDataToFormatedList(self):
+        print
+        print dataToFormatedList(range(4))
+        print dataToFormatedList(range(5))
+        print dataToFormatedList(range(6))
+        print dataToFormatedList(range(7))
+        print dataToFormatedList(range(8))
+        print dataToFormatedList(range(9))
+        print dataToFormatedList(range(10))
+        print dataToFormatedList(range(15))
+        print dataToFormatedList(range(16))
+        print dataToFormatedList(range(17))
+        print
+
         
         
         

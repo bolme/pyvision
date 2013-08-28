@@ -58,6 +58,7 @@ class GaborWavelet:
         
     def mask(self,size):
         w,h = size
+
         #m = np.zeros(size,np.complex64)
         x = np.arange(-w/2,w/2).reshape(w,1)*np.ones(size)
         x = np.concatenate((x[w/2:,:],x[:w/2,:]),axis=0)
@@ -526,10 +527,10 @@ class _FastFilterTest(unittest.TestCase):
             bank.addFilter(wavelet)
             
         for i in range(len(bank.filters)):
-            gabor_filter = np.fft.ifft2(bank.filters[i])
+            corr_filter = np.fft.ifft2(bank.filters[i])
             if ilog:
-                ilog.log(pv.Image(np.fft.fftshift(gabor_filter.real)),label="Filter_RE_%d"%i)
-                ilog.log(pv.Image(np.fft.fftshift(gabor_filter.imag)),label="Filter_IM_%d"%i)
+                ilog.log(pv.Image(np.fft.fftshift(corr_filter.real)),label="Filter_RE_%d"%i)
+                ilog.log(pv.Image(np.fft.fftshift(corr_filter.imag)),label="Filter_IM_%d"%i)
             
         
         for im in self.test_images[:1]:
@@ -578,16 +579,7 @@ class _FastFilterTest(unittest.TestCase):
                 #Image(imag(mask)).show()
         #print "Filter Time:",stop-start
                 
-        for im in self.test_images:
-            _ = bank.convolve(im)
-            #mag = sqrt(real(jets)*real(jets)+imag(jets)*imag(jets))
-            #if ilog: ilog.log(im)
-            #for i in range(freq*oreint):
-            #    if ilog: ilog.log(Image(real(jets[:,:,i])))
-            #    if ilog: ilog.log(Image(real(jets[:,:,i])))
-            #    if ilog: ilog.log(Image(mag[:,:,i]))
             
-        #print "Frame Time: %0.5fs"% frame_time
 
 
     def test_GaborFilters(self):
@@ -624,7 +616,6 @@ class _FastFilterTest(unittest.TestCase):
       
     def test_GaborImage(self):
         
-        #bank = FilterBank(tile_size=(128,128))
         kernels = createGaborKernels()
         filters = GaborFilters(kernels)
         

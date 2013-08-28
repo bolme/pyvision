@@ -49,14 +49,14 @@ class CaptureClicks:
     This object handles the data mangagement and display of the capture clicks window.
     '''
     
-    def __init__(self,im,default_points=[],keep_window_open = False):
+    def __init__(self,im,default_points=[],keep_window_open = False,window="PyVision Capture Points"):
         '''
         Initialize the data.
         '''
+        self.window = window
         self.im = im.copy()
         self.keep_window_open = keep_window_open
         self.reset()
-        print default_points
         for pt in default_points:
             self.mouseCallback(cv.CV_EVENT_LBUTTONDOWN,pt.X(),pt.Y(),None,None)
             
@@ -65,11 +65,11 @@ class CaptureClicks:
         Display the window and run the main event loop.
         '''
         # Setup the mouse callback to handle mause events (optional)
-        cv.NamedWindow("PyVision Capture Points")
-        cv.SetMouseCallback("PyVision Capture Points", self.mouseCallback)
+        cv.NamedWindow(self.window)
+        cv.SetMouseCallback(self.window, self.mouseCallback)
         
         while True:
-            key_press = self.im.show("PyVision Capture Points",delay=100)
+            key_press = self.im.show(self.window,delay=100)
             
             # Handle key press events.
             if key_press == ord(' '):
@@ -79,7 +79,8 @@ class CaptureClicks:
                 self.reset()
                 
         if not self.keep_window_open:
-            cv.DestroyWindow("PyVision Capture Points")
+            cv.DestroyWindow(self.window)
+            
         return self.points
                 
     def reset(self):
@@ -98,7 +99,6 @@ class CaptureClicks:
         Call back function for mouse events.
         '''
         if event in [cv.CV_EVENT_LBUTTONDOWN]:
-            print "Mouse Event:",event,x,y
             point = pv.Point(x,y)
             self.im.annotateLabel(point,str(len(self.points)),mark='below')
             self.points.append(point)
@@ -185,7 +185,6 @@ class CaptureClicksVideo:
         if self.callback != None:
             self.callback(self.im,self.frame)
         
-        print self.im.size
         self.im.annotateLabel(pv.Point(10,h+10), "Frame: %d"%self.frame,color='yellow')
         self.im.annotateLabel(pv.Point(10,h+20), "Click anywhere in the image to select a point.",color='yellow')
         self.im.annotateLabel(pv.Point(10,h+30), "Press 'r' to reset.",color='yellow')
@@ -221,7 +220,6 @@ class CaptureClicksVideo:
         else:
             self.buffer_index -= 1
             self.frame -= 1
-        print self.buffer_index,self.frame,len(self.buffer),self.points
         self.render()
         
             
@@ -230,7 +228,6 @@ class CaptureClicksVideo:
         Call back function for mouse events.
         '''
         if event in [cv.CV_EVENT_LBUTTONDOWN]:
-            print "Mouse Event:",event,x,y
             if not self.points.has_key(self.frame):
                 self.points[self.frame] = []
             points = self.points[self.frame]

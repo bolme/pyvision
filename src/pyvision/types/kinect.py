@@ -19,7 +19,7 @@ class Kinect(object):
     
     The kinect drivers to not appear to be robust.  Some trial and error may be
     needed to determine how to best interface with the device. Here are some problem 
-    behaviours that I have seen:
+    behaviours that I have seen: #
       * The Kinect does not seem to start properly.
       * Calling some functions in the freenect module results in segmentation
         faults
@@ -29,14 +29,14 @@ class Kinect(object):
         my laptop but not the other.
       * The device sometimes prints out error/warning messages which do not seem
         to interfere with the operation of the device.
-        "[Stream 70] Expected 1748 data bytes, but got 948"
+        "[Stream 70] Expected 1748 data bytes, but got 948" #
         
     After connecting the device to the usb port it may be helpful to initialize 
     the device using ipython.  Try running these commands before connecting through
-    pyvision or attempting to grab frames:
+    pyvision or attempting to grab frames: 
     
     import freenect
-    freenect.init()
+    freenect.init() # start the connection
     exit
     
     The current implementation initializes the device and returns RGB and depth
@@ -73,10 +73,9 @@ class Kinect(object):
         cvframe = cv.CreateImageHeader((c,r),cv.IPL_DEPTH_8U,chan)
         cv.SetData(cvframe,frame.tostring(),3*c)
         cv.CvtColor(cvframe,cvframe,cv.CV_RGB2BGR)
-        #video = video_cv(frame)
         return pv.Image(cvframe),pv.Image(np.array(depth.T,dtype=np.float))
     
-    
+# The main function that runs some tests    
 if __name__ == '__main__':
     print "Testing the kinect sensor."
     print "Press any key to quit"

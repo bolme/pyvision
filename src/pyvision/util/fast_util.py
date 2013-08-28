@@ -26,6 +26,8 @@ class LocalMaximumDetector:
         '''
         maxes = self.maxes
         vals = self.vals
+        r,c = mat.shape
+        max_length = self.max_length
         
         if threshold != None:
             count = weave.inline(

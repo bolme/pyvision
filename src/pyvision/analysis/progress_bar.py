@@ -19,6 +19,8 @@ class ProgressBar:
         self.min = minValue
         self.max = maxValue
         self.span = maxValue - minValue
+        if self.span == 0: # Prevent divide by zero
+            self.span = 1
         self.width = totalWidth
         self.amount = 0       # When amount == max, we are 100% done 
         self.updateAmount(0)  # Build progress bar string
