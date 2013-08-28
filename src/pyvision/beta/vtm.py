@@ -142,6 +142,7 @@ class VideoTaskManager(object):
         self.flow = defaultdict(set)
         self.task_set = set()
         self.data_set = set()
+        self.task_data = defaultdict(dict)
         
         if self.debug_level >= 3:
             print "TaskManager[INFO]: Initialized"
@@ -251,7 +252,7 @@ class VideoTaskManager(object):
         
         @returns: false if task should be deleted and true otherwise.
         '''
-        self.task_set .add(task.__class__.__name__)
+        self.task_set.add(task.__class__.__name__)
         #print "task check = ",self.frame_id - task.getFrameId(),self.buffer_size
         if self.frame_id - task.getFrameId() > self.buffer_size:
             if self.debug_level >= 2: 
@@ -332,6 +333,13 @@ class VideoTaskManager(object):
         if self.debug_level >= 3:
             print "TaskManager[INFO]: Evalutate task %s for frame %d. Time=%0.2fms"%(task,task.getFrameId(),stop*1000)
         
+        # Compute task statistics
+        if not self.task_data[task.__class__.__name__].has_key('time_sum'):
+            self.task_data[task.__class__.__name__]['time_sum'] = 0.0
+            self.task_data[task.__class__.__name__]['call_count'] = 0
+        self.task_data[task.__class__.__name__]['time_sum'] += stop
+        self.task_data[task.__class__.__name__]['call_count'] += 1
+        
         # Return false so that the task is deleted.
         return False
     
@@ -400,6 +408,9 @@ class VideoTaskManager(object):
             else:
                 return "%+d"%n
             
+        def record_strings(my_list):
+            return '{''}'
+            
         # Create the graph.
         graph = pydot.Dot(graph_type='digraph')
         graph.add_node(pydot.Node("Video Input",shape='invhouse',style='filled',fillcolor='#ffCC99'))
@@ -407,11 +418,17 @@ class VideoTaskManager(object):
 
         # Add task nodes        
         for each in self.task_set:
-            graph.add_node(pydot.Node(each,shape='box',style='filled',fillcolor='#99CC99'))
+            call_count = self.task_data[each]['call_count']
+            mean_time = self.task_data[each]['time_sum']/call_count
+            node_label = "{" + " | ".join([each,
+                                       "Time=%0.2fms"%(mean_time*1000.0,),
+                                       "Calls=%d"%(call_count,),
+                                       ]) + "}"
+            graph.add_node(pydot.Node(each,label=node_label,shape='record',style='filled',fillcolor='#99CC99'))
 
         # Add Data Nodes
         for each in self.data_set:
-            graph.add_node(pydot.Node(each,shape='ellipse',style='filled',fillcolor='#9999ff'))
+            graph.add_node(pydot.Node(each,shape='box',style='rounded, filled',fillcolor='#9999ff'))
             
         # Add edges.
         for each,offsets in self.flow.iteritems():
