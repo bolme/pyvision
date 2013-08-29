@@ -418,8 +418,13 @@ class VideoTaskManager(object):
 
         # Add task nodes        
         for each in self.task_set:
-            call_count = self.task_data[each]['call_count']
-            mean_time = self.task_data[each]['time_sum']/call_count
+            call_count = 0
+            mean_time = 0.0
+            try:
+                call_count = self.task_data[each]['call_count']
+                mean_time = self.task_data[each]['time_sum']/call_count
+            except:
+                pass
             node_label = "{" + " | ".join([each,
                                        "Time=%0.2fms"%(mean_time*1000.0,),
                                        "Calls=%d"%(call_count,),
