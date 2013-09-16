@@ -24,6 +24,7 @@ class ProgressBar:
         self.width = totalWidth
         self.amount = 0       # When amount == max, we are 100% done 
         self.updateAmount(0)  # Build progress bar string
+        self.last_show = 0.0
 
     def updateAmount(self, newAmount = None):
         '''
@@ -74,8 +75,11 @@ class ProgressBar:
     
     def show(self):
         '''Displays the progress bar on stdout.'''
-        sys.stdout.write(self.__str__()+"  " + self.time_string + "\r")
-        sys.stdout.flush()
+        current_time = time.time()
+        if current_time - self.last_show > 1.0:
+            sys.stdout.write(self.__str__()+"  " + self.time_string + "\r")
+            sys.stdout.flush()
+            self.last_show = current_time
     
     def finish(self):
         '''Conducts Cleanup and new line.'''
