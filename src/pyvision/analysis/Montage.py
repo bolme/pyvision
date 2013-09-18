@@ -388,7 +388,7 @@ class VideoMontage(pv.Video):
     montage by iterating through all the frames, just as with
     a standard video object.
     '''
-    def __init__(self, videoDict, layout=(2,4), tileSize=(64,48) ):
+    def __init__(self, videoDict, layout=(2,4), tile_size=(64,48) ):
         '''
         @param videoDict: A dictionary of videos to display in the montage. The keys are the video labels, and 
         the values are objects adhering to the pyvision video interface. (pv.Video, pv.VideoFromImages, etc.)
@@ -404,13 +404,13 @@ class VideoMontage(pv.Video):
         
         self.vids = videoDict
         self.layout = layout
-        self.vidsize = tileSize 
+        self.vidsize = tile_size 
         self.imgs = {}
         self.stopped = []
         
     def __iter__(self):
         ''' Return an iterator for this video '''
-        return VideoMontage(self.vids, layout=self.layout, tileSize=self.vidsize)
+        return VideoMontage(self.vids, layout=self.layout, tile_size=self.vidsize)
     
     def next(self):
         if len(self.stopped) == len(self.vids.keys()):
@@ -454,9 +454,9 @@ def demo_imageMontage():
         imageList.append( pv.Image(fn) )
         counter += 1
         
-    im = ImageMontage(imageList, (2, 3), tile_size=(128,96), gutter=2, byrow=False)
+    im = ImageMontage(imageList, (2, 3), tile_size=(128,96), gutter=2, by_row=False)
     im.show(window="Image Montage",delay=0)
-
+    cv.DestroyWindow('Image Montage')
     
 def demo_videoMontage():
     import os
@@ -470,8 +470,7 @@ def demo_videoMontage():
     #vid4 = pv.Video(TAZ_VIDEO)
     vid_dict = {"V1":vid1, "V2":vid2} #, "V3":vid3, "V4":vid4}
     vm = VideoMontage(vid_dict, layout=(2,1), tile_size=(256,192))
-    for img in vm:
-        img.show("Video Montage", delay=60, pos=(10,10))
+    vm.play("Video Montage", delay=60, pos=(10,10))
     
 #if __name__ == '__main__':
 
