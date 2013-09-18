@@ -41,7 +41,7 @@ __version__ = "$Revision$"
 import PIL.ImageDraw
 import PIL.Image
 from PIL.Image import BICUBIC, ANTIALIAS
-import ImageFont
+import PIL.ImageFont as ImageFont
 
 # Imaging imports
 import numpy
@@ -702,7 +702,7 @@ class Image:
         
     def valueNormalize(self):
         '''TODO: Deprecated remove this sometime.'''
-        print "WARNING: Image.valueNormalize has been depricated."
+        print "WARNING: Image.valueNormalize has been deprecated."
         return self.normalize()
 
 
@@ -1143,7 +1143,7 @@ class Image:
             #pylab.figure()
             IPython.core.pylabtools.figsize(1.25*w/72.0,1.25*h/72.0) #@UndefinedVariable
             pylab.figure()
-            pylab.imshow(self.asAnnotated(),origin='lower',aspect='auto')
+            pylab.imshow(self.asAnnotated(),origin='upper',aspect='auto')
             
         else:
             # Otherwise, use an opencv window
