@@ -153,16 +153,16 @@ class ImageBuffer:
             
         return stack
     
-    def asMontage(self, layout, tileSize=None, **kwargs):
+    def asMontage(self, layout, tile_size=None, **kwargs):
         (w,h) = self[0].size
-        if tileSize == None:
+        if tile_size == None:
             tw = w/5
             th = h/5
             if tw < 32: tw=32
             if th < 24: th=24
-            tileSize = (tw,th)
+            tile_size = (tw,th)
             
-        im = pv.ImageMontage(self._data, layout=layout, tileSize=tileSize, **kwargs)
+        im = pv.ImageMontage(self._data, layout=layout, tile_size=tile_size, **kwargs)
         return im
     
     def show(self, N=10, window="Image Buffer", pos=None, delay=0):

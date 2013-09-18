@@ -883,7 +883,8 @@ class Image:
 
     def toBufferRGB(self,depth):
         '''
-            returns the image data as a binary python string.
+        returns the image data as a binary python string.
+        @param depth: Specify the bits per pixel, 8,32 or 64.    
         '''
         image_buffer = None
         if self.type == TYPE_PIL:

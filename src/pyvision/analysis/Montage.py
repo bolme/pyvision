@@ -362,7 +362,7 @@ class clickHandler(object):
         IM = self.IM()  #IM object is obtained via weak reference to image montage
         if IM is None: return #if the reference was deleted already...
         
-        print "event",event
+        #print "event",event
         if event == cv.CV_EVENT_LBUTTONDOWN:
             rc = IM._checkClickRegion(x, y)
             if rc == -1 and IM._imgPtr > 0:
@@ -435,7 +435,7 @@ class VideoMontage(pv.Video):
         for k in keys:
             imageList.append( self.imgs[k] )
             
-        im = ImageMontage(imageList, self.layout, self.vidsize, gutter=2, byrow=True, labels=keys)      
+        im = ImageMontage(imageList, self.layout, self.vidsize, gutter=2, by_row=True, labels=keys)      
         return im.asImage()
     
 def demo_imageMontage():
@@ -454,7 +454,7 @@ def demo_imageMontage():
         imageList.append( pv.Image(fn) )
         counter += 1
         
-    im = ImageMontage(imageList, (2, 3), tileSize=(128,96), gutter=2, byrow=False)
+    im = ImageMontage(imageList, (2, 3), tile_size=(128,96), gutter=2, byrow=False)
     im.show(window="Image Montage",delay=0)
 
     
@@ -469,7 +469,7 @@ def demo_videoMontage():
     #vid3 = pv.Video(TOYCAR_VIDEO)
     #vid4 = pv.Video(TAZ_VIDEO)
     vid_dict = {"V1":vid1, "V2":vid2} #, "V3":vid3, "V4":vid4}
-    vm = VideoMontage(vid_dict, layout=(2,1), tileSize=(256,192))
+    vm = VideoMontage(vid_dict, layout=(2,1), tile_size=(256,192))
     for img in vm:
         img.show("Video Montage", delay=60, pos=(10,10))
     
