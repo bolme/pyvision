@@ -810,7 +810,8 @@ class Image:
         
     def toBufferGray(self,depth):
         '''
-            returns the image data as a binary python string.
+        @param depth: Use 8, 32, or 64, to specify the bit depth of the pixels.
+        @return: the image data as a binary python string.
         '''
         image_buffer = None
         if self.type == TYPE_PIL:
@@ -883,8 +884,7 @@ class Image:
 
     def toBufferRGB(self,depth):
         '''
-        returns the image data as a binary python string.
-        @param depth: Specify the bits per pixel, 8,32 or 64.    
+            returns the image data as a binary python string.
         '''
         image_buffer = None
         if self.type == TYPE_PIL:
@@ -1160,7 +1160,7 @@ class Image:
             
             # Resize the image.    
             if size != None:
-                x = pyvision.Image(self.resize(size).asAnnotated())
+                x = pyvision.Image(self.asAnnotated().resize(size) )
             else:
                 x = pyvision.Image(self.asAnnotated())    
                 
