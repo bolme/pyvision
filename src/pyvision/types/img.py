@@ -355,8 +355,13 @@ class Image:
         return pv.Image(therm)
         
 
-    def asAnnotated(self):
+    def asAnnotated(self, as_type="PIL"):
         '''
+        @param as_type: Specify either "PIL" or "PV". If
+        "PIL" (default) then the return type is a PIL image.
+        If "PV", then the return type is a pyvision image,
+        where the annotations have been 'flattened' onto
+        the original source image.
         @return: the PIL image used for annotation.
         '''
         if self.annotated == None:
@@ -366,7 +371,11 @@ class Image:
             else:
                 # Annotate over color if avalible.
                 self.annotated = self.asPIL().copy().convert("RGB")
-        return self.annotated
+                
+        if as_type.upper() == "PV":
+            return pv.Image(self.annotated)
+        else:
+            return self.annotated
             
     def asHSV(self):
         '''
