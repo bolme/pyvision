@@ -225,11 +225,12 @@ from pyvision.ml.opencv_ml import svc_linear, svc_rbf, svr_linear, svr_rbf, rand
 
 from pyvision.beta.vtm import VideoTaskManager, VideoTask, _VideoDataItem
 
-
+from pyvision.analysis.html_report import HtmlReport
 # Import the beta components
 import beta
 
 IMAGE_EXTENSIONS = ['.JPG','.JPEG','.GIF','.TIF','.TIFF','.PNG','.BMP','.PGM','.PPM',]
+VIDEO_EXTENSIONS = ['.MOV','.M4V','.FLV','.AVI','.MPEG','.MJPEG','.MP4','.MPG','.WMV',]
 
 #================================== Misc Functions =====================================
 
@@ -364,6 +365,15 @@ def isImage(filename):
     Determines if the filename corresponds to a known image extension.
     '''
     for ext in IMAGE_EXTENSIONS:
+        if filename.upper().endswith(ext):
+            return True
+    return False
+
+def isVideo(filename):
+    '''
+    Determines if the filename corresponds to a known image extension.
+    '''
+    for ext in VIDEO_EXTENSIONS:
         if filename.upper().endswith(ext):
             return True
     return False
