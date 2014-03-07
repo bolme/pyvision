@@ -162,11 +162,13 @@ class ImageMontage(object):
         Will display the montage image, as well as register the mouse handling callback
         function so that the user can scroll the montage by clicking the increment/decrement
         arrows.
+        @return: The key code of the key pressed, if any, that dismissed the window.
         """
         img = self.asImage()
         cv.NamedWindow(window)
         cv.SetMouseCallback(window, self._clickHandler.onClick, window)
-        img.show(window=window, pos=pos, delay=delay)
+        key = img.show(window=window, pos=pos, delay=delay)
+        return key
 
     def setSelectHandler(self, handler):
         """
