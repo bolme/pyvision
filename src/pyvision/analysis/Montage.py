@@ -166,7 +166,8 @@ class ImageMontage(object):
         img = self.asImage()
         cv.NamedWindow(window)
         cv.SetMouseCallback(window, self._clickHandler.onClick, window)
-        img.show(window=window, pos=pos, delay=delay)
+        key = img.show(window=window, pos=pos, delay=delay)
+        return key
 
     def setSelectHandler(self, handler):
         """
