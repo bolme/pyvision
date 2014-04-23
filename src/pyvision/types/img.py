@@ -455,11 +455,11 @@ class Image:
             (r,g,b) = PIL.ImageColor.getrgb(fill_color)
             rect_img = PIL.Image.new('RGBA', (int(rect.w),int(rect.h)), (r,g,b,int(alpha*255)))
             im.paste(rect_img,offset,mask=rect_img) #use 'paste' method to support transparency
-        else:
-            #just draws the rect outline in the outline color
-            draw = PIL.ImageDraw.Draw(im)
-            draw.rectangle(box,outline=color,fill=None)
-            del draw
+        
+        #just draws the rect outline in the outline color
+        draw = PIL.ImageDraw.Draw(im)
+        draw.rectangle(box,outline=color,fill=None)
+        del draw
         
     def annotateImage(self,im,rect,color='red', fill_color=None):
         '''
