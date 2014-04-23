@@ -914,7 +914,7 @@ class Image:
             pil = self.pil
             if pil.mode != 'RGB':
                 pil = pil.convert('RGB')
-            image_buffer = pil.tostring()
+            image_buffer = pil.tobytes()
         elif self.type == TYPE_MATRIX_2D:
             # Convert to color
             mat = self.matrix2d.transpose()
