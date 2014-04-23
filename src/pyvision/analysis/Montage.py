@@ -47,7 +47,7 @@ class ImageMontage(object):
     """
 
     def __init__(self, image_list, layout=(2, 4), tile_size=(64, 48), gutter=2, by_row=True, labels='index',
-                 keep_aspect=True):
+                 keep_aspect=True, highlight_selected=False):
         """
         Constructor
         @param image_list: A list of pyvision images that you wish to display
@@ -64,6 +64,9 @@ class ImageMontage(object):
         the label to be used for the corresponding image. If labels == 'index', then the image
         montage will simply display the index of the image in image_list. Set labels to None to suppress labels.
         @param keep_aspect: If true the original image aspect ratio will be preserved.
+        @param highlight_selected: If true, any image tile in the montage which has been clicked will
+        be drawn with a rectangular highlight. This will toggle, such that if an image is clicked a second
+        time, the highlighting will be removed.
         """
         self._tileSize = tile_size
         self._rows = layout[0]
@@ -79,6 +82,8 @@ class ImageMontage(object):
         self._keep_aspect = keep_aspect
         self._image_positions = []
         self._select_handler = None
+        self._highlighted = highlight_selected
+        self._selected_tiles = []  #which images have been selected (or clicked) by user
 
         #check if we need to allow for scroll-arrow padding
         if self._rows * self._cols < len(image_list):
@@ -157,23 +162,49 @@ class ImageMontage(object):
         Will display the montage image, as well as register the mouse handling callback
         function so that the user can scroll the montage by clicking the increment/decrement
         arrows.
+        @return: The key code of the key pressed, if any, that dismissed the window.
         """
         img = self.asImage()
         cv.NamedWindow(window)
         cv.SetMouseCallback(window, self._clickHandler.onClick, window)
-        img.show(window=window, pos=pos, delay=delay)
+        key = img.show(window=window, pos=pos, delay=delay)
+        return key
 
     def setSelectHandler(self, handler):
         """
         Add a function that will be called when an image is selected.
-        The handler function should take an image, the image index, and a dictionary of other info.
+        The handler function should take an image, the image index, 
+        a list of labels, and a dictionary of other info.
         """
         self._select_handler = handler
+        
+    def setHighlighted(self, idxs):
+        '''
+        If the montage was created with highlight_selected option enabled,
+        then this function will cause a set of tiles in the montage to be
+        highlighted.
+        @note: Calling this method will erase any previous selections made
+        by the user.
+        '''
+        self._selected_tiles = idxs
+        self.draw()
+        
+    def getHighlighted(self):
+        '''
+        Returns the index list of the tiles which were selected/highlighted
+        by the users
+        '''
+        return sorted(self._selected_tiles)
 
     def _checkClickRegion(self, x, y):
         """
         internal method to determine the clicked region of the montage.
-        @return: -1 for decrement region, 1 for increment region, and 0 otherwise
+        @return: -1 for decrement region, 1 for increment region, and 0 otherwise.
+        If a select handler function was defined (via setSelectHandler), then
+        this function will be called when the user clicks within the region
+        of one of the tiles of the montage. Signature of selectHandler function
+        is f(img, imgNum, dict). As of now, the only key/value pair passed
+        into the dict is "imgLabel":<label>.
         """
         if self._by_row:
             #scroll up/down to expose next/prev row
@@ -193,11 +224,15 @@ class ImageMontage(object):
             return -1
         else:
             #print "DEBUG: Neither Region"
-            if self._select_handler != None:
-                for img, imgNum, rect in self._image_positions:
-                    if rect.containsPoint(pt):
-                        self._select_handler(img, imgNum, {})
-
+            for img, imgNum, rect in self._image_positions:
+                if rect.containsPoint(pt):
+                    if imgNum in self._selected_tiles:
+                        self._selected_tiles.remove(imgNum)
+                    else:
+                        self._selected_tiles.append(imgNum)
+                    if self._select_handler != None:
+                        imgLabel = self._labels[imgNum] if type(self._labels) == list else str(imgNum)
+                        self._select_handler(img, imgNum, {"imgLabel":imgLabel})
             return 0
 
     def _initDecrementArrow(self):
@@ -335,6 +370,10 @@ class ImageMontage(object):
                 font = self._txtfont
                 color = self._txtcolor
                 cv.PutText(cvImg, lbltext, (1, self._tileSize[1] - self._gutter - 2), font, color)
+
+        if self._highlighted and (imgNum in self._selected_tiles):
+            #draw a highlight around this image
+            cv.Rectangle(cvImg, (0, 0), (self._tileSize[0], self._tileSize[1]), (0, 255, 255), thickness=4)
 
                 #reset ROI
         cv.SetImageROI(cvImg, (0, 0, self._size[0], self._size[1]))

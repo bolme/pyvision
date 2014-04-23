@@ -108,17 +108,26 @@ class ImageBuffer:
         if(self._count > self._max):
             self._count = self._max
             
-    def fillBuffer(self, vid):
+    def fillBuffer(self, v):
         '''
         If buffer is empty, you can use this function to spool off the first
-        N frames of the video to initialize/fill the buffer.
-        @param vid: an iterator of images, typically a pv.Video object or similar.
+        N frames of a video or list of images to initialize/fill the buffer.
+        @param v: Either a list of pv.Images, an instance of pv.Video or its
+        subclass, or any other iterable that yields a pv.Image() when
+        next() is called.
         @note: Will cause an assertion exception if buffer is already full.
         '''
         assert not self.isFull()
         
+        if type(v) == list:
+            #create an iterator from an input list of images
+            idxs = range(len(v))
+            V = ( v[i] for i in idxs)
+        else:
+            V = v
+            
         while not self.isFull():
-            im = vid.next()
+            im = V.next()
             self.add(im)
 
         return

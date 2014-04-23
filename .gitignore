@@ -8,6 +8,9 @@
 # Python files
 *.pyc
 
+# Idea files
+.idea/*
+
 # XCode
 build/*
 *.pbxuser
