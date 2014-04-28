@@ -7,6 +7,7 @@ Created on Oct 21, 2011
 import time
 from collections import defaultdict
 import cProfile
+import traceback
 
 
 class EmptyData(object):
@@ -187,6 +188,30 @@ class _VideoDataItem(object):
     def __repr__(self):
         return "_VideoDataItem((%s,%s,%s)"%(self._data_type,self._frame_id,self._data)
 
+
+
+def vtmProcessor(task_queue,results_queue,options):
+    '''
+    Each task_queue item should have three items (task_id,frame_id,command/task).
+    the command "quit" is used to stop the process.
+    
+    The vtmProcessor will return (task_id, frame_id, results).  If there is an exception
+    then the result will be replaced by the exception and a stack trace will be printed.
+    '''
+    
+    while True:
+        item = task_queue.get()
+        try:
+            task_id,frame_id,task = item
+            
+            result = task.run()
+
+            results_queue.put((task_id,frame_id,result))
+            
+        except Exception, error:
+            traceback.print_exc()
+            results_queue.put((task_id,frame_id,error))
+            
 
 #############################################################################
 # This class manages the workflow for video items.
@@ -559,7 +584,6 @@ class VideoTaskManager(object):
         return graph
 
 def formatGroup(group):
-    print group
     try:
         if len(group) > 3:
             return formatGroup(group[:1])+"..."+formatGroup(group[-1:])
@@ -578,15 +602,12 @@ def groupOffsets(offsets):
             group = [each]
             groups.append(group)
             
-    print groups
     
     return groups
 
 def formatOffsets(offsets):
-    print "Offsets:",offsets
     groups = groupOffsets(offsets)
     out = "("+ ",".join([formatGroup(each) for each in groups]) + ")"
-    print out
     return out
     
 if __name__ == '__main__':
