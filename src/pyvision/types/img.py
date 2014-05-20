@@ -369,7 +369,7 @@ class Image:
                 # Make a black and white image that can be annotated with color.
                 self.annotated = self.asPIL().convert("L").copy().convert("RGB")
             else:
-                # Annotate over color if avalible.
+                # Annotate over color if available.
                 self.annotated = self.asPIL().copy().convert("RGB")
                 
         if as_type.upper() == "PV":
@@ -433,7 +433,7 @@ class Image:
             return None    
         
         
-    def annotateRect(self,rect,color='red', fill_color=None):
+    def annotateRect(self,rect,color='red', fill_color=None, alpha=1.0):
         '''
         Draws a rectangle on the annotation image
         
@@ -441,11 +441,24 @@ class Image:
         @param color: defined as ('#rrggbb' or 'name') 
         @param fill_color: defined as per color, but indicates the color
         used to fill the rectangle. Specify None for no fill.
+        @param alpha: Ignored if no fill. Otherwise, this value controls
+        how opaque the fill is. Specify 1.0 (default) for a fully opaque
+        fill, or 0.0 for fully transparent. A value of 0.3, for example,
+        would show a partially transparent filled rectangle over
+        the background image.
         '''
         im = self.asAnnotated()
+        box = rect.box()
+        offset = (box[0],box[1])
+        #this supports filling a rectangle that is semi-transparent
+        if fill_color:
+            (r,g,b) = PIL.ImageColor.getrgb(fill_color)
+            rect_img = PIL.Image.new('RGBA', (int(rect.w),int(rect.h)), (r,g,b,int(alpha*255)))
+            im.paste(rect_img,offset,mask=rect_img) #use 'paste' method to support transparency
+        
+        #just draws the rect outline in the outline color
         draw = PIL.ImageDraw.Draw(im)
-        box = [rect.x,rect.y,rect.x+rect.w,rect.y+rect.h]
-        draw.rectangle(box,outline=color,fill=fill_color)
+        draw.rectangle(box,outline=color,fill=None)
         del draw
         
     def annotateImage(self,im,rect,color='red', fill_color=None):
@@ -771,9 +784,9 @@ class Image:
         Create a PIL version of the image
         '''
         if self.channels == 1:
-            self.pil = PIL.Image.fromstring("L",self.size,self.toBufferGray(8))
+            self.pil = PIL.Image.frombytes("L",self.size,self.toBufferGray(8))
         elif self.channels == 3:
-            self.pil = PIL.Image.fromstring("RGB",self.size,self.toBufferRGB(8))
+            self.pil = PIL.Image.frombytes("RGB",self.size,self.toBufferRGB(8))
         else:
             raise NotImplementedError("Cannot convert image from type: %s"%self.type)
         
@@ -828,7 +841,7 @@ class Image:
             pil = self.pil
             if pil.mode != 'L':
                 pil = pil.convert('L')
-            image_buffer = pil.tostring()
+            image_buffer = pil.tobytes()
         elif self.type == TYPE_MATRIX_2D:
             # Just get the buffer
             image_buffer = self.matrix2d.transpose().tostring()
@@ -901,7 +914,7 @@ class Image:
             pil = self.pil
             if pil.mode != 'RGB':
                 pil = pil.convert('RGB')
-            image_buffer = pil.tostring()
+            image_buffer = pil.tobytes()
         elif self.type == TYPE_MATRIX_2D:
             # Convert to color
             mat = self.matrix2d.transpose()
