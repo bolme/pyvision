@@ -784,9 +784,15 @@ class Image:
         Create a PIL version of the image
         '''
         if self.channels == 1:
-            self.pil = PIL.Image.frombytes("L",self.size,self.toBufferGray(8))
+            if hasattr(PIL.Image,'frombytes'):
+                self.pil = PIL.Image.frombytes("L",self.size,self.toBufferGray(8))
+            else:
+                self.pil = PIL.Image.fromstring("L",self.size,self.toBufferGray(8))
         elif self.channels == 3:
-            self.pil = PIL.Image.frombytes("RGB",self.size,self.toBufferRGB(8))
+            if hasattr(PIL.Image,'frombytes'):
+                self.pil = PIL.Image.frombytes("RGB",self.size,self.toBufferRGB(8))
+            else:
+                self.pil = PIL.Image.fromstring("RGB",self.size,self.toBufferRGB(8))
         else:
             raise NotImplementedError("Cannot convert image from type: %s"%self.type)
         
@@ -841,7 +847,10 @@ class Image:
             pil = self.pil
             if pil.mode != 'L':
                 pil = pil.convert('L')
-            image_buffer = pil.tobytes()
+            if hasattr(pil,'tobytes'):
+                image_buffer = pil.tobytes()
+            else:
+                image_buffer = pil.tostring() # Keep this for compatability.
         elif self.type == TYPE_MATRIX_2D:
             # Just get the buffer
             image_buffer = self.matrix2d.transpose().tostring()
@@ -914,7 +923,10 @@ class Image:
             pil = self.pil
             if pil.mode != 'RGB':
                 pil = pil.convert('RGB')
-            image_buffer = pil.tobytes()
+            if hasattr(pil,'tobytes'):
+                image_buffer = pil.tobytes()
+            else:
+                image_buffer = pil.tostring() # Keep this for compatability.
         elif self.type == TYPE_MATRIX_2D:
             # Convert to color
             mat = self.matrix2d.transpose()
