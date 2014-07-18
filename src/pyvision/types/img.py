@@ -243,7 +243,7 @@ class Image:
         '''
         @return: a gray-scale version of this pyvision image
         '''    
-        if self.matrix2d == None:
+        if self.matrix2d is None:
             self._generateMatrix2D()
         return Image(self.matrix2d)
     
@@ -251,7 +251,7 @@ class Image:
         '''
         @return: the gray-scale image data as a two dimensional numpy array
         '''
-        if self.matrix2d == None:
+        if self.matrix2d is None:
             self._generateMatrix2D()
         return self.matrix2d
 
@@ -259,7 +259,7 @@ class Image:
         '''
         @return: color image data as a 3D array with shape (3(rgb),w,h)
         '''
-        if self.matrix3d == None:
+        if self.matrix3d is None:
             self._generateMatrix3D()
         return self.matrix3d
 
@@ -267,7 +267,7 @@ class Image:
         '''
         @return: image data as a pil image
         '''
-        if self.pil == None:
+        if self.pil is None:
             self._generatePIL()
         return self.pil
 
@@ -275,7 +275,7 @@ class Image:
         '''
         @return: the image data in an OpenCV format
         '''
-        if self.opencv == None:
+        if self.opencv is None:
             self._generateOpenCV()
         return self.opencv
         
@@ -283,7 +283,7 @@ class Image:
         '''
         @return: the image data in an OpenCV format that is a numpy array of shape (h,w,3) of uint8
         '''
-        if self.opencv2 == None:
+        if self.opencv2 is None:
             self._generateOpenCV2()
         return self.opencv2
         
@@ -291,7 +291,7 @@ class Image:
         '''
         @return: the image data in an OpenCV format that is a numpy array of shape (h,w,1) of uint8
         '''
-        if self.opencv2bw == None:
+        if self.opencv2bw is None:
             self._generateOpenCV2BW()
         return self.opencv2bw
         
@@ -364,7 +364,7 @@ class Image:
         the original source image.
         @return: the PIL image used for annotation.
         '''
-        if self.annotated == None:
+        if self.annotated is None:
             if self.bw_annotate:
                 # Make a black and white image that can be annotated with color.
                 self.annotated = self.asPIL().convert("L").copy().convert("RGB")
@@ -406,10 +406,10 @@ class Image:
         @param output: select 'simple' or 'full'. 'full' output contains additional metadata.
         @returns: a dictionary of EXIF data.
         '''
-        if self.type == TYPE_PIL and self.filename != None:
+        if self.type == TYPE_PIL and self.filename is not None:
             result = {}
             info = self.pil._getexif()
-            if info == None:
+            if info is None:
                 return None
             
             # iterate through exif tags
@@ -579,7 +579,7 @@ class Image:
         @param width: the line width
         '''
         # Fill the center
-        if fill != None:
+        if fill is not None:
             im = self.asAnnotated()
             draw = PIL.ImageDraw.Draw(im)
             poly = [(point.X(),point.Y()) for point in points]
@@ -587,7 +587,7 @@ class Image:
             del draw
         
         # Draw lines    
-        if color != None:
+        if color is not None:
             n = len(points)
             for i in range(n):
                 j = (i+1)%n 
@@ -668,7 +668,7 @@ class Image:
         draw = PIL.ImageDraw.Draw(im)
         
         # Load the font
-        if font == None:
+        if font is None:
             font = ImageFont.load_default()
         elif isinstance(font,int):
             font = ImageFont.truetype(pv.FONT_ARIAL, font)
@@ -695,7 +695,7 @@ class Image:
             textpt = point
             
         # Fill in the background
-        if background != None:
+        if background is not None:
             point2 = pv.Point( textpt.x + tw, textpt.y+th)
             draw.rectangle([textpt.asTuple(), point2.asTuple()], fill=background)
         
@@ -784,15 +784,9 @@ class Image:
         Create a PIL version of the image
         '''
         if self.channels == 1:
-            if hasattr(PIL.Image,'frombytes'):
-                self.pil = PIL.Image.frombytes("L",self.size,self.toBufferGray(8))
-            else:
-                self.pil = PIL.Image.fromstring("L",self.size,self.toBufferGray(8))
+            self.pil = PIL.Image.frombytes("L",self.size,self.toBufferGray(8))
         elif self.channels == 3:
-            if hasattr(PIL.Image,'frombytes'):
-                self.pil = PIL.Image.frombytes("RGB",self.size,self.toBufferRGB(8))
-            else:
-                self.pil = PIL.Image.fromstring("RGB",self.size,self.toBufferRGB(8))
+            self.pil = PIL.Image.frombytes("RGB",self.size,self.toBufferRGB(8))
         else:
             raise NotImplementedError("Cannot convert image from type: %s"%self.type)
         
@@ -847,10 +841,7 @@ class Image:
             pil = self.pil
             if pil.mode != 'L':
                 pil = pil.convert('L')
-            if hasattr(pil,'tobytes'):
-                image_buffer = pil.tobytes()
-            else:
-                image_buffer = pil.tostring() # Keep this for compatability.
+            image_buffer = pil.tobytes()
         elif self.type == TYPE_MATRIX_2D:
             # Just get the buffer
             image_buffer = self.matrix2d.transpose().tostring()
@@ -923,10 +914,7 @@ class Image:
             pil = self.pil
             if pil.mode != 'RGB':
                 pil = pil.convert('RGB')
-            if hasattr(pil,'tobytes'):
-                image_buffer = pil.tobytes()
-            else:
-                image_buffer = pil.tostring() # Keep this for compatability.
+            image_buffer = pil.tobytes()
         elif self.type == TYPE_MATRIX_2D:
             # Convert to color
             mat = self.matrix2d.transpose()
@@ -1082,7 +1070,7 @@ class Image:
         
         # Check the bounds for cropping
         if x < 0 or y < 0 or x+w > self.size[0] or y+h > self.size[1]:
-            if size == None:
+            if size is None:
                 size = (w,h)
             
             affine = pv.AffineFromRect(pv.Rect(x,y,w,h),size)
@@ -1100,12 +1088,12 @@ class Image:
         
         affine = pv.AffineTranslate(-x,-y,(w,h))
         
-        if size == None:
+        if size is None:
             size = (w,h)
         
         # Copy to new image
         new_image = cv.CreateImage(size,cvim.depth,cvim.nChannels)        
-        if interpolation == None:
+        if interpolation is None:
             
             if size[0] < w or size[1] < y:
                 # Downsampling so use area interpolation
@@ -1162,7 +1150,7 @@ class Image:
         if window==None and pv.runningInNotebook() and 'pylab' in globals().keys():
             # If running in notebook, then try to display the image inline.
             
-            if size == None:
+            if size is None:
                 size = self.size
                 
                 # Constrain the size of the output
@@ -1182,18 +1170,18 @@ class Image:
             
         else:
             # Otherwise, use an opencv window
-            if window == None:
+            if window is None:
                 window = "PyVisionImage"
 
             # Create the window
             cv.NamedWindow(window)
             
             # Set the location
-            if pos != None:
+            if pos is not None:
                 cv.MoveWindow(window, pos[0], pos[1])
             
             # Resize the image.    
-            if size != None:
+            if size is not None:
                 x = pyvision.Image(self.asAnnotated().resize(size) )
             else:
                 x = pyvision.Image(self.asAnnotated())    
