@@ -310,6 +310,10 @@ class Video(VideoInterface):
     def __iter__(self):
         ''' Return an iterator for this video '''
         return Video(self.filename,self.size)
+    
+    def __len__(self):
+        return self._numframes
+        
 
 
 class VideoFromFileList(VideoInterface):
@@ -351,7 +355,7 @@ class VideoFromDirectory(VideoInterface):
     and return any image with an image extension: JPG,JPEG,PNG,TIF,TIFF,GIF,BMP,PPM,PGM
     '''
     
-    def __init__(self,dirname,order='ascending',limit=None,size=None):
+    def __init__(self,dirname,order='ascending',limit=None,size=None,followlinks=True):
         '''
         Recursively scans a directory for images and returns all images that
         could be loaded. 
@@ -376,6 +380,8 @@ class VideoFromDirectory(VideoInterface):
         self._limit = limit
         self._size = size
         self._counter = 0
+        
+        self._followlinks = followlinks
 
         self._image_paths = []
                 
@@ -402,7 +408,7 @@ class VideoFromDirectory(VideoInterface):
         '''
         Scan the directory and populate image_paths.
         '''
-        for dirpath,_,filenames in os.walk(self._dirname):
+        for dirpath,_,filenames in os.walk(self._dirname,followlinks=self._followlinks):
             for filename in filenames:
                 if self._checkExtension(filename):
                     path = os.path.join(dirpath,filename)
