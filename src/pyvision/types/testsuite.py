@@ -310,8 +310,9 @@ class _TestVideo(unittest.TestCase):
 
        
         
-        
+def test():
+    unittest.main()
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    test()

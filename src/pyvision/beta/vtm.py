@@ -8,6 +8,7 @@ import time
 from collections import defaultdict
 import cProfile
 import traceback
+import shelve
 
 
 class EmptyData(object):
@@ -273,6 +274,11 @@ class VideoTaskManager(object):
         
         self.lastFrameCreated = 0
 
+        self.recording_shelf = None
+        self.playback_shelf = None
+        self.recording_filter = None
+        self.task_filter = None
+        self.playback_filter = None
         
         if self.debug_level >= 3:
             print "TaskManager[INFO]: Initialized"
@@ -328,9 +334,20 @@ class VideoTaskManager(object):
         self._createTasksForFrame(self.frame_id)
         self.frame_list.append(frame_data)
         
+        # Playback the recording
+        if self.playback_shelf != None and self.playback_shelf.has_key(str(self.frame_id)):
+            data_items = self.playback_shelf[str(self.frame_id)]
+            for each in data_items:
+                if self.playback_filter==None or each.getType() in self.playback_filter:
+                    self.addDataItem(each)
+                    self.data_set.add(each.getKey()[0])
+                    self.flow[('Playback',each.getType())].add(0)
+                    
         # Run any tasks that can be completed with the current data.
         self._runTasks()
-        
+  
+        if self.recording_shelf != None:
+            self.recording_shelf.sync()
         # Delete old data
         #self._cleanUp()
 
@@ -350,6 +367,13 @@ class VideoTaskManager(object):
         '''
         Process any new data items and associate them with tasks.
         '''
+        if self.recording_shelf != None:
+            frame_id = str(self.frame_id)
+            if not self.recording_shelf.has_key(frame_id):
+                self.recording_shelf[frame_id] = []
+            if self.recording_filter == None or data_item.getType() in self.recording_filter:
+                self.recording_shelf[frame_id].append(data_item)
+            
         for task in self.task_list:
             was_added = task.addData(data_item)
             if was_added:
@@ -368,7 +392,9 @@ class VideoTaskManager(object):
                 task = factory(self.lastFrameCreated,*args,**kwargs)
                 task.profile=profile
                 count += 1
-                self.task_list += [task]
+
+                if self.task_filter == None or task.__class__.__name__ in self.task_filter:
+                    self.task_list += [task]
             stop = time.time() - start
             if self.debug_level >= 3:
                 print "TaskManager[INFO]: Created %d new tasks for frame %s. Total Tasks=%d.  Time=%0.2fms"%(count,self.lastFrameCreated,len(self.task_list),stop*1000)
@@ -516,6 +542,38 @@ class VideoTaskManager(object):
             else:
                 break
     
+    def recordingFile(self,filename):
+        '''
+        Set up an output file for recording.
+        '''
+        assert self.playback_shelf == None
+        self.recording_shelf = shelve.open(filename, flag='n', protocol=2, writeback=True) 
+    
+    def playbackFile(self,filename,cache=False):
+        '''
+        Set up an input file for playback.
+        '''
+        assert self.recording_shelf == None
+        self.playback_shelf = shelve.open(filename, flag='r', protocol=2, writeback=False) 
+    
+    def recordingFilter(self,data_types):
+        '''
+        Only recorded data_types in the list.
+        '''
+        self.recording_filter = set(data_types)
+    
+    def taskFilter(self,task_types):
+        '''
+        Only generate tasks in the list.
+        '''
+        self.task_filter = set(task_types)
+    
+    def playbackFilter(self,data_types):
+        '''
+        Only playback data_types in the list.
+        '''
+        self.playback_filter = set(data_types)
+    
     def asGraph(self,as_image=False):
         '''
         This uses runtime analysis to create a dataflow graph for this VTM.
@@ -541,6 +599,10 @@ class VideoTaskManager(object):
         graph = pydot.Dot(graph_type='digraph')
         graph.add_node(pydot.Node("Video Input",shape='invhouse',style='filled',fillcolor='#ffCC99'))
         graph.add_edge(pydot.Edge("Video Input","FRAME"))
+        graph.add_edge(pydot.Edge("Video Input","LAST_FRAME"))
+        
+        if self.playback_shelf != None:
+            graph.add_node(pydot.Node("Playback",shape='invhouse',style='filled',fillcolor='#ffCC99'))
 
         # Add task nodes        
         for each in self.task_set:
