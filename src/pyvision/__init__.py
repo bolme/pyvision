@@ -163,8 +163,11 @@ from pyvision.analysis.ImageLog import ImageLog
 
 from pyvision.analysis.Montage import ImageMontage, VideoMontage
 
-from pyvision.analysis.plot import Plot
-
+try:
+    from pyvision.analysis.plot import Plot
+except:
+    print "Warning: could not load plotting library."
+    
 from pyvision.analysis.Table import Table
 
 from pyvision.analysis.Timer import Timer
@@ -185,8 +188,11 @@ from pyvision.other.distance import boolToUbyte, ubyteToBool, hamming, hamming_t
 
 from pyvision.ml.knn import RobustPNorm,PNorm,correlation,chisquared,KNearestNeighbors,FLANNTree,FLANN_IMPORTED
 
-from pyvision.util.fast_util import LocalMaximumDetector
-
+try:
+    from pyvision.util.fast_util import LocalMaximumDetector
+except:
+    print "Warning: could not import fast_util."
+    
 from pyvision.util.windows import cosineWindow, hammingWindow, hannWindow
 
 from pyvision.analysis.stats import pbinom, qbinom, cibinom, mcnemar_test, SummaryStats, cor, cov, cov2cor
@@ -207,8 +213,10 @@ from pyvision.other.texture import lbp,LBP_CLASSIC,LBP_RAD1,LBP_RAD2,LBP_RAD3,LB
 
 from pyvision.analysis.bee import parseSigSet,saveSigset,computeMaskMatrix,BEE_CODE_MAP,BEE_DONTCARE,BEE_MATCH,BEE_NONMATCH,BEEDistanceMatrix
 
-from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO,FONT_ARIAL,BUGS_VIDEO,CAR_VIDEO, IRIS_DATA, IRIS_LABELS
-
+try:
+    from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO,FONT_ARIAL,BUGS_VIDEO,CAR_VIDEO, IRIS_DATA, IRIS_LABELS
+except:
+    print "Warning: could not import data."
 from pyvision.surveillance.VideoStreamProcessor import *
 
 from analysis.progress_bar import ProgressBar
