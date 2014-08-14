@@ -362,6 +362,18 @@ class VideoTaskManager(object):
         if self.debug_level >= 3:
             print "TaskManager[INFO]: Frame Processing Time=%0.3fms"%(1000*(stop-start),)
 
+    def addData(self,data_list):
+        '''
+        Add additional data for this frame. The data list should contain a list tuples where each tuple of (label, data)
+        '''
+        for each in data_list:
+            data = _VideoDataItem((each[0],self.frame_id,each[1]))
+            self.addDataItem(data)
+            self.flow[('Data Input',data.getType())].add(0)
+            self.data_set.add(data.getKey()[0])
+
+
+        
         
     def addDataItem(self,data_item):
         '''
@@ -597,6 +609,7 @@ class VideoTaskManager(object):
             
         # Create the graph.
         graph = pydot.Dot(graph_type='digraph')
+        graph.add_node(pydot.Node("Data Input",shape='invhouse',style='filled',fillcolor='#ffCC99'))
         graph.add_node(pydot.Node("Video Input",shape='invhouse',style='filled',fillcolor='#ffCC99'))
         graph.add_edge(pydot.Edge("Video Input","FRAME"))
         graph.add_edge(pydot.Edge("Video Input","LAST_FRAME"))
