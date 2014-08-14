@@ -1,3 +1,12 @@
+PyVision Computer Vision Toolkit
+    by David Bolme
+
+As of August 2014, PyVision is now hosted at github:
+    http://github.com/bolme/pyvision
+
+For additional documentation please see the github wiki:
+    http://github.com/bolme/pyvision/wiki
+
 PyVision is a object-oriented Computer Vision Toolkit (BSD Licenses) 
 that is designed to allow the rapid prototype and analysis of computer 
 vision algorithms.  Using python as a foundation this package provides 
@@ -17,18 +26,19 @@ translate image data between PIL, numpy array, and opencv formats.
 
 Currently, PyVision contains a set of popular computer vision algorithms 
 including: 
-    * canny edge detection (opencv) 
-	* harris corner detection (opencv)
-	* viola and jones face detection (opencv)
-	* support vector machines (libsvm)
-	* image normalization primitives (scipy)
-	* Difference of Gaussian ROI detection (scipy)
-	* Genetic Algorithm (python)
-	* Phase Correlation (scipy)
-	* Eye Detection (libsvm/scipy)
-	* PCA analysis (scipy)
-	* PCA Face Recognition (scipy)
-	* Image Affine Transform (scipy)
+    * canny edge detection 
+	* harris corner detection
+	* viola and jones face detection
+	* support vector machines and other classifiers
+	* image normalization primitives
+	* Difference of Gaussian ROI detection
+	* Genetic Algorithm
+	* Phase Correlation
+	* Eye Detection (ASEF and MOSSE Filters)
+	* PCA and LDA analysis
+	* PCA Face Recognition
+	* Image Affine Transform
+	* Video Stream Processing
 
 Pyvision also has a set of built in analysis tools (based on scipy) for 
 analyzing and testing vision algorithms.  This includes a simple image 
@@ -39,7 +49,7 @@ then exported to csv, txt, or tex formats.  PyVision also has a simple GUI
 (based on opencv and wxpython) which allows for the easy creation of live 
 demos.
 
-My goals for releasing this library on sourceforge  is to provide this 
+My goals for releasing this library is to provide this 
 toolkit to other computer vision researchers.  I would also like to have a 
 place where other researchers contribute their code, and I could use some 
 help making the toolkit multi-platform.  The current version is focused on 
@@ -65,7 +75,7 @@ Dependencies
 	scipy
 	numpy
 	OpenCV
-	libsvm
+	
 
 Features:
 	Python based for rapid prototyping.
@@ -85,13 +95,22 @@ Notes:
 	    Jan 25, 2007 18:19:21 UTC by rstanchak
 	
 Releases:
-	1.0.0 - Many interface things have been cleaned up.
-	        Function arguments that are keywords have been change and may not 
-	        work as in previous version.  These include: buffer, type, filter, iter
-	        All warnings and errors from the code analysis have been fixed.
-	0.8.1 - Released in July 2010.	This is the last release before a major 
-	        upgrade and the last version to support OpenCV 1.0 with the swig 
-	        bindings.
-	0.8.0 - Released in June 2009.  This was primarily to support FaceL.
+    1.1.0 - It has been a while since the last release.  OpenCV has improved 
+            recently and has become more stable with improved python bindings.  
+            As a result PyVision is adapting to use OpenCV for much of its
+            core functionality.  In general OpenCV tends to be faster and 
+            more accurate for common image processing functions than scipy or
+            PIL.  Additionally OpenCV will be used in the future for machine
+            learning algorithms.  The Video Task Manager (VTM) framework is 
+            improving for quickly developing video processing pipelines.  
+    1.0.0 - Many interface things have been cleaned up.
+            Function arguments that are keywords have been change and may not 
+            work as in previous version.  These include: buffer, type, filter,
+            iter. All warnings and errors from the code analysis have been 
+            fixed.
+    0.8.1 - Released in July 2010. This is the last release before a major 
+            upgrade and the last version to support OpenCV 1.0 with the swig 
+            bindings.
+    0.8.0 - Released in June 2009.  This was primarily to support FaceL.
 
 
