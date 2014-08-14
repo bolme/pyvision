@@ -55,7 +55,7 @@ class SVMFaceRec:
         
     def train(self, C = None, Gamma = None, ilog=None, callback=None):
         # Create the SVM
-        self.svm = SVM(type=TYPE_C_SVC)
+        self.svm = SVM(svm_type=TYPE_C_SVC)
         
         # Add training data
         for sub_id, tiles in self.training_data.iteritems():
