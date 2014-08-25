@@ -784,9 +784,17 @@ class Image:
         Create a PIL version of the image
         '''
         if self.channels == 1:
-            self.pil = PIL.Image.frombytes("L",self.size,self.toBufferGray(8))
+            try:
+                # PILLOW
+                self.pil = PIL.Image.frombytes("L",self.size,self.toBufferGray(8))
+            except:
+                # PIL
+                self.pil = PIL.Image.fromstring("L",self.size,self.toBufferGray(8))
         elif self.channels == 3:
-            self.pil = PIL.Image.frombytes("RGB",self.size,self.toBufferRGB(8))
+            try:
+                self.pil = PIL.Image.frombytes("RGB",self.size,self.toBufferRGB(8))
+            except:
+                self.pil = PIL.Image.fromstring("RGB",self.size,self.toBufferRGB(8))
         else:
             raise NotImplementedError("Cannot convert image from type: %s"%self.type)
         
