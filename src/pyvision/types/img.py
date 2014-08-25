@@ -841,7 +841,12 @@ class Image:
             pil = self.pil
             if pil.mode != 'L':
                 pil = pil.convert('L')
-            image_buffer = pil.tobytes()
+            try:
+                # PILLOW
+                image_buffer = pil.tobytes()
+            except:
+                # PIL
+                image_buffer = pil.tostring()
         elif self.type == TYPE_MATRIX_2D:
             # Just get the buffer
             image_buffer = self.matrix2d.transpose().tostring()
@@ -914,7 +919,12 @@ class Image:
             pil = self.pil
             if pil.mode != 'RGB':
                 pil = pil.convert('RGB')
-            image_buffer = pil.tobytes()
+            try:
+                # PILLOW
+                image_buffer = pil.tobytes()
+            except:
+                # PIL
+                image_buffer = pil.tostring()
         elif self.type == TYPE_MATRIX_2D:
             # Convert to color
             mat = self.matrix2d.transpose()
