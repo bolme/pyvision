@@ -39,6 +39,7 @@ class VideoTask(object):
         '''
         self.frame_id = frame_id
         self.args = args
+        self.task_id = None
 
         self._arg_map = {}
         self._added_args = 0 # keep track of how many arguments have been found.
@@ -271,6 +272,7 @@ class VideoTaskManager(object):
         self.task_set = set()
         self.data_set = set(('FRAME','LAST_FRAME',))
         self.task_data = defaultdict(dict)
+        self.task_id = 0
         
         self.lastFrameCreated = 0
 
@@ -310,11 +312,12 @@ class VideoTaskManager(object):
                         generated for each call to this task.
         @type profile: True | False
         '''
+        self.task_id += 1
         profile = False
         if kwargs.has_key('profile'):
             profile = kwargs['profile']
             del kwargs['profile']
-        self.task_factories.append((task_factory,args,kwargs,profile))
+        self.task_factories.append((task_factory,args,kwargs,profile,self.task_id))
         
         
     def addFrame(self,frame,ilog=None):
@@ -390,7 +393,7 @@ class VideoTaskManager(object):
             was_added = task.addData(data_item)
             if was_added:
                 # Compute the dataflow
-                self.flow[(data_item.getKey()[0],task.__class__.__name__)].add(data_item.getKey()[1]-task.getFrameId())
+                self.flow[(data_item.getKey()[0],task.task_id)].add(data_item.getKey()[1]-task.getFrameId())
 
             
     def _createTasksForFrame(self,frame_id):
@@ -400,8 +403,9 @@ class VideoTaskManager(object):
         while self.lastFrameCreated < frame_id + self.buffer_size:
             start = time.time()
             count = 0
-            for factory,args,kwargs,profile in self.task_factories:
+            for factory,args,kwargs,profile,task_id in self.task_factories:
                 task = factory(self.lastFrameCreated,*args,**kwargs)
+                task.task_id=task_id
                 task.profile=profile
                 count += 1
 
@@ -444,7 +448,7 @@ class VideoTaskManager(object):
         
         @returns: false if task should be deleted and true otherwise.
         '''
-        self.task_set.add(task.__class__.__name__)
+        self.task_set.add(task.task_id)
 
 
         should_run = False
@@ -492,14 +496,14 @@ class VideoTaskManager(object):
                             
         # Record the dataflow information.
         for each in result:
-            self.flow[(task.__class__.__name__,each[0])].add(0)
+            self.flow[(task.task_id,each[0])].add(0)
             self.data_set.add(each[0])
             
         # Compute the dataflow
         for i in range(len(task.collected_args)):
             if task.collected_args[i]:
                 each = task.processed_args[i]
-                self.flow[(each.getKey()[0],task.__class__.__name__)].add(each.getKey()[1]-task.getFrameId())
+                self.flow[(each.getKey()[0],task.task_id)].add(each.getKey()[1]-task.getFrameId())
                 self.data_set.add(each.getKey()[0])
 
                 
@@ -514,11 +518,12 @@ class VideoTaskManager(object):
             print "TaskManager[INFO]: Evalutate task %s for frame %d. Time=%0.2fms"%(task,task.getFrameId(),stop*1000)
         
         # Compute task statistics
-        if not self.task_data[task.__class__.__name__].has_key('time_sum'):
-            self.task_data[task.__class__.__name__]['time_sum'] = 0.0
-            self.task_data[task.__class__.__name__]['call_count'] = 0
-        self.task_data[task.__class__.__name__]['time_sum'] += stop
-        self.task_data[task.__class__.__name__]['call_count'] += 1
+        if not self.task_data[task.task_id].has_key('time_sum'):
+            self.task_data[task.task_id]['class_name'] = task.__class__.__name__
+            self.task_data[task.task_id]['time_sum'] = 0.0
+            self.task_data[task.task_id]['call_count'] = 0
+        self.task_data[task.task_id]['time_sum'] += stop
+        self.task_data[task.task_id]['call_count'] += 1
         
         # Return false so that the task is deleted.
         return False
@@ -620,9 +625,10 @@ class VideoTaskManager(object):
         # Add task nodes        
         for each in self.task_set:
             if self.task_data[each].has_key('call_count'):
+                class_name = self.task_data[each]['class_name']
                 call_count = self.task_data[each]['call_count']
                 mean_time = self.task_data[each]['time_sum']/call_count
-                node_label = "{" + " | ".join([each,
+                node_label = "{" + " | ".join([class_name,
                                            "Time=%0.2fms"%(mean_time*1000.0,),
                                            "Calls=%d"%(call_count,),
                                            ]) + "}"
