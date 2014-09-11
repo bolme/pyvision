@@ -406,6 +406,8 @@ class VideoTaskManager(object):
             for factory,args,kwargs,profile,task_id in self.task_factories:
                 task = factory(self.lastFrameCreated,*args,**kwargs)
                 task.task_id=task_id
+                self.task_data[task.task_id]['class_name'] = task.__class__.__name__
+
                 task.profile=profile
                 count += 1
 
@@ -515,13 +517,13 @@ class VideoTaskManager(object):
             self.addDataItem(data_item)
         stop = time.time() - start
         if self.debug_level >= 3:
-            print "TaskManager[INFO]: Evalutate task %s for frame %d. Time=%0.2fms"%(task,task.getFrameId(),stop*1000)
+            print "TaskManager[INFO]: Evaluate task %s for frame %d. Time=%0.2fms"%(task,task.getFrameId(),stop*1000)
         
         # Compute task statistics
         if not self.task_data[task.task_id].has_key('time_sum'):
-            self.task_data[task.task_id]['class_name'] = task.__class__.__name__
             self.task_data[task.task_id]['time_sum'] = 0.0
             self.task_data[task.task_id]['call_count'] = 0
+        #self.task_data[task.task_id]['class_name'] = task.__class__.__name__
         self.task_data[task.task_id]['time_sum'] += stop
         self.task_data[task.task_id]['call_count'] += 1
         
@@ -637,7 +639,8 @@ class VideoTaskManager(object):
                 # The task node was never executed
                 call_count = 0
                 mean_time = -1
-                node_label = "{" + " | ".join([each,
+                class_name = self.task_data[each]['class_name']
+                node_label = "{" + " | ".join([class_name,
                                            "Time=%0.2fms"%(mean_time*1000.0,),
                                            "Calls=%d"%(call_count,),
                                            ]) + "}"
