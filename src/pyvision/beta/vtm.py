@@ -12,11 +12,19 @@ import shelve
 
 
 class EmptyData(object):
-    pass
+    def __str__(self):
+        return "<MissingData>"
 
 class DefaultData(object):
     def __init__(self,default):
         self.default = default
+    
+    def __str__(self):
+        tmp = str(self.default)
+        tmp = " ".join(tmp.split()) # Flatten to one line an collapse white space to single spaces
+        if len(tmp) > 40:
+            tmp = tmp[:37] + "..."
+        return "<DefaultData:%s>"%(tmp,)
 
 EMPTY_DATA = EmptyData()
 
@@ -69,18 +77,25 @@ class VideoTask(object):
         '''
         Check to see if the data item is needed for this task.  If it is then keep a reference.
         '''
+        # Compute the key
         key = (data_item.getType(),data_item.getFrameId())
+        
+        # Check if this task needs the data
         if self._arg_map.has_key(key):
             curr_val = self._arg_map[key]
+            
+            # If no default save the data and update counts
             if curr_val == EMPTY_DATA: 
                 self._arg_map[key] = data_item.getData()
                 self._added_args += 1
                 return True
+            
+            # If there is a default replace and update counts
             elif isinstance(curr_val,DefaultData):
                 self._arg_map[key] = data_item.getData()
                 self._added_args += 1
                 self._default_args -= 1
-                assert self._default_args >= 0
+                assert self._default_args >= 0 # This should only fail if there is an error in counting.
                 return True
         return False
             
@@ -100,9 +115,7 @@ class VideoTask(object):
 
         
     def run(self):
-        
-        #assert self.couldRun()
-        
+                
         args = []
         for i in range(len(self.args)):
             each = self.args[i]
@@ -111,14 +124,7 @@ class VideoTask(object):
                 args.append(self._arg_map[key].default)
             else:
                 args.append(self._arg_map[key])
-            
-        #for i in range(len(self.collected_args)):
-        #    if self.collected_args[i]:
-        #        args.append(self.processed_args[i].getData())
-        #    else:
-        #        # Use the default argument
-        #        args.append(self.args[i][2])
-                
+                            
         return self.execute(*args)
     
         
@@ -145,12 +151,18 @@ class VideoTask(object):
     
     def printInfo(self):
         print "VideoTask {%s:%d}"%(self.__class__.__name__,self.getFrameId())
-        for i in range(len(self.collected_args)):
-            if self.collected_args[i]:
-                print "    arg %d -> { %s:%d }"%(i,self.processed_args[i].getType(),self.processed_args[i].getFrameId())
-                
+        for key in self._arg_map.keys():
+            dtype,frame_id = key
+            
+            if self._arg_map[key] is EMPTY_DATA or isinstance(self._arg_map[key],DefaultData):
+                print "    Argument <%s,%d> -> %s"%(dtype,frame_id,str(self._arg_map[key]))
+            
             else:
-                print "    arg %d -> MISSING - %s"%(i,self.args[i])
+                tmp = str(self._arg_map[key])
+                tmp = " ".join(tmp.split()) # Flatten to one line an collapse white space to single spaces
+                if len(tmp) > 40:
+                    tmp = tmp[:37] + "..."
+                print "    Argument <%s,%d> -> %s"%(dtype,frame_id,tmp)    
 
 
 class _VideoDataItem(object):
