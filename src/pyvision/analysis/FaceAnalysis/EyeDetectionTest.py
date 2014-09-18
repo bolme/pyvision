@@ -224,33 +224,33 @@ class EyeDetectionTest:
             
 
     def finish(self):
-            self.face_rate    = float(self.face_successes)/self.faces
-            self.face_ci      = pv.cibinom(self.faces,self.face_successes,alpha=0.05)
-            self.both25_rate  = float(self.both25_successes)/self.faces
-            self.both25_ci    = pv.cibinom(self.faces,self.both25_successes,alpha=0.05)
-            self.both10_rate  = float(self.both10_successes)/self.faces
-            self.both10_ci    = pv.cibinom(self.faces,self.both10_successes,alpha=0.05)
-            self.both05_rate  = float(self.both05_successes)/self.faces
-            self.both05_ci    = pv.cibinom(self.faces,self.both05_successes,alpha=0.05)
-            self.left25_rate  = float(self.left25_successes)/self.faces
-            self.left25_ci    = pv.cibinom(self.faces,self.left25_successes,alpha=0.05)
-            self.left10_rate  = float(self.left10_successes)/self.faces
-            self.left10_ci    = pv.cibinom(self.faces,self.left10_successes,alpha=0.05)
-            self.left05_rate  = float(self.left05_successes)/self.faces
-            self.left05_ci    = pv.cibinom(self.faces,self.left05_successes,alpha=0.05)
-            self.right25_rate  = float(self.right25_successes)/self.faces
-            self.right25_ci    = pv.cibinom(self.faces,self.right25_successes,alpha=0.05)
-            self.right10_rate  = float(self.right10_successes)/self.faces
-            self.right10_ci    = pv.cibinom(self.faces,self.right10_successes,alpha=0.05)
-            self.right05_rate  = float(self.right05_successes)/self.faces
-            self.right05_ci    = pv.cibinom(self.faces,self.right05_successes,alpha=0.05)
-            if self.face_successes > 0:
-                self.bothrmse = math.sqrt(self.bothsse/(2*self.face_successes))
-                self.leftrmse = math.sqrt(self.leftsse/self.face_successes)
-                self.rightrmse = math.sqrt(self.rightsse/self.face_successes)
-            self.elapse_time  = self.stop_time - self.start_time
-            self.time_per_image = self.elapse_time / self.images
-            self.time_per_face  = self.elapse_time / self.faces
+        self.face_rate    = float(self.face_successes)/self.faces
+        self.face_ci      = pv.cibinom(self.faces,self.face_successes,alpha=0.05)
+        self.both25_rate  = float(self.both25_successes)/self.faces
+        self.both25_ci    = pv.cibinom(self.faces,self.both25_successes,alpha=0.05)
+        self.both10_rate  = float(self.both10_successes)/self.faces
+        self.both10_ci    = pv.cibinom(self.faces,self.both10_successes,alpha=0.05)
+        self.both05_rate  = float(self.both05_successes)/self.faces
+        self.both05_ci    = pv.cibinom(self.faces,self.both05_successes,alpha=0.05)
+        self.left25_rate  = float(self.left25_successes)/self.faces
+        self.left25_ci    = pv.cibinom(self.faces,self.left25_successes,alpha=0.05)
+        self.left10_rate  = float(self.left10_successes)/self.faces
+        self.left10_ci    = pv.cibinom(self.faces,self.left10_successes,alpha=0.05)
+        self.left05_rate  = float(self.left05_successes)/self.faces
+        self.left05_ci    = pv.cibinom(self.faces,self.left05_successes,alpha=0.05)
+        self.right25_rate  = float(self.right25_successes)/self.faces
+        self.right25_ci    = pv.cibinom(self.faces,self.right25_successes,alpha=0.05)
+        self.right10_rate  = float(self.right10_successes)/self.faces
+        self.right10_ci    = pv.cibinom(self.faces,self.right10_successes,alpha=0.05)
+        self.right05_rate  = float(self.right05_successes)/self.faces
+        self.right05_ci    = pv.cibinom(self.faces,self.right05_successes,alpha=0.05)
+        if self.face_successes > 0:
+            self.bothrmse = math.sqrt(self.bothsse/(2*self.face_successes))
+            self.leftrmse = math.sqrt(self.leftsse/self.face_successes)
+            self.rightrmse = math.sqrt(self.rightsse/self.face_successes)
+        self.elapse_time  = self.stop_time - self.start_time
+        self.time_per_image = self.elapse_time / self.images
+        self.time_per_face  = self.elapse_time / self.faces
                 
 
         
