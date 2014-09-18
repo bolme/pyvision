@@ -68,6 +68,9 @@ class StatsModelWrapper(object):
         for key,value in state.iteritems():
             if key not in ('model_data','model_class'):
                 setattr(self,key,value)
+                
+    def save(self,*args,**kwargs):
+        self.model.save(*args,**kwargs)
 
 
 def svc_rbf(data,responses):
