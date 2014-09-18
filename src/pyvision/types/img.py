@@ -1043,6 +1043,7 @@ class Image:
         @param scale: a float indicating the scale factor
         @returns: a new pyvision image that is the scaled version of this image.
         ''' 
+        assert scale > 0.0
         w,h = self.size
         new_size = (int(round(scale*w)),int(round(scale*h)))
         return self.resize(new_size)
