@@ -39,6 +39,12 @@ class VideoTask(object):
         '''
         self.frame_id = frame_id
         self.args = args
+        
+        self.label = self.__class__.__name__
+        if not hasattr(self,'subgraph'):
+            self.subgraph = None
+        if not hasattr(self,'color'):
+            self.color = None
 
         self._arg_map = {}
         self._added_args = 0 # keep track of how many arguments have been found.
@@ -269,7 +275,7 @@ class VideoTaskManager(object):
         # Initialize information for flow analysis.
         self.flow = defaultdict(set)
         self.task_set = set()
-        self.data_set = set(('FRAME','LAST_FRAME',))
+        self.data_set = set((('FRAME',None),('LAST_FRAME',None),))
         self.task_data = defaultdict(dict)
         
         self.lastFrameCreated = 0
@@ -340,7 +346,7 @@ class VideoTaskManager(object):
             for each in data_items:
                 if self.playback_filter==None or each.getType() in self.playback_filter:
                     self.addDataItem(each)
-                    self.data_set.add(each.getKey()[0])
+                    self.data_set.add((each.getKey()[0],None))
                     self.flow[('Playback',each.getType())].add(0)
                     
         # Run any tasks that can be completed with the current data.
@@ -370,7 +376,7 @@ class VideoTaskManager(object):
             data = _VideoDataItem((each[0],self.frame_id,each[1]))
             self.addDataItem(data)
             self.flow[('Data Input',data.getType())].add(0)
-            self.data_set.add(data.getKey()[0])
+            self.data_set.add(data.getKey()[0],None)
 
 
         
@@ -493,14 +499,14 @@ class VideoTaskManager(object):
         # Record the dataflow information.
         for each in result:
             self.flow[(task.__class__.__name__,each[0])].add(0)
-            self.data_set.add(each[0])
+            self.data_set.add((each[0],task.subgraph))
             
         # Compute the dataflow
         for i in range(len(task.collected_args)):
             if task.collected_args[i]:
                 each = task.processed_args[i]
                 self.flow[(each.getKey()[0],task.__class__.__name__)].add(each.getKey()[1]-task.getFrameId())
-                self.data_set.add(each.getKey()[0])
+                self.data_set.add((each.getKey()[0],task.subgraph))
 
                 
         # Add the data to the cache.
@@ -519,6 +525,8 @@ class VideoTaskManager(object):
             self.task_data[task.__class__.__name__]['call_count'] = 0
         self.task_data[task.__class__.__name__]['time_sum'] += stop
         self.task_data[task.__class__.__name__]['call_count'] += 1
+        self.task_data[task.__class__.__name__]['color'] = task.color
+        self.task_data[task.__class__.__name__]['subgraph'] = task.subgraph
         
         # Return false so that the task is deleted.
         return False
@@ -608,7 +616,7 @@ class VideoTaskManager(object):
             return '{''}'
             
         # Create the graph.
-        graph = pydot.Dot(graph_type='digraph')
+        graph = pydot.Dot(graph_type='digraph',nodesep=.3,ranksep=.5)
         graph.add_node(pydot.Node("Data Input",shape='invhouse',style='filled',fillcolor='#ffCC99'))
         graph.add_node(pydot.Node("Video Input",shape='invhouse',style='filled',fillcolor='#ffCC99'))
         graph.add_edge(pydot.Edge("Video Input","FRAME"))
@@ -617,6 +625,8 @@ class VideoTaskManager(object):
         if self.playback_shelf != None:
             graph.add_node(pydot.Node("Playback",shape='invhouse',style='filled',fillcolor='#ffCC99'))
 
+        subgraphs = {None:graph}
+        
         # Add task nodes        
         for each in self.task_set:
             if self.task_data[each].has_key('call_count'):
@@ -626,7 +636,20 @@ class VideoTaskManager(object):
                                            "Time=%0.2fms"%(mean_time*1000.0,),
                                            "Calls=%d"%(call_count,),
                                            ]) + "}"
-                graph.add_node(pydot.Node(each,label=node_label,shape='record',style='filled',fillcolor='#99CC99'))
+                color = '#99CC99'
+                print each, self.task_data[each]
+                if self.task_data[each]['color'] is not None:
+                    color = self.task_data[each]['color']
+                subgraph = self.task_data[each]['subgraph']
+                subgraph_name = subgraph
+                if subgraph_name != None:
+                    subgraph_name = "_".join(subgraph.split())
+                if not subgraphs.has_key(subgraph):
+                    print "adding subgraph",subgraph
+                    subgraphs[subgraph_name] = pydot.Cluster(subgraph_name,label=subgraph,shape='box',style='filled',fillcolor='#DDDDDD',nodesep=1.0) 
+                    subgraphs[None].add_subgraph(subgraphs[subgraph_name])
+                print "adding node",each,subgraph
+                subgraphs[subgraph_name].add_node(pydot.Node(each,label=node_label,shape='record',style='filled',fillcolor=color))
             else:
                 # The task node was never executed
                 call_count = 0
@@ -638,8 +661,11 @@ class VideoTaskManager(object):
                 graph.add_node(pydot.Node(each,label=node_label,shape='record',style='filled',fillcolor='#CC3333'))
 
         # Add Data Nodes
-        for each in self.data_set:
-            graph.add_node(pydot.Node(each,shape='box',style='rounded, filled',fillcolor='#9999ff'))
+        for each,subgraph in self.data_set:
+            subgraph_name = subgraph
+            if subgraph_name != None:
+                subgraph_name = "_".join(subgraph.split())
+            subgraphs[subgraph_name].add_node(pydot.Node(each,shape='box',style='rounded, filled',fillcolor='#9999ff'))
             
         # Add edges.
         for each,offsets in self.flow.iteritems():
