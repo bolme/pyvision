@@ -242,6 +242,13 @@ def capturePointsFromMouse(im,*args,**kwargs):
     space bar.
     
     @param im: An image to display.
+    @param default_points: Some default points to display.
+    @type default_points: list of pv.Point
+    @type default_points: list
+    @param keep_window_open: keep the window open after point were captured
+    @type True|False
+    @param window: The name of the window
+    @type window: string
     @returns: a list of points that were clicked by the user.
     '''
     if isinstance(im, pv.Image):
