@@ -349,10 +349,10 @@ class VideoTaskManager(object):
         start = time.time()
         
         frame_data = _VideoDataItem(("FRAME",self.frame_id,frame))
+        self._createTasksForFrame(self.frame_id)
         self.addDataItem(frame_data)
         last_data = _VideoDataItem(("LAST_FRAME",self.frame_id-1,False))
         self.addDataItem(last_data)
-        self._createTasksForFrame(self.frame_id)
         self.frame_list.append(frame_data)
         
         # Playback the recording
