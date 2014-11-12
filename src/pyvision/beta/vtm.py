@@ -391,7 +391,7 @@ class VideoTaskManager(object):
             data = _VideoDataItem((each[0],self.frame_id,each[1]))
             self.addDataItem(data)
             self.flow[('Data Input',data.getType())].add(0)
-            self.data_set.add(data.getKey()[0],None)
+            self.data_set.add((data.getKey()[0],None))
 
 
         
