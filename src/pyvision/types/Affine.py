@@ -280,19 +280,19 @@ def AffineFromPointsLS(src,dst,new_size,interpolate=BILINEAR, normalize=True):
     A = []
     b = []
     for i in range(len(src)):
-        A.append([src[i].X(),-src[i].Y(),src[i].Y(),0,1,0])
+        A.append([src[i].X(),-src[i].Y(),1,0])
         A.append([src[i].Y(), src[i].X(),0,1])
         b.append(dst[i].X())
         b.append(dst[i].Y())
          
-    A = array(A)
-    b = array(b)
-        
+    A = array(A,dtype=np.float64)
+    b = array(b,dtype=np.float64)
+            
     result,_,_,_ = lstsq(A,b)
     
-    a,b,c,d,tx,ty = result    
+    a,b,tx,ty = result    
     # Create the transform matrix
-    matrix = array([[a,-b+c,tx],[b+d,a,ty],[0,0,1]],'d')
+    matrix = array([[a,-b,tx],[b,a,ty],[0,0,1]],'d')
     
     if normalize:
         matrix = dot(dst_norm.inverse,dot(matrix,src_norm.matrix))
