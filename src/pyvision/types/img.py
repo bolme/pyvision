@@ -1021,7 +1021,7 @@ class Image:
         return self.scale(s)
 
     
-    def resize(self, newSize):
+    def resize(self, newSize, **kwargs):
         ''' Returns a resized version of the image. This is a convenience function.
         For more control, look at the Affine class for arbitrary transformations.
         @param newSize: tuple (new_width, new_height)
@@ -1035,7 +1035,7 @@ class Image:
             #use bicubic interpolation
             tmp = tmp.resize(newSize, BICUBIC)
 
-        return pyvision.Image(tmp)
+        return pyvision.Image(tmp,**kwargs)
     
     def scale(self, scale):
         ''' Returns a scaled version of the image. This is a convenience function.
