@@ -307,6 +307,11 @@ class Video(VideoInterface):
         frame = cv.CloneImage(frame);
         return pv.Image(self.resize(frame))
     
+    def setFrame(self,n):
+        assert n >= 0 and n <= 1
+        cv.SetCaptureProperty(self.cv_capture, cv.CV_CAP_PROP_POS_AVI_RATIO, float(n))
+        
+    
     def __iter__(self):
         ''' Return an iterator for this video '''
         return Video(self.filename,self.size)
@@ -434,6 +439,8 @@ class VideoFromDirectory(VideoInterface):
         ''' Return an iterator for this video '''
         return VideoFromDirectory(self._dirname, self._order, self._limit, self._size) 
     
+    def __len__(self):
+        return len(self._image_paths)
         
 class VideoFromImages(VideoInterface):
     '''
@@ -516,14 +523,14 @@ class VideoFromImages(VideoInterface):
 class VideoFromImageStack(VideoInterface):
     '''
     This class allows the user to treat a stack of grayscale images in a 3D numpy array as a video.
-	We assume that the dimensions of the array are ordered as (frame #, width, height)
+	We assume that the dimensions of the array are ordered as (frame number, width, height).
     '''
     def __init__(self, imageStack, size=None):
         '''
-	    @param imageStack: The numpy ndarray that represents the image stack. Should be of dimensions (frames,width,height).
+	    imageStack is the numpy ndarray that represents the image stack. Should be of dimensions (frames,width,height).
 	    Optionally, this can be any object, such as pyvision.ImageBuffer, that implements asStackBW() method that returns
 	    the grayscale image stack.
-        @param size: the optional width,height to resize the input frames
+        size is the optional width,height to resize the input frames.
         '''
         if str( type(imageStack) ) == "<type 'instance'>":
             self.imageStack = imageStack.asStackBW()
