@@ -81,21 +81,23 @@ class FaceDetectorVT(vtm.VideoTask):
 def runChangeDetectionExample():
     video = pv.Video(pv.BUGS_VIDEO)
     
-    vtm = vtm.VideoTaskManager(buffer_size=2,debug_level=2)
+    vtm = pv.VideoTaskManager(buffer_size=2,debug_level=2)
     vtm.addTaskFactory(ChangeDetectionVT)
     vtm.addTaskFactory(ChangeDetectionAnnotationVT)
     
     for frame in video:
         vtm.addFrame(frame)
+        frame.show(delay=30)
 
 def runFaceDetectionExample():
     video = pv.Webcam()
     
-    vtm = vtm.VideoTaskManager(buffer_size=2,debug_level=3)
+    vtm = pv.VideoTaskManager(buffer_size=2,debug_level=3)
     vtm.addTaskFactory(FaceDetectorVT)
     
     for frame in video:
         vtm.addFrame(frame)
+        frame.show(delay=1)
 
 if __name__ == '__main__':
     #runChangeDetectionExample()
