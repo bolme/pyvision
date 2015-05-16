@@ -83,7 +83,7 @@ def dataToFormatedList(data):
 
 class Label:
     def __init__(self,point,label,size='small',align='center',rotate=False,color='black'):
-        self.point = point
+        self.point = point[:2]
         self.label = label
         self.size = size
         self.align = align
@@ -561,7 +561,7 @@ class Plot:
     def show(self,**kwargs):
         self.asImage().show(**kwargs)
         
-    def asR(self,plot_pdf=os.getcwd()+"out.pdf"):
+    def asR(self,plot_pdf=os.getcwd()+"/out.pdf"):
         '''
         Generate an R script that will reproduce this plot.
         '''
