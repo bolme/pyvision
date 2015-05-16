@@ -368,6 +368,16 @@ def inspectObject(item,name='<top>',max_depth=5,verbose=False,print_depth=0,info
         info[i,'error'] = "Could not process this object."    
     return info
 
+def numpy2r(mat):
+    '''
+    Convert a matrix into a string that can be executed in R.
+    '''
+    num_rows = mat.shape[0]
+    data = mat.T.flatten()
+    data = ["%f"%each for each in data]
+    data = "c(" + ",".join(data) + ")"
+    return "matrix(%s,%d)"%(data,num_rows)
+
 def isImage(filename):
     '''
     Determines if the filename corresponds to a known image extension.
