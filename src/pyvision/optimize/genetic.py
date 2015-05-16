@@ -770,6 +770,7 @@ class GeneticAlgorithm:
         self.history = []
         self.iter = 0
         
+        
     def list_random(self,args):
         for i in range(len(args)):
             if isinstance(args[i],GAVariable):
@@ -874,7 +875,7 @@ class GeneticAlgorithm:
         return args
     
     
-    def addIndividual(self,score,args,kwargs,ilog=None):
+    def addIndividual(self,score,args,kwargs,ilog=None,display=False):
         # This try block allows multiple values to be returned by the fitness function. 
         # Everything except the score will be stored in extra and should be picklible.
         extras = []
@@ -922,15 +923,19 @@ class GeneticAlgorithm:
                 else:
                     ilog.pickle(extra,"extra_%02d_%0.8f"%(i,score))
                 
-            if self.iter % 25 == 0:
-                plot = pv.Plot(title="Population Statistics",xlabel="Iteration",ylabel="Score")
-                data = [ [i,self.bests[i]] for i in range(len(self.bests)) ]
-                plot.lines(data,width=3,color='green')
-                data = [ [i,self.history[i]] for i in range(len(self.bests)) ]
-                plot.points(data,shape=16,color='blue',size=2)
-                data = [ [i,self.worsts[i]] for i in range(len(self.bests)) ]
-                plot.lines(data,width=3,color='red')
+        if self.iter % 64 == 0 and (display or ilog is not None):
+            plot = self.plotConvergence()
+            #pv.Plot(title="Population Statistics",xlabel="Iteration",ylabel="Score")
+            #data = [ [i,self.bests[i]] for i in range(len(self.bests)) ]
+            #plot.lines(data,width=3,color='green')
+            #data = [ [i,self.history[i]] for i in range(len(self.bests)) ]
+            #plot.points(data,shape=16,color='blue',size=2)
+            #data = [ [i,self.worsts[i]] for i in range(len(self.bests)) ]
+            #plot.lines(data,width=3,color='red')
+            if ilog is not None:
                 ilog(plot,"PopulationData")
+            if display:
+                plot.show(delay=1,window="Convergence")
     
 
     def printPopulation(self):
@@ -943,15 +948,26 @@ class GeneticAlgorithm:
         print
         print
         
+    def plotConvergence(self):
+        plot = pv.Plot(title="Population Statistics",xlabel="Iteration",ylabel="Score")
+        data = [ [i,self.bests[i]] for i in range(len(self.bests)) ]
+        plot.lines(data,width=3,color='green')
+        data = [ [i,self.history[i]] for i in range(len(self.bests)) ]
+        plot.points(data,shape=16,color='blue',size=2)
+        data = [ [i,self.worsts[i]] for i in range(len(self.bests)) ]
+        plot.lines(data,width=3,color='red')
+        return plot
+        
+        
     
-    def optimize(self,max_iter=1000,callback=None,ilog=None,restart_dir=None):
+    def optimize(self,max_iter=1000,callback=None,ilog=None,restart_dir=None,display=False):
         '''
         @returns: best_score, args, kwargs
         '''
         
         # Create worker process pool
         if self.n_processes > 1: 
-            print "Init Params:",self.initializer, self.initargs
+            print "Init Params (%d cores):"%self.n_processes,self.initializer, self.initargs
             pool = mp.Pool(self.n_processes,initializer=self.initializer,initargs=self.initargs)    
             
         # Initialize the population with random members
@@ -965,12 +981,12 @@ class GeneticAlgorithm:
             for i in range(len(scores)):
                 score = scores[i]
                 _,args,kwargs = work[i]
-                self.addIndividual(score,args,kwargs,ilog=ilog)
+                self.addIndividual(score,args,kwargs,ilog=ilog,display=display)
         else:
             for each in work:
                 score = _gaWork(each)
                 _,args,kwargs = each
-                self.addIndividual(score,args,kwargs,ilog=ilog)
+                self.addIndividual(score,args,kwargs,ilog=ilog,display=display)
                 
         if len(self.population) < 2:
             raise ValueError("Could not initialize population.")
@@ -998,12 +1014,12 @@ class GeneticAlgorithm:
                 for i in range(len(scores)):
                     score = scores[i]
                     _,args,kwargs = work[i]
-                    self.addIndividual(score,args,kwargs,ilog=ilog)
+                    self.addIndividual(score,args,kwargs,ilog=ilog,display=display)
             else:
                 for each in work:
                     score = _gaWork(each)
                     _,args,kwargs = each
-                    self.addIndividual(score,args,kwargs,ilog=ilog)
+                    self.addIndividual(score,args,kwargs,ilog=ilog,display=display)
 
             if callback != None:
                 callback(self.population)
