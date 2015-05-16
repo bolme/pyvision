@@ -20,17 +20,23 @@ def prcomp(data,center=True,scale=False):
     '''
     data = data.copy()
     r,c = data.shape
+    ddof = 0
     
     # center the data 
     if center:
+        ddof = 1
         ctr = data.mean(axis=0).reshape(1,c)
         data = data - ctr 
     
     # scale the data
     if scale:
-        scl = data.std(axis=0,ddof=1).reshape(1,c)
+        n = data.shape[0]
+        #print 'scale', np.sqrt((data*data).sum(axis=0)/(n-1))
+        scl = np.sqrt((data*data).sum(axis=0)/(n-1))
+        #scl = data.std(axis=0,ddof=2).reshape(1,c)
+        #print 'scale',scl
         data = data/scl 
-        
+        #print 'var:',data.var(axis=0,ddof=0)
     # decompose the data using svd
     _,val,vt = la.svd(data,full_matrices=False)
 
