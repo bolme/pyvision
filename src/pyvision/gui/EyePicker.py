@@ -325,11 +325,17 @@ class EyePickerFrame(wx.Frame):
         
 
 if __name__ == '__main__':
-    app = wx.PySimpleApp()
-    dir_dialog = wx.DirDialog(None, message = "Please select a directory that contains images.")
-    dir_dialog.ShowModal()
-    image_dir = dir_dialog.GetPath()
+    app = wx.App(False)
     
+    dir_dialog = wx.DirDialog(None, message = "Please select a directory that contains images.")
+    err = dir_dialog.ShowModal()
+    image_dir = '.'
+    if(err == wx.ID_OK):
+        image_dir = dir_dialog.GetPath()
+    else:
+        print "Error getting path:",err
+    
+    print "Image Dir",image_dir
     scale = 1.0
         
     frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=None,randomize=True,scale=scale)
