@@ -538,6 +538,8 @@ class _VersionTest(unittest.TestCase):
         #             or major == rmajor and minor == rminor and sub >= sub)
         self.assert_(True)        
         
+
+        
 def test():
     disableCommercialUseWarnings()
     
@@ -546,8 +548,9 @@ def test():
     from pyvision.types.Affine import _AffineTest
     affine_suite = unittest.TestLoader().loadTestsFromTestCase(_AffineTest)
     
-    from pyvision.types.testsuite import _TestImage
-    image_suite = unittest.TestLoader().loadTestsFromTestCase(_TestImage)
+    from pyvision.testsuite.image_tests import TestImage, TestVideo
+    image_suite = unittest.TestLoader().loadTestsFromTestCase(TestImage)
+    video_suite = unittest.TestLoader().loadTestsFromTestCase(TestVideo)
 
     from pyvision.vector.VectorClassifier import _TestVectorClassifier
     vc_suite = unittest.TestLoader().loadTestsFromTestCase(_TestVectorClassifier)
@@ -612,6 +615,7 @@ def test():
                    version_suite,
                    affine_suite,
                    image_suite,
+                   video_suite,
                    vc_suite,
                    #svm_suite, #TODO: uncomment
                    poly_suite,

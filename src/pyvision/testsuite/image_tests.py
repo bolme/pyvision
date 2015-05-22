@@ -20,7 +20,7 @@ BUGS_VIDEO = os.path.join(pv.__path__[0],'data','test','BugsSample.m4v')
 TAZ_VIDEO = os.path.join(pv.__path__[0],'data','test','TazSample.m4v')
 TOYCAR_VIDEO = os.path.join(pv.__path__[0],'data','test','toy_car.m4v')
 
-class _TestImage(unittest.TestCase):
+class TestImage(unittest.TestCase):
     
     def setUp(self):
         # Assume these work correctly
@@ -224,7 +224,7 @@ class _TestImage(unittest.TestCase):
 
 
 
-class _TestVideo(unittest.TestCase):
+class TestVideo(unittest.TestCase):
     '''Tests for the video class.'''
 
 

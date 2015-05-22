@@ -432,10 +432,10 @@ class _TestFilterEyeLocator(unittest.TestCase):
             edt.addSample(truth_eyes, pred_eyes, im=im, annotate=False)
         
         edt.createSummary()
-        self.assertAlmostEqual( edt.face_rate ,   0.97109826589595372, places = 3 ) # Updated numbers for OpenCV 2.0
-        self.assertAlmostEqual( edt.both25_rate , 0.82658959537572252, places = 3 )
-        self.assertAlmostEqual( edt.both10_rate , 0.47976878612716761, places = 3 )
-        self.assertAlmostEqual( edt.both05_rate , 0.30635838150289019, places = 3 )
+        self.assertAlmostEqual( edt.face_rate ,   0.97109826589595372, delta = 0.01 ) # Updated numbers for OpenCV 2.0
+        self.assertAlmostEqual( edt.both25_rate , 0.82658959537572252, delta = 0.01 )
+        self.assertAlmostEqual( edt.both10_rate , 0.47976878612716761, delta = 0.01 )
+        self.assertAlmostEqual( edt.both05_rate , 0.30635838150289019, delta = 0.01 )
 
         
     

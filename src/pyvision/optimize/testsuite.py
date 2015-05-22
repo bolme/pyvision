@@ -16,17 +16,12 @@ import random
 def callback(population):
     plot = pv.Plot(x_range=[0,10],y_range=[0,10])
     pts = [ [each[1][0].value,each[1][1].value] for each in population ]
-    #pts = [ pv.Point(each[1][0],each[1][1]) for each in population ]
-    #print pts
     plot.points(pts)
-    plot.show(delay=10)
-    #for each in population:
-    #    plot.point(each[1])
+    #plot.show(delay=1)
 
 def unitRectCallback(population):
     if random.random() < 0.05:
         return
-    #print "Score:",population[0][0]
     im = pv.Image(np.zeros((1000,1000),dtype=np.float32))
     for each in population:
         rect = each[1][0].generate()
@@ -35,7 +30,7 @@ def unitRectCallback(population):
     im.annotatePolygon((1000*rect).asPolygon(),color='green',width=3)
     target_rect = pv.CenteredRect(.33385,.69348,.3482,.55283)
     im.annotatePolygon((1000*target_rect).asPolygon(),color='white',width=3)
-    im.show(delay=1)
+    #im.show(delay=1)
 
 class Fitness:
     '''

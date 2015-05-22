@@ -92,8 +92,8 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
     #error,count,inliers = computeErrorAndCount(A,b,bestx,group,tol)
     inliers = bestinliers
     for _ in xrange(10):
-        ty = b[inliers,:]
-        tX = A[inliers,:]
+        ty = b[inliers.flatten(),:]
+        tX = A[inliers.flatten(),:]
         try:
             x = np.linalg.lstsq(tX,ty)[0]        
         except:

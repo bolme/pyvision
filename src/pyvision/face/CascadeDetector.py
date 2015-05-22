@@ -377,34 +377,7 @@ class _TestCascadeDetector(unittest.TestCase):
             fdt.addSample(truth,rects,im=img)
 
         self.assertAlmostEqual( fdt.pos_rate , 0.98265895953757221, places = 2 ) # TODO: Version 2 performance is better
-        
-    def test_detect_scraps_celeb1(self):
-        fd = CascadeDetector(CELEB1_CASCADE)
-        fdt = FaceDetectionTest(name='scraps')
-
-        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
-        for filename in self.eyes.files():
-            img = pv.Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
-            rects = fd(img)
-            truth = self.eyes.getFaces(img.filename)
-            fdt.addSample(truth,rects,im=img)
-
-        self.assertAlmostEqual( fdt.pos_rate , 0.76878612716763006, places = 2 ) # TODO: Version 2 performance is better
-        
-    def test_detect_scraps_celeb2(self):
-        
-        fd = CascadeDetector(CELEB2_CASCADE)
-        fdt = FaceDetectionTest(name='scraps')
-        
-        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
-        for filename in self.eyes.files():
-            img = pv.Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
-            rects = fd(img)
-            truth = self.eyes.getFaces(img.filename)
-            fdt.addSample(truth,rects,im=img)
-
-        self.assertAlmostEqual( fdt.pos_rate , 0.925, places = 2 )
-  
+          
 
     def donttest_detector_train(self): # TODO: Cascade training fails for Version OpenCV 2.0
 

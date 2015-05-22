@@ -126,7 +126,7 @@ class _PolyTest(unittest.TestCase):
             for y in range(-8,9):
                 val  = -5 + 3*y + 2*x - 4*y*y + 2*y*x+ x*x
                 pred = poly.predict([x,y])
-                self.assert_(abs(val - pred) < 0.0001)
+                self.assertAlmostEqual(val,pred,delta=0.0001)
 
 
 

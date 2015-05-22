@@ -96,7 +96,7 @@ class _TestNormalize(unittest.TestCase):
             
         mat = norm.asMatrix2D()
         self.assertAlmostEqual(mat.mean(),0.0,places=4)
-        self.assertAlmostEqual(mat.std(),12.090113839874826,places=3)
+        self.assertAlmostEqual(mat.std(),12.090113839874826,delta=0.01)
 
     def test_5_lowPass(self):
         '''lowPassFilter Normalization: ....................................'''
@@ -110,8 +110,8 @@ class _TestNormalize(unittest.TestCase):
             ilog.log(norm,label="lowPass_Normalization")
             
         mat = norm.asMatrix2D()
-        self.assertAlmostEqual(mat.mean(),123.69997406005859,places=3)
-        self.assertAlmostEqual(mat.std(),36.886999835117216,places=3)
+        self.assertAlmostEqual(mat.mean(),123.69997406005859,delta=0.01)
+        self.assertAlmostEqual(mat.std(),36.886999835117216,delta=0.01)
 
     def test_6_highPass(self):
         '''highPassFilter Normalization: ...................................'''
@@ -125,8 +125,8 @@ class _TestNormalize(unittest.TestCase):
             ilog.log(norm,label="highPass_Normalization")
             
         mat = norm.asMatrix2D()
-        self.assertAlmostEqual(mat.mean(),0.0,places=4)
-        self.assertAlmostEqual(mat.std(),22.936873341661158,places=3)
+        self.assertAlmostEqual(mat.mean(),0.0,delta=0.001)
+        self.assertAlmostEqual(mat.std(),22.936873341661158,delta=0.01)
 
     def test_7_veryHighPass(self):
         '''highPassFilter Normalization: sigma = 1.5........................'''
@@ -141,8 +141,8 @@ class _TestNormalize(unittest.TestCase):
             ilog.log(norm,label="veryHighPass_Normalization")
             
         mat = norm.asMatrix2D()
-        self.assertAlmostEqual(mat.mean(),0.0,places=4)
-        self.assertAlmostEqual(mat.std(),8.0027218003238687,places=3)
+        self.assertAlmostEqual(mat.mean(),0.0,delta=4)
+        self.assertAlmostEqual(mat.std(),8.0027218003238687,delta=0.01)
 
     def test_8_selfQuotient(self):
         '''selfQuotient Normalization: .....................................'''
@@ -156,8 +156,8 @@ class _TestNormalize(unittest.TestCase):
             ilog.log(norm,label="selfQuotient_Normalization")
             
         mat = norm.asMatrix2D()
-        self.assertAlmostEqual(mat.mean(),0.98861616849899292,places=3)
-        self.assertAlmostEqual(mat.std(),0.1647989569275968,places=3)
+        self.assertAlmostEqual(mat.mean(),0.98861616849899292,delta=0.001)
+        self.assertAlmostEqual(mat.std(),0.1647989569275968,delta=0.001)
 
 
 
