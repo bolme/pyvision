@@ -77,8 +77,8 @@ def svc_rbf(data,responses):
     '''
     Auto trains an OpenCV SVM.
     '''
-    np.float32(data)
-    np.float32(responses) 
+    data = np.float32(data)
+    responses = np.float32(responses) 
     params = dict( kernel_type = cv2.SVM_RBF, svm_type = cv2.SVM_C_SVC )
     model = cv2.SVM()
     model.train_auto(data,responses,None,None,params)

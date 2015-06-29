@@ -35,6 +35,9 @@ def prcomp(data,center=True,scale=False):
         scl = np.sqrt((data*data).sum(axis=0)/(n-1))
         #scl = data.std(axis=0,ddof=2).reshape(1,c)
         #print 'scale',scl
+        scl[scl == 0.0] = 1.0
+        
+        #print scl
         data = data/scl 
         #print 'var:',data.var(axis=0,ddof=0)
     # decompose the data using svd
