@@ -225,7 +225,7 @@ from analysis.gui_tools import capturePointsFromMouse
 
 from pyvision.face import REDUCED_LEYE, REDUCED_REYE, REDUCED_SIZE
 
-from pyvision.types.kinect import Kinect
+# Removed for opencv 3 from pyvision.types.kinect import Kinect
 
 from pyvision.surveillance.kalman import KalmanFilter
 

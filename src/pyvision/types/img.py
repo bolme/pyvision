@@ -46,7 +46,7 @@ import PIL.ImageFont as ImageFont
 # Imaging imports
 import numpy
 import numpy as np
-import cv
+#import cv
 import cv2
 import pyvision
 import pyvision as pv

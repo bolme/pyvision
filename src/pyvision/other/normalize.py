@@ -36,7 +36,7 @@
 import scipy.ndimage as ndi
 import numpy as np
 import pyvision as pv
-import cv
+import cv2
 
 def normalizeMeanStd(matrix):
     ''' TODO: deprecated please use meanStd.'''

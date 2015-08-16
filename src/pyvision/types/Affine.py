@@ -58,7 +58,6 @@ import random
 import pyvision
 import pyvision as pv
 import numpy as np
-import cv
 import cv2
 
 from pyvision.types.img import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_MATRIX_RGB, TYPE_OPENCV, TYPE_OPENCV2, TYPE_OPENCV2BW

@@ -49,7 +49,7 @@ import numpy as np
 #import scipy as sp
 import scipy.io as spio
 import pyvision as pv
-import pyvision.analysis.roc as roc
+import roc
 import gzip
 
 BIOMETRIC_SIGNATURE = '{http://www.bee-biometrics.org/schemas/sigset/0.1}biometric-signature'

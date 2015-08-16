@@ -37,7 +37,7 @@ Created on Jan 11, 2011
 '''
 
 import pyvision as pv
-import cv
+import cv2
 import numpy as np
 
 HIST_HS = "HIST_HS"

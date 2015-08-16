@@ -5,7 +5,7 @@ Created on Feb 2, 2011
 '''
 
 #import pyvision as pv
-import cv
+import cv2
 
 def surf(im,mask=None,extended=False,hessianThreshold=500, nOctaves=3, nOctaveLayers=4):
     '''

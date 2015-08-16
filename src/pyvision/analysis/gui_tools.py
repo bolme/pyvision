@@ -38,7 +38,7 @@ Created on Oct 31, 2011
 '''
 
 import pyvision as pv
-import cv
+import cv2
 import PIL.Image as pil
 
 def null_callback(*args,**kwargs):
@@ -227,7 +227,7 @@ class CaptureClicksVideo:
         '''
         Call back function for mouse events.
         '''
-        if event in [cv.CV_EVENT_LBUTTONDOWN]:
+        if event in [cv2.CV_EVENT_LBUTTONDOWN]:
             if not self.points.has_key(self.frame):
                 self.points[self.frame] = []
             points = self.points[self.frame]
