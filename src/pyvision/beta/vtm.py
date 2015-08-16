@@ -422,7 +422,19 @@ class VideoTaskManager(object):
             start = time.time()
             count = 0
             for factory,args,kwargs,profile,task_id in self.task_factories:
+                display_vars = ['display_color','display_subgraph']
+                display_options = {k:v for (k,v) in kwargs.iteritems() if k in display_vars}
+                kwargs = {k:v for (k,v) in kwargs.iteritems() if k not in display_vars}
                 task = factory(self.lastFrameCreated,*args,**kwargs)
+                
+                # Setup Graph Display Options
+                if display_options.has_key('display_color'):
+                    print 'setting color',display_options['display_color']
+                    task.color = display_options['display_color']
+                if display_options.has_key('display_subgraph'):
+                    print 'setting subgraph',display_options['display_subgraph']
+                    task.subgraph = display_options['display_subgraph']
+                    
                 task.task_id=task_id
                 self.task_data[task.task_id]['class_name'] = task.__class__.__name__
 

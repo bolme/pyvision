@@ -325,7 +325,9 @@ def inspectObject(item,name='<top>',max_depth=5,verbose=False,print_depth=0,info
     try:
         
         # Add info about the type
-        type_name = getTypeName(item)
+        type_name = str(getTypeName(item))
+        if len(type_name) > 30:
+            type_name = type_name[:27]+'...'
         info[i,'type'] = type_name
     
         value = " ".join(repr(item).split())
