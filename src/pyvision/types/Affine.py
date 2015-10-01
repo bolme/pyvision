@@ -60,7 +60,7 @@ import pyvision as pv
 import numpy as np
 import cv2
 
-from pyvision.types.img import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_MATRIX_RGB, TYPE_OPENCV, TYPE_OPENCV2, TYPE_OPENCV2BW
+from pyvision.types.img import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_MATRIX_RGB, TYPE_OPENCV2, TYPE_OPENCV2BW
 from pyvision.types.Point import Point
 from pyvision.types.Rect import Rect
 from pyvision.vector.RANSAC import RANSAC,LMeDs

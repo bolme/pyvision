@@ -37,7 +37,7 @@ import pyvision as pv
 #import cv
 import random
 #from scipy import weave
-
+import cv2
 
 
 class VideoInterface(object):
@@ -292,24 +292,24 @@ class Video(VideoInterface):
         vid.play()
         '''
         self.filename = filename
-        self.cv_capture = cv.CaptureFromFile( filename );
-        self._numframes = cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_COUNT)
+        self.cv_capture = cv2.VideoCapture( filename );
+        self._numframes = self.cv_capture.get(cv2.CAP_PROP_FRAME_COUNT)
         self.size = size
         self.current_frame = 0
 
     def query(self):
-        if self.current_frame > 0 and cv.GetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_POS_AVI_RATIO) == 1.0:
+        if self.current_frame > 0 and self.cv_capture.get(cv2.CAP_PROP_POS_AVI_RATIO) == 1.0:
             return None
-        frame = cv.QueryFrame( self.cv_capture )
+        retval,frame = self.cv_capture.read()
         if frame == None:
             raise StopIteration("End of video sequence")
         self.current_frame += 1
-        frame = cv.CloneImage(frame);
+        frame = frame.copy();
         return pv.Image(self.resize(frame))
     
     def setFrame(self,n):
         assert n >= 0 and n <= 1
-        cv.SetCaptureProperty(self.cv_capture, cv.CV_CAP_PROP_POS_AVI_RATIO, float(n))
+        self.cv_capture.set(cv2.CAP_PROP_POS_AVI_RATIO, float(n))
         
     
     def __iter__(self):
@@ -554,107 +554,3 @@ class VideoFromImageStack(VideoInterface):
         return VideoFromImageStack(self.imageStack, self.size) 
                 
         
-class FFMPEGVideo:
-    # TODO: there may be a bug with the popen interface
-    '''
-    FFMPEGVideo is an alternate way to capture video from a file,
-    not directly using OpenCV's highgui. This class does not implement
-    the VideoInterface abstract class, and it does not have the same
-    usage pattern.
-    '''
-    def __init__(self,filename,size=None,aspect=None,options=""):
-        self.filename = filename
-        self.size = size
-        self.aspect = aspect
-        self.options = options 
-        
-        # Open a pipe
-        args = "/opt/local/bin/ffmpeg -i %s %s -f yuv4mpegpipe - "%(filename,options)
-        #print args
-        
-        self.stdin, self.stdout, self.stderr = os.popen3(args)
-        #popen = subprocess.Popen(args,executable="/opt/local/bin/ffmpeg")
-        
-        line = self.stdout.readline()
-        #print line
-        #self.stdout.seek(0,os.SEEK_CUR)
-        
-        _,w,h,_,_,aspect,_,_ = line.split()
-        
-        # I am not sure what all this means but I am checking it anyway
-        assert format=='YUV4MPEG2'
-        #assert t1=='Ip'
-        #assert t2=='C420mpeg2'
-        #assert t3=='XYSCSS=420MPEG2'
-
-        # get the width and height
-        assert w[0] == "W"
-        assert h[0] == "H"
-        
-        self.w = int(w[1:])
-        self.h = int(h[1:])
-        
-        # Create frame caches        
-        if size == None and self.aspect != None:
-            h = self.h
-            w = int(round(self.aspect*h))
-            size = (w,h)
-            #print size
-        
-        self.size = size
-        
-        self.frame_y = cv.CreateImage( (self.w,self.h), cv.IPL_DEPTH_8U, 1 )
-        self.frame_u2 = cv.CreateImage( (self.w/2,self.h/2), cv.IPL_DEPTH_8U, 1 )
-        self.frame_v2 = cv.CreateImage( (self.w/2,self.h/2), cv.IPL_DEPTH_8U, 1 )
-
-        self.frame_u = cv.CreateImage( (self.w,self.h), cv.IPL_DEPTH_8U, 1 )
-        self.frame_v = cv.CreateImage( (self.w,self.h), cv.IPL_DEPTH_8U, 1 )
-        self.frame_col = cv.CreateImage( (self.w,self.h), cv.IPL_DEPTH_8U, 3 )
-
-        
-        if self.size != None:
-            w,h = self.size
-            self.frame_resized = cv.CreateImage( (w,h),cv.IPL_DEPTH_8U,3)
-
-        
-        
-    def frame(self):
-        _ = self.stdout.readline()
-        #print line
-        #print self.w,self.h
-        y = self.stdout.read(self.w*self.h)
-        u = self.stdout.read(self.w*self.h/4)
-        v = self.stdout.read(self.w*self.h/4)
-        if len(y) < self.w*self.h:
-            raise EOFError
-
-        cv.SetData(self.frame_y,y)
-        cv.SetData(self.frame_u2,u)
-        cv.SetData(self.frame_v2,v)
-
-        cv.Resize(self.frame_u2,self.frame_u)
-        cv.Resize(self.frame_v2,self.frame_v)
-        
-        cv.Merge(self.frame_y,self.frame_u,self.frame_v,None,self.frame_col)
-        cv.CvtColor(self.frame_col,self.frame_col,cv.CV_YCrCb2RGB)
-        
-        out = self.frame_col
-        
-        if self.size != None:
-            cv.Resize(self.frame_col,self.frame_resized)
-            out = self.frame_resized
-
-        return pv.Image(self.frame_y),pv.Image(self.frame_u),pv.Image(self.frame_v),pv.Image(out)
-    
-    
-    def __iter__(self):
-        ''' Return an iterator for this video '''
-        return FFMPEGVideo(self.filename,size=self.size,aspect=self.aspect,options=self.options)
-
-        
-    def next(self):
-        try:
-            _,_,_,frame = self.frame()
-        except EOFError:
-            raise StopIteration("End of video sequence")
-        return frame

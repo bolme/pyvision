@@ -113,4 +113,10 @@ Releases:
             bindings.
     0.8.0 - Released in June 2009.  This was primarily to support FaceL.
 
-
+Changes for OpenCV 3.0:
+    * Removes support for any references to the legacy cv module and iplimage 
+      formats.
+    * NumpyToOpenCV and OpenCVToNUmpy conversions removed.
+    * ImageClass: asOpenCV and asOpenCVBW removed TYPE_OPENCV removed.  
+      Subsititude with asOpenCV2 and asOpenCV2BW
+    * FFMPEGVideo support has been removed.
