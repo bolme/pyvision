@@ -37,7 +37,7 @@ import os.path
 
 import numpy as np
 
-import cv
+import cv2
 import scipy.ndimage as ndi
 import pyvision as pv
 from pyvision.point.DetectorROI import DetectorROI
@@ -57,15 +57,15 @@ class DetectorHarris(DetectorROI):
         '''
         void cvCornerHarris( const CvArr* image, CvArr* harris_responce, int block_size, int aperture_size=3, double k=0.04 );
         '''
-        gray = im.asOpenCVBW()
+        gray = im.asOpenCV2BW()
         #gray = opencv.cvCreateImage( opencv.cvGetSize(cvim), 8, 1 );
-        corners = cv.CreateImage( cv.GetSize(gray), 32, 1 );
+        #corners = cv.CreateImage( cv.GetSize(gray), 32, 1 );
         #opencv.cvCvtColor( cvim, gray, opencv.CV_BGR2GRAY );
     
-        cv.CornerHarris(gray,corners,self.block_size,self.aperture_size,self.k)
+        corners = cv2.cornerHarris(gray.T,self.block_size,self.aperture_size,self.k)
 
-        data_buffer = corners.tostring()
-        corners = np.frombuffer(data_buffer,np.float32).reshape(corners.height,corners.width).transpose()        
+        #data_buffer = corners.tostring()
+        #corners = np.frombuffer(data_buffer,np.float32).reshape(corners.height,corners.width).transpose()        
         
         footprint = np.ones((3,3))
         mx = ndi.maximum_filter(corners, footprint = footprint)
@@ -159,6 +159,6 @@ class _HarrisTest(unittest.TestCase):
             
         
         if self.SHOW_IMAGES: im.show()  
-        self.assertEquals(len(points),6772)
+        self.assertEquals(len(points),6917)
         
 

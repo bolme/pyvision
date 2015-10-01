@@ -75,6 +75,8 @@ Dependencies
 	scipy
 	numpy
 	OpenCV
+	scikit learn (As of pyvision 2.0)
+	scikit image (As of pyvision 2.0)
 	
 
 Features:
@@ -113,7 +115,15 @@ Releases:
             bindings.
     0.8.0 - Released in June 2009.  This was primarily to support FaceL.
 
-Changes for OpenCV 3.0:
+Changes for Version 2.0:
+
+The major modivation for this release is that OpenCV no longer supports the 1.0
+python interface.  This causes issues with backwards compatibility.  For this
+reason it is used as an excuse for major cleanup and to remove code that is 
+no longer needed such as the SVM.  That functionality will be supported through
+new interfaces or by going directly to OpenCV, scikit learn, or scikit image.
+
+Here is a list of major 2.0 changes:
     * Removes support for any references to the legacy cv module and iplimage 
       formats.
     * NumpyToOpenCV and OpenCVToNUmpy conversions removed.
@@ -121,3 +131,10 @@ Changes for OpenCV 3.0:
       Subsititude with asOpenCV2 and asOpenCV2BW
     * FFMPEGVideo support has been removed.
     * Image transforms now use cv2 interface.
+    * Removed SVM, VectorClassifier, RidgeRegression, PCA, SVMEyeDetector, 
+      SVMFaceRec because they are rarely used now and there are implemetations
+      in scikit learn.
+    * FilterEyeLocator performance was reduced in the conversion.  It probably
+      also runs slower.  (This may be fixed later.)
+    * Removed libsvm, PointLocator, Polynomial Fitting.
+      

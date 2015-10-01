@@ -642,7 +642,7 @@ class TestPlot(unittest.TestCase):
         
     def testRangeZero(self):
         "Plot: Range = 0"
-        plot = Plot(xrange=[0,0],yrange=[0,0])
+        plot = Plot(x_range=[0,0],y_range=[0,0])
         plot.asImage()
         
     def testNoData(self):

@@ -35,7 +35,7 @@
 Created on Oct 18, 2010
 @author: Stephen O'Hara
 '''
-import cv
+import cv2
 import pyvision as pv
 
 def sobel(im,xorder=1,yorder=0,aperture_size=3,sigma=None):

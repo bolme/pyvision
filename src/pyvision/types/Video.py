@@ -83,11 +83,11 @@ class VideoInterface(object):
         if self.size == None:
             return frame
         else:
-            depth = frame.depth
-            channels = frame.channels
+            #depth = frame.depth
+            #channels = frame.channels
             w,h = self.size
-            resized = cv.CreateImage( (w,h), depth, channels )
-            cv.Resize( frame, resized, cv.CV_INTER_LINEAR )
+            #resized = cv.CreateImage( (w,h), depth, channels )
+            resized = cv2.resize( frame, (w,h), cv2.INTER_LINEAR )
             return resized
     
     def __iter__(self):
@@ -232,7 +232,7 @@ class Webcam(VideoInterface):
         on your computer. See the OpenCV highgui documentation for details.
         @param flipped: Set to true if camera is installed upside-down.
         '''
-        self.cv_capture = cv.CreateCameraCapture( camera_num )  
+        self.cv_capture = cv2.VideoCapture( camera_num )  
         self.flipped = flipped      
         #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH,1600.0)
         #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_HEIGHT,1200.0)
@@ -252,16 +252,16 @@ class Webcam(VideoInterface):
         @returns: the frame rescaled to a given size.
         '''
         # TODO: Video capture is unreliable under linux.  This may just be a timing issue when running under parallels.
-        frame = cv.QueryFrame( self.cv_capture )
+        retval,frame = self.cv_capture.read()
         if self.flipped:
-            cv.Flip(frame,frame,-1)
+            frame = cv2.flip(frame,-1)
         im = pv.Image(self.resize(frame))
         im.orig_frame = pv.Image(frame)
         im.capture_time = time.time()
         return im
     
     def grab(self):
-        return cv.GrabFrame( self.cv_capture );
+        return self.cv_capture.grab()
     
     def retrieve(self):
         '''
@@ -270,7 +270,7 @@ class Webcam(VideoInterface):
         
         @returns: the frame rescaled to a given size.
         '''
-        frame = cv.RetrieveFrame( self.cv_capture );
+        retval,frame = self.cv_capture.retrieve()
         im = pv.Image(self.resize(frame))
         im.orig_frame = pv.Image(frame)
         return im

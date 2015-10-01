@@ -799,25 +799,13 @@ class Image:
             image_buffer = self.opencv2bw.tostring()
         elif self.type == TYPE_OPENCV2:
             # Convert to gray then get buffer
-            tmp = cv2.cvtColor(self.opencv2, cv2.cv.CV_BGR2GRAY)
+            tmp = cv2.cvtColor(self.opencv2, cv2.COLOR_BGR2GRAY)
             image_buffer = tmp.tostring()
         elif self.type == TYPE_MATRIX_RGB:
             # Convert to gray
             mat = self.matrix3d
             mat = LUMA[0]*mat[0] + LUMA[1]*mat[1] + LUMA[2]*mat[2]
             image_buffer = mat.transpose().tostring()
-        elif self.type == TYPE_OPENCV:
-            if self.channels == 1:
-                # Just get buffer
-                image_buffer = self.opencv.tostring()
-            elif self.channels == 3:
-                # Convert to gray
-                w,h = self.width,self.height
-                gray = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,1)
-                cv.CvtColor( self.opencv, gray, cv.CV_BGR2GRAY );
-                image_buffer = gray.tostring()
-            else:
-                raise TypeError("Operation not supported for image type.")
         else:
             raise TypeError("Operation not supported for image type.")
         
@@ -889,20 +877,6 @@ class Image:
             # Just get buffer
             mat = self.matrix3d.transpose()
             image_buffer = mat.tostring()
-        elif self.type == TYPE_OPENCV:
-            # Convert color BGR to RGB
-            w,h = self.width,self.height
-            if self.channels == 3:
-                rgb = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
-                cv.CvtColor( self.opencv, rgb, cv2.COLOR_BGR2RGB );
-                image_buffer = rgb.tostring()
-            elif self.channels == 1:
-                rgb = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
-                cv2.CvtColor( self.opencv2, rgb, cv2.COLOR_BGR2RGB );
-                image_buffer = rgb.tostring()
-            else:
-                # Handle type errors
-                raise TypeError("Operation not supported for image type.")
         else:
             # Handle unsupported
             raise TypeError("Operation not supported for image type.")
@@ -991,9 +965,8 @@ class Image:
         This method uses cv.CloneImage so that the underlying image data will be
         disconnected from the original data. (Deep copy)
         '''
-        imgdat = self.asOpenCV()
-        imgdat2 = cv.CloneImage(imgdat)
-        return pv.Image(imgdat2)
+        imgdat = self.asOpenCV2()
+        return pv.Image(imgdat.copy())
     
     def crop(self, rect, size=None, interpolation=None, return_affine=False):
         '''

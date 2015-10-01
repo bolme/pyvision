@@ -8,7 +8,6 @@ import numpy as np
 import itertools as it
 import copy
 import pyvision as pv
-from libsvm import Classifier,Regression
 import time
 
 class CrossValidation:
