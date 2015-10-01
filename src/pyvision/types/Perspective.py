@@ -44,6 +44,7 @@ import os.path
 import numpy as np
 import numpy.linalg as la
 import pyvision as pv
+import cv2
 
 
 def logPolar(im,center=None,radius=None,M=None,size=(64,128)):
@@ -64,9 +65,8 @@ def logPolar(im,center=None,radius=None,M=None,size=(64,128)):
 
     if center == None:
         center = pv.Point(0.5*w,0.5*h)
-    src = im.asOpenCV()
-    dst = cv.cvCreateImage( cv.cvSize(size[0],size[1]), 8, 3 )
-    cv.cvLogPolar( src, dst, center.asOpenCV(), M, cv.CV_INTER_LINEAR+cv.CV_WARP_FILL_OUTLIERS )
+    src = im.asOpenCV2()
+    dst = cv2.logPolar( src, center.asOpenCV(), M, cv2.INTER_LINEAR+cv2.WARP_FILL_OUTLIERS )
     return pv.Image(dst)
     
 ##
@@ -123,9 +123,9 @@ def PerspectiveFromPoints(source, dest, new_size, method=0, ransacReprojThreshol
     
     n_points = len(source)
     
-    s = cv.CreateMat(n_points,2,cv.CV_32F)
-    d = cv.CreateMat(n_points,2,cv.CV_32F)
-    p = cv.CreateMat(3,3,cv.CV_32F)
+    s = np.zeros((n_points,2),dtype=np.float32)#cv.CreateMat(n_points,2,cv.CV_32F)
+    d = np.zeros((n_points,2),dtype=np.float32)#cv.CreateMat(n_points,2,cv.CV_32F)
+    p = np.zeros((3,3),dtype=np.float32)
     
     for i in range(n_points):
         s[i,0] = source[i].X()
@@ -134,10 +134,9 @@ def PerspectiveFromPoints(source, dest, new_size, method=0, ransacReprojThreshol
         d[i,0] = dest[i].X()
         d[i,1] = dest[i].Y()
         
-    results = cv.FindHomography(s,d,p,method,ransacReprojThreshold)
+    matrix,mask = cv2.findHomography(s,d,method,ransacReprojThreshold)
     
-    matrix = pv.OpenCVToNumpy(p)
-
+    #print retval,matrix
     return PerspectiveTransform(matrix,new_size)
 
 
@@ -185,13 +184,9 @@ class PerspectiveTransform:
     # @param im an pv.Image object
     def transformImage(self,im):
         ''' Transform an image. '''
-        if isinstance(self.matrix,cv.cvmat):
-            matrix = self.matrix
-        else:
-            matrix = pv.NumpyToOpenCV(self.matrix)
-        src = im.asOpenCV()
-        dst = cv.CreateImage( (self.size[0],self.size[1]), cv.IPL_DEPTH_8U, src.nChannels );
-        cv.WarpPerspective( src, dst, matrix)                    
+        matrix = self.matrix
+        src = im.asOpenCV2()
+        dst = cv2.warpPerspective( src, matrix, self.size)                    
         return pv.Image(dst)
 
         

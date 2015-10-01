@@ -32,7 +32,8 @@ class PerspectiveTest(unittest.TestCase):
         #    print "Point: %7.2f %7.2f"%(pt.X(), pt.Y())
             
         _ = p.transformImage(self.im_a)
-        #im.show()
+        self.im_a.show()
+        #_.show()
 
     def test_four_points_b(self):
         p = pv.PerspectiveFromPoints(self.corners_b,self.corners_t,(640,480))
@@ -41,7 +42,7 @@ class PerspectiveTest(unittest.TestCase):
         #    print "Point: %7.2f %7.2f"%(pt.X(), pt.Y())
             
         _ = p.transformImage(self.im_b)
-        #im.show()
+        #_.show()
         
     def test_four_points_ab(self):
         p = pv.PerspectiveFromPoints(self.corners_a,self.corners_b,(640,480))
@@ -50,9 +51,35 @@ class PerspectiveTest(unittest.TestCase):
         #    print "Point: %7.2f %7.2f"%(pt.X(), pt.Y())
             
         _ = p.transformImage(self.im_a)
-        #im.show()
+        #_.show()
         #self.im_b.show()
         
+# TODO: Add unit tests
+class LogPolarTest(unittest.TestCase):
+    
+    def setUp(self):
+        fname_a = os.path.join(pv.__path__[0],'data','test','perspective1a.jpg')
+        fname_b = os.path.join(pv.__path__[0],'data','test','perspective1b.jpg')
+        
+        self.im_a = pv.Image(fname_a)
+        self.im_b = pv.Image(fname_b)
+        
+        #corners clockwize: upper left, upper right, lower right, lower left
+        self.corners_a = (pv.Point(241,136),pv.Point(496,140),pv.Point(512,343),pv.Point(261,395))
+        self.corners_b = (pv.Point(237,165),pv.Point(488,177),pv.Point(468,392),pv.Point(222,347))
+        self.corners_t = (pv.Point(0,0),pv.Point(639,0),pv.Point(639,479),pv.Point(0,479))
+        
+        for pt in self.corners_a:
+            self.im_a.annotatePoint(pt)
+
+        #self.im_a.show()
+        #self.im_b.show()
+            
+    def testLogPolar(self):
+        # Just run the code for now
+        pv.logPolar(self.im_a)
+        # TODO: add a test to make sure it worked.
+
         
 # TODO: Add unit tests
 class AffineTest(unittest.TestCase):

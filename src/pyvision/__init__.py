@@ -157,7 +157,7 @@ from pyvision.types.Rect import Rect,BoundingRect,CenteredRect
 
 from pyvision.types.Affine import  AffineNormalizePoints, AffineTranslate, AffineScale, AffineNonUniformScale, AffineRotate, AffineFromRect, AffineFromTile, AffineFromPoints, AffineFromPointsLS, AffineFromPointsRANSAC, AffineFromPointsLMeDs, AffinePerturb, AffineTransform
 
-from pyvision.types.Perspective import  PerspectiveTransform, PerspectiveFromPoints
+from pyvision.types.Perspective import  PerspectiveTransform, PerspectiveFromPoints, logPolar
 
 from pyvision.analysis.ImageLog import ImageLog
 

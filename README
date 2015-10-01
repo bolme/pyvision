@@ -120,3 +120,4 @@ Changes for OpenCV 3.0:
     * ImageClass: asOpenCV and asOpenCVBW removed TYPE_OPENCV removed.  
       Subsititude with asOpenCV2 and asOpenCV2BW
     * FFMPEGVideo support has been removed.
+    * Image transforms now use cv2 interface.
