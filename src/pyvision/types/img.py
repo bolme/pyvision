@@ -200,20 +200,6 @@ class Image:
             
             self.depth = 8
         
-        # opencv format             
-        elif isinstance(data,cv.iplimage):
-            self.type=TYPE_OPENCV
-            self.opencv=data 
-            
-            self.width = data.width
-            self.height = data.height
-                        
-            assert data.nChannels in (1,3)
-            self.channels = data.nChannels 
-            
-            assert data.depth == 8
-            self.depth = data.depth   
-
         # unknown type
         else:
             raise TypeError("Could not create from type: %s %s"%(data,type(data)))

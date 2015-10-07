@@ -137,4 +137,6 @@ Here is a list of major 2.0 changes:
     * FilterEyeLocator performance was reduced in the conversion.  It probably
       also runs slower.  (This may be fixed later.)
     * Removed libsvm, PointLocator, Polynomial Fitting.
+    * SURF does not seem to be avalible currently.  Could be replaced with ORB.
+      SURF may be readded in the future.
       
