@@ -756,6 +756,7 @@ class GeneticAlgorithm:
         self.initargs=initargs
         self.population_size = population_size
         self.n_processes = n_processes
+        self.pool = None
         if self.n_processes == "AUTO":
             self.n_processes = mp.cpu_count()
             
@@ -896,11 +897,11 @@ class GeneticAlgorithm:
                 print "New Best Score:",score
                 
                 for i in range(len(args)):
-                    print "    arg%02d"%i,args[i]
+                    print "    arg%02d"%i,str(args[i])[:70]
                 keys = list(kwargs.keys())
                 keys.sort()
                 for key in keys:
-                    print "    %10s:"%key,kwargs[key]
+                    print "    %10s:"%key,str(kwargs[key])[:70]
                 
         self.population.append([score,args,kwargs])
         self.population.sort(lambda x,y: cmp(x[0],y[0]))
@@ -967,8 +968,8 @@ class GeneticAlgorithm:
         
         # Create worker process pool
         if self.n_processes > 1: 
-            print "Init Params (%d cores):"%self.n_processes,self.initializer, self.initargs
-            pool = mp.Pool(self.n_processes,initializer=self.initializer,initargs=self.initargs)    
+            print "Init Params (%d cores):"%self.n_processes,str(self.initializer)[:20], str(self.initargs)[:20]
+            self.pool = mp.Pool(self.n_processes,initializer=self.initializer,initargs=self.initargs)    
             
         # Initialize the population with random members
         work = []
@@ -977,7 +978,7 @@ class GeneticAlgorithm:
             work.append((self.fitness,args,kwargs))
 
         if self.n_processes > 1:
-            scores = pool.map(_gaWork, work)
+            scores = self.pool.map(_gaWork, work)
             for i in range(len(scores)):
                 score = scores[i]
                 _,args,kwargs = work[i]
@@ -1010,7 +1011,7 @@ class GeneticAlgorithm:
                     work.append((self.fitness,args,kwargs))
 
             if self.n_processes > 1:
-                scores = pool.map(_gaWork, work)
+                scores = self.pool.map(_gaWork, work)
                 for i in range(len(scores)):
                     score = scores[i]
                     _,args,kwargs = work[i]
@@ -1028,6 +1029,8 @@ class GeneticAlgorithm:
         kwargs = copy.deepcopy(self.population[0][2])
         list_generate(args)
         dict_generate(kwargs)
+        
+        self.pool = None
         
         return self.population[0][0],args,kwargs
 
