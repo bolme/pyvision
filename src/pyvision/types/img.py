@@ -51,16 +51,7 @@ import cv2
 import pyvision
 import pyvision as pv
 
-import cStringIO
 import exif
-import os
-
-# iPython support for ipython notebook
-try:
-    import pylab
-    import IPython
-except:
-    pass # do nothing
 
 
 TYPE_MATRIX_2D  = "TYPE_MATRIX2D" 
@@ -1063,24 +1054,30 @@ class Image:
         '''
         if window==None and pv.runningInNotebook() and 'pylab' in globals().keys():
             # If running in notebook, then try to display the image inline.
-            
-            if size is None:
-                size = self.size
+            try:
+                import IPython
+                import pylab
+
+                if size is None:
+                    size = self.size
+                    
+                    # Constrain the size of the output
+                    max_dim = max(size[0],size[1])
+                    
+                    if max_dim > 800:
+                        scale = 800.0/max_dim
+                        size = (int(scale*size[0]),int(scale*size[1]))
                 
-                # Constrain the size of the output
-                max_dim = max(size[0],size[1])
+                w,h = size
                 
-                if max_dim > 800:
-                    scale = 800.0/max_dim
-                    size = (int(scale*size[0]),int(scale*size[1]))
-            
-            w,h = size
-            
-            # TODO: Cant quite figure out how figsize works and how to set it to native pixels
-            #pylab.figure()
-            IPython.core.pylabtools.figsize(1.25*w/72.0,1.25*h/72.0) #@UndefinedVariable
-            pylab.figure()
-            pylab.imshow(self.asAnnotated(),origin='upper',aspect='auto')
+                # TODO: Cant quite figure out how figsize works and how to set it to native pixels
+                #pylab.figure()
+                IPython.core.pylabtools.figsize(1.25*w/72.0,1.25*h/72.0) #@UndefinedVariable
+                pylab.figure()
+                pylab.imshow(self.asAnnotated(),origin='upper',aspect='auto')
+            except:
+                print "WARNING: could not display image in ipython notebook."
+                self.show(window="PyVisionImage",pos=pos,delay=delay,size=size)
             
         else:
             # Otherwise, use an opencv window
