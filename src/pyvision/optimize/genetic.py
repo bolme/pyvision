@@ -57,6 +57,8 @@ import numpy as np
 import copy
 #import time
 import pyvision as pv
+import os
+import cPickle as pkl
 
 # Genetic algorithm message types
 _GA_EVALUATE="GA_EVALUATE"
@@ -976,7 +978,26 @@ class GeneticAlgorithm:
             args,kwargs = self.random()
             work.append((self.fitness,args,kwargs))
 
-        if self.n_processes > 1:
+        if restart_dir is not None:
+            # Scan restart dir
+            files = os.listdir(restart_dir)
+            for filename in files:
+                print filename
+                if "_Fitness_" not in filename or not filename.endswith('.pkl'):
+                    continue
+                path = os.path.join(restart_dir,filename)
+                data = pkl.load(open(path,'rb'))
+                print 'Reloading:',path
+                for each in data:
+                    if len(str(each)) > 70:
+                        print "    %s..."%str(each)[:70]
+                    else:
+                        print "    %s"%str(each)
+                    
+                # Call addIninvidiual
+                self.addIndividual(data[0], data[1], data[2], ilog=ilog, display=display)
+        
+        elif self.n_processes > 1:
             scores = pool.map(_gaWork, work)
             for i in range(len(scores)):
                 score = scores[i]

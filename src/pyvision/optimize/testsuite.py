@@ -12,6 +12,7 @@ import pyvision.optimize.genetic as ga
 #import scipy as sp
 import numpy as np
 import random
+import time
 
 def callback(population):
     plot = pv.Plot(x_range=[0,10],y_range=[0,10])
@@ -270,6 +271,23 @@ class GeneticAlgorithmTest(unittest.TestCase):
         #fitness.solve()
         alg = ga.GeneticAlgorithm(fitness,[ga.GARanking(100)],n_processes=1)
         result = alg.optimize(max_iter=1000)
+        #print "testNapsack",result
+
+    def testRestart(self):
+        fitness = FitnessNapsack()
+        ilog = pv.ImageLog()
+        restart_dir = ilog.dir
+        #fitness.solve()
+        alg = ga.GeneticAlgorithm(fitness,[ga.GARanking(100)],n_processes=1)
+        result = alg.optimize(max_iter=500,ilog=ilog)
+        
+        time.sleep(2)
+        print "Restarting..."
+        ilog = pv.ImageLog()
+        alg = ga.GeneticAlgorithm(fitness,[ga.GARanking(100)],n_processes=1)
+        result = alg.optimize(max_iter=1000,ilog=ilog,restart_dir=restart_dir)
+        
+
         #print "testNapsack",result
 
     def testGAUnitVector(self):
