@@ -133,10 +133,18 @@ def random_forest(data,responses,n_trees=100):
     return StatsModelWrapper(model)
     
     
-def boost(data,responses,weak_count=100,max_depth=20,boost_type=cv2.ml.BOOST_DISCRETE):
+def boost(data,responses,weak_count=100,max_depth=20,boost_type=None):
     '''
     Auto trains an OpenCV SVM.
     '''
+    if boost_type is None:
+        try:
+            # opencv 2.6
+            boost_type=cv2.ml.BOOST_DISCRETE
+        except:
+            # opencv 2.4
+            boost_type=cv2.BOOST_DISCRETE
+        
     np.float32(data)
     np.float32(responses) 
     params = dict(boost_type=boost_type,weak_count=weak_count,max_depth=max_depth)

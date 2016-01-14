@@ -545,100 +545,102 @@ class _VersionTest(unittest.TestCase):
 def test():
     disableCommercialUseWarnings()
     
+    test_suites = []
+    
     version_suite = unittest.TestLoader().loadTestsFromTestCase(_VersionTest)
-
+    test_suites.append(version_suite)
+    
     from pyvision.types.Affine import _AffineTest
     affine_suite = unittest.TestLoader().loadTestsFromTestCase(_AffineTest)
+    test_suites.append(affine_suite)
     
     from pyvision.testsuite.image_tests import TestImage, TestVideo
     image_suite = unittest.TestLoader().loadTestsFromTestCase(TestImage)
+    test_suites.append(image_suite)
     video_suite = unittest.TestLoader().loadTestsFromTestCase(TestVideo)
-
+    test_suites.append(video_suite)
+    
     from pyvision.vector.VectorClassifier import _TestVectorClassifier
     vc_suite = unittest.TestLoader().loadTestsFromTestCase(_TestVectorClassifier)
+    test_suites.append(vc_suite)
     
     #from pyvision.vector.SVM import _TestSVM
     #svm_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSVM)
 
     from pyvision.vector.Polynomial import _PolyTest
     poly_suite = unittest.TestLoader().loadTestsFromTestCase(_PolyTest)
+    test_suites.append(poly_suite)
     
     from pyvision.point.DetectorCorner import _CornerTest
     corner_suite = unittest.TestLoader().loadTestsFromTestCase(_CornerTest)
-
+    test_suites.append(corner_suite)
+    
     from pyvision.point.DetectorDOG import _DetectorDOGTestCase
     dog_suite = unittest.TestLoader().loadTestsFromTestCase(_DetectorDOGTestCase)
+    test_suites.append(dog_suite)
     
     from pyvision.point.DetectorHarris import _HarrisTest
     harris_suite = unittest.TestLoader().loadTestsFromTestCase(_HarrisTest)
+    test_suites.append(harris_suite)
     
     from pyvision.point.PhaseCorrelation import _TestPhaseCorrelation
     pc_suite = unittest.TestLoader().loadTestsFromTestCase(_TestPhaseCorrelation)
+    test_suites.append(pc_suite)
     
     from pyvision.optimize.testsuite import GeneticAlgorithmTest
     ga_suite = unittest.TestLoader().loadTestsFromTestCase(GeneticAlgorithmTest)
+    test_suites.append(ga_suite)
     
-    from pyvision.face.CascadeDetector import _TestCascadeDetector
-    cd_suite = unittest.TestLoader().loadTestsFromTestCase(_TestCascadeDetector)
-    
+    try:
+        from pyvision.face.CascadeDetector import _TestCascadeDetector
+        cd_suite = unittest.TestLoader().loadTestsFromTestCase(_TestCascadeDetector)
+        test_suites.append(cd_suite)
+    except:
+        print "WARNING: Could not load _TestCascadeDetector."
+        
     from pyvision.face.PCA import _TestFacePCA
     fpca_suite = unittest.TestLoader().loadTestsFromTestCase(_TestFacePCA)
+    test_suites.append(fpca_suite)
     
     from pyvision.face.FilterEyeLocator import _TestFilterEyeLocator
     asefed_suite = unittest.TestLoader().loadTestsFromTestCase(_TestFilterEyeLocator)
-
+    test_suites.append(asefed_suite)
+    
     # Replaced by ASEF work
     # from pyvision.face.SVMEyeDetector import _TestSVMEyeDetector 
     # svmed_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSVMEyeDetector)
     
     from pyvision.edge.canny import _TestCanny
     canny_suite = unittest.TestLoader().loadTestsFromTestCase(_TestCanny)
+    test_suites.append(canny_suite)
     
     from pyvision.analysis.stats import _TestStats
     stats_suite = unittest.TestLoader().loadTestsFromTestCase(_TestStats)
+    test_suites.append(stats_suite)
     
     from pyvision.analysis.Table import _TestTable
     table_suite = unittest.TestLoader().loadTestsFromTestCase(_TestTable)
+    test_suites.append(table_suite)
     
     from pyvision.analysis.classifier.ConfusionMatrix import _TestConfusionMatrix
     cm_suite = unittest.TestLoader().loadTestsFromTestCase(_TestConfusionMatrix)
+    test_suites.append(cm_suite)
     
     from pyvision.other.testsuite import _TestDistance
     dist_suite = unittest.TestLoader().loadTestsFromTestCase(_TestDistance)
-
+    test_suites.append(dist_suite)
+    
     from pyvision.other.testsuite import _TestNormalize
     norm_suite = unittest.TestLoader().loadTestsFromTestCase(_TestNormalize)
+    test_suites.append(norm_suite)
     
-    from pyvision.other.testsuite import _TestSURF
-    surf_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSURF)
-    
-    
-    test_suites = [
-                   version_suite,
-                   affine_suite,
-                   image_suite,
-                   video_suite,
-                   vc_suite,
-                   #svm_suite, #TODO: uncomment
-                   poly_suite,
-                   corner_suite,
-                   dog_suite,
-                   harris_suite,
-                   pc_suite,
-                   ga_suite,
-                   cd_suite,
-                   fpca_suite,
-                   asefed_suite,
-                   #svmed_suite,
-                   canny_suite,
-                   stats_suite,
-                   table_suite,
-                   cm_suite,
-                   dist_suite,
-                   norm_suite,
-                   surf_suite,
-                   ]
-    
+    try:
+        from pyvision.other.testsuite import _TestSURF
+        surf_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSURF)
+        test_suites.append(surf_suite)
+    except:
+        print "WARNING: Could not load _TestSURF."
+            
     pyvision_suite = unittest.TestSuite(test_suites)
     
     unittest.TextTestRunner(verbosity=2).run(pyvision_suite)
