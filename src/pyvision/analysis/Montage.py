@@ -37,6 +37,7 @@ Created on Mar 14, 2011
 import pyvision as pv
 import PIL.Image
 import weakref
+import cv2
 
 class ImageMontage(object):
     """
