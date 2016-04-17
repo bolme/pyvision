@@ -56,11 +56,11 @@ import exif
 import os
 
 # iPython support for ipython notebook
-try:
-    import pylab
-    import IPython
-except:
-    pass # do nothing
+#try:
+#    import pylab
+#    import IPython
+#except:
+#    pass # do nothing
 
 
 TYPE_MATRIX_2D  = "TYPE_MATRIX2D" 
