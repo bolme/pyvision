@@ -52,6 +52,8 @@ import pyvision
 import pyvision as pv
 
 import exif
+import os
+
 
 
 TYPE_MATRIX_2D  = "TYPE_MATRIX2D" 
