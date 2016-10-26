@@ -237,11 +237,15 @@ from pyvision.analysis.html_report import HtmlReport
 # Import the beta components
 import beta
 
+import time
+
 IMAGE_EXTENSIONS = ['.JPG','.JPEG','.GIF','.TIF','.TIFF','.PNG','.BMP','.PGM','.PPM',]
 VIDEO_EXTENSIONS = ['.MOV','.M4V','.FLV','.AVI','.MPEG','.MJPEG','.MP4','.MPG','.WMV',]
 
 #================================== Misc Functions =====================================
 
+def timestamp():
+    return time.strftime("%Y%m%d_%H%M%S")
 
 def searchNames(text,item):
     '''Search dir(object) for patterns matching text'''
