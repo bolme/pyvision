@@ -561,7 +561,7 @@ class Plot:
     def show(self,**kwargs):
         self.asImage().show(**kwargs)
         
-    def asR(self,plot_pdf=os.getcwd()+"/out.pdf"):
+    def asR(self,plot_pdf=os.getcwd()+"/out.pdf",run_r=True):
         '''
         Generate an R script that will reproduce this plot.
         '''
@@ -616,11 +616,12 @@ class Plot:
 
         f.flush()
         
-        p_in,p_out = os.popen2("R --no-save")
-        p_in.write(f.getvalue())
-        p_in.close()
-        print p_out.read()
-        p_out.close()
+        if run_r:
+            p_in,p_out = os.popen2("R --no-save")
+            p_in.write(f.getvalue())
+            p_in.close()
+            print p_out.read()
+            p_out.close()
         
         return f.getvalue()
     
