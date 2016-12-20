@@ -976,50 +976,16 @@ class Image:
         h = int(np.round(h))
         
         # Check the bounds for cropping
-        if x < 0 or y < 0 or x+w > self.size[0] or y+h > self.size[1]:
-            if size is None:
-                size = (w,h)
-            
-            affine = pv.AffineFromRect(pv.Rect(x,y,w,h),size)
-            im = affine(self)
-            if return_affine:
-                return im,affine
-            else:
-                return im
-        
-        # Get the image as opencv
-        cvim = self.asOpenCV()
-                
-        # Set up ROI
-        subim = cv.GetSubRect(cvim,(x,y,w,h))
-        
-        affine = pv.AffineTranslate(-x,-y,(w,h))
-        
         if size is None:
             size = (w,h)
         
-        # Copy to new image
-        new_image = cv.CreateImage(size,cvim.depth,cvim.nChannels)        
-        if interpolation is None:
-            
-            if size[0] < w or size[1] < y:
-                # Downsampling so use area interpolation
-                interpolation = cv.CV_INTER_AREA
-            else:
-                # Upsampling so use linear
-                interpolation = cv.CV_INTER_CUBIC
-            
-        # Resize to the correct size
-        cv.Resize(subim,new_image,interpolation)
-        
-        affine = pv.AffineNonUniformScale(float(size[0])/w,float(size[1])/h,size)*affine
-        
-        # Return the result as a pv.Image
-        if return_affine: 
-            return pv.Image(new_image),affine
+        affine = pv.AffineFromRect(pv.Rect(x,y,w,h),size)
+        im = affine(self)
+        if return_affine:
+            return im,affine
         else:
-            return pv.Image(new_image)
-        
+            return im
+                
         
     def save(self,filename,annotations=False):
         '''
