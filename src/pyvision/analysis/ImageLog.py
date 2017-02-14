@@ -100,7 +100,7 @@ class ImageLog:
         plot.asImage().asAnnotated().save(self.dir+'/%06d_%s.%s'%(self.count,label,ext),quality=95)
 
         if r_script:
-            data = plot.asR(plot_pdf=self.dir+'/%06d_%s.pdf'%(self.count,label),run_r=False)
+            data = plot.asR(plot_pdf='%06d_%s.pdf'%(self.count,label),run_r=False)
             f = open(self.dir+'/%06d_%s.%s'%(self.count,label,'R'),'w')
             f.write(data)
             f.close()

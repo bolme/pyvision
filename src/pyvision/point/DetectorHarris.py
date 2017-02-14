@@ -159,6 +159,6 @@ class _HarrisTest(unittest.TestCase):
             
         
         if self.SHOW_IMAGES: im.show()  
-        self.assertEquals(len(points),6772)
+        self.assertEquals(len(points),6771)
         
 

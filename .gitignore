@@ -6,6 +6,8 @@
 *.out
 
 # Python files
+build
+dist
 *.pyc
 
 # Idea files
