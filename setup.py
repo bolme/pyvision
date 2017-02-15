@@ -1,6 +1,20 @@
 from distutils.core import setup
 import os
 
+try:
+    import cv2
+    cv_version_data = cv2.__version__.split('.')
+    cv_version_data = [int(val) for val in cv_version_data]
+    if cv_version_data[0] > 2:
+        pass
+    else:
+        assert cv_version_data[0] == 2
+        assert cv_version_data[1] == 4
+    
+except:
+    print "ERROR: Could not load OpenCV.  Make sure the python bindings for opencv 2.4.9 or later are installed."
+    raise
+
 package_data = {}
 
 
@@ -15,7 +29,7 @@ for path,dirs,files in os.walk(DATA_DIR):
         pathname = pathname[len(DATA_DIR):]
         base,ext = os.path.splitext(pathname)
         if ext not in ['.jpg','.png','.pgm','.txt','.pdf','.csv','.data','.tiff','.dat','.m4v','.mov']:
-            print 'skipping',pathname
+            #print 'skipping',pathname
             continue
         
         package_data['pyvision.data'].append(pathname)
@@ -32,7 +46,7 @@ for path,dirs,files in os.walk(DATA_DIR):
         pathname = pathname[len(DATA_DIR):]
         base,ext = os.path.splitext(pathname)
         if ext not in ['.xml','.ttf','.fel']:
-            print 'skipping',pathname
+            #print 'skipping',pathname
             continue
         
         package_data['pyvision.config'].append(pathname)
