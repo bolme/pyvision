@@ -87,7 +87,7 @@ class ImageLog:
         self.count += 1
         #print message
     
-    def plot(self,plot,label="NOLABEL",ext='png',**kwargs):
+    def plot(self,plot,label="NOLABEL",ext='png', r_script=False, **kwargs):
         '''
         Save a pyvision plot to the log.
         '''
@@ -98,6 +98,12 @@ class ImageLog:
         if len(kwargs) > 0:
             raise ValueError("Unsupported keyword arguments: %s"(kwargs.keys(),))
         plot.asImage().asAnnotated().save(self.dir+'/%06d_%s.%s'%(self.count,label,ext),quality=95)
+
+        if r_script:
+            data = plot.asR(plot_pdf='%06d_%s.pdf'%(self.count,label),run_r=False)
+            f = open(self.dir+'/%06d_%s.%s'%(self.count,label,'R'),'w')
+            f.write(data)
+            f.close()
         self.count += 1
         #print message
     

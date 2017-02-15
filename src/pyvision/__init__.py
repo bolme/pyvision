@@ -237,11 +237,15 @@ from pyvision.analysis.html_report import HtmlReport
 # Import the beta components
 import beta
 
+import time
+
 IMAGE_EXTENSIONS = ['.JPG','.JPEG','.GIF','.TIF','.TIFF','.PNG','.BMP','.PGM','.PPM',]
 VIDEO_EXTENSIONS = ['.MOV','.M4V','.FLV','.AVI','.MPEG','.MJPEG','.MP4','.MPG','.WMV',]
 
 #================================== Misc Functions =====================================
 
+def timestamp():
+    return time.strftime("%Y%m%d_%H%M%S")
 
 def searchNames(text,item):
     '''Search dir(object) for patterns matching text'''
@@ -269,7 +273,7 @@ def getTypeName(item):
             type_name = type_name[:-1]
             type_name += ")"
         elif isinstance(item,dict):
-            type_list = set([getTypeName(each) for key,each in item.iteritems()])
+            type_list = set([getTypeName(each) for _,each in item.iteritems()])
             type_name = 'dict:%d('%len(item)
             for each in type_list:
                 type_name += each+","
@@ -361,7 +365,7 @@ def inspectObject(item,name='<top>',max_depth=5,verbose=False,print_depth=0,info
                 
         if isinstance(item,dict):
             processed_types = set()
-            for key,each in item.iteritems():
+            for _,each in item.iteritems():
                 if type(each) in processed_types:
                     continue
                 processed_types.add(type(each))
@@ -526,20 +530,7 @@ class _VersionTest(unittest.TestCase):
         self.assert_(major > rmajor 
                      or major == rmajor and minor >= rminor 
                      or major == rmajor and minor == rminor and sub >= sub)
-        
-    def test_libsvm_version(self):
-        import svm
-        #major,minor,sub = svm.__version__.split('.')[:3]
-        rmajor,rminor,_ = 2,86,0 # 2008/03/20
-        #major,minor,sub = int(major),int(minor),int(sub)
-        #print "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
-        print >> sys.stderr, "No way to get version numbers >= %d.%d "%(rmajor,rminor),
-        sys.stderr.flush()
-        #self.assert_(major > rmajor 
-        #             or major == rmajor and minor >= rminor 
-        #             or major == rmajor and minor == rminor and sub >= sub)
-        self.assert_(True)        
-        
+                
 
         
 def test():
