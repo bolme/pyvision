@@ -257,6 +257,7 @@ class TestVideo(unittest.TestCase):
         
         self.assertEquals(count,5)
         
+        
     def disabletestFFMPEGBugsVideo(self):
         #ilog = pv.ImageLog()
         ilog = None

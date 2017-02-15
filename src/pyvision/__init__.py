@@ -551,16 +551,16 @@ def test():
     video_suite = unittest.TestLoader().loadTestsFromTestCase(TestVideo)
     test_suites.append(video_suite)
     
-    from pyvision.vector.VectorClassifier import _TestVectorClassifier
-    vc_suite = unittest.TestLoader().loadTestsFromTestCase(_TestVectorClassifier)
-    test_suites.append(vc_suite)
+    #from pyvision.vector.VectorClassifier import _TestVectorClassifier
+    #vc_suite = unittest.TestLoader().loadTestsFromTestCase(_TestVectorClassifier)
+    #test_suites.append(vc_suite)
     
     #from pyvision.vector.SVM import _TestSVM
     #svm_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSVM)
 
-    from pyvision.vector.Polynomial import _PolyTest
-    poly_suite = unittest.TestLoader().loadTestsFromTestCase(_PolyTest)
-    test_suites.append(poly_suite)
+    #from pyvision.vector.Polynomial import _PolyTest
+    #poly_suite = unittest.TestLoader().loadTestsFromTestCase(_PolyTest)
+    #test_suites.append(poly_suite)
     
     from pyvision.point.DetectorCorner import _CornerTest
     corner_suite = unittest.TestLoader().loadTestsFromTestCase(_CornerTest)
@@ -589,9 +589,9 @@ def test():
     except:
         print "WARNING: Could not load _TestCascadeDetector."
         
-    from pyvision.face.PCA import _TestFacePCA
-    fpca_suite = unittest.TestLoader().loadTestsFromTestCase(_TestFacePCA)
-    test_suites.append(fpca_suite)
+    #from pyvision.face.PCA import _TestFacePCA
+    #fpca_suite = unittest.TestLoader().loadTestsFromTestCase(_TestFacePCA)
+    #test_suites.append(fpca_suite)
     
     from pyvision.face.FilterEyeLocator import _TestFilterEyeLocator
     asefed_suite = unittest.TestLoader().loadTestsFromTestCase(_TestFilterEyeLocator)
