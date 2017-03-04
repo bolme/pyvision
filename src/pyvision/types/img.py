@@ -767,9 +767,15 @@ class Image:
             try:
                 # PILLOW
                 image_buffer = pil.tobytes()
-            except:
+            except Exception as ex:
                 # PIL
-                image_buffer = pil.tostring()
+                try:
+                    image_buffer = pil.tostring()
+                except:
+                    # Return the original error
+                    print "Problem processing filename:",self.filename
+                    raise ex
+
         elif self.type == TYPE_MATRIX_2D:
             # Just get the buffer
             image_buffer = self.matrix2d.transpose().tostring()
@@ -833,9 +839,15 @@ class Image:
             try:
                 # PILLOW
                 image_buffer = pil.tobytes()
-            except:
+            except Exception as ex:
                 # PIL
-                image_buffer = pil.tostring()
+                try:
+                    image_buffer = pil.tostring()
+                except:
+                    # Return the original error
+                    print "Problem processing filename:",self.filename
+                    raise ex
+        
         elif self.type == TYPE_MATRIX_2D:
             # Convert to color
             mat = self.matrix2d.transpose()
