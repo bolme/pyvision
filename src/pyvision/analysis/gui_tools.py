@@ -40,9 +40,28 @@ Created on Oct 31, 2011
 import pyvision as pv
 import cv2
 import PIL.Image as pil
+from collections import defaultdict
 
 def null_callback(*args,**kwargs):
     pass
+
+class SingletonCallback(object):
+    def __init__(self):
+        self.my_callback = None
+    
+    def __call__(self,*args,**kwargs):
+        if self.my_callback is not None:
+            self.my_callback(*args,**kwargs)
+        else:
+            print "pyvision.analysis.gui_tools.SingletonCallback: warning no callback function."
+            
+    def set(self,callback):
+        self.my_callback = callback
+        
+    def release(self):
+        self.my_callback = None
+
+CALLBACK_DICT = defaultdict(SingletonCallback)
 
 class CaptureClicks:
     '''
@@ -58,15 +77,18 @@ class CaptureClicks:
         self.keep_window_open = keep_window_open
         self.reset()
         for pt in default_points:
-            self.mouseCallback(cv.CV_EVENT_LBUTTONDOWN,pt.X(),pt.Y(),None,None)
+            self.mouseCallback(cv2.EVENT_LBUTTONDOWN,pt.X(),pt.Y(),None,None)
             
     def display(self):
         '''
         Display the window and run the main event loop.
         '''
+        global CALLBACK_DICT
         # Setup the mouse callback to handle mause events (optional)
-        cv.NamedWindow(self.window)
-        cv.SetMouseCallback(self.window, self.mouseCallback)
+        cv2.namedWindow(self.window)
+        
+        CALLBACK_DICT[self.window].set(self.mouseCallback)
+        cv2.setMouseCallback(self.window, CALLBACK_DICT[self.window])
         
         while True:
             key_press = self.im.show(self.window,delay=100)
@@ -78,8 +100,10 @@ class CaptureClicks:
             if key_press == ord('r'):
                 self.reset()
                 
+        CALLBACK_DICT[self.window].release()
+                
         if not self.keep_window_open:
-            cv.DestroyWindow(self.window)
+            cv2.destroyWindow(self.window)
             
         return self.points
                 
@@ -98,7 +122,7 @@ class CaptureClicks:
         '''
         Call back function for mouse events.
         '''
-        if event in [cv.CV_EVENT_LBUTTONDOWN]:
+        if event in [cv2.EVENT_LBUTTONDOWN]:
             point = pv.Point(x,y)
             self.im.annotateLabel(point,str(len(self.points)),mark='below')
             self.points.append(point)
