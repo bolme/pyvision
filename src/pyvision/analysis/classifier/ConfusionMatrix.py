@@ -118,8 +118,13 @@ class ConfusionMatrix(pv.Table):
                 total += self.element(row,col)
                 if row == col:
                     successes += self.element(row,col)
-            rate = float(successes)/total
-            self.setData('Total',col,"%0.4f"%rate)
+            rate = 'N/A'
+            self.setData('Total',col,"%s"%rate)
+            try:
+                rate = float(successes)/total
+                self.setData('Total',col,"%0.4f"%rate)
+            except:
+                pass
         
         self.setData('Total','Rate',self.update_rate())
         self.setData('Total','Bar',"#"*int(10*self.update_rate()+0.5))
