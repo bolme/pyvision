@@ -273,7 +273,7 @@ class TestVideo(unittest.TestCase):
         
         self.assertEquals(count,5)
         
-    def testFFMPEGFrameCount(self):
+    def disabletestFFMPEGFrameCount(self):
         """Frame Count Test"""
         video_path = os.path.join(DATA_DIR,SYNC_VIDEO)
         video = pv.FFMPEGVideo(video_path)
@@ -285,7 +285,7 @@ class TestVideo(unittest.TestCase):
         
         self.assertEquals(count,5)
         
-    def testFFMPEGBugsVideo(self):
+    def disabletestFFMPEGBugsVideo(self):
         #ilog = pv.ImageLog()
         ilog = None
         
