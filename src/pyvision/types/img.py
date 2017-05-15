@@ -846,7 +846,7 @@ class Image:
             image_buffer = mat.tostring()
         elif self.type == TYPE_OPENCV2BW:
             # Convert to color
-            tmp = cv2.cvtColor(self.opencv2bw, cv2.cv.CV_GRAY2RGB)
+            tmp = cv2.cvtColor(self.opencv2bw, cv2.COLOR_GRAY2RGB)
             image_buffer = tmp.tostring()
         elif self.type == TYPE_OPENCV2:
             # Convert BGR to RGB
