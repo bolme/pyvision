@@ -38,6 +38,7 @@ import pyvision as pv
 import PIL.Image
 import weakref
 import cv2
+import numpy as np
 
 class ImageMontage(object):
     """
@@ -74,59 +75,87 @@ class ImageMontage(object):
         self._images = image_list
         self._gutter = gutter
         self._by_row = by_row
-        self._txtfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 0.5, 0.5)
+        
+        self._txtfont = (cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
         self._txtcolor = (255, 255, 255)
-        self._imgPtr = 0
+        
+        self._image_list = image_list
+        
         self._labels = labels
-        self._clickHandler = clickHandler(self)
         self._keep_aspect = keep_aspect
-        self._image_positions = []
-        self._select_handler = None
-        self._highlighted = highlight_selected
-        self._selected_tiles = []  #which images have been selected (or clicked) by user
+        
+        width = tile_size[0]*self._cols
+        height = tile_size[1]*self._rows
+        im_size = (height,width,3)
 
-        #check if we need to allow for scroll-arrow padding
-        if self._rows * self._cols < len(image_list):
-            if by_row:
-                self._xpad = 0
-                self._ypad = 25
-            else:
-                self._ypad = 0
-                self._xpad = 25
-        else:
-            #there will be no scrolling required
-            self._xpad = 0
-            self._ypad = 0
-
-        imgWidth = self._cols * ( tile_size[0] + gutter ) + gutter + 2 * self._xpad
-        imgHeight = self._rows * (tile_size[1] + gutter) + gutter + 2 * self._ypad
-        self._size = (imgWidth, imgHeight)
-
-        cvimg = cv.CreateImage(self._size, cv.IPL_DEPTH_8U, 3)
+        cvimg = np.zeros(im_size,dtype=np.uint8) #cv.CreateImage(self._size, cv.IPL_DEPTH_8U, 3)
         self._cvMontageImage = cvimg
 
-        self._initDecrementArrow()  #build the polygon for the decrement arrow
-        self._initIncrementArrow()  #build the polygon for the increment arrow
         self.draw()  #compute the initial montage image
 
-    def draw(self, mousePos=None):
+    def draw(self):
         """
         Computes the image montage from the source images based on the current
         image pointer (position in list of images), etc. This internally constructs
         the montage, but show() is required for display and mouse-click handling.
         """
-        cv.SetZero(self._cvMontageImage)
+        # initialize to zeros
+        self._cvMontageImage[:,:,:] = 0
 
+        for i in range(self._rows*self._cols):
+            if i > len(self._image_list):
+                break
+            row = i / self._cols
+            col = i % self._cols
+            if not self._by_row:
+                row = i % self._rows
+                col = i / self._rows
+            tw = self._tileSize[0]
+            th = self._tileSize[1]
+            xpos = col*tw
+            ypos = row*th
+            
+            im = self._image_list[i]
+            
+            cv_tile = im.thumbnail((tw,th)).asOpenCV2()
+            ih,iw,ch = cv_tile.shape
+
+            assert ch==3
+            
+            # Draw Image
+            xpos += (tw - iw)/2
+            ypos += (th - ih)/2
+            self._cvMontageImage[ypos:ypos+ih,xpos:xpos+iw,:] = cv_tile
+
+            # Draw Text
+            xpos = col*tw
+            ypos = row*th
+            lbltext = "%d"%(i)
+            ((txtw, txth), _) = cv2.getTextSize(lbltext, *self._txtfont)
+            print "DEBUG: tw, th = %d,%d"%(txtw,txth)
+            if txtw > 0 and txth > 0:
+                cv2.rectangle(self._cvMontageImage, (xpos, ypos), (xpos+txtw + 3, ypos+txth + 3),
+                             (0, 0, 0), thickness=cv2.FILLED)
+                font = self._txtfont[0]
+                font_size = self._txtfont[1]
+                font_thick = self._txtfont[2]
+                color = self._txtcolor
+                cv2.putText(self._cvMontageImage, lbltext, (xpos+1, ypos+1+txth), font, font_size, color,font_thick)
+        return
+            
+            
+            
+                
         img_ptr = self._imgPtr
         if img_ptr > 0:
             #we are not showing the first few images in imageList
             #so display the decrement arrow
-            cv.FillConvexPoly(self._cvMontageImage, self._decrArrow, (125, 125, 125))
-
+            #cv.FillConvexPoly()
+            cv2.fillConvexPoly(self._cvMontageImage, self._decrArrow, (125, 125, 125))
         if img_ptr + (self._rows * self._cols) < len(self._images):
             #we are not showing the last images in imageList
             #so display increment arrow
-            cv.FillConvexPoly(self._cvMontageImage, self._incrArrow, (125, 125, 125))
+            cv2.fillConvexPoly(self._cvMontageImage, self._incrArrow, (125, 125, 125))
 
         self._image_positions = []
         if self._by_row:
@@ -165,139 +194,9 @@ class ImageMontage(object):
         @return: The key code of the key pressed, if any, that dismissed the window.
         """
         img = self.asImage()
-        cv.NamedWindow(window)
-        cv.SetMouseCallback(window, self._clickHandler.onClick, window)
         key = img.show(window=window, pos=pos, delay=delay)
         return key
 
-    def setSelectHandler(self, handler):
-        """
-        Add a function that will be called when an image is selected.
-        The handler function should take an image, the image index, 
-        a list of labels, and a dictionary of other info.
-        """
-        self._select_handler = handler
-        
-    def setHighlighted(self, idxs):
-        '''
-        If the montage was created with highlight_selected option enabled,
-        then this function will cause a set of tiles in the montage to be
-        highlighted.
-        @note: Calling this method will erase any previous selections made
-        by the user.
-        '''
-        self._selected_tiles = idxs
-        self.draw()
-        
-    def getHighlighted(self):
-        '''
-        Returns the index list of the tiles which were selected/highlighted
-        by the users
-        '''
-        return sorted(self._selected_tiles)
-
-    def _checkClickRegion(self, x, y):
-        """
-        internal method to determine the clicked region of the montage.
-        @return: -1 for decrement region, 1 for increment region, and 0 otherwise.
-        If a select handler function was defined (via setSelectHandler), then
-        this function will be called when the user clicks within the region
-        of one of the tiles of the montage. Signature of selectHandler function
-        is f(img, imgNum, dict). As of now, the only key/value pair passed
-        into the dict is "imgLabel":<label>.
-        """
-        if self._by_row:
-            #scroll up/down to expose next/prev row
-            decr_rect = pv.Rect(0, 0, self._size[0], self._ypad)
-            incr_rect = pv.Rect(0, self._size[1] - self._ypad, self._size[0], self._ypad)
-        else:
-            #scroll left/right to expose next/prev col
-            decr_rect = pv.Rect(0, 0, self._xpad, self._size[1])
-            incr_rect = pv.Rect(self._size[0] - self._xpad, 0, self._xpad, self._size[1])
-
-        pt = pv.Point(x, y)
-        if incr_rect.containsPoint(pt):
-            #print "DEBUG: Increment Region"
-            return 1
-        elif decr_rect.containsPoint(pt):
-            #print "DEBUG: Decrement Region"
-            return -1
-        else:
-            #print "DEBUG: Neither Region"
-            for img, imgNum, rect in self._image_positions:
-                if rect.containsPoint(pt):
-                    if imgNum in self._selected_tiles:
-                        self._selected_tiles.remove(imgNum)
-                    else:
-                        self._selected_tiles.append(imgNum)
-                    if self._select_handler != None:
-                        imgLabel = self._labels[imgNum] if type(self._labels) == list else str(imgNum)
-                        self._select_handler(img, imgNum, {"imgLabel":imgLabel})
-            return 0
-
-    def _initDecrementArrow(self):
-        """
-        internal method to compute the list of points that represents
-        the appropriate decrement arrow (leftwards or upwards) depending
-        on the image montage layout.
-        """
-        if self._by_row:
-            #decrement upwards
-            x1 = self._size[0] / 2
-            y1 = 2
-            halfpad = self._ypad / 2
-            self._decrArrow = [(x1, y1), (x1 + halfpad, self._ypad - 2), (x1 - halfpad, self._ypad - 2)]
-        else:
-            #decrement leftwards
-            x1 = 2
-            y1 = self._size[1] / 2
-            halfpad = self._xpad / 2
-            self._decrArrow = [(x1, y1), (x1 + self._xpad - 3, y1 - halfpad), (x1 + self._xpad - 3, y1 + halfpad)]
-
-    def _initIncrementArrow(self):
-        """
-        internal method to compute the list of points that represents
-        the appropriate increment arrow (rightwards or downwards) depending
-        on the image montage layout.
-        """
-        if self._by_row:
-            #increment downwards
-            x1 = self._size[0] / 2
-            y1 = self._size[1] - 3
-            halfpad = self._ypad / 2
-            self._incrArrow = [(x1, y1), (x1 + halfpad, y1 - self._ypad + 3), (x1 - halfpad, y1 - self._ypad + 3)]
-        else:
-            #increment rightwards
-            x1 = self._size[0] - 2
-            y1 = self._size[1] / 2
-            halfpad = self._xpad / 2
-            self._incrArrow = [(x1, y1), (x1 - self._xpad + 2, y1 - halfpad), (x1 - self._xpad + 2, y1 + halfpad)]
-
-    def _decr(self):
-        """
-        internal method used by _onClick to compute the new imgPtr location after a decrement
-        """
-        tmp_ptr = self._imgPtr
-        if self._by_row:
-            tmp_ptr -= self._cols
-        else:
-            tmp_ptr -= self._rows
-        if tmp_ptr < 0:
-            self._imgPtr = 0
-        else:
-            self._imgPtr = tmp_ptr
-
-    def _incr(self):
-        """
-        internal method used by _onClick to compute the new imgPtr location after an increment
-        """
-        tmp_ptr = self._imgPtr
-        if self._by_row:
-            tmp_ptr += self._cols
-        else:
-            tmp_ptr += self._rows
-
-        self._imgPtr = tmp_ptr
 
 
     def _composite(self, img, pos, imgNum):
@@ -316,7 +215,7 @@ class ImageMontage(object):
             w, h = img.size
 
             # Find the scale
-            scale = min(1.0 * self._tileSize[0] / w, 1.0 * self._tileSize[1] / h)
+            scale = min(1.0 * self._tileSize[1] / w, 1.0 * self._tileSize[0] / h)
             w = int(scale * w)
             h = int(scale * h)
 
@@ -338,20 +237,20 @@ class ImageMontage(object):
         pos_y = row * (self._tileSize[1] + self._gutter) + self._gutter + self._ypad
 
         cvImg = self._cvMontageImage
-        cvTile = tile.asOpenCV()
-        cv.SetImageROI(cvImg, (pos_x, pos_y, self._tileSize[0], self._tileSize[1]))
+        cvTile = tile.asOpenCV2()
+        cvImg[pos_x:pos_x+self._tileSize[0], pos_y:pos_y+self._tileSize[1],:] = np.transpose(cvTile,axes=(1,0,2))
 
         # Save the position of this image
         self._image_positions.append(
             [self._images[imgNum], imgNum, pv.Rect(pos_x, pos_y, self._tileSize[0], self._tileSize[1])])
 
-        depth = cvTile.nChannels
-        if depth == 1:
-            cvTileBGR = cv.CreateImage(self._tileSize, cv.IPL_DEPTH_8U, 3)
-            cv.CvtColor(cvTile, cvTileBGR, cv.CV_GRAY2BGR)
-            cv.Copy(cvTileBGR, cvImg)  #should respect the ROI
-        else:
-            cv.Copy(cvTile, cvImg)  #should respect the ROI
+        depth = cvTile.shape[2]
+        #if depth == 1:
+        #    cvTileBGR = cv.CreateImage(self._tileSize, cv.IPL_DEPTH_8U, 3)
+        #    cv.CvtColor(cvTile, cvTileBGR, cv.CV_GRAY2BGR)
+        #    cv.Copy(cvTileBGR, cvImg)  #should respect the ROI
+        #else:
+        #    cv.Copy(cvTile, cvImg)  #should respect the ROI
 
         if self._labels == 'index':
             #draw image number in lower left corner, respective to ROI
@@ -362,21 +261,23 @@ class ImageMontage(object):
             lbltext = None
 
         if not lbltext is None:
-            ((tw, th), _) = cv.GetTextSize(lbltext, self._txtfont)
+            ((tw, th), _) = cv2.getTextSize(lbltext, *self._txtfont)
             #print "DEBUG: tw, th = %d,%d"%(tw,th)
             if tw > 0 and th > 0:
-                cv.Rectangle(cvImg, (0, self._tileSize[1] - 1), (tw + 1, self._tileSize[1] - (th + 1) - self._gutter),
-                             (0, 0, 0), thickness=cv.CV_FILLED)
-                font = self._txtfont
+                cv2.rectangle(cvImg, (0, self._tileSize[1] - 1), (tw + 1, self._tileSize[1] - (th + 1) - self._gutter),
+                             (0, 0, 0), thickness=cv2.FILLED)
+                font = self._txtfont[0]
+                font_size = self._txtfont[1]
+                font_thick = self._txtfont[2]
                 color = self._txtcolor
-                cv.PutText(cvImg, lbltext, (1, self._tileSize[1] - self._gutter - 2), font, color)
+                cv2.putText(cvImg, lbltext, (1, self._tileSize[1] - self._gutter - 2), font, font_size, color,font_thick)
 
         if self._highlighted and (imgNum in self._selected_tiles):
             #draw a highlight around this image
-            cv.Rectangle(cvImg, (0, 0), (self._tileSize[0], self._tileSize[1]), (0, 255, 255), thickness=4)
+            cv2.rectangle(cvImg, (0, 0), (self._tileSize[0], self._tileSize[1]), (0, 255, 255), thickness=4)
 
                 #reset ROI
-        cv.SetImageROI(cvImg, (0, 0, self._size[0], self._size[1]))
+        #cv2.setImageROI(cvImg, (0, 0, self._size[0], self._size[1]))
 
 
 class clickHandler(object):
@@ -401,7 +302,7 @@ class clickHandler(object):
         if IM is None: return #if the reference was deleted already...
 
         #print "event",event
-        if event == cv.CV_EVENT_LBUTTONDOWN:
+        if event == cv2.EVENT_LBUTTONDOWN:
             rc = IM._checkClickRegion(x, y)
             if rc == -1 and IM._imgPtr > 0:
                 #user clicked in the decrement region
@@ -412,7 +313,7 @@ class clickHandler(object):
                 pass #do nothing
 
             IM.draw((x, y))
-            cv.ShowImage(window, IM._cvMontageImage)
+            cv2.imshow(window, IM._cvMontageImage)
 
 
 class VideoMontage(pv.Video):
@@ -498,7 +399,7 @@ def demo_imageMontage():
 
     im = ImageMontage(imageList, (2, 3), tile_size=(128, 96), gutter=2, by_row=False)
     im.show(window="Image Montage", delay=0)
-    cv.DestroyWindow('Image Montage')
+    cv2.destroyWindow('Image Montage')
 
 
 def demo_videoMontage():
@@ -515,10 +416,10 @@ def demo_videoMontage():
     vm = VideoMontage(vid_dict, layout=(2, 1), tile_size=(256, 192))
     vm.play("Video Montage", delay=60, pos=(10, 10))
 
-#if __name__ == '__main__':
+if __name__ == '__main__':
 
 #    print "Demo of an Image Montage..."
-#    demo_imageMontage()
+    demo_imageMontage()
 
 #    print "Demo of a Video Montage..."
 #    demo_videoMontage()
