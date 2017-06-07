@@ -4,7 +4,7 @@ import os
 try:
     import cv2
     cv_version_data = cv2.__version__.split('.')
-    cv_version_data = [int(val) for val in cv_version_data]
+    cv_version_data = [int(cv_version_data[0]),int(cv_version_data[1])]
     if cv_version_data[0] > 2:
         pass
     else:
