@@ -92,6 +92,7 @@ class CaptureClicks:
         
         while True:
             key_press = self.im.show(self.window,delay=100)
+            key_press=key_press%128
             
             # Handle key press events.
             if key_press == ord(' '):

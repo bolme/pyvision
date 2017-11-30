@@ -42,17 +42,28 @@ import PIL.ImageDraw
 import PIL.Image
 from PIL.Image import BICUBIC, ANTIALIAS
 import PIL.ImageFont as ImageFont
-
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import sys
+import pprint
 # Imaging imports
 import numpy
 import numpy as np
 #import cv
-import cv2
+#import cv2
 import pyvision
 import pyvision as pv
 
 import exif
 import os
+import skimage as ski
+import skimage.color
+import time
+
+
+# maintain the state of matplotlib windows for visualizations
+_image_windows = {}
 
 
 
@@ -320,20 +331,19 @@ class Image:
         @return: an OpenCV HSV encoded image
         '''
         cvim = self.asOpenCV2()
-        dst = cv2.cvtColor(cvim, cv2.COLOR_BGR2HSV)
+        hsv = skimage.color.rgb2hsv(cvim[:,:,::-1])
         
-        return dst
+        return hsv
         
         
     def asLAB(self):
         '''
         @return: an OpenCV LAB encoded image
         '''
-        cvim = self.asOpenCV()
-        dst = cv.CreateImage(cv.GetSize(cvim), cv.IPL_DEPTH_8U, 3)
-        cv.CvtColor(cvim, dst, cv.CV_BGR2Lab)
+        cvim = self.asOpenCV3()
+        lab = skimage.color.rgb2lab(cvim[:,:,::-1])
         
-        return dst
+        return lab
     
     def getExif(self,output='simple'):
         '''
@@ -1064,13 +1074,42 @@ class Image:
             if window is None:
                 window = "PyVisionImage"
 
+            
             # Create the window
-            cv2.namedWindow(window)
+            if _image_windows.has_key(window):
+                fig, ax, key_capture, mouse_capture = _image_windows[window]
+                ax.clear()
+                key_capture.key = None
+                mouse_capture.x = None
+                mouse_capture.y = None
+                
+            else:
+                class KeyHandeler(object):
+                    
+                    def __init__(self):
+                        self.key = None
+                        
+                    def __call__(self,event):
+                        self.key = event.key
+    
+                class MouseHandeler(object):
+                    
+                    def __init__(self):
+                        self.x, self.y = None,None
+                        
+                    def __call__(self,event):
+                        self.x, self.y = event.xdata, event.ydata
+    
+                key_capture = KeyHandeler()
+                mouse_capture = MouseHandeler()
+                fig, ax = plt.subplots()
+                fig.canvas.set_window_title(window)
+                fig.canvas.mpl_connect('key_press_event', key_capture )
+                fig.canvas.mpl_connect('button_press_event', mouse_capture )
             
-            # Set the location
-            if pos is not None:
-                cv2.moveWindow(window, pos[0], pos[1])
-            
+                _image_windows[window] = fig, ax, key_capture, mouse_capture
+
+                        
             # Resize the image.    
             if size is not None:
                 x = pyvision.Image(self.asAnnotated().resize(size) )
@@ -1078,11 +1117,34 @@ class Image:
                 x = pyvision.Image(self.asAnnotated())    
                 
             # Display the result
-            cv2.imshow(window, x.asOpenCV2() )
-            key = cv2.waitKey(delay=delay)
+            #cv2.imshow(window, x.asOpenCV2() )
+            mat = x.asOpenCV2()
+            imgplot = ax.imshow(mat)
+
+            
+            if delay == 0:
+                delay = 300.0
+
+            # Start display
+            finish_time = time.time() + delay*0.001
+            while time.time() < finish_time:
+                plt.pause(0.01)
+                if key_capture.key is not None:
+                    break
+                if mouse_capture.x is not None:
+                    break
+
             del x
-            return key
-        
+
+            key = key_capture.key
+            x = mouse_capture.x
+            y = mouse_capture.y
+            
+            if x is not None:
+                return pv.Point(x,y)
+            if key is not None:
+                return ord(key)
+            return None
         
     def __repr__(self):
         
