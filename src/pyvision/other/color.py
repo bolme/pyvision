@@ -37,7 +37,7 @@ Created on Jan 11, 2011
 '''
 
 import pyvision as pv
-import cv
+import cv2
 import numpy as np
 
 HIST_HS = "HIST_HS"
@@ -84,12 +84,11 @@ class Histogram:
         ''' 
         Rescale the histogram such that the maximum equals the value.
         '''
-        cv.NormalizeHist(self.hist,1)
-        _,max_value,_,_ = cv.GetMinMaxHistValue(self.hist)
-        if max_value == 0:
-            max_value = 1.0
-        cv.NormalizeHist(self.hist,255/max_value)
-
+        if self.hist.max() <= 0:
+            return
+        
+        self.hist = value * self.hist / self.hist.max()
+        
     def rescaleSum(self,value=1.0):
         ''' 
         Rescale the histogram such that the maximum equals the value.
@@ -123,12 +122,6 @@ def HSHist(im,h_bins=32,s_bins=32,mask=None,normalize=True):
     w,h = im.size
     hsv = im.asHSV()
 
-    # Extract the H and S planes
-    h_plane = cv.CreateImage((w,h), cv.IPL_DEPTH_8U, 1)
-    s_plane = cv.CreateImage((w,h), cv.IPL_DEPTH_8U, 1)
-    cv.Split(hsv, h_plane, s_plane, None, None)
-    planes = [h_plane, s_plane]
-
     # set the histogram size
     hist_size = [h_bins, s_bins]
     
@@ -139,14 +132,16 @@ def HSHist(im,h_bins=32,s_bins=32,mask=None,normalize=True):
     # 255 (pure spectrum color)
     s_ranges = [0, 255]
     
-    ranges = [h_ranges, s_ranges]
+    ranges = h_ranges + s_ranges
+    
+    channels= (0,1)
 
     # Calculate the histogram    
-    hist = cv.CreateHist(hist_size, cv.CV_HIST_ARRAY, ranges, 1)
     if mask != None:
-        mask = mask.asOpenCVBW()
-    cv.CalcHist(planes, hist,mask=mask)
-    
+        mask = mask.asOpenCV2BW()
+        
+    hist = cv2.calcHist([hsv],channels,None,hist_size,ranges)
+
     return pv.Histogram(hist,HIST_HS,h_bins,s_bins,None)
 
 
@@ -212,6 +207,10 @@ def hsBackProjectHist(im,fg_hist,bg_hist=None):
     w,h = im.size
     hsv = im.asHSV()
     
+    h_ranges = [0, 180]
+    s_ranges = [0, 255]
+    ranges = h_ranges + s_ranges
+
     if bg_hist != None:
         # set the histogram size
         hist_size = [fg_hist.nbins1, fg_hist.nbins2]
@@ -219,31 +218,25 @@ def hsBackProjectHist(im,fg_hist,bg_hist=None):
         # pixel value ranges
         h_ranges = [0, 180]
         s_ranges = [0, 255]
-        ranges = [h_ranges, s_ranges]
-        
-        # Calculate the histogram    
-        prob_hist = cv.CreateHist(hist_size, cv.CV_HIST_ARRAY, ranges, 1)
+        ranges = h_ranges + s_ranges
         
         fg_hist.rescaleMax(255)
         bg_hist.rescaleMax(255)
         
-        cv.CalcProbDensity(bg_hist.hist, fg_hist.hist, prob_hist, scale=255) 
+        #fg_hist = 
+        #cv2.calcProbDensity(bg_hist.hist, fg_hist.hist, prob_hist, scale=255) 
         
-        fg_hist = pv.Histogram(prob_hist,pv.HIST_HS,fg_hist.nbins1, fg_hist.nbins2, None)
+        fg_hist = pv.Histogram(fg_hist.hist/bg_hist.hist,pv.HIST_HS,fg_hist.nbins1, fg_hist.nbins2, None)
     
-    # Extract the H and S planes
-    h_plane = cv.CreateImage((w,h), cv.IPL_DEPTH_8U, 1)
-    s_plane = cv.CreateImage((w,h), cv.IPL_DEPTH_8U, 1)
-    cv.Split(hsv, h_plane, s_plane, None, None)
-    planes = [h_plane, s_plane]
 
-    output = cv.CreateImage((w,h), cv.IPL_DEPTH_8U, 1)
+    #output = cv.CreateImage((w,h), cv.IPL_DEPTH_8U, 1)
     
     # Normalize the histogram
     fg_hist.rescaleMax(255)
 
-    cv.CalcBackProject(planes,output,fg_hist.hist)
-    
+    #cv.CalcBackProject(planes,output,fg_hist.hist)
+    #calcBackProject(images, channels, hist, ranges, scale[, dst]) -> dst
+    output = cv2.calcBackProject([hsv], [0,1], fg_hist.hist, ranges, 1.0)
     return pv.Image(output)
 
 def rgbBackProjectHist(im,fg_hist,bg_hist=None):
@@ -310,6 +303,10 @@ class ColorTest(unittest.TestCase):
         mask[150:200,128:300] = True
         m = pv.Image(1.0*mask)
         hist = HSHist(im,mask=m)
+        bgmask = np.zeros((512,512),dtype=np.bool)
+        bgmask[150:200,0:128] = True
+        bgm = pv.Image(1.0*mask)
+        bghist = HSHist(im,mask=bgm)
         #print hist
         #print dir(hist)
         #print dir(hist.bins),hist.bins.channels
@@ -320,7 +317,12 @@ class ColorTest(unittest.TestCase):
         
         #print hist.asMatrix()
         #print cv.SetHistBinRanges
-        back = hist.backProject(im)
+        back = hist.backProject(im)        
+        back.show()
+        m.show()
+        back = hist.backProject(im,bghist)        
+        back.show()
+        bgm.show()
         if ilog != None:
             ilog(im)
             ilog(m)

@@ -34,7 +34,7 @@
 import unittest
 import os.path
 
-import cv
+import cv2
 
 import pyvision as pv
 
@@ -47,15 +47,14 @@ def canny(im,threshold1=40.0,threshold2=100.0,aperture_size=3,sigma=None):
     '''
     void cvCanny( const CvArr* image, CvArr* edges, double threshold1, double threshold2, int aperture_size=3 );
     '''
-    gray = im.asOpenCVBW()
-    edges = cv.CreateImage( cv.GetSize(gray), 8, 1 );
+    gray = im.asOpenCV2BW()
     
 
     if sigma!=None:
-        cv.Smooth(gray,gray,cv.CV_GAUSSIAN,int(sigma+1)*4+1,int(sigma+1)*4+1,sigma,sigma)
+        gray = cv2.GaussianBlur(gray,(int(sigma+1)*4+1,int(sigma+1)*4+1),sigma)
     if threshold1 < threshold2:
         threshold1, threshold2 = threshold2,threshold1
-    cv.Canny(gray,edges,threshold1,threshold2   ,aperture_size)
+    edges = cv2.Canny(gray,threshold1,threshold2   ,aperture_size)
     
     return pv.Image(edges)
     

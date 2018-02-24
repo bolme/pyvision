@@ -37,7 +37,6 @@ Created on Nov 9, 2010
 
 import pyvision as pv
 from pyvision.surveillance.BackgroundSubtraction import BG_SUBTRACT_AMF, BG_SUBTRACT_FD, BG_SUBTRACT_MCFD, BG_SUBTRACT_MF
-import cv
 import numpy as np
 
 #TODO: Consider Renaming the following constants with a class-specific prefix

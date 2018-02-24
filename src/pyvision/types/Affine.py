@@ -58,10 +58,9 @@ import random
 import pyvision
 import pyvision as pv
 import numpy as np
-import cv
 import cv2
 
-from pyvision.types.img import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_MATRIX_RGB, TYPE_OPENCV, TYPE_OPENCV2, TYPE_OPENCV2BW
+from pyvision.types.img import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_MATRIX_RGB, TYPE_OPENCV2, TYPE_OPENCV2BW
 from pyvision.types.Point import Point
 from pyvision.types.Rect import Rect
 from pyvision.vector.RANSAC import RANSAC,LMeDs
@@ -578,13 +577,6 @@ class AffineTransform:
             mat = np.array([c0,c1,c2],dtype=np.float32)
             result = Image(mat[:,:self.size[0],:self.size[1]])
             
-        elif im_a.getType() == TYPE_OPENCV:
-            matrix = pv.NumpyToOpenCV(self.matrix)
-            src = im_a.asOpenCV()
-            dst = cv.CreateImage( (self.size[0],self.size[1]), cv.IPL_DEPTH_8U, src.nChannels );
-            cv.WarpPerspective( src, dst, matrix, cv.CV_INTER_LINEAR+cv.CV_WARP_FILL_OUTLIERS,cv.ScalarAll(128))                    
-            result = pv.Image(dst)
-
         elif im_a.getType() == TYPE_OPENCV2:
             # Transform an opencv 2 image
             src = im_a.asOpenCV2()

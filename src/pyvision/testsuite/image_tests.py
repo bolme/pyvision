@@ -10,7 +10,7 @@ import unittest
 import pyvision as pv
 import numpy as np
 import os.path
-import cv
+import cv2
 
 DATA_DIR = os.path.join(pv.__path__[0],'data','test')
 SYNC_VIDEO = 'video_sync.mov'
@@ -33,7 +33,8 @@ class TestImage(unittest.TestCase):
         assert self.mat3d.shape[0] == 3
         assert self.mat3d.shape[1] == 640
         assert self.mat3d.shape[2] == 480
-        self.opencv = self.im.asOpenCV()
+        self.opencv = self.im.asOpenCV2()
+        self.opencv = self.im.asOpenCV2BW()
             
     def test_PILToBufferGray(self):
         w,h = self.im.size
@@ -103,7 +104,7 @@ class TestImage(unittest.TestCase):
     def test_PILToOpenCV(self):
         pil = self.im.asPIL().resize((180,120))
         im = pv.Image(pil)
-        cv = im.asOpenCV()
+        cv = im.asOpenCV2()
         #Uncomment this code to compare saved images
         #from opencv import highgui
         #highgui.cvSaveImage('/tmp/cv.png',cv)
@@ -118,7 +119,7 @@ class TestImage(unittest.TestCase):
     def test_OpenCVToPIL(self):
         pil = self.im.asPIL().resize((180,120))
         im = pv.Image(pil)
-        cv = im.asOpenCV()
+        cv = im.asOpenCV2()
         pil = pv.Image(cv).asPIL()
 
         for i in range(im.width):
@@ -129,7 +130,7 @@ class TestImage(unittest.TestCase):
     def test_OpenCVToPILGray(self):
         pil = self.im.asPIL().resize((180,120)).convert('L')
         im = pv.Image(pil)
-        cv = im.asOpenCV()
+        cv = im.asOpenCV2()
         im = pv.Image(cv)
         pil = im.asPIL()
         
@@ -147,7 +148,7 @@ class TestImage(unittest.TestCase):
     def test_BufferToOpenCV(self):
         pil = self.im.asPIL().resize((180,120))
         im = pv.Image(pil)
-        cvim = im.asOpenCV()
+        cvim = im.asOpenCV2()
         data_buffer = im.toBufferRGB(8)
 
         for i in range(im.width):
@@ -157,48 +158,20 @@ class TestImage(unittest.TestCase):
      
     def test_asOpenCVBW(self):
         pass #TODO: Create tests for this method.
-        
-    def test_MatConvertOpenCVToNumpy(self):
-        r,c = 10,20
-        cvmat = cv.CreateMat(r,c,cv.CV_32F)
-        for i in range(r):
-            for j in range(c):
-                cvmat[i,j] = i*j
-        mat = pv.OpenCVToNumpy(cvmat)
-        self.assert_(mat.shape == (r,c))
-        for i in range(r):
-            for j in range(c):
-                self.assert_(mat[i,j] == cvmat[i,j])
-        
+                
         
     def test_ConvertIPLImage32FToPvImage(self):
         im = pv.Image(pv.LENA)
         im = im.resize((512,400))
-        cv_im = im.asOpenCV()
+        cv_im = im.asOpenCV2()
         mat = im.asMatrix3D()
-        cv_32 = cv.CreateImage(cv.GetSize(cv_im),cv.IPL_DEPTH_32F,3)
-        cv.Convert(cv_im,cv_32)
         
         for x in range(50):
             for y in range(50):
                 for c in range(3):
-                    self.assertAlmostEqual(cv_im[y,x][2-c],mat[c,x,y])
-                    self.assertAlmostEqual(cv_im[y,x][2-c],cv_32[y,x][2-c])
+                    self.assertAlmostEqual(cv_im[y,x,2-c],mat[c,x,y])
                     
-        _ = pv.Image(cv_32)
-        
-    def test_MatConvertNumpyToOpenCV(self):
-        r,c = 10,20
-        mat = np.zeros((r,c),dtype=np.float32)
-        for i in range(r):
-            for j in range(c):
-                mat[i,j] = i*j
-        cvmat = pv.NumpyToOpenCV(mat)
-        self.assert_(mat.shape == (r,c))
-        for i in range(r):
-            for j in range(c):
-                self.assert_(mat[i,j] == cvmat[i,j])
-                
+                        
     def test_ImageCropOutofBounds(self):
         rect = pv.Rect(-3, -2, 35, 70)
         imcrop = self.im.crop(rect)
@@ -219,7 +192,6 @@ class TestImage(unittest.TestCase):
         #im.show(delay=0)
 
         im = pv.Image(os.path.join(pv.__path__[0],"data","misc","baboon_bw.jpg"))
-        self.assertRaises(Exception, im.asHSV)
 
 
 
@@ -284,6 +256,7 @@ class TestVideo(unittest.TestCase):
             count += 1
         
         self.assertEquals(count,5)
+        
         
     def disabletestFFMPEGBugsVideo(self):
         #ilog = pv.ImageLog()

@@ -46,21 +46,14 @@ import PIL.ImageFont as ImageFont
 # Imaging imports
 import numpy
 import numpy as np
-import cv
+#import cv
 import cv2
 import pyvision
 import pyvision as pv
 
-import cStringIO
 import exif
 import os
 
-# iPython support for ipython notebook
-#try:
-#    import pylab
-#    import IPython
-#except:
-#    pass # do nothing
 
 
 TYPE_MATRIX_2D  = "TYPE_MATRIX2D" 
@@ -71,9 +64,6 @@ TYPE_MATRIX_RGB = "TYPE_MATRIX_RGB"
 
 TYPE_PIL        = "TYPE_PIL" 
 '''Image was created using a PIL image instance'''
-
-TYPE_OPENCV     = "TYPE_OPENCV"
-'''Image was created using a OpenCV image instance'''
 
 TYPE_OPENCV2     = "TYPE_OPENCV2"
 '''Image was created using a OpenCV image instance'''
@@ -126,21 +116,6 @@ class Image:
         self.annotated = None
         self.bw_annotate = bw_annotate
         
-        # Convert floating point ipl images to numpy arrays
-        if isinstance(data,cv.iplimage) and data.nChannels == 3 and data.depth == 32:
-            w,h = cv.GetSize(data)
-            data = np.frombuffer(data.tostring(),dtype=np.float32)
-            data.shape = (h,w,3)
-            data = data.transpose((2,1,0))
-            data = data[::-1,:,:]
-            
-        # Convert floating point ipl images to numpy arrays
-        if isinstance(data,cv.iplimage) and data.nChannels == 1 and data.depth == 32:
-            w,h = cv.GetSize(data)
-            data = np.frombuffer(data.tostring(),dtype=np.float32)
-            data.shape = (h,w)
-            data = data.transpose((2,1,0))
-            data = data[::-1,:,:]
             
         # Numpy format
         if isinstance(data,numpy.ndarray) and len(data.shape) == 2 and data.dtype != np.uint8:
@@ -218,20 +193,6 @@ class Image:
             
             self.depth = 8
         
-        # opencv format             
-        elif isinstance(data,cv.iplimage):
-            self.type=TYPE_OPENCV
-            self.opencv=data 
-            
-            self.width = data.width
-            self.height = data.height
-                        
-            assert data.nChannels in (1,3)
-            self.channels = data.nChannels 
-            
-            assert data.depth == 8
-            self.depth = data.depth   
-
         # unknown type
         else:
             raise TypeError("Could not create from type: %s %s"%(data,type(data)))
@@ -271,13 +232,6 @@ class Image:
             self._generatePIL()
         return self.pil
 
-    def asOpenCV(self):
-        '''
-        @return: the image data in an OpenCV format
-        '''
-        if self.opencv is None:
-            self._generateOpenCV()
-        return self.opencv
         
     def asOpenCV2(self):
         '''
@@ -295,22 +249,6 @@ class Image:
             self._generateOpenCV2BW()
         return self.opencv2bw
         
-    def asOpenCVBW(self):
-        '''
-        @return: the image data in an OpenCV one channel format
-        '''
-        cvim = self.asOpenCV()
-        
-        if cvim.nChannels == 1:
-            return cvim
-        
-        elif cvim.nChannels == 3:
-            cvimbw = cv.CreateImage(cv.GetSize(cvim), cv.IPL_DEPTH_8U, 1);
-            cv.CvtColor(cvim, cvimbw, cv.CV_BGR2GRAY);
-            return cvimbw
-        
-        else:
-            raise ValueError("Unsupported opencv image format: nChannels=%d"%cvim.nChannels)
         
     def asThermal(self,clip_negative=False):
         '''
@@ -381,9 +319,8 @@ class Image:
         '''
         @return: an OpenCV HSV encoded image
         '''
-        cvim = self.asOpenCV()
-        dst = cv.CreateImage(cv.GetSize(cvim), cv.IPL_DEPTH_8U, 3)
-        cv.CvtColor(cvim, dst, cv.CV_BGR2HSV)
+        cvim = self.asOpenCV2()
+        dst = cv2.cvtColor(cvim, cv2.COLOR_BGR2HSV)
         
         return dst
         
@@ -798,28 +735,6 @@ class Image:
         else:
             raise NotImplementedError("Cannot convert image from type: %s"%self.type)
         
-    def _generateOpenCV(self):
-        '''
-        Create a color opencv representation of the image.
-        TODO: The OpenCV databuffer seems to be automatically swapped from RGB to BGR.  This is counter intuitive.
-        '''
-        
-        w,h = self.size
-        # generate a grayscale opencv image
-        if self.channels == 1:
-            gray = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,1)
-            cv.SetData(gray,self.toBufferGray(8))
-            self.opencv = gray
-        # Generate a color opencv image
-        elif self.channels == 3:
-            rgb = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
-            bgr = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
-            cv.SetData(rgb, self.toBufferRGB(8))
-            # convert from RGB to BGR
-            cv.CvtColor(rgb,bgr,cv.CV_RGB2BGR)
-            self.opencv=bgr
-        else:
-            raise NotImplementedError("Cannot convert image from type: %s"%self.type)
                 
     def _generateOpenCV2(self):
         '''
@@ -869,25 +784,13 @@ class Image:
             image_buffer = self.opencv2bw.tostring()
         elif self.type == TYPE_OPENCV2:
             # Convert to gray then get buffer
-            tmp = cv2.cvtColor(self.opencv2, cv2.cv.CV_BGR2GRAY)
+            tmp = cv2.cvtColor(self.opencv2, cv2.COLOR_BGR2GRAY)
             image_buffer = tmp.tostring()
         elif self.type == TYPE_MATRIX_RGB:
             # Convert to gray
             mat = self.matrix3d
             mat = LUMA[0]*mat[0] + LUMA[1]*mat[1] + LUMA[2]*mat[2]
             image_buffer = mat.transpose().tostring()
-        elif self.type == TYPE_OPENCV:
-            if self.channels == 1:
-                # Just get buffer
-                image_buffer = self.opencv.tostring()
-            elif self.channels == 3:
-                # Convert to gray
-                w,h = self.width,self.height
-                gray = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,1)
-                cv.CvtColor( self.opencv, gray, cv.CV_BGR2GRAY );
-                image_buffer = gray.tostring()
-            else:
-                raise TypeError("Operation not supported for image type.")
         else:
             raise TypeError("Operation not supported for image type.")
         
@@ -955,30 +858,16 @@ class Image:
             image_buffer = mat.tostring()
         elif self.type == TYPE_OPENCV2BW:
             # Convert to color
-            tmp = cv2.cvtColor(self.opencv2bw, cv2.cv.CV_GRAY2RGB)
+            tmp = cv2.cvtColor(self.opencv2bw, cv2.COLOR_GRAY2RGB)
             image_buffer = tmp.tostring()
         elif self.type == TYPE_OPENCV2:
             # Convert BGR to RGB
-            tmp = cv2.cvtColor(self.opencv2, cv2.cv.CV_BGR2RGB)
+            tmp = cv2.cvtColor(self.opencv2, cv2.COLOR_BGR2RGB)
             image_buffer = tmp.tostring() 
         elif self.type == TYPE_MATRIX_RGB:
             # Just get buffer
             mat = self.matrix3d.transpose()
             image_buffer = mat.tostring()
-        elif self.type == TYPE_OPENCV:
-            # Convert color BGR to RGB
-            w,h = self.width,self.height
-            if self.channels == 3:
-                rgb = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
-                cv.CvtColor( self.opencv, rgb, cv.CV_BGR2RGB );
-                image_buffer = rgb.tostring()
-            elif self.channels == 1:
-                rgb = cv.CreateImage((w,h),cv.IPL_DEPTH_8U,3)
-                cv.CvtColor( self.opencv, rgb, cv.CV_GRAY2RGB );
-                image_buffer = rgb.tostring()
-            else:
-                # Handle type errors
-                raise TypeError("Operation not supported for image type.")
         else:
             # Handle unsupported
             raise TypeError("Operation not supported for image type.")
@@ -1067,9 +956,8 @@ class Image:
         This method uses cv.CloneImage so that the underlying image data will be
         disconnected from the original data. (Deep copy)
         '''
-        imgdat = self.asOpenCV()
-        imgdat2 = cv.CloneImage(imgdat)
-        return pv.Image(imgdat2)
+        imgdat = self.asOpenCV2()
+        return pv.Image(imgdat.copy())
     
     def crop(self, rect, size=None, interpolation=None, return_affine=False):
         '''
@@ -1100,50 +988,16 @@ class Image:
         h = int(np.round(h))
         
         # Check the bounds for cropping
-        if x < 0 or y < 0 or x+w > self.size[0] or y+h > self.size[1]:
-            if size is None:
-                size = (w,h)
-            
-            affine = pv.AffineFromRect(pv.Rect(x,y,w,h),size)
-            im = affine(self)
-            if return_affine:
-                return im,affine
-            else:
-                return im
-        
-        # Get the image as opencv
-        cvim = self.asOpenCV()
-                
-        # Set up ROI
-        subim = cv.GetSubRect(cvim,(x,y,w,h))
-        
-        affine = pv.AffineTranslate(-x,-y,(w,h))
-        
         if size is None:
             size = (w,h)
         
-        # Copy to new image
-        new_image = cv.CreateImage(size,cvim.depth,cvim.nChannels)        
-        if interpolation is None:
-            
-            if size[0] < w or size[1] < y:
-                # Downsampling so use area interpolation
-                interpolation = cv.CV_INTER_AREA
-            else:
-                # Upsampling so use linear
-                interpolation = cv.CV_INTER_CUBIC
-            
-        # Resize to the correct size
-        cv.Resize(subim,new_image,interpolation)
-        
-        affine = pv.AffineNonUniformScale(float(size[0])/w,float(size[1])/h,size)*affine
-        
-        # Return the result as a pv.Image
-        if return_affine: 
-            return pv.Image(new_image),affine
+        affine = pv.AffineFromRect(pv.Rect(x,y,w,h),size)
+        im = affine(self)
+        if return_affine:
+            return im,affine
         else:
-            return pv.Image(new_image)
-        
+            return im
+                
         
     def save(self,filename,annotations=False):
         '''
@@ -1180,24 +1034,30 @@ class Image:
         '''
         if window==None and pv.runningInNotebook() and 'pylab' in globals().keys():
             # If running in notebook, then try to display the image inline.
-            
-            if size is None:
-                size = self.size
+            try:
+                import IPython
+                import pylab
+
+                if size is None:
+                    size = self.size
+                    
+                    # Constrain the size of the output
+                    max_dim = max(size[0],size[1])
+                    
+                    if max_dim > 800:
+                        scale = 800.0/max_dim
+                        size = (int(scale*size[0]),int(scale*size[1]))
                 
-                # Constrain the size of the output
-                max_dim = max(size[0],size[1])
+                w,h = size
                 
-                if max_dim > 800:
-                    scale = 800.0/max_dim
-                    size = (int(scale*size[0]),int(scale*size[1]))
-            
-            w,h = size
-            
-            # TODO: Cant quite figure out how figsize works and how to set it to native pixels
-            #pylab.figure()
-            IPython.core.pylabtools.figsize(1.25*w/72.0,1.25*h/72.0) #@UndefinedVariable
-            pylab.figure()
-            pylab.imshow(self.asAnnotated(),origin='upper',aspect='auto')
+                # TODO: Cant quite figure out how figsize works and how to set it to native pixels
+                #pylab.figure()
+                IPython.core.pylabtools.figsize(1.25*w/72.0,1.25*h/72.0) #@UndefinedVariable
+                pylab.figure()
+                pylab.imshow(self.asAnnotated(),origin='upper',aspect='auto')
+            except:
+                print "WARNING: could not display image in ipython notebook."
+                self.show(window="PyVisionImage",pos=pos,delay=delay,size=size)
             
         else:
             # Otherwise, use an opencv window
@@ -1205,11 +1065,11 @@ class Image:
                 window = "PyVisionImage"
 
             # Create the window
-            cv.NamedWindow(window)
+            cv2.namedWindow(window)
             
             # Set the location
             if pos is not None:
-                cv.MoveWindow(window, pos[0], pos[1])
+                cv2.moveWindow(window, pos[0], pos[1])
             
             # Resize the image.    
             if size is not None:
@@ -1218,8 +1078,8 @@ class Image:
                 x = pyvision.Image(self.asAnnotated())    
                 
             # Display the result
-            cv.ShowImage(window, x.asOpenCV() )
-            key = cv.WaitKey(delay=delay)
+            cv2.imshow(window, x.asOpenCV2() )
+            key = cv2.waitKey(delay=delay)
             del x
             return key
         
@@ -1229,60 +1089,6 @@ class Image:
         return "pv.Image(w=%d,h=%d,c=%d,type=%s)"%(self.width,self.height,self.channels,self.type)
 
 
-def OpenCVToNumpy(cvmat):
-    '''
-    Convert an OpenCV matrix to a numpy matrix.
-    
-    Based on code from: http://opencv.willowgarage.com/wiki/PythonInterface
-    '''
-    depth2dtype = {
-            cv.CV_8U: 'uint8',
-            cv.CV_8S: 'int8',
-            cv.CV_16U: 'uint16',
-            cv.CV_16S: 'int16',
-            cv.CV_32S: 'int32',
-            cv.CV_32F: 'float32',
-            cv.CV_64F: 'float64',
-        }
-    
-    # Check the size and channels
-    assert cvmat.channels == 1
-    r = cvmat.rows
-    c = cvmat.cols
-    
-    # Convert to numpy
-    a = np.fromstring(
-             cvmat.tostring(),
-             dtype=depth2dtype[cvmat.type],
-             count=r*c)
-    a.shape = (r,c)
-    return a
-
-
-def NumpyToOpenCV(a):
-    '''
-    Convert a numpy matrix to an OpenCV matrix. 
-    
-    Based on code from: http://opencv.willowgarage.com/wiki/PythonInterface
-    '''
-    dtype2depth = {
-        'uint8':   cv.CV_8U,
-        'int8':    cv.CV_8S,
-        'uint16':  cv.CV_16U,
-        'int16':   cv.CV_16S,
-        'int32':   cv.CV_32S,
-        'float32': cv.CV_32F,
-        'float64': cv.CV_64F,
-    }
-  
-    # Check the size
-    assert len(a.shape) == 2
-    r,c = a.shape
-    
-    # Convert to opencv
-    cv_im = cv.CreateMat(r,c,dtype2depth[str(a.dtype)])
-    cv.SetData(cv_im, a.tostring())
-    return cv_im
 
 
         

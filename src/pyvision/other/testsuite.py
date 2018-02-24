@@ -160,53 +160,6 @@ class _TestNormalize(unittest.TestCase):
         self.assertAlmostEqual(mat.std(),0.1647989569275968,delta=0.001)
 
 
-
-class _TestSURF(unittest.TestCase):
-    
-    def test_1_SURF(self):
-        '''SURF Lena: ......................................................'''
-        ilog = None
-        if 'ilog' in globals().keys():
-            ilog = globals()['ilog']
-                    
-        filename = os.path.join(pv.__path__[0],'data','misc','lena.jpg')
-        im = pv.Image(filename)
-        timer = pv.Timer()
-        keypoints,descriptors = pv.surf(im)
-        timer.mark("LenaSurf")
-        if ilog != None:
-            ilog(timer,"SURFLena")
-        for each in keypoints:
-            im.annotateCircle(pv.Point(each[0][0],each[0][1]), each[2])
-        if ilog != None:
-            ilog(im,'SurfKeypoints')
-                
-        self.assertEqual(len(keypoints),len(descriptors))
-        self.assertEqual(len(keypoints),774)
-        #print descriptors
-        
-        
-    def test_2_SURF(self):
-        '''SURF Taz: .......................................................'''
-        ilog = None
-        if 'ilog' in globals().keys():
-            ilog = globals()['ilog']
-                    
-        filename = os.path.join(pv.__path__[0],'data','test','TAZ_0010.jpg')
-        im = pv.Image(filename)
-        timer = pv.Timer()
-        keypoints,descriptors = pv.surf(im)
-        timer.mark("TazSurf")
-        if ilog != None:
-            ilog(timer,"SURFTaz")
-        for each in keypoints:
-            im.annotateCircle(pv.Point(each[0][0],each[0][1]), each[2])
-        if ilog != None:
-            ilog(im,'SurfKeypoints')
-
-        self.assertEqual(len(keypoints),len(descriptors))
-        self.assertEqual(len(keypoints),367)        
-            
          
                     
 class _TestDistance(unittest.TestCase):

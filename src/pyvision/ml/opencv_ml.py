@@ -9,7 +9,6 @@ import pyvision as pv
 import cv2
 import numpy as np
 import tempfile
-import shutil
 import os
 
 class StatsModelWrapper(object):
@@ -60,7 +59,8 @@ class StatsModelWrapper(object):
     
     def __setstate__(self,state):
         ''' Load the state for pickling. '''
-        self.model = eval(state['model_class']+"()")
+        model_class = 'cv2.ml.'+state['model_class'][7:]
+        self.model = eval(model_class+"_create()")
         filename = tempfile.mktemp(suffix='.mod', prefix='tmp')
         open(filename,'wb').write(state['model_data'])
         self.model.load(filename)
@@ -78,10 +78,10 @@ def svc_rbf(data,responses):
     Auto trains an OpenCV SVM.
     '''
     data = np.float32(data)
-    responses = np.float32(responses) 
-    params = dict( kernel_type = cv2.SVM_RBF, svm_type = cv2.SVM_C_SVC )
-    model = cv2.SVM()
-    model.train_auto(data,responses,None,None,params)
+    responses = np.int32(responses) 
+    params = dict( kernel_type = cv2.ml.SVM_RBF, svm_type = cv2.ml.SVM_C_SVC )
+    model = cv2.ml.SVM_create()
+    model.train(data,cv2.ml.ROW_SAMPLE,responses)
     return StatsModelWrapper(model)
     
     
@@ -91,9 +91,9 @@ def svc_linear(data,responses):
     '''
     np.float32(data)
     np.float32(responses) 
-    params = dict( kernel_type = cv2.SVM_LINEAR, svm_type = cv2.SVM_C_SVC)
-    model = cv2.SVM()
-    model.train_auto(data,responses,None,None,params)
+    params = dict( kernel_type = cv2.ml.SVM_LINEAR, svm_type = cv2.ml.SVM_C_SVC)
+    model = cv2.ml.SVM_create()
+    model.train(data,responses,None,None,params)
     return StatsModelWrapper(model)
     
     
@@ -103,9 +103,9 @@ def svr_rbf(data,responses):
     '''
     np.float32(data)
     np.float32(responses) 
-    params = dict( kernel_type = cv2.SVM_RBF, svm_type = cv2.SVM_EPS_SVR , p=1.0)
-    model = cv2.SVM()
-    model.train_auto(data,responses,None,None,params)
+    params = dict( kernel_type = cv2.ml.SVM_RBF, svm_type = cv2.ml.SVM_EPS_SVR , p=1.0)
+    model = cv2.ml.SVM_create()
+    model.train(data,responses,None,None,params)
     return StatsModelWrapper(model)
     
 def svr_linear(data,responses):
@@ -114,8 +114,8 @@ def svr_linear(data,responses):
     '''
     np.float32(data)
     np.float32(responses) 
-    params = dict( kernel_type = cv2.SVM_LINEAR, svm_type = cv2.SVM_EPS_SVR , p=1.0 )
-    model = cv2.SVM()
+    params = dict( kernel_type = cv2.ml.SVM_LINEAR, svm_type = cv2.ml.SVM_EPS_SVR , p=1.0 )
+    model = cv2.ml.SVM_create()
     model.train_auto(data,responses,None,None,params)
     return StatsModelWrapper(model)
     
@@ -128,33 +128,41 @@ def random_forest(data,responses,n_trees=100):
     np.float32(responses) 
     params = dict(max_num_of_trees_in_the_forest=n_trees,termcrit_type=cv2.TERM_CRITERIA_MAX_ITER)
     #params = dict( kernel_type = cv2.SVM_LINEAR, svm_type = cv2.SVM_EPS_SVR , p=1.0 )
-    model = cv2.RTrees()
-    model.train(data,cv2.CV_ROW_SAMPLE,responses,params=params)
+    model = cv2.ml.RTrees_create()
+    model.train(data,responses,params=params)
     return StatsModelWrapper(model)
     
     
-def boost(data,responses,weak_count=100,max_depth=20,boost_type=cv2.BOOST_DISCRETE):
+def boost(data,responses,weak_count=100,max_depth=20,boost_type=None):
     '''
     Auto trains an OpenCV SVM.
     '''
+    if boost_type is None:
+        try:
+            # opencv 2.6
+            boost_type=cv2.ml.BOOST_DISCRETE
+        except:
+            # opencv 2.4
+            boost_type=cv2.BOOST_DISCRETE
+        
     np.float32(data)
     np.float32(responses) 
     params = dict(boost_type=boost_type,weak_count=weak_count,max_depth=max_depth)
-    model = cv2.Boost()
-    model.train(data,cv2.CV_ROW_SAMPLE,responses,params=params)
+    model = cv2.ml.Boost_create()
+    model.train(data,responses,params=params)
     return StatsModelWrapper(model)
     
 def gbtrees(data,responses,n_trees=100):
     '''
     Auto trains an OpenCV SVM.
     '''
-    np.float32(data)
-    np.float32(responses) 
-    params = dict(max_num_of_trees_in_the_forest=n_trees,termcrit_type=cv2.TERM_CRITERIA_MAX_ITER)
-    #params = dict( kernel_type = cv2.SVM_LINEAR, svm_type = cv2.SVM_EPS_SVR , p=1.0 )
-    model = cv2.GBTrees()
-    model.train(data,cv2.CV_ROW_SAMPLE,responses,params=params)
-    return StatsModelWrapper(model)
+    raise NotImplementedError("This was removed for opencv 3.0.")
+    #np.float32(data)
+    #np.float32(responses) 
+    #params = dict(max_num_of_trees_in_the_forest=n_trees,termcrit_type=cv2.TERM_CRITERIA_MAX_ITER)
+    #model = cv2.ml.GBTrees_create()
+    #model.train(data,responses,params=params)
+    #return StatsModelWrapper(model)
     
     
 if __name__ == '__main__':

@@ -31,20 +31,15 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import cv
+import cv2
 
 import os
 import subprocess
 import random
 import tempfile
-import unittest
 
 import pyvision as pv
 
-from pyvision.analysis.face import EyesFile
-
-from pyvision.analysis.FaceAnalysis.FaceDetectionTest import FaceDetectionTest
-import pickle
 #from pyvision.optimize.GeneticAlgorithm import GeneticAlgorithm,ChoiceVariable
 import time
 #from pyvision.analysis.Table import Table
@@ -95,8 +90,8 @@ class CascadeDetector:
                 orig_size = (orig_size[0],orig_size[1])
             
             self.cascade_data = open(cascade_name).read()
-            self.cascade = cv.Load( cascade_name )
-            self.storage = cv.CreateMemStorage(0)
+            self.cascade = cv2.CascadeClassifier( cascade_name )
+            #self.storage = cv.CreateMemStorage(0)
             self.trained = True
         
         
@@ -126,50 +121,51 @@ class CascadeDetector:
         
         filename = tempfile.mktemp()
         open(filename,'w').write(self.cascade_data)
-        self.cascade = cv.Load( filename )
-        self.storage = cv.CreateMemStorage(0)
+        self.cascade = cv2.CascadeClassifier( filename )
         os.remove(filename)
 
     def _resizeImage(self, image, scale=None, size=None):
         ''' Resize an image by a scale or a size. Internal use only.'''
+        height,width = image.shape
         if scale != None and type(scale) in (int,float):
-            size = (int(image.width*scale),int(image.height*scale))
+            size = (int(width*scale),int(height*scale))
         elif size != None and type(size) in [list,tuple]:
             size = (int(size[0]),int(size[1]))
         else:
             pass
-        depth = image.depth
-        channels = image.nChannels
-        resized = cv.CreateImage( (size[0],size[1]), depth, channels )
-        cv.Resize( image, resized, cv.CV_INTER_LINEAR )
+        #depth = image.depth
+        #channels = image.nChannels
+        #resized = cv.CreateImage( (size[0],size[1]), depth, channels )
+        resized = cv2.resize( image, size, cv2.INTER_LINEAR )
         return resized
         
     def detect(self, im):
         ''' Runs the cascade classifer on an image. '''
-        image = im.asOpenCV()
+        image = im.asOpenCV2BW()
         
         min_size = (self.min_size[0],self.min_size[1])
         
         # Create a resized gray scale image
-        if image.nChannels == 3:
-            gray = cv.CreateImage( (image.width,image.height), image.depth, 1 )
-            cv.CvtColor( image, gray, cv.CV_BGR2GRAY );
-            image = gray
+        #if image.nChannels == 3:
+        #    gray = cv.CreateImage( (image.width,image.height), image.depth, 1 )
+        #    cv.CvtColor( image, gray, cv.CV_BGR2GRAY );
+        #    image = gray
             
             
         image = self._resizeImage(image,self.image_scale)
     
         # Equalize the image
-        cv.EqualizeHist( image, image )
+        image = cv2.equalizeHist( image )
         
         # Detect faces
-        faces = cv.HaarDetectObjects( image, self.cascade, self.storage,
-                                 self.haar_scale, self.min_neighbors, self.haar_flags, min_size );
-    
+        #faces = cv.HaarDetectObjects( image, self.cascade, self.storage,
+        #                         self.haar_scale, self.min_neighbors, self.haar_flags, min_size );
+        faces = self.cascade.detectMultiScale(image,
+                                 self.haar_scale, self.min_neighbors, self.haar_flags, min_size)
         # Transform and return the points
         result = []
         for r in faces:
-            rect = pv.Rect(r[0][0]/self.image_scale, r[0][1]/self.image_scale, r[0][2]/self.image_scale, r[0][3]/self.image_scale)
+            rect = pv.Rect(r[0]/self.image_scale, r[1]/self.image_scale, r[2]/self.image_scale, r[3]/self.image_scale)
             result.append(rect)
             
         return result
@@ -328,83 +324,4 @@ def trainHaarClassifier(pos_rects,
     return detector
     
  
-
-SCRAPS_FACE_DATA = os.path.join(pv.__path__[0],"data","csuScrapShots")
-NONFACE_DATA = os.path.join(pv.__path__[0],"data","NonFace")
-BAD_CASCADE=os.path.join(pv.__path__[0],"config","not_there.xml")
-
-
-class _TestCascadeDetector(unittest.TestCase):
-    ''' Unit tests for the Cascade Detector '''
-    
-    
-    def test_detect_bad_file(self):
-        '''
-        If the cascade file does not exist, opencv can crash without warning.
-        This makes sure a test is run to make sure the cascade is there.
-        '''
-        
-        self.assertRaises(CascadeNotFound,CascadeDetector,BAD_CASCADE)
-        
-    def test_face_detection_pickle(self):
-        fd = CascadeDetector(OPENCV_CASCADE)
-        
-        fdt = FaceDetectionTest(name='scraps')
-
-        data_buffer = pickle.dumps(fd)
-        fd = pickle.loads(data_buffer)
-        
-        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
-        for filename in self.eyes.files():
-            img = pv.Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
-            rects = fd(img)
-            truth = self.eyes.getFaces(img.filename)
-            fdt.addSample(truth,rects,im=img)
-
-        self.assertAlmostEqual( fdt.pos_rate , 0.98265895953757221, places = 2 ) # TODO: Version 2 performance is better
-
-        
-    def test_detect_scraps_opencv(self):
-        
-        fd = CascadeDetector(OPENCV_CASCADE)
-        fdt = FaceDetectionTest(name='scraps')
-        
-        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
-        for filename in self.eyes.files():
-            img = pv.Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
-            rects = fd(img)
-            truth = self.eyes.getFaces(img.filename)
-            fdt.addSample(truth,rects,im=img)
-
-        self.assertAlmostEqual( fdt.pos_rate , 0.98265895953757221, places = 2 ) # TODO: Version 2 performance is better
-          
-
-    def donttest_detector_train(self): # TODO: Cascade training fails for Version OpenCV 2.0
-
-        positives = []    
-        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
-        n = len(self.eyes.files())    
-        for filename in self.eyes.files()[:n/2]:
-            img = pv.Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
-            faces = self.eyes.getFaces(img.filename)
-            positives.append([os.path.join(SCRAPS_FACE_DATA,img.filename),faces])   
-            
-        neg_files = []
-        for im_name in os.listdir(NONFACE_DATA):    
-            if im_name[-4:] != ".jpg": continue
-            neg_files.append(os.path.join(NONFACE_DATA,im_name))
-
-        fd = trainHaarClassifier(positives,neg_files,nstages=6,maxtreesplits=0,max_run_time=300)
-        fdt = FaceDetectionTest(name='scraps')
-        
-        self.eyes = EyesFile(os.path.join(SCRAPS_FACE_DATA,"coords.txt"))
-        for filename in self.eyes.files():
-            img = pv.Image(os.path.join(SCRAPS_FACE_DATA, filename + ".pgm"))
-            rects = fd(img)
-            truth = self.eyes.getFaces(img.filename)
-            fdt.addSample(truth,rects,im=img)
-
-        self.assertAlmostEqual( fdt.pos_rate , 0.9942196531791907 )
- 
-
 
