@@ -71,8 +71,8 @@ import unittest
 import sys
 import cPickle as pkl
 
-__version__ = "0.9.0 $Rev: 446 $"
-__info__ = "$Id: __init__.py 446 2012-10-25 03:24:15Z bolme $"
+__version__ = "1.2.0"
+__info__ = "https://github.com/bolme/pyvision/wiki"
 __license__= '''
 PyVision License
 

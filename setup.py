@@ -54,7 +54,7 @@ for path,dirs,files in os.walk(DATA_DIR):
 #pyvision/config
 
 setup(name='PyVision',
-      version='1.1.0',
+      version='1.2.0',
       description='A computer vision library for python.',
       author='David Bolme',
       author_email='dbolme@gmail.com',

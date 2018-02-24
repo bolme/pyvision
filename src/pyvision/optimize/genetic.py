@@ -878,7 +878,7 @@ class GeneticAlgorithm:
         return args
     
     
-    def addIndividual(self,score,args,kwargs,ilog=None,display=False):
+    def addIndividual(self,score,args,kwargs,ilog=None,display=False,verbose=False):
         # This try block allows multiple values to be returned by the fitness function. 
         # Everything except the score will be stored in extra and should be picklible.
         extras = []
@@ -894,8 +894,8 @@ class GeneticAlgorithm:
         
         if score < self.best_score:
             self.best_score = score
-            if ilog != None:
-                # Print data
+            # Print data
+            if verbose:
                 print "New Best Score:",score
                 
                 for i in range(len(args)):
@@ -904,7 +904,7 @@ class GeneticAlgorithm:
                 keys.sort()
                 for key in keys:
                     print "    %10s:"%key,str(kwargs[key])[:70]
-                
+            
         self.population.append([score,args,kwargs])
         self.population.sort(lambda x,y: cmp(x[0],y[0]))
         self.population = self.population[:self.population_size]
@@ -915,9 +915,10 @@ class GeneticAlgorithm:
         
         self.iter += 1
 
-        if ilog != None:    
+        if verbose:
             self.printPopulation()
-            
+
+        if ilog != None:    
             ilog.pickle([score,args,kwargs],"Fitness_%0.8f"%score)
             for i in xrange(len(extras)):
                 extra = extras[i]
@@ -963,14 +964,14 @@ class GeneticAlgorithm:
         
         
     
-    def optimize(self,max_iter=1000,callback=None,ilog=None,restart_dir=None,display=False):
+    def optimize(self,max_iter=1000,callback=None,ilog=None,restart_dir=None,display=False, verbose=False):
         '''
         @returns: best_score, args, kwargs
         '''
         
         # Create worker process pool
         if self.n_processes > 1: 
-            print "Init Params (%d cores):"%self.n_processes,str(self.initializer)[:20], str(self.initargs)[:20]
+            # print "Init Params (%d cores):"%self.n_processes,str(self.initializer)[:20], str(self.initargs)[:20]
             self.pool = mp.Pool(self.n_processes,initializer=self.initializer,initargs=self.initargs)    
             
         # Initialize the population with random members
@@ -983,20 +984,22 @@ class GeneticAlgorithm:
             # Scan restart dir
             files = os.listdir(restart_dir)
             for filename in files:
-                print filename
+                if verbose:
+                    print filename
                 if "_Fitness_" not in filename or not filename.endswith('.pkl'):
                     continue
                 path = os.path.join(restart_dir,filename)
                 data = pkl.load(open(path,'rb'))
-                print 'Reloading:',path
-                for each in data:
-                    if len(str(each)) > 70:
-                        print "    %s..."%str(each)[:70]
-                    else:
-                        print "    %s"%str(each)
+                if verbose:
+                    print 'Reloading:',path
+                    for each in data:
+                        if len(str(each)) > 70:
+                            print "    %s..."%str(each)[:70]
+                        else:
+                            print "    %s"%str(each)
                     
                 # Call addIninvidiual
-                self.addIndividual(data[0], data[1], data[2], ilog=ilog, display=display)
+                self.addIndividual(data[0], data[1], data[2], ilog=ilog, display=display,verbose=verbose)
         
         elif self.n_processes > 1:
             scores = self.pool.map(_gaWork, work)

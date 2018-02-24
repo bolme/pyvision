@@ -298,10 +298,10 @@ class Video(VideoInterface):
         self.current_frame = 0
 
     def query(self):
-        if self.current_frame > 0 and self.cv_capture.get(cv2.CAP_PROP_POS_AVI_RATIO) == 1.0:
+        if self.current_frame > 0 and self.cv_capture.get(cv2.CAP_PROP_FRAME_COUNT) == 1.0:
             return None
         retval,frame = self.cv_capture.read()
-        if frame == None:
+        if frame is None:
             raise StopIteration("End of video sequence")
         self.current_frame += 1
         frame = frame.copy();

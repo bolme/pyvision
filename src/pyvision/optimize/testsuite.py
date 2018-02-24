@@ -282,7 +282,7 @@ class GeneticAlgorithmTest(unittest.TestCase):
         result = alg.optimize(max_iter=500,ilog=ilog)
         
         time.sleep(2)
-        print "Restarting..."
+        #print "Restarting..."
         ilog = pv.ImageLog()
         alg = ga.GeneticAlgorithm(fitness,[ga.GARanking(100)],n_processes=1)
         result = alg.optimize(max_iter=1000,ilog=ilog,restart_dir=restart_dir)

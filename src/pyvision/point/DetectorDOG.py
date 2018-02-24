@@ -267,7 +267,8 @@ class _DetectorDOGTestCase(unittest.TestCase):
         for _,pt,_ in points:
             im.annotatePoint(pt)
             
-        self.assertEquals(len(points),329)
+        self.assertLess(len(points),340)
+        self.assertGreater(len(points),320)
 
     def testDetectorDOG4(self):
         detector = DetectorDOG()
@@ -278,7 +279,8 @@ class _DetectorDOGTestCase(unittest.TestCase):
         for _,pt,_ in points:
             im.annotatePoint(pt)
             
-        self.assertEquals(len(points),293)
+        self.assertLess(len(points),300)
+        self.assertGreater(len(points),280)
 
     def testDetectorDOG5(self):
         detector = DetectorDOG(selector='best')
@@ -289,7 +291,8 @@ class _DetectorDOGTestCase(unittest.TestCase):
         for _,pt,_ in points:
             im.annotatePoint(pt)
             
-        self.assertEquals(len(points),250)
+        self.assertLess(len(points),260)
+        self.assertGreater(len(points),240)
         
     def testDetectorDOG6(self):
         detector = DetectorDOG(selector='all')
@@ -300,7 +303,9 @@ class _DetectorDOGTestCase(unittest.TestCase):
         for _,pt,_ in points:
             im.annotatePoint(pt)
             
-        self.assertEquals(len(points),554)
+            self.assertLess(len(points),570)
+        self.assertGreater(len(points),540)
+
         
 
   

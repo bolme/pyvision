@@ -136,7 +136,8 @@ class CascadeDetector:
         #depth = image.depth
         #channels = image.nChannels
         #resized = cv.CreateImage( (size[0],size[1]), depth, channels )
-        resized = cv2.resize( image, size, cv2.INTER_LINEAR )
+        
+        resized = cv2.resize( image, size, 0, 0,cv2.INTER_LINEAR )
         return resized
         
     def detect(self, im):

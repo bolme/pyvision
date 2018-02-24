@@ -223,6 +223,7 @@ class _CornerTest(unittest.TestCase):
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
-        self.assertEquals(len(points),2149)
+        self.assertLess(len(points),2160) 
+        self.assertGreater(len(points),2130) 
         
 
