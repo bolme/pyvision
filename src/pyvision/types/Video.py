@@ -60,6 +60,9 @@ class VideoInterface(object):
         '''
         pass
     
+    def next(self):
+        return self.__next__()
+    
     def __next__(self):
         '''
         The next method calls self.query(), so it is common to most video sources

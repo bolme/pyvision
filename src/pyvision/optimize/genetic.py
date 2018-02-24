@@ -947,12 +947,12 @@ class GeneticAlgorithm:
     
 
     def printPopulation(self):
-        print("GA Population (Iteration %d):"%self.iter, end=' ')
+        print("GA Population (Iteration %d):"%self.iter)
         for i in range(len(self.population)):
             if i % 10 == 0:
                 print()
-                print("   ", end=' ')
-            print("%8.3f"%self.population[i][0], end=' ')
+                print("   ")
+            print("%8.3f"%self.population[i][0])
         print()
         print()
         

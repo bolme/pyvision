@@ -32,7 +32,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import csv
-import io
+import StringIO
 import pyvision as pv
 
 
@@ -444,12 +444,12 @@ class _TestTable(unittest.TestCase):
 
     def test_save(self):
         expected = 'row,red,blue,pink,green\r\nred,3,1,0,1\r\nblue,2,4,0,0\r\npink,2,0,5,0\r\ngreen,0,0,0,1\r\n'
-        output = io.StringIO()
+        output = StringIO.StringIO()
         self.color.save(output)
         self.assertEqual(output.getvalue(),expected)
 
         expected = '3,1,0,1\r\n2,4,0,0\r\n2,0,5,0\r\n0,0,0,1\r\n'
-        output = io.StringIO()
+        output = StringIO.StringIO()
         self.color.save(output,headers=False)
         self.assertEqual(output.getvalue(),expected)
         

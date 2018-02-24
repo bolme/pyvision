@@ -481,7 +481,7 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = sys.version.split(' ')[0].split('.')[:3]
         rmajor,rminor,rsub = 2,3,0 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub), end=' ', file=sys.stderr)
+        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub))
         sys.stderr.flush()
         self.assertTrue(major > rmajor 
                      or major == rmajor and minor >= rminor 
@@ -492,7 +492,7 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = PIL.Image.VERSION.split('.')[:3]
         rmajor,rminor,rsub = 1,1,5 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub), end=' ', file=sys.stderr)
+        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub))
         sys.stderr.flush()
         self.assertTrue(major > rmajor 
                      or major == rmajor and minor >= rminor 
@@ -503,7 +503,7 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = cv2.__version__.split('.')[:3]
         rmajor,rminor,rsub = 2,4,2 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub), end=' ', file=sys.stderr)
+        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub))
         sys.stderr.flush()
         self.assertTrue(major > rmajor 
                      or major == rmajor and minor >= rminor 
@@ -514,7 +514,7 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = scipy.__version__.split('.')[:3]
         rmajor,rminor,rsub = 0,7,0 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub), end=' ', file=sys.stderr)
+        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub))
         sys.stderr.flush()
         self.assertTrue(major > rmajor 
                      or major == rmajor and minor >= rminor 
@@ -525,7 +525,7 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = numpy.__version__.split('.')[:3]
         rmajor,rminor,rsub = 1,0,4 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub), end=' ', file=sys.stderr)
+        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub))
         sys.stderr.flush()
         self.assertTrue(major > rmajor 
                      or major == rmajor and minor >= rminor 
