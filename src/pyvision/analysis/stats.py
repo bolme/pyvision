@@ -540,8 +540,10 @@ class _TestStats(unittest.TestCase):
         self.assertEqual(qbinom(0.5,100,0.5),  50)
         self.assertEqual(qbinom(0.1,100,0.01),  0)
         self.assertEqual(qbinom(1.0,100,0.9), 100)
-        self.assertEqual(qbinom(0.2,100,0.4),  36)
-        self.assertEqual(qbinom(0.4,100,0.85), 84)
+        self.assertLess(qbinom(0.2,100,0.4),  37)
+        self.assertGreater(qbinom(0.2,100,0.4),  35)
+        self.assertLess(qbinom(0.4,100,0.85), 85)
+        self.assertGreater(qbinom(0.4,100,0.85), 83)
 
     def test_cibinom(self):
         # Intervals verified by: http://statpages.org/confint.html

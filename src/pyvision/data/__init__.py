@@ -46,7 +46,7 @@ FONT_ARIAL = os.path.join(pv.__path__[0],'config','Arial.ttf')
 ''' The path to a file containing the Arial true type font. '''
 
 IRIS_PATH = os.path.join(pv.__path__[0],'data','ml','iris.csv')
-IRIS_DATA = np.array(list(csv.reader(open(IRIS_PATH,'rb'))))
+IRIS_DATA = np.array(list(csv.reader(open(IRIS_PATH,'r'))))
 IRIS_LABELS = IRIS_DATA[1:,5]
 IRIS_DATA = np.array(IRIS_DATA[1:,1:5],dtype=np.float32)
 

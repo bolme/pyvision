@@ -563,8 +563,10 @@ class GARanking(GAVariable):
         a = [ (i,self.ranking[i]) for i in range(len(self.ranking))]
         b = [ (i,other.ranking[i]) for i in range(len(self.ranking))]
         
-        a.sort(lambda x,y: cmp(x[1],y[1]))
-        b.sort(lambda x,y: cmp(x[1],y[1]))
+        
+        a.sort(key=lambda x:x[1])
+        b.sort(key=lambda x:x[1])
+        
         
         c = []
         for i in range(len(a)):
@@ -575,7 +577,7 @@ class GARanking(GAVariable):
 
         random.shuffle(c)
         
-        c.sort(lambda x,y: cmp(x[0],y[0]))
+        c.sort(key=lambda x:x[1])
         
         self.ranking = [r for _,r in c]
         
@@ -905,8 +907,10 @@ class GeneticAlgorithm:
                 for key in keys:
                     print("    %10s:"%key,str(kwargs[key])[:70])
             
+        #comp_func = lambda a,b: (a > b) - (a < b)
+
         self.population.append([score,args,kwargs])
-        self.population.sort(lambda x,y: cmp(x[0],y[0]))
+        self.population.sort(key=lambda a: a[0])
         self.population = self.population[:self.population_size]
 
         self.history.append(score)

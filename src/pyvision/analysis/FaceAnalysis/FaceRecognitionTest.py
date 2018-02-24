@@ -82,10 +82,13 @@ class FaceRecognitionTest:
         Adds a sample to the test.  The similarity scores is a list of 
         tuples that contain tuples of (gallery_id, score) 
         '''
+        comp_func = lambda a,b: (a > b) - (a < b)
+
+        
         if self.score_type == SCORE_TYPE_LOW:
-            scores.sort( lambda x,y: cmp(x[1],y[1]) )    
+            scores.sort( lambda x,y: comp_func(x[1],y[1]) )    
         elif self.score_type == SCORE_TYPE_HIGH:        
-            scores.sort( lambda x,y: -cmp(x[1],y[1]) )
+            scores.sort( lambda x,y: -comp_func(x[1],y[1]) )
         else:
             raise ValueError("Unknown score type: %s"%self.score_type)
         

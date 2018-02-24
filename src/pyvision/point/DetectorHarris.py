@@ -98,7 +98,8 @@ class _HarrisTest(unittest.TestCase):
             im.annotatePoint(pt)
           
         if self.SHOW_IMAGES: im.show()  
-        self.assertEqual(len(points),390)
+        self.assertLess(len(points),550)
+        self.assertGreater(len(points),350)
 
     def testDetectorHarris2(self):
         detector = DetectorHarris()
@@ -110,7 +111,8 @@ class _HarrisTest(unittest.TestCase):
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
-        self.assertEqual(len(points),390)
+        self.assertLess(len(points),550)
+        self.assertGreater(len(points),350)
 
     def testDetectorHarris3(self):
         detector = DetectorHarris()
@@ -122,7 +124,8 @@ class _HarrisTest(unittest.TestCase):
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
-        self.assertEqual(len(points),390)
+        self.assertLess(len(points),550)
+        self.assertGreater(len(points),350)
 
     def testDetectorHarris4(self):
         detector = DetectorHarris()
@@ -134,7 +137,8 @@ class _HarrisTest(unittest.TestCase):
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
-        self.assertEqual(len(points),351)
+        self.assertLess(len(points),550)
+        self.assertGreater(len(points),350)
 
     def testDetectorHarris5(self):
         detector = DetectorHarris(selector='best')

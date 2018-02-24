@@ -82,8 +82,11 @@ class HeadDetector(object):
             default.score = 0.0
             default.detector = "DEFAULT"
             faces.append(default)
-        # Order the list by score.            
-        faces.sort(lambda x,y: -cmp(x.score,y.score))
+        # Order the list by score.  
+        
+        comp_func = lambda a,b: (a > b) - (a < b)
+                  
+        faces.sort(lambda x,y: -comp_func(x.score,y.score))
         
         return faces
     

@@ -35,6 +35,7 @@ import csv
 import io
 import pyvision as pv
 
+
 def convertVal(val):
     if val in ("True","False"):
         return val == "True"
@@ -94,12 +95,12 @@ class Table:
             #if j > 300:
             #    break
             
-    def sortByRowHeader(self,comp_func = cmp):
-        self.row_headers.sort(comp_func)
+    def sortByRowHeader(self,key = None):
+        self.row_headers.sort(key=key)
         
         
-    def sortByColHeader(self,comp_func = cmp):
-        self.col_headers.sort(comp_func)
+    def sortByColHeader(self,key = None):
+        self.col_headers.sort(key=key)
         
                 
     def accumulateData(self,row,col,value):

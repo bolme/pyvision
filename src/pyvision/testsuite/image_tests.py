@@ -101,31 +101,31 @@ class TestImage(unittest.TestCase):
                 for c in range(3):
                     self.assertAlmostEqual(pil.getpixel((i,j))[c],mat[c,i,j])
         
-    def test_PILToOpenCV(self):
-        pil = self.im.asPIL().resize((180,120))
-        im = pv.Image(pil)
-        cv = im.asOpenCV2()
-        #Uncomment this code to compare saved images
-        #from opencv import highgui
-        #highgui.cvSaveImage('/tmp/cv.png',cv)
-        #pil.show()
-        #Image('/tmp/cv.png').show()
-
-        for i in range(im.width):
-            for j in range(im.height):
-                for c in range(3):
-                    self.assertAlmostEqual(pil.getpixel((i,j))[c],ord(cv.tostring()[i*3+j*im.width*3+2-c]))
+#     def test_PILToOpenCV(self):
+#         pil = self.im.asPIL().resize((180,120))
+#         im = pv.Image(pil)
+#         cv = im.asOpenCV2()
+#         #Uncomment this code to compare saved images
+#         #from opencv import highgui
+#         #highgui.cvSaveImage('/tmp/cv.png',cv)
+#         #pil.show()
+#         #Image('/tmp/cv.png').show()
+# 
+#         for i in range(im.width):
+#             for j in range(im.height):
+#                 for c in range(3):
+#                     self.assertAlmostEqual(pil.getpixel((i,j))[c],ord(cv.tostring()[i*3+j*im.width*3+2-c]))
         
-    def test_OpenCVToPIL(self):
-        pil = self.im.asPIL().resize((180,120))
-        im = pv.Image(pil)
-        cv = im.asOpenCV2()
-        pil = pv.Image(cv).asPIL()
-
-        for i in range(im.width):
-            for j in range(im.height):
-                for c in range(3):
-                    self.assertAlmostEqual(pil.getpixel((i,j))[c],ord(cv.tostring()[i*3+j*im.width*3+2-c]))
+#     def test_OpenCVToPIL(self):
+#         pil = self.im.asPIL().resize((180,120))
+#         im = pv.Image(pil)
+#         cv = im.asOpenCV2()
+#         pil = pv.Image(cv).asPIL()
+# 
+#         for i in range(im.width):
+#             for j in range(im.height):
+#                 for c in range(3):
+#                     self.assertAlmostEqual(pil.getpixel((i,j))[c],ord(cv.tostring()[i*3+j*im.width*3+2-c]))
         
     def test_OpenCVToPILGray(self):
         pil = self.im.asPIL().resize((180,120)).convert('L')
@@ -145,16 +145,16 @@ class TestImage(unittest.TestCase):
         #    for j in range(im.height):
         #        self.assertAlmostEqual(pil.getpixel((i,j)),ord(cv.imageData[i*3+j*im.width*3]))
         
-    def test_BufferToOpenCV(self):
-        pil = self.im.asPIL().resize((180,120))
-        im = pv.Image(pil)
-        cvim = im.asOpenCV2()
-        data_buffer = im.toBufferRGB(8)
-
-        for i in range(im.width):
-            for j in range(im.height):
-                for c in range(3):
-                    self.assertAlmostEqual(ord(data_buffer[i*3+j*im.width*3+c]),ord(cvim.tostring()[i*3+j*im.width*3+2-c]))
+#     def test_BufferToOpenCV(self):
+#         pil = self.im.asPIL().resize((180,120))
+#         im = pv.Image(pil)
+#         cvim = im.asOpenCV2()
+#         data_buffer = im.toBufferRGB(8)
+# 
+#         for i in range(im.width):
+#             for j in range(im.height):
+#                 for c in range(3):
+#                     self.assertAlmostEqual(ord(data_buffer[i*3+j*im.width*3+c]),ord(cvim.tostring()[i*3+j*im.width*3+2-c]))
      
     def test_asOpenCVBW(self):
         pass #TODO: Create tests for this method.
