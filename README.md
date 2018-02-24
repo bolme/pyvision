@@ -1,4 +1,4 @@
-#PyVision Computer Vision Toolkit
+## PyVision Computer Vision Toolkit
     by David Bolme
 
 As of August 2014, PyVision is now hosted at github:
