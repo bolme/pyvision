@@ -292,7 +292,7 @@ try:
     
 except:
     def FLANNTree(*args,**kwargs):
-        print "WARNING: The pyflann library was not imported.  Using pv.KNearestNeighbors instead."
+        print("WARNING: The pyflann library was not imported.  Using pv.KNearestNeighbors instead.")
         return pv.KNearestNeighbors(*args,**kwargs)
 
         

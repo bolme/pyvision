@@ -61,7 +61,7 @@ if __name__ == "__main__":
     plot.lines(data,color='red',width=3)
     plot.points(data,color='blue')
     
-    print "The plot with charecters can take a while to render..."
+    print("The plot with charecters can take a while to render...")
     ilog(plot,"Test_Plot_1")
-    print "done."    
+    print("done.")    
     ilog.show()

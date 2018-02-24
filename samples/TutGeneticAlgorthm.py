@@ -3,7 +3,7 @@
 import pyvision as pv
 import pyvision.optimize.genetic as ga
 import numpy as np
-import cPickle as pkl
+import pickle as pkl
 
 def callback(population):
     plot = pv.Plot(x_range=[0,10],y_range=[0,10],title='Search Space')
@@ -50,7 +50,7 @@ def myFitness(*args,**kwargs):
 # use True and False to toggle between running GA and loading archived results
 if True:
     # Check the fitness function
-    print myFitness(8,2)
+    print(myFitness(8,2))
     assert abs(myFitness(8,2) + 0.63) < 0.01
     
     # Here are the three arguments
@@ -63,12 +63,12 @@ if True:
     ilog = pv.ImageLog()
     ga_test = ga.GeneticAlgorithm(myFitness,args,kwargs,n_processes='AUTO')
     
-    print 'running ga'
+    print('running ga')
     
     result = ga_test.optimize(max_iter=2000,callback=callback,display=True)
-    print "Best Score =",result[0]
-    print "Best args =",result[1]
-    print "Best kwargs =",result[2]
+    print("Best Score =",result[0])
+    print("Best args =",result[1])
+    print("Best kwargs =",result[2])
     
 
 else:
@@ -80,7 +80,7 @@ else:
     
     result = pkl.load(open('/tmp/20150501_140701_pyvis_log/003701_Fitness_22.93110867.pkl','rb'))
     
-    print result
+    print(result)
     
     # to get useable args and kwargs you need to do this
     ga.list_generate(result)
@@ -88,9 +88,9 @@ else:
     args = result[1]
     kwargs = result[2]
     
-    print score
-    print args
-    print kwargs
-    print myFitness(*args,**kwargs)
+    print(score)
+    print(args)
+    print(kwargs)
+    print(myFitness(*args,**kwargs))
 
     

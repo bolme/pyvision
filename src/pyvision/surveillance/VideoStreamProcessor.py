@@ -221,8 +221,8 @@ class FrameSkipperVSP(AbstractVSP):
         '''
         self.skip_param = skip_param
         if skip_param == 1:
-            print "Warning, you specified a skip_param of 1 for the frame skipper VSP."
-            print "This means ALL frames will be suppressed."
+            print("Warning, you specified a skip_param of 1 for the frame skipper VSP.")
+            print("This means ALL frames will be suppressed.")
             
         pv.AbstractVSP.__init__(self, window=None, nextModule=nextModule)
              

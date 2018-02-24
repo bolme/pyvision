@@ -123,11 +123,11 @@ if __name__ == "__main__":
     
     svm = SVM(kernel='LINEAR',random_seed=30)
     ilog = pv.ImageLog()
-    print "SVM rate:",genderClassifier(svm,ilog=None)
+    print("SVM rate:",genderClassifier(svm,ilog=None))
     
     svm = SVM(kernel='RBF',random_seed=30)
     ilog = pv.ImageLog()
-    print "SVM rate:",genderClassifier(svm,ilog=None)
+    print("SVM rate:",genderClassifier(svm,ilog=None))
     
     ilog.show()
     

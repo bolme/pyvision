@@ -41,7 +41,7 @@ class MotionDetectTest(unittest.TestCase):
             _ = md.getPolygons(return_all=True)
             
             if ilog != None:
-                print "Processing Frame:",i
+                print("Processing Frame:",i)
                 
                 key_frame = md.getKeyFrame()
                 
@@ -74,7 +74,7 @@ class MotionDetectTest(unittest.TestCase):
             _ = md.getPolygons(return_all=True)
             
             if ilog != None:
-                print "Processing Frame:",i
+                print("Processing Frame:",i)
                 
                 key_frame = md.getKeyFrame()
                 
@@ -108,7 +108,7 @@ class MotionDetectTest(unittest.TestCase):
             _ = md.getPolygons(return_all=True)
             
             if ilog != None:
-                print "Processing Frame:",i
+                print("Processing Frame:",i)
                 
                 key_frame = md.getKeyFrame()
                 
@@ -137,7 +137,7 @@ class MotionDetectTest(unittest.TestCase):
             md.detect(frame)
             
             if ilog != None:
-                print "Processing Frame:",i
+                print("Processing Frame:",i)
                 #flow.annotateFrame(frame)  #this is encapsulated in the md.annotateFrame method
 
                 key_frame = md.getKeyFrame()                
@@ -177,7 +177,7 @@ class OpticalFlowTest(unittest.TestCase):
             
             flow.annotateFrame(frame)
             if ilog != None:
-                print "Processing Frame:",i  
+                print("Processing Frame:",i)  
                 ilog(frame,format='jpg')
 
             i += 1
@@ -201,7 +201,7 @@ class OpticalFlowTest(unittest.TestCase):
             
             flow.annotateFrame(frame)
             if ilog != None:
-                print "Processing Frame:",i  
+                print("Processing Frame:",i)  
                 if hasattr(frame,'to_prev'):
                     prev_im = frame.to_prev(frame)
                     ilog(prev_im,'back',format='jpg')

@@ -92,8 +92,8 @@ class ProgressBar:
     
 if __name__ == '__main__':
     prog = ProgressBar(0, 100, 60)
-    print dir(prog)
-    for i in xrange(101):
+    print(dir(prog))
+    for i in range(101):
         prog.updateAmount(i)
         prog.show()
         time.sleep(.05)

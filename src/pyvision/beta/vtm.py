@@ -87,7 +87,7 @@ class VideoTask(object):
         key = (data_item.getType(),data_item.getFrameId())
         
         # Check if this task needs the data
-        if self._arg_map.has_key(key):
+        if key in self._arg_map:
             curr_val = self._arg_map[key]
             
             # If no default save the data and update counts
@@ -156,19 +156,19 @@ class VideoTask(object):
         raise NotImplementedError("Abstract Method")
     
     def printInfo(self):
-        print "VideoTask {%s:%d}"%(self.__class__.__name__,self.getFrameId())
-        for key in self._arg_map.keys():
+        print("VideoTask {%s:%d}"%(self.__class__.__name__,self.getFrameId()))
+        for key in list(self._arg_map.keys()):
             dtype,frame_id = key
             
             if self._arg_map[key] is EMPTY_DATA or isinstance(self._arg_map[key],DefaultData):
-                print "    Argument <%s,%d> -> %s"%(dtype,frame_id,str(self._arg_map[key]))
+                print("    Argument <%s,%d> -> %s"%(dtype,frame_id,str(self._arg_map[key])))
             
             else:
                 tmp = str(self._arg_map[key])
                 tmp = " ".join(tmp.split()) # Flatten to one line an collapse white space to single spaces
                 if len(tmp) > 40:
                     tmp = tmp[:37] + "..."
-                print "    Argument <%s,%d> -> %s"%(dtype,frame_id,tmp)    
+                print("    Argument <%s,%d> -> %s"%(dtype,frame_id,tmp))    
 
 
 class _VideoDataItem(object):
@@ -228,7 +228,7 @@ def vtmProcessor(task_queue,results_queue,options):
 
             results_queue.put((task_id,frame_id,result))
             
-        except Exception, error:
+        except Exception as error:
             traceback.print_exc()
             results_queue.put((task_id,frame_id,error))
             
@@ -301,7 +301,7 @@ class VideoTaskManager(object):
         self.playback_filter = None
         
         if self.debug_level >= 3:
-            print "TaskManager[INFO]: Initialized"
+            print("TaskManager[INFO]: Initialized")
             
 
     def addTaskFactory(self,task_factory,*args,**kwargs):
@@ -332,7 +332,7 @@ class VideoTaskManager(object):
         '''
         self.task_id += 1
         profile = False
-        if kwargs.has_key('profile'):
+        if 'profile' in kwargs:
             profile = kwargs['profile']
             del kwargs['profile']
         self.task_factories.append((task_factory,args,kwargs,profile,self.task_id))
@@ -356,7 +356,7 @@ class VideoTaskManager(object):
         self.frame_list.append(frame_data)
         
         # Playback the recording
-        if self.playback_shelf != None and self.playback_shelf.has_key(str(self.frame_id)):
+        if self.playback_shelf != None and str(self.frame_id) in self.playback_shelf:
             data_items = self.playback_shelf[str(self.frame_id)]
             for each in data_items:
                 if self.playback_filter==None or each.getType() in self.playback_filter:
@@ -381,7 +381,7 @@ class VideoTaskManager(object):
         self.showFrames(ilog=ilog)
         
         if self.debug_level >= 3:
-            print "TaskManager[INFO]: Frame Processing Time=%0.3fms"%(1000*(stop-start),)
+            print("TaskManager[INFO]: Frame Processing Time=%0.3fms"%(1000*(stop-start),))
 
     def addData(self,data_list):
         '''
@@ -402,7 +402,7 @@ class VideoTaskManager(object):
         '''
         if self.recording_shelf != None:
             frame_id = str(self.frame_id)
-            if not self.recording_shelf.has_key(frame_id):
+            if frame_id not in self.recording_shelf:
                 self.recording_shelf[frame_id] = []
             if self.recording_filter == None or data_item.getType() in self.recording_filter:
                 self.recording_shelf[frame_id].append(data_item)
@@ -423,16 +423,16 @@ class VideoTaskManager(object):
             count = 0
             for factory,args,kwargs,profile,task_id in self.task_factories:
                 display_vars = ['display_color','display_subgraph']
-                display_options = {k:v for (k,v) in kwargs.iteritems() if k in display_vars}
-                kwargs = {k:v for (k,v) in kwargs.iteritems() if k not in display_vars}
+                display_options = {k:v for (k,v) in kwargs.items() if k in display_vars}
+                kwargs = {k:v for (k,v) in kwargs.items() if k not in display_vars}
                 task = factory(self.lastFrameCreated,*args,**kwargs)
                 
                 # Setup Graph Display Options
-                if display_options.has_key('display_color'):
-                    print 'setting color',display_options['display_color']
+                if 'display_color' in display_options:
+                    print('setting color',display_options['display_color'])
                     task.color = display_options['display_color']
-                if display_options.has_key('display_subgraph'):
-                    print 'setting subgraph',display_options['display_subgraph']
+                if 'display_subgraph' in display_options:
+                    print('setting subgraph',display_options['display_subgraph'])
                     task.subgraph = display_options['display_subgraph']
                     
                 task.task_id=task_id
@@ -445,14 +445,14 @@ class VideoTaskManager(object):
                     self.task_list += [task]
             stop = time.time() - start
             if self.debug_level >= 3:
-                print "TaskManager[INFO]: Created %d new tasks for frame %s. Total Tasks=%d.  Time=%0.2fms"%(count,self.lastFrameCreated,len(self.task_list),stop*1000)
+                print("TaskManager[INFO]: Created %d new tasks for frame %s. Total Tasks=%d.  Time=%0.2fms"%(count,self.lastFrameCreated,len(self.task_list),stop*1000))
             self.lastFrameCreated += 1
         
     def _runTasks(self,flush=False):
         '''
         Run any tasks that have all data available.
         '''
-        if self.debug_level >= 3: print "TaskManager[INFO]: Running Tasks..."
+        if self.debug_level >= 3: print("TaskManager[INFO]: Running Tasks...")
         while True:
             start_count = len(self.task_list)
             remaining_tasks = []
@@ -491,7 +491,7 @@ class VideoTaskManager(object):
             should_run = True
         elif (flush or self.frame_id - task.getFrameId() > self.buffer_size) and not task.couldRun():
             if self.debug_level >= 2: 
-                print "TaskManager[WARNING]: Task %s for frame %d was not executed."%(task,task.getFrameId())
+                print("TaskManager[WARNING]: Task %s for frame %d was not executed."%(task,task.getFrameId()))
                 task.printInfo()
             
             # If the task is beyond the buffer, then delete it.
@@ -515,10 +515,10 @@ class VideoTaskManager(object):
         # Stop the profiler and show that information.
         if task.profile:
             prof.disable()
-            print
-            print "Profiled task:",task.__class__.__name__
+            print()
+            print("Profiled task:",task.__class__.__name__)
             prof.print_stats('time')
-            print
+            print()
             
         # Check that the task did return a list.
         try:
@@ -547,10 +547,10 @@ class VideoTaskManager(object):
             self.addDataItem(data_item)
         stop = time.time() - start
         if self.debug_level >= 3:
-            print "TaskManager[INFO]: Evaluate task %s for frame %d. Time=%0.2fms"%(task,task.getFrameId(),stop*1000)
+            print("TaskManager[INFO]: Evaluate task %s for frame %d. Time=%0.2fms"%(task,task.getFrameId(),stop*1000))
         
         # Compute task statistics
-        if not self.task_data[task.task_id].has_key('time_sum'):
+        if 'time_sum' not in self.task_data[task.task_id]:
             self.task_data[task.task_id]['time_sum'] = 0.0
             self.task_data[task.task_id]['call_count'] = 0
         self.task_data[task.task_id]['time_sum'] += stop
@@ -631,7 +631,7 @@ class VideoTaskManager(object):
         import pydot
         import pyvision as pv
         import PIL.Image
-        from cStringIO import StringIO
+        from io import StringIO
         
         def formatNum(n):
             '''
@@ -659,7 +659,7 @@ class VideoTaskManager(object):
         
         # Add task nodes        
         for each in self.task_set:
-            if self.task_data[each].has_key('call_count'):
+            if 'call_count' in self.task_data[each]:
                 class_name = self.task_data[each]['class_name']
                 call_count = self.task_data[each]['call_count']
                 mean_time = self.task_data[each]['time_sum']/call_count
@@ -668,18 +668,18 @@ class VideoTaskManager(object):
                                            "Calls=%d"%(call_count,),
                                            ]) + "}"
                 color = '#99CC99'
-                print each, self.task_data[each]
+                print(each, self.task_data[each])
                 if self.task_data[each]['color'] is not None:
                     color = self.task_data[each]['color']
                 subgraph = self.task_data[each]['subgraph']
                 subgraph_name = subgraph
                 if subgraph_name != None:
                     subgraph_name = "_".join(subgraph.split())
-                if not subgraphs.has_key(subgraph):
-                    print "adding subgraph",subgraph
+                if subgraph not in subgraphs:
+                    print("adding subgraph",subgraph)
                     subgraphs[subgraph_name] = pydot.Cluster(subgraph_name,label=subgraph,shape='box',style='filled',fillcolor='#DDDDDD',nodesep=1.0) 
                     subgraphs[None].add_subgraph(subgraphs[subgraph_name])
-                print "adding node",each,subgraph
+                print("adding node",each,subgraph)
                 subgraphs[subgraph_name].add_node(pydot.Node(each,label=node_label,shape='record',style='filled',fillcolor=color))
             else:
                 # The task node was never executed
@@ -700,7 +700,7 @@ class VideoTaskManager(object):
             subgraphs[subgraph_name].add_node(pydot.Node(each,shape='box',style='rounded, filled',fillcolor='#9999ff'))
             
         # Add edges.
-        for each,offsets in self.flow.iteritems():
+        for each,offsets in self.flow.items():
             offsets = list(offsets)
             if len(offsets) == 1 and list(offsets)[0] == 0:
                 graph.add_edge(pydot.Edge(each[0],each[1]))
@@ -747,7 +747,7 @@ if __name__ == '__main__':
     offsets = [-3,-2,-1,0,1,3,4,5,6,7,8,10,15,20,21,22,23,-21,-22,56,57]
     offsets.sort()
     
-    print offsets
+    print(offsets)
     groups = groupOffsets(offsets)
-    print groups
-    print ",".join([formatGroup(each) for each in groups])
+    print(groups)
+    print(",".join([formatGroup(each) for each in groups]))

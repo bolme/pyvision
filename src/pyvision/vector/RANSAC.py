@@ -45,7 +45,7 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
     
     bestx = np.linalg.lstsq(A,b)[0]
     besterror,bestcount,bestinliers = computeErrorAndCount(A,b,bestx,group,tol)
-    if verbose: print "New Best (LS):",bestcount,besterror,float(bestcount*group)/n
+    if verbose: print("New Best (LS):",bestcount,besterror,float(bestcount*group)/n)
     
     if bestcount == n/group:
         if full_output:
@@ -55,7 +55,7 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
         
     #bestcount = 0
     #besterror = 0.0
-    for _ in xrange(niter):
+    for _ in range(niter):
         sample = random.sample(tmp,k/group)
         
         new_sample = []
@@ -82,7 +82,7 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
             besterror = error 
             bestx = x
             bestinliers = inliers
-            if verbose: print "    New Best:",bestcount,besterror,float(bestcount*group)/n
+            if verbose: print("    New Best:",bestcount,besterror,float(bestcount*group)/n)
             
         #print x, count, bestcount
                 
@@ -91,7 +91,7 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
     #refine the estimate
     #error,count,inliers = computeErrorAndCount(A,b,bestx,group,tol)
     inliers = bestinliers
-    for _ in xrange(10):
+    for _ in range(10):
         ty = b[inliers.flatten(),:]
         tX = A[inliers.flatten(),:]
         try:
@@ -105,7 +105,7 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
             besterror = error 
             bestx = x
             bestinliers = inliers
-            if verbose: print "Improved Best:",bestcount,besterror,float(bestcount*group)/n
+            if verbose: print("Improved Best:",bestcount,besterror,float(bestcount*group)/n)
         
         #new_inliers = nonzero(abs(b - np.dot(A,x)) < tol)[0]
         #if list(new_inliers) == list(inliers):
@@ -225,8 +225,8 @@ if __name__ == '__main__':
     b = np.array(b)
     b[0] = -20
     
-    print np.linalg.lstsq(A,b)[0]
-    print RANSAC(A,b,tol=6.0)
+    print(np.linalg.lstsq(A,b)[0])
+    print(RANSAC(A,b,tol=6.0))
     
 
     A = []
@@ -242,8 +242,8 @@ if __name__ == '__main__':
     b = np.array(b)
     b[0] = -200000.
     
-    print np.linalg.lstsq(A,b)[0]
-    print RANSAC(A,b,group=2,tol=6,full_output = True,verbose=True)
+    print(np.linalg.lstsq(A,b)[0])
+    print(RANSAC(A,b,group=2,tol=6,full_output = True,verbose=True))
     
 
 

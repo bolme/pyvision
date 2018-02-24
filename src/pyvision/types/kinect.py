@@ -58,7 +58,7 @@ class Kinect(object):
         ''' Return an iterator for this video '''
         return self
 
-    def next(self):
+    def __next__(self):
         '''
         Get the next frame and depth image from the sensor.
         '''
@@ -77,8 +77,8 @@ class Kinect(object):
     
 # The main function that runs some tests    
 if __name__ == '__main__':
-    print "Testing the kinect sensor."
-    print "Press any key to quit"
+    print("Testing the kinect sensor.")
+    print("Press any key to quit")
     
     kinect = pv.Kinect()
     for frame, depth in kinect:

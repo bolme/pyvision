@@ -146,7 +146,7 @@ class EyePickerFrame(wx.Frame):
             row = row[1:]
             
             if len(row)%2 != 0:
-                print "Error Loading File"
+                print("Error Loading File")
                 raise TypeError("Odd number of values in this row")
             
             points = []
@@ -160,7 +160,7 @@ class EyePickerFrame(wx.Frame):
             
             
             
-        print "CSV File Data: ", coords
+        print("CSV File Data: ", coords)
            
         self.coords = coords
         
@@ -168,7 +168,7 @@ class EyePickerFrame(wx.Frame):
         ''' Save the coords to a csv file. '''
         writer = csv.writer(open(path,'wb'))
         
-        keys = self.coords.keys()
+        keys = list(self.coords.keys())
         keys.sort()
         for key in keys:
             row = [key]
@@ -181,11 +181,11 @@ class EyePickerFrame(wx.Frame):
     def onSelect(self,event):
         if self.image_name:
             if self.n_points != None and len(self.coords[self.image_name]) != self.n_points:
-                print "ERROR: incorrect number of points."
+                print("ERROR: incorrect number of points.")
                 
         self.image_name = event.GetString()
         
-        if not self.coords.has_key(self.image_name):
+        if self.image_name not in self.coords:
             self.coords[self.image_name] = []
 
         filename = os.path.join(self.image_dir,self.image_name)
@@ -287,11 +287,11 @@ class EyePickerFrame(wx.Frame):
         
         
     def onOpen(self,event):
-        print "Open"
+        print("Open")
         fd = wx.FileDialog(self,style=wx.FD_OPEN)
         fd.ShowModal()
         self.filename = fd.GetPath()
-        print "On Open...",self.filename
+        print("On Open...",self.filename)
         
         self.openCSVFile(self.filename)
         
@@ -315,10 +315,10 @@ class EyePickerFrame(wx.Frame):
         dlg = wx.MessageDialog(self,message="Would you like to save the coordinates before exiting?",style = wx.YES_NO | wx.YES_DEFAULT)
         result = dlg.ShowModal()
         if result == wx.ID_YES:
-            print "Saving..."
+            print("Saving...")
             self.onSave(event)
         else:
-            print "Discarding changes..."
+            print("Discarding changes...")
         
         # Pass this on to the default handler.
         event.Skip()
@@ -333,9 +333,9 @@ if __name__ == '__main__':
     if(err == wx.ID_OK):
         image_dir = dir_dialog.GetPath()
     else:
-        print "Error getting path:",err
+        print("Error getting path:",err)
     
-    print "Image Dir",image_dir
+    print("Image Dir",image_dir)
     scale = 1.0
         
     frame = EyePickerFrame(None, wx.ID_ANY, "Eye Selector",image_dir,n_points=None,randomize=True,scale=scale)

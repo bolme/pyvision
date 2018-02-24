@@ -350,6 +350,6 @@ class GeneticAlgorithmTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    print "Running GA Test Suite"
+    print("Running GA Test Suite")
     #import sys;sys.argv = ['', 'Test.test2DSurface']
     unittest.main()

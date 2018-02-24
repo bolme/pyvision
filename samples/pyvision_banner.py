@@ -45,9 +45,9 @@ if __name__ == '__main__':
 
     #Load source image and resize to smaller scale
     im = pv.Image(source_name)
-    print "Size before affine scale: %s"%str(im.size)
+    print("Size before affine scale: %s"%str(im.size))
     im = pv.AffineScale(0.25,(320,240)).transformImage(im)
-    print "Size after scaling: %s"%str(im.size)
+    print("Size after scaling: %s"%str(im.size))
     ilog.log(im, 'Input')    
     #im.show(window='Input', pos=(0,0))
             
@@ -82,12 +82,12 @@ if __name__ == '__main__':
     #logo_surf.show(window='Annotated',pos=(360,300))
     
     #Demonstrate use of ImageMontage class to show a few small images in a single window
-    print "Have the image montage focused in UI and hit spacebar to continue..."
+    print("Have the image montage focused in UI and hit spacebar to continue...")
     imontage = pv.ImageMontage([im,edges,logo,logo_surf], layout=(2,2), tileSize=im.size, gutter=3, byrow=True, labels=None)
     imontage.show(window="Image Montage", delay=0)
     
     #Show the images stored to the image log object
-    print "Showing image log. These images are stored in a tmp directory."
+    print("Showing image log. These images are stored in a tmp directory.")
     ilog.show()
 
     

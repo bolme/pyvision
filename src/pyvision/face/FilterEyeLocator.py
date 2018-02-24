@@ -295,7 +295,7 @@ class FilterEyeLocator:
         '''
         version_nums = cv2.__version__.split('.')
         if version_nums[0] >= 3:
-            print "WARNING: FilterEyeLocator does not seem to work correctly with OpenCV ver. 3"
+            print("WARNING: FilterEyeLocator does not seem to work correctly with OpenCV ver. 3")
         
         if filename == None:
             filename = os.path.join(pv.__path__[0],"config","EyeLocatorASEF128x128.fel")
@@ -361,7 +361,7 @@ class _TestFilterEyeLocator(unittest.TestCase):
         edt = EyeDetectionTest(name='asef_scraps')
 
         #print "Testing..."
-        for face_id in ssdb.keys():
+        for face_id in list(ssdb.keys()):
             face = ssdb[face_id]
             im = face.image
 

@@ -18,8 +18,8 @@ cam_url = "rtsp://192.168.2.55/img/video.sav"
 if __name__ == '__main__':
     pass
 
-print "Please be patient, it can take several seconds to buffer live video..."
-print "When video is playing, if you click on the video window and then hold down the spacebar, you can pause it."
-print "When paused, you can hit 's' to step one frame at a time, 'c' to continue playback, or 'q' to quit."
+print("Please be patient, it can take several seconds to buffer live video...")
+print("When video is playing, if you click on the video window and then hold down the spacebar, you can pause it.")
+print("When paused, you can hit 's' to step one frame at a time, 'c' to continue playback, or 'q' to quit.")
 vid = pv.Video(cam_url)
 vid.play()

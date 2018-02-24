@@ -32,7 +32,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import csv
-import StringIO
+import io
 import pyvision as pv
 
 def convertVal(val):
@@ -108,7 +108,7 @@ class Table:
 
 
     def setColumnFormat(self,col,format_str):
-        if format_str == None and self.col_format.has_key(col):
+        if format_str == None and col in self.col_format:
             # Clear formating for that column
             del self.col_format[col]
         else:
@@ -141,13 +141,13 @@ class Table:
         
     def rebuildTable(self):
         for row in self.row_headers:
-            if not self.data.has_key(row): self.data[row] = {}
+            if row not in self.data: self.data[row] = {}
             for col in self.col_headers:
-                if not self.data[row].has_key(col): self.data[row][col] = self.default_value
+                if col not in self.data[row]: self.data[row][col] = self.default_value
         
         
     def hasElement(self,row,col):
-        return (self.data.has_key(row) and self.data[row].has_key(col))
+        return (row in self.data and col in self.data[row])
 
      
     def __getitem__(self,key):
@@ -162,7 +162,7 @@ class Table:
     def elementAsText(self,row,col):
         if isinstance(self.col_format,str):
             return self.col_format%self.element(row,col)
-        if isinstance(self.col_format,dict) and self.col_format.has_key(col):
+        if isinstance(self.col_format,dict) and col in self.col_format:
             return self.col_format[col]%self.element(row,col)
         # Todo it would be nice to support callable objects
             
@@ -248,9 +248,9 @@ class Table:
         if equal_cols:
             #new_widths = {}
             max_width = 0
-            for key,value in col_widths.iteritems():
+            for key,value in col_widths.items():
                 max_width = max(max_width,value)
-            for key in col_widths.keys():
+            for key in list(col_widths.keys()):
                 col_widths[key]=max_width
         
         row_header_width = 0
@@ -443,12 +443,12 @@ class _TestTable(unittest.TestCase):
 
     def test_save(self):
         expected = 'row,red,blue,pink,green\r\nred,3,1,0,1\r\nblue,2,4,0,0\r\npink,2,0,5,0\r\ngreen,0,0,0,1\r\n'
-        output = StringIO.StringIO()
+        output = io.StringIO()
         self.color.save(output)
         self.assertEqual(output.getvalue(),expected)
 
         expected = '3,1,0,1\r\n2,4,0,0\r\n2,0,5,0\r\n0,0,0,1\r\n'
-        output = StringIO.StringIO()
+        output = io.StringIO()
         self.color.save(output,headers=False)
         self.assertEqual(output.getvalue(),expected)
         

@@ -29,8 +29,8 @@ class V1LikeTest(unittest.TestCase):
         v1like = v1.V1Processing(v1.V1LIKE_PARAMS_A,v1.V1LIKE_FEATURES_A)
         tmp = v1like.extractFromImage(im)
         
-        print tmp.shape
-        self.assertEquals(tmp.shape, (30,30,96))
+        print(tmp.shape)
+        self.assertEqual(tmp.shape, (30,30,96))
         
         
 

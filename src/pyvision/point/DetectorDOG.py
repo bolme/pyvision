@@ -245,7 +245,7 @@ class _DetectorDOGTestCase(unittest.TestCase):
         for _,pt,radius in points:
             im.annotateCircle(pt,radius)
         #im.show()
-        self.assertEquals(len(points),100)
+        self.assertEqual(len(points),100)
 
     def testDetectorDOG2(self):
         detector = DetectorDOG(selector='best')
@@ -256,7 +256,7 @@ class _DetectorDOGTestCase(unittest.TestCase):
         for _,pt,_ in points:
             im.annotatePoint(pt)
             
-        self.assertEquals(len(points),250)
+        self.assertEqual(len(points),250)
 
     def testDetectorDOG3(self):
         detector = DetectorDOG()

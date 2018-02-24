@@ -53,7 +53,7 @@ class SingletonCallback(object):
         if self.my_callback is not None:
             self.my_callback(*args,**kwargs)
         else:
-            print "pyvision.analysis.gui_tools.SingletonCallback: warning no callback function."
+            print("pyvision.analysis.gui_tools.SingletonCallback: warning no callback function.")
             
     def set(self,callback):
         self.my_callback = callback
@@ -144,7 +144,7 @@ class CaptureClicksVideo:
         self.buffer_index = -1
         self.buffer_size = buffer_size
         self.keep_window_open = keep_window_open
-        self.next()
+        next(self)
         
         
     def display(self):
@@ -174,11 +174,11 @@ class CaptureClicksVideo:
                     self.prev()
                 
             if key_press == ord(' ') or key_press == ord('n'):
-                self.next()
+                next(self)
 
             if key_press == ord('N'):
                 for _ in range(10):
-                    self.next()
+                    next(self)
                 
             if key_press == ord('q'):
                 break
@@ -192,7 +192,7 @@ class CaptureClicksVideo:
         return self.points
             
     def reset(self):
-        if self.points.has_key(self.frame):
+        if self.frame in self.points:
             del self.points[self.frame]
             self.render()
             
@@ -216,31 +216,31 @@ class CaptureClicksVideo:
         self.im.annotateLabel(pv.Point(10,h+50), "Press 'p' for the previous frame.",color='yellow')
         self.im.annotateLabel(pv.Point(10,h+60), "Press 'N' or 'P' to skip 10 frames.",color='yellow')
         self.im.annotateLabel(pv.Point(10,h+70), "Press 'q' when finished.",color='yellow')
-        if self.points.has_key(self.frame):
+        if self.frame in self.points:
             points = self.points[self.frame]
             for i in range(len(points)):
                 pt = points[i]
                 self.im.annotateLabel(pt,'%d'% i,mark='below')
         
-    def next(self):
+    def __next__(self):
         if self.buffer_index == -1:
             try:
-                self.buffer.append(self.video.next())
+                self.buffer.append(next(self.video))
                 self.frame += 1
             except StopIteration:
-                print "End of video."
+                print("End of video.")
             self.buffer = self.buffer [-self.buffer_size:]
         else:
             self.buffer_index += 1
             self.frame += 1
 
-        print self.buffer_index,self.frame,len(self.buffer),self.points
+        print(self.buffer_index,self.frame,len(self.buffer),self.points)
         self.render()
         
     
     def prev(self):
         if self.buffer_index == -len(self.buffer):
-            print "Buffer exceed. Cannot display previous frame"
+            print("Buffer exceed. Cannot display previous frame")
         else:
             self.buffer_index -= 1
             self.frame -= 1
@@ -252,7 +252,7 @@ class CaptureClicksVideo:
         Call back function for mouse events.
         '''
         if event in [cv2.CV_EVENT_LBUTTONDOWN]:
-            if not self.points.has_key(self.frame):
+            if self.frame not in self.points:
                 self.points[self.frame] = []
             points = self.points[self.frame]
             point = pv.Point(x,y)

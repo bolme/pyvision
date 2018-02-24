@@ -71,7 +71,7 @@ def lda(data,labels,reg=0.0):
         means[key] = data[labels==key,:].mean(axis=0)
     
     # Compute the between class cov
-    t1 = [mean for key,mean in means.iteritems()]
+    t1 = [mean for key,mean in means.items()]
     t1 = np.array(t1)
     
     # mean of class means

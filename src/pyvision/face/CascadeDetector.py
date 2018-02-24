@@ -103,7 +103,7 @@ class CascadeDetector:
         ''' Function required to save and load the state from pickel. '''
         state = {}
         
-        for key,value in self.__dict__.iteritems():
+        for key,value in self.__dict__.items():
             if key in ['cascade','storage']:
                 continue
             
@@ -115,7 +115,7 @@ class CascadeDetector:
         ''' Function required to save and load the state from pickel. '''
         # Modeled after SVM pickling
         
-        for key,value in state.iteritems():
+        for key,value in state.items():
             self.__dict__[key] = value
             
         
@@ -191,7 +191,7 @@ def trainHaarClassifier(pos_rects,
     '''        
     # Create a directory for training.
     training_dir  = tempfile.mktemp()
-    os.makedirs(training_dir, 0700)
+    os.makedirs(training_dir, 0o700)
 
     random_name = "haar_"
     for _ in range(8):
@@ -236,7 +236,7 @@ def trainHaarClassifier(pos_rects,
     
     proc.wait()
     if verbose:
-        print proc.stdout.read()
+        print(proc.stdout.read())
         
     # Run haar training
     success = False
@@ -290,7 +290,7 @@ def trainHaarClassifier(pos_rects,
         if proc.poll() != None:
             break
         if time.time() - start_time > max_run_time:
-            print "Haar Training time exceeded. Killing process..." 
+            print("Haar Training time exceeded. Killing process...") 
             os.kill(proc.pid,6) #6 = abort, 3=quit, 9=kill
             proc.wait()
             break
@@ -300,12 +300,12 @@ def trainHaarClassifier(pos_rects,
         time.sleep(1)
 
     if proc.returncode == 0:
-        if verbose: print "Cascade successful."
+        if verbose: print("Cascade successful.")
         success = True
         
 
     else:
-        print "Problem with return code:",proc.returncode
+        print("Problem with return code:",proc.returncode)
         #levels = os.listdir(os.path.join(training_dir,cascade_name))
         #nlevels = len(levels)
 
@@ -316,7 +316,7 @@ def trainHaarClassifier(pos_rects,
         detector = CascadeDetector(os.path.join(training_dir,cascade_name+'.xml')) 
     else:
         # TODO: loading a partial cascade.  Maybe training should be removed from this module all together
-        print "Cascade Failure. Could not create classifier."            
+        print("Cascade Failure. Could not create classifier.")            
 
     # Clean up the temporary files   
     os.system("rm -rf %s"%training_dir)

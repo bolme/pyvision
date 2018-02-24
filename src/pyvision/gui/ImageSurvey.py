@@ -4,9 +4,9 @@ Created on Jun 6, 2016
 
 @author: qdb
 '''
-import BaseHTTPServer
-import SocketServer
-import StringIO
+import http.server
+import socketserver
+import io
 import os
 import pyvision as pv
 
@@ -37,7 +37,7 @@ IMAGELIST_HTML = '''
 </HTML>
 '''
 
-class ImageSurvey(BaseHTTPServer.BaseHTTPRequestHandler):
+class ImageSurvey(http.server.BaseHTTPRequestHandler):
     '''
     Runs and image survey through html.
     '''
@@ -66,19 +66,19 @@ class ImageSurvey(BaseHTTPServer.BaseHTTPRequestHandler):
     #    print dir(self)
 
     def sendImageList(self):
-        print 'Processing GET',self.headers
+        print('Processing GET',self.headers)
         self.send_response(200)
         self.send_header('Content-Type', 'text/html')
         self.end_headers()
         
-        table_data = StringIO.StringIO()
+        table_data = io.StringIO()
         for image_name in os.listdir('images'):
-            print image_name
+            print(image_name)
             if pv.isImage(image_name):
                 table_data.write("<TR><TD> %s </TD></TR>\n"%image_name)
             
         tmp = table_data.getvalue()
-        print tmp
+        print(tmp)
         self.wfile.write(IMAGELIST_HTML%(tmp,))
 
 if __name__ == '__main__':
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     
     #Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
     
-    httpd = SocketServer.TCPServer(("127.0.0.1", PORT), ImageSurvey)
+    httpd = socketserver.TCPServer(("127.0.0.1", PORT), ImageSurvey)
     
-    print "serving at port", PORT
+    print("serving at port", PORT)
     httpd.serve_forever()

@@ -60,7 +60,7 @@ class VideoInterface(object):
         '''
         pass
     
-    def next(self):
+    def __next__(self):
         '''
         The next method calls self.query(), so it is common to most video sources
         and may not need to be overridden.
@@ -147,7 +147,7 @@ class VideoInterface(object):
             delayObj = {'wait_time':delay, 'current_state':'PLAYING'}
         key=''
         for fn, img in enumerate(vid):
-            if fn == 0 and startframe > 0: print "Cueing video to start at %d"%startframe
+            if fn == 0 and startframe > 0: print("Cueing video to start at %d"%startframe)
             if fn < startframe: continue
             if not endframe is None and fn > endframe: break
             
@@ -185,7 +185,7 @@ class VideoInterface(object):
         #print state, wait
         
         if state=="PAUSED":
-            print "PAUSED: Select <a>bort program, <q>uit playback, <c>ontinue playback, or <s>tep to next frame."
+            print("PAUSED: Select <a>bort program, <q>uit playback, <c>ontinue playback, or <s>tep to next frame.")
             wait = 0
             
         c = cv.WaitKey(wait)
@@ -196,13 +196,13 @@ class VideoInterface(object):
         # we need to 'soak up' these extra inputs when the user is still
         # holding the spacebar, but we've gotten into the pause state.
         while c==ord(' '):
-            print "PAUSED: Select <a>bort program, <q>uit playback, <c>ontinue playback, or <s>tep to next frame."
+            print("PAUSED: Select <a>bort program, <q>uit playback, <c>ontinue playback, or <s>tep to next frame.")
             c = cv.WaitKey(0)
             c = c & 127 #bit mask to get only lower 8 bits
         
         #At this point, we have a non-spacebar input, so process it.
         if c == ord('a'):   #abort
-            print "User Aborted Program."
+            print("User Aborted Program.")
             raise SystemExit
         elif c == ord('q'): #quit video playback
             return 'q'
@@ -433,7 +433,7 @@ class VideoFromDirectory(VideoInterface):
                     im = im.resize(self.size)
                 return im
             except:
-                print "Warning: could not process image:",im_path
+                print("Warning: could not process image:",im_path)
                 
     def __iter__(self):
         ''' Return an iterator for this video '''
@@ -497,7 +497,7 @@ class VideoFromImages(VideoInterface):
         
         #check that directory exists
         if not os.path.exists(dirname):
-            print "Error. Directory: %s does not exist."%dirname
+            print("Error. Directory: %s does not exist."%dirname)
             raise IOError
         
     def query(self):      
@@ -512,7 +512,7 @@ class VideoFromImages(VideoInterface):
                 self.current_frame += 1
                 return( pv.Image(self.resize(frame)) )
             else:
-                print "Image file %s does not exist. Stopping VideoFromImages."%f
+                print("Image file %s does not exist. Stopping VideoFromImages."%f)
         
         return None
         

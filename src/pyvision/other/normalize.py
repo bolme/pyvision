@@ -40,7 +40,7 @@ import cv2
 
 def normalizeMeanStd(matrix):
     ''' TODO: deprecated please use meanStd.'''
-    print '''normalizeMeanStd is deprecated.  Please call as normalize.meanStd'''
+    print('''normalizeMeanStd is deprecated.  Please call as normalize.meanStd''')
     return meanStd(matrix)
 
 def clipRange(matrix,min_val,max_val):

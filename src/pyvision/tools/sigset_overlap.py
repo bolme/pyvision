@@ -93,16 +93,16 @@ if __name__ == '__main__':
     
 
     # Print overlap statistics
-    print "Total Subjects A:  ",len(sub_a)
-    print "Total Subjects B:  ",len(sub_b)
-    print "Common Subjects:   ",len(sub_a&sub_b)
-    print "Unique Subjects A: ",len(sub_a-sub_b)
-    print "Unique Subjects B: ",len(sub_b-sub_a)
-    print "Total Recordings A:",len(rec_a)
-    print "Total Recordings B:",len(rec_b)
-    print "Common Recordings: ",len(rec_a&rec_b)
-    print "Unique Recordings A:",len(rec_a-rec_b)
-    print "Unique Recordings B:",len(rec_b-rec_a)
+    print("Total Subjects A:  ",len(sub_a))
+    print("Total Subjects B:  ",len(sub_b))
+    print("Common Subjects:   ",len(sub_a&sub_b))
+    print("Unique Subjects A: ",len(sub_a-sub_b))
+    print("Unique Subjects B: ",len(sub_b-sub_a))
+    print("Total Recordings A:",len(rec_a))
+    print("Total Recordings B:",len(rec_b))
+    print("Common Recordings: ",len(rec_a&rec_b))
+    print("Unique Recordings A:",len(rec_a-rec_b))
+    print("Unique Recordings B:",len(rec_b-rec_a))
     
         
     

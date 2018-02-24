@@ -269,7 +269,7 @@ class GaborImage:
         return pt,sim,novel
     
     def show(self,*args,**kwargs):
-        print self.data.shape
+        print(self.data.shape)
         tiles = []
         w,h,n = self.data.shape
         for i in range(n):
@@ -340,7 +340,7 @@ class GaborJet:
         denom = gam_xx*gam_yy - gam_xy*gam_xy
         
         if denom == 0:
-            print "Warning: divide by zero error in gabor displacement. returning (0.0,0.0)"
+            print("Warning: divide by zero error in gabor displacement. returning (0.0,0.0)")
             return 0.,0.
 
         else:
@@ -391,7 +391,7 @@ class GaborJet:
             denom = gam_xx*gam_yy - gam_xy*gam_xy
             
             if denom == 0:
-                print "Warning: divide by zero error in gabor displacement. returning (0.0,0.0)"
+                print("Warning: divide by zero error in gabor displacement. returning (0.0,0.0)")
                 return 0.,0.
     
             else:
@@ -437,7 +437,7 @@ class GaborJet:
             denom = gam_xx*gam_yy - gam_xy*gam_xy
             
             if denom == 0:
-                print "Warning: divide by zero error in gabor displacement. returning (0.0,0.0)"
+                print("Warning: divide by zero error in gabor displacement. returning (0.0,0.0)")
                 return 0.,0.
     
             else:
@@ -628,7 +628,7 @@ class _FastFilterTest(unittest.TestCase):
         self.assertAlmostEqual(new_point.l2(test_point),0.0)
 
         new_point,_,_ = gim.locatePoint(template,pv.Point(30,49))        
-        self.assert_(new_point.l2(test_point) > 1.0)
+        self.assertTrue(new_point.l2(test_point) > 1.0)
         
         new_point,_,_ = gim.locatePoint(template)        
         self.assertAlmostEqual(new_point.l2(test_point),0.0)

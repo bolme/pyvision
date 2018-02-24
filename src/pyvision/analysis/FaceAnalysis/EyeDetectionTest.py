@@ -310,7 +310,7 @@ def summarizeEyeDetectionTests(tests):
     '''
     Create a summary table for a list containing FaceDetectionTest objects.
     '''
-    print 'Creating summaries...'
+    print('Creating summaries...')
     summary25 = pv.Table()
     summary25.setColumnFormat('Face_Rate','%0.4f')
     summary25.setColumnFormat('Rate_25','%0.4f')
@@ -318,7 +318,7 @@ def summarizeEyeDetectionTests(tests):
     summary25.setColumnFormat('Upper95_25','%0.4f')
     summary25.setColumnFormat('Time','%0.2f')
     for test in tests:
-        print test.name
+        print(test.name)
         summary25.setElement(test.name,'Face_Rate',test.face_rate)
         summary25.setElement(test.name,'Rate_25',test.both25_rate)
         summary25.setElement(test.name,'Lower95_25',test.both25_ci[0])

@@ -39,7 +39,7 @@ Created on May 15, 2009
 '''
 
 #import BEE
-from FaceDatabase import FaceDatabase
+from .FaceDatabase import FaceDatabase
 #import os.path
 import os
 import copy
@@ -233,7 +233,7 @@ class FRGC_V1(FaceDatabase):
         self.orig_sigset     = pv.parseSigSet(self.orig_sigset_path)
         #print self.orig_sigset
         
-        self.orig_sigset = filter(lambda x: len(x[1]) > 0, self.orig_sigset)
+        self.orig_sigset = [x for x in self.orig_sigset if len(x[1]) > 0]
 
         self.orig_sigset_map     = dict([ (data[0]['name'],[key,data]) for key,data in self.orig_sigset ])
         
@@ -388,7 +388,7 @@ class FRGC_Exp4_Reduced(FaceDatabase):
 
 def reduce_exp4(source_dir,dest_dir):
     ''''''
-    print "Creating directories."
+    print("Creating directories.")
     try:
         os.makedirs(os.path.join(dest_dir,'recordings'))
     except:
@@ -399,15 +399,15 @@ def reduce_exp4(source_dir,dest_dir):
     except:
         pass
     
-    print "Loading FRGC Information."
+    print("Loading FRGC Information.")
     frgc = FRGC_Exp4(source_dir)
     
-    print "Processing Images."
-    keys = frgc.keys()
-    for i in xrange(len(keys)):
+    print("Processing Images.")
+    keys = list(frgc.keys())
+    for i in range(len(keys)):
         key = keys[i]
         face = frgc[key]
-        print "Processing %d of %d:"%(i+1,len(keys)), key,face.person_id
+        print("Processing %d of %d:"%(i+1,len(keys)), key,face.person_id)
         
         affine = pv.AffineFromPoints(face.left_eye,face.right_eye,REDUCED_LEYE,REDUCED_REYE,REDUCED_SIZE)
         tile = affine.transformImage(face.image)
@@ -416,13 +416,13 @@ def reduce_exp4(source_dir,dest_dir):
         #if i > 10:
         #    break
         
-    print "Copying sigsets."
+    print("Copying sigsets.")
     shutil.copy(frgc.orig_sigset_path,     os.path.join(dest_dir,'sigsets'))
     shutil.copy(frgc.query_sigset_path,    os.path.join(dest_dir,'sigsets'))
     shutil.copy(frgc.target_sigset_path,   os.path.join(dest_dir,'sigsets'))
     shutil.copy(frgc.training_sigset_path, os.path.join(dest_dir,'sigsets'))
     
-    print "Copying metadata."
+    print("Copying metadata.")
     shutil.copy(frgc.metadata_path,        os.path.join(dest_dir,'sigsets'))
 
 
@@ -451,7 +451,7 @@ def FRGCExp4Test(database, algorithm, face_detector=None, eye_locator=None, n=No
         if verbose:
             if time.time() - message_time > verbose:
                 message_time = time.time()
-                print "Processed query image %d of %d"%(i,len(query_keys))
+                print("Processed query image %d of %d"%(i,len(query_keys)))
                 
     timer.mark("QueryStop",notes="Processed %d images."%len(query_keys))
     
@@ -473,20 +473,20 @@ def FRGCExp4Test(database, algorithm, face_detector=None, eye_locator=None, n=No
         if verbose:
             if time.time() - message_time > verbose:
                 message_time = time.time()
-                print "Processed target image %d of %d"%(i,len(target_keys))
+                print("Processed target image %d of %d"%(i,len(target_keys)))
                 
     timer.mark("TargetStop",notes="Processed %d images."%len(target_keys))
     
-    print "Finished processing FaceRecs (%d query, %d target)"%(len(query_keys),len(target_keys))
+    print("Finished processing FaceRecs (%d query, %d target)"%(len(query_keys),len(target_keys)))
     
     # Compute the  matrix
-    print "Computing similarity matrix..."
+    print("Computing similarity matrix...")
     timer.mark("SimilarityStart")
     mat = algorithm.similarityMatrix(query_recs,target_recs)
     timer.mark("SimilarityStop",notes="Processed %d comparisons."%(mat.shape[0]*mat.shape[1],))
 
-    print "Completing task..."
-    print mat.shape
+    print("Completing task...")
+    print(mat.shape)
     
     bee_mat = pv.BEEDistanceMatrix(mat,"FRGC_Exp_2.0.4_Query.xml", "FRGC_Exp_2.0.4_Target.xml", sigset_dir=database.sigset_dir, is_distance=False)
     

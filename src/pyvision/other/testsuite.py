@@ -33,7 +33,7 @@ class _TestNormalize(unittest.TestCase):
     def test_1_meanStd(self):
         '''meanStd Normalization: norm.mean() = 0.0 and norm.std() = 1.0....'''
         ilog = None
-        if 'ilog' in globals().keys():
+        if 'ilog' in list(globals().keys()):
             ilog = globals()['ilog']
             
         norm = pv.meanStd(self.tile)
@@ -48,7 +48,7 @@ class _TestNormalize(unittest.TestCase):
     def test_2_meanUnit(self):
         '''meanUnit Normalization: norm.mean() = 0.0  and ||norm|| = 1.0....'''
         ilog = None
-        if 'ilog' in globals().keys():
+        if 'ilog' in list(globals().keys()):
             ilog = globals()['ilog']
             
         norm = pv.meanUnit(self.tile)
@@ -64,7 +64,7 @@ class _TestNormalize(unittest.TestCase):
     def test_3_unit(self):
         '''unit Normalization: ||norm|| = 1.0 and dot(norm,im)/||im|| = 1.0.'''
         ilog = None
-        if 'ilog' in globals().keys():
+        if 'ilog' in list(globals().keys()):
             ilog = globals()['ilog']
             
         norm = pv.unit(self.tile)
@@ -86,7 +86,7 @@ class _TestNormalize(unittest.TestCase):
     def test_4_bandPass(self):
         '''bandPassFilter Normalization: ...................................'''
         ilog = None
-        if 'ilog' in globals().keys():
+        if 'ilog' in list(globals().keys()):
             ilog = globals()['ilog']
             
         norm = pv.bandPassFilter(self.tile,10.0,4.0)
@@ -101,7 +101,7 @@ class _TestNormalize(unittest.TestCase):
     def test_5_lowPass(self):
         '''lowPassFilter Normalization: ....................................'''
         ilog = None
-        if 'ilog' in globals().keys():
+        if 'ilog' in list(globals().keys()):
             ilog = globals()['ilog']
             
         norm = pv.lowPassFilter(self.tile,10.0)
@@ -116,7 +116,7 @@ class _TestNormalize(unittest.TestCase):
     def test_6_highPass(self):
         '''highPassFilter Normalization: ...................................'''
         ilog = None
-        if 'ilog' in globals().keys():
+        if 'ilog' in list(globals().keys()):
             ilog = globals()['ilog']
             
         norm = pv.highPassFilter(self.tile,10.0)
@@ -131,7 +131,7 @@ class _TestNormalize(unittest.TestCase):
     def test_7_veryHighPass(self):
         '''highPassFilter Normalization: sigma = 1.5........................'''
         ilog = None
-        if 'ilog' in globals().keys():
+        if 'ilog' in list(globals().keys()):
             ilog = globals()['ilog']
             
         # This setting corsponds to the default gaussian in selfQuotient
@@ -147,7 +147,7 @@ class _TestNormalize(unittest.TestCase):
     def test_8_selfQuotient(self):
         '''selfQuotient Normalization: .....................................'''
         ilog = None
-        if 'ilog' in globals().keys():
+        if 'ilog' in list(globals().keys()):
             ilog = globals()['ilog']
             
         norm = pv.selfQuotientImage(self.tile)
@@ -175,16 +175,16 @@ class _TestDistance(unittest.TestCase):
         c = pv.ubyteToBool(b)
         d = pv.boolToUbyte(c)
 
-        self.assert_((a == c).sum() == 16)
-        self.assert_((b == d).sum() == 2)
+        self.assertTrue((a == c).sum() == 16)
+        self.assertTrue((b == d).sum() == 2)
         
         a = np.random.randint(2,size=5000) > 0
         b = pv.boolToUbyte(a)
         c = pv.ubyteToBool(b)
         d = pv.boolToUbyte(c)
 
-        self.assert_((a == c).sum() == 5000)
-        self.assert_((b == d).sum() == 625)
+        self.assertTrue((a == c).sum() == 5000)
+        self.assertTrue((b == d).sum() == 625)
         
         
         
@@ -201,7 +201,7 @@ class _TestDistance(unittest.TestCase):
         
         byte_hamming = pv.hamming(a,b)
         
-        self.assertEquals(bin_hamming,byte_hamming)
+        self.assertEqual(bin_hamming,byte_hamming)
         
 
     def test_3_hamming(self):
@@ -216,7 +216,7 @@ class _TestDistance(unittest.TestCase):
         
         byte_hamming = pv.hamming(a,b)
         
-        self.assertEquals(bin_hamming,byte_hamming)
+        self.assertEqual(bin_hamming,byte_hamming)
         
         
             

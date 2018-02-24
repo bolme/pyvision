@@ -189,7 +189,7 @@ if __name__ == "__main__":
     # and then displays that data in a nicely formated table.  "Current"
     # times are measured from the previous mark and show that Scipy
     # and OpenCV are very fast at this particular task.
-    print timer
+    print(timer)
     #|---|---------------|---------------|-------------------|-----------------|-------|
     #|   | event         | time          | current           | total           | notes |
     #|---|---------------|---------------|-------------------|-----------------|-------|

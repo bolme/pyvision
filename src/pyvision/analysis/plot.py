@@ -10,7 +10,7 @@ import os.path
 import PIL.ImageFont
 import PIL.ImageDraw
 random = np.random
-import StringIO
+import io
 import sys
 
 arial_path = os.path.join(pv.__path__[0],'config','Arial.ttf')
@@ -566,7 +566,7 @@ class Plot:
         Generate an R script that will reproduce this plot.
         '''
         # Create a file object for output
-        f = StringIO.StringIO()
+        f = io.StringIO()
         
         # Generate Configuration
         f.write("# This is an R script that will generate a plot.\n")
@@ -620,7 +620,7 @@ class Plot:
             p_in,p_out = os.popen2("R --no-save")
             p_in.write(f.getvalue())
             p_in.close()
-            print p_out.read()
+            print(p_out.read())
             p_out.close()
         
         return f.getvalue()
@@ -653,18 +653,18 @@ class TestPlot(unittest.TestCase):
         
         
     def testDataToFormatedList(self):
-        print
-        print dataToFormatedList(range(4))
-        print dataToFormatedList(range(5))
-        print dataToFormatedList(range(6))
-        print dataToFormatedList(range(7))
-        print dataToFormatedList(range(8))
-        print dataToFormatedList(range(9))
-        print dataToFormatedList(range(10))
-        print dataToFormatedList(range(15))
-        print dataToFormatedList(range(16))
-        print dataToFormatedList(range(17))
-        print
+        print()
+        print(dataToFormatedList(list(range(4))))
+        print(dataToFormatedList(list(range(5))))
+        print(dataToFormatedList(list(range(6))))
+        print(dataToFormatedList(list(range(7))))
+        print(dataToFormatedList(list(range(8))))
+        print(dataToFormatedList(list(range(9))))
+        print(dataToFormatedList(list(range(10))))
+        print(dataToFormatedList(list(range(15))))
+        print(dataToFormatedList(list(range(16))))
+        print(dataToFormatedList(list(range(17))))
+        print()
 
         
         

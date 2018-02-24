@@ -174,7 +174,7 @@ class CrossValidation:
             #print score
         tmp = str(kwargs)
         if verbose:
-            print "%-40s %8.6f"%(tmp[:40],score),successes,'/',len(self.folds)
+            print("%-40s %8.6f"%(tmp[:40],score),successes,'/',len(self.folds))
         return score
                 
             
@@ -240,7 +240,7 @@ class Validation(CrossValidation):
             
             row = self.results.nRows()
             
-            for key,value in kwargs.iteritems():
+            for key,value in kwargs.items():
                 self.results[row,key] = value
                 
             new_best = False
@@ -258,12 +258,12 @@ class Validation(CrossValidation):
             self.results[row,'time'] = stop-start
             self.results[row,'score'] = score
             self.results[row,'new_best'] = new_best
-            print self.results
+            print(self.results)
         else:
             score = np.sqrt(squared_error/count)
         tmp = str(kwargs)
         if verbose:
-            print "%-40s %8.6f"%(tmp[:40],score),successes,'/',len(self.folds)
+            print("%-40s %8.6f"%(tmp[:40],score),successes,'/',len(self.folds))
         return score
                 
             

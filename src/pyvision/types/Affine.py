@@ -826,16 +826,16 @@ class _AffineTest(unittest.TestCase):
         im_a = Image(fname)
         ref  = weakref.ref(im_a)
 
-        self.assertEquals(ref(), im_a)
+        self.assertEqual(ref(), im_a)
         
         tmp = im_a
         del im_a
         
-        self.assertEquals(ref(), tmp)
+        self.assertEqual(ref(), tmp)
         
         del tmp
         
-        self.assertEquals(ref(), None)
+        self.assertEqual(ref(), None)
         
  
     def test_prev_ref2(self):

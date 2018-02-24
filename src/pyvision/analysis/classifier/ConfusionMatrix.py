@@ -177,14 +177,14 @@ class _TestConfusionMatrix(unittest.TestCase):
     def test_color(self):
         #print
         #print self.color
-        self.assertAlmostEquals(self.color.update_rate(),0.6842,places=4)
-        self.assertAlmostEquals(self.color.confidenceInterval()[0],0.4345,places=4)
-        self.assertAlmostEquals(self.color.confidenceInterval()[1],0.8742,places=4)
+        self.assertAlmostEqual(self.color.update_rate(),0.6842,places=4)
+        self.assertAlmostEqual(self.color.confidenceInterval()[0],0.4345,places=4)
+        self.assertAlmostEqual(self.color.confidenceInterval()[1],0.8742,places=4)
     
     def test_verification(self):
-        self.assertAlmostEquals(self.sim_face.update_rate(),0.99890100000000004,places=4)
-        self.assertAlmostEquals(self.sim_face.confidenceInterval()[0],0.99883409247930877,places=4)
-        self.assertAlmostEquals(self.sim_face.confidenceInterval()[1],0.99896499025635421,places=4)
+        self.assertAlmostEqual(self.sim_face.update_rate(),0.99890100000000004,places=4)
+        self.assertAlmostEqual(self.sim_face.confidenceInterval()[0],0.99883409247930877,places=4)
+        self.assertAlmostEqual(self.sim_face.confidenceInterval()[1],0.99896499025635421,places=4)
         
         
         

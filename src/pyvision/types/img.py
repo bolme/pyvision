@@ -51,7 +51,7 @@ import cv2
 import pyvision
 import pyvision as pv
 
-import exif
+from . import exif
 import os
 
 
@@ -350,10 +350,10 @@ class Image:
                 return None
             
             # iterate through exif tags
-            for key,value in info.iteritems():
+            for key,value in info.items():
                 tag = "ukn_%s"%key
                 # translate tags to text
-                if exif.EXIF_TAGS.has_key(key):
+                if key in exif.EXIF_TAGS:
                     tag = exif.EXIF_TAGS[key][0]
                     datatype = exif.EXIF_TAGS[key][1]
                     category = exif.EXIF_TAGS[key][2]
@@ -661,7 +661,7 @@ class Image:
         
     def valueNormalize(self):
         '''TODO: Deprecated remove this sometime.'''
-        print "WARNING: Image.valueNormalize has been deprecated."
+        print("WARNING: Image.valueNormalize has been deprecated.")
         return self.normalize()
 
 
@@ -773,7 +773,7 @@ class Image:
                     image_buffer = pil.tostring()
                 except:
                     # Return the original error
-                    print "Problem processing filename:",self.filename
+                    print("Problem processing filename:",self.filename)
                     raise ex
 
         elif self.type == TYPE_MATRIX_2D:
@@ -845,7 +845,7 @@ class Image:
                     image_buffer = pil.tostring()
                 except:
                     # Return the original error
-                    print "Problem processing filename:",self.filename
+                    print("Problem processing filename:",self.filename)
                     raise ex
         
         elif self.type == TYPE_MATRIX_2D:
@@ -1032,7 +1032,7 @@ class Image:
         @param size: Optional output size for image, None=native size.
         @returns: the return value of the cv.WaitKey call.
         '''
-        if window==None and pv.runningInNotebook() and 'pylab' in globals().keys():
+        if window==None and pv.runningInNotebook() and 'pylab' in list(globals().keys()):
             # If running in notebook, then try to display the image inline.
             try:
                 import IPython
@@ -1056,7 +1056,7 @@ class Image:
                 pylab.figure()
                 pylab.imshow(self.asAnnotated(),origin='upper',aspect='auto')
             except:
-                print "WARNING: could not display image in ipython notebook."
+                print("WARNING: could not display image in ipython notebook.")
                 self.show(window="PyVisionImage",pos=pos,delay=delay,size=size)
             
         else:

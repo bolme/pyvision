@@ -7,11 +7,11 @@ def foo(a,b):
 i = 0
 while i < 10:
 
-    print "Number:",i,
+    print("Number:",i, end=' ')
 
     if i % 2 == 0:
-        print "even"
+        print("even")
     else:
-        print "odd"
+        print("odd")
 
     i = foo(i, 1)

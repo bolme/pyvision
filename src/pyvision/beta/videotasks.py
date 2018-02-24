@@ -5,7 +5,7 @@ Created on Jan 13, 2012
 '''
 import pyvision as pv
 from pyvision.face.CascadeDetector import CascadeDetector
-import vtm
+from . import vtm
 import numpy as np
 
 class ChangeDetectionVT(vtm.VideoTask):
@@ -68,7 +68,7 @@ class FaceDetectorVT(vtm.VideoTask):
     
     def execute(self,frame,detector=None):
         if detector == None:
-            print "Initializing Face Detector."
+            print("Initializing Face Detector.")
             detector = CascadeDetector(min_size=(128,128))
         
         faces = detector(frame)

@@ -200,7 +200,7 @@ class RangeImage:
                 tmp = z.copy()
                 smooth = nd.gaussian_filter(z.reshape(self.width,self.height),2.0).flatten()
                 z[ mask==False ] = smooth[ mask==False ]
-                print "Iteration:",i,(z-tmp).max(),(z-tmp).min()
+                print("Iteration:",i,(z-tmp).max(),(z-tmp).min())
                 ilog.log(pv.Image(z.reshape(self.width,self.height)),label="ZSmooth%02d"%i)
                 ilog.log(pv.Image((z-tmp).reshape(self.width,self.height)),label="ZSmooth%02d"%i)
                 
@@ -220,11 +220,11 @@ class RangeImage:
             z = self.z.copy()
             z = z.flatten()
             
-            print "Coords:"
-            print len(mask)
-            print len(x[mask])
-            print len(y[mask])
-            print len(z[mask])
+            print("Coords:")
+            print(len(mask))
+            print(len(x[mask]))
+            print(len(y[mask]))
+            print(len(z[mask]))
             
             # this produces an error.  Probably has too much data
             it.Rbf(x[mask],y[mask],z[mask])
@@ -243,9 +243,9 @@ if __name__ == "__main__":
     t = time.time()
     ri = RangeImage(filename)
     t = time.time() - t
-    print t
+    print(t)
     
-    print ri.getRange()
+    print(ri.getRange())
     ilog.log(ri.getXImage(),"X_Image")
     ilog.log(ri.getYImage(),"Y_Image")
     ilog.log(ri.getZImage(),"Z_Image")

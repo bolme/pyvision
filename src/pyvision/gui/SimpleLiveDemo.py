@@ -15,7 +15,7 @@ from pyvision.face.FilterEyeLocator import FilterEyeLocator
 
 def mouseCallback(event, x, y, flags, param):
     if event in [cv2.EVENT_LBUTTONDOWN,cv2.EVENT_LBUTTONUP]:
-        print "Mouse Event:",event,x,y
+        print("Mouse Event:",event,x,y)
 
 if __name__ == '__main__':
     

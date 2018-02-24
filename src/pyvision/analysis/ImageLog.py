@@ -35,7 +35,7 @@ import time
 from os import makedirs,system,listdir
 from os.path import join
 import csv
-import cPickle
+import pickle
 import sys
 import pyvision as pv
 
@@ -77,12 +77,12 @@ class ImageLog:
         '''
         Save a pyvision image to the log.
         '''
-        if kwargs.has_key('format'):
+        if 'format' in kwargs:
             sys.stderr.write("WARNING: the format option to ImageLog.plot is no longer supported. Please use 'ext'")
             ext = kwargs['format']
             del kwargs[format]
         if len(kwargs) > 0:
-            raise ValueError("Unsupported keyword arguments: %s"(kwargs.keys(),))
+            raise ValueError("Unsupported keyword arguments: %s"(list(kwargs.keys()),))
         image.asAnnotated().save(self.dir+'/%06d_%s.%s'%(self.count,label,ext),quality=95)
         self.count += 1
         #print message
@@ -91,12 +91,12 @@ class ImageLog:
         '''
         Save a pyvision plot to the log.
         '''
-        if kwargs.has_key('format'):
+        if 'format' in kwargs:
             sys.stderr.write("WARNING: the format option to ImageLog.plot is no longer supported. Please use 'ext'")
             ext = kwargs['format']
             del kwargs[format]
         if len(kwargs) > 0:
-            raise ValueError("Unsupported keyword arguments: %s"(kwargs.keys(),))
+            raise ValueError("Unsupported keyword arguments: %s"(list(kwargs.keys()),))
         plot.asImage().asAnnotated().save(self.dir+'/%06d_%s.%s'%(self.count,label,ext),quality=95)
 
         if r_script:
@@ -135,7 +135,7 @@ class ImageLog:
         '''
         filename = join(self.dir,'%06d_%s.pkl'%(self.count,label))
         f = open(filename,'wb')
-        cPickle.dump(data, f, protocol=2)
+        pickle.dump(data, f, protocol=2)
         f.close()
         self.count += 1
         
@@ -178,6 +178,6 @@ class ImageLog:
             #If you use KDE, gwenview might be better...
             system("gthumb %s"%startfile)
         elif sys.platform.startswith("windows"):
-            print "ImageLog.show() is not supported on windows."
+            print("ImageLog.show() is not supported on windows.")
         
         

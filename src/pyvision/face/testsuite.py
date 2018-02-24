@@ -24,7 +24,7 @@ class TestFilterEyeLocator(unittest.TestCase):
     def test_ASEFEyeLocalization(self):
         '''FilterEyeLocator: Scrapshots Both10 rate == 0.4800...............'''
         ilog = None
-        if 'ilog' in globals().keys():
+        if 'ilog' in list(globals().keys()):
             ilog = globals()['ilog']
             
         # Load a face database
@@ -40,7 +40,7 @@ class TestFilterEyeLocator(unittest.TestCase):
         edt = EyeDetectionTest(name='asef_scraps')
 
         #print "Testing..."
-        for face_id in ssdb.keys()[:25]:
+        for face_id in list(ssdb.keys())[:25]:
             face = ssdb[face_id]
             im = face.image
             

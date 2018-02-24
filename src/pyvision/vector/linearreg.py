@@ -56,7 +56,7 @@ class LinearReg:
         self.RMSE = []
         # create the data matrix
         for output in range(outputs.shape[1]):
-            print "Training output ", output
+            print("Training output ", output)
             y = outputs[:,output]
             #print "y:\n",y
             X = inputs

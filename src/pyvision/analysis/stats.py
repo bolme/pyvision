@@ -501,7 +501,7 @@ class _TestStats(unittest.TestCase):
         # Verified with R and SAS
         stats = SummaryStats(self.normal_data, name="Normal Data")
         
-        self.assertEquals(stats.n,50)
+        self.assertEqual(stats.n,50)
         self.assertAlmostEqual(stats.mean,       2.273416, places=6) #R
         self.assertAlmostEqual(stats.var,        7.739672, places=6) #R
         self.assertAlmostEqual(stats.std,        2.782027, places=6) #R
@@ -528,20 +528,20 @@ class _TestStats(unittest.TestCase):
         
     def test_pbinom(self):
         # probabilities verified with R
-        self.assertAlmostEquals(pbinom(50,100,0.5),   0.5397946)
-        self.assertAlmostEquals(pbinom(25,100,0.3),   0.1631301)
-        self.assertAlmostEquals(pbinom(20,100,0.1),   0.9991924)
-        self.assertAlmostEquals(pbinom(8,100,0.05),   0.9369104)
-        self.assertAlmostEquals(pbinom(0,100,0.01),   0.3660323)
-        self.assertAlmostEquals(pbinom(100,100,0.98), 1.0000000)
+        self.assertAlmostEqual(pbinom(50,100,0.5),   0.5397946)
+        self.assertAlmostEqual(pbinom(25,100,0.3),   0.1631301)
+        self.assertAlmostEqual(pbinom(20,100,0.1),   0.9991924)
+        self.assertAlmostEqual(pbinom(8,100,0.05),   0.9369104)
+        self.assertAlmostEqual(pbinom(0,100,0.01),   0.3660323)
+        self.assertAlmostEqual(pbinom(100,100,0.98), 1.0000000)
         
     def test_qbinom(self):
         # quantiles verified with R
-        self.assertEquals(qbinom(0.5,100,0.5),  50)
-        self.assertEquals(qbinom(0.1,100,0.01),  0)
-        self.assertEquals(qbinom(1.0,100,0.9), 100)
-        self.assertEquals(qbinom(0.2,100,0.4),  36)
-        self.assertEquals(qbinom(0.4,100,0.85), 84)
+        self.assertEqual(qbinom(0.5,100,0.5),  50)
+        self.assertEqual(qbinom(0.1,100,0.01),  0)
+        self.assertEqual(qbinom(1.0,100,0.9), 100)
+        self.assertEqual(qbinom(0.2,100,0.4),  36)
+        self.assertEqual(qbinom(0.4,100,0.85), 84)
 
     def test_cibinom(self):
         # Intervals verified by: http://statpages.org/confint.html

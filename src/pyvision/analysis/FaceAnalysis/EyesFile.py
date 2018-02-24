@@ -62,14 +62,14 @@ class EyesFile:
         '''
         @returns: a list of all image filenames
         '''
-        names = self.images.keys()
+        names = list(self.images.keys())
         names.sort()
         return names
     
     def hasFile(self,filename):
         '''@returns: True if filename is in index or False otherwise'''
         fname = self._parseName(filename)
-        return self.images.has_key(fname)
+        return fname in self.images
     
 
     def findFace(self,filename,rect):
@@ -83,7 +83,7 @@ class EyesFile:
                  not near a face.
         '''
         fname = self._parseName(filename)
-        if self.images.has_key(fname):
+        if fname in self.images:
             faces = self.images[fname]
             for each in faces:
                 truth_rect = each[3]
@@ -98,7 +98,7 @@ class EyesFile:
     # @return list of face rectangles
     def getFaces(self,filename):
         fname = self._parseName(filename)
-        if self.images.has_key(fname):
+        if fname in self.images:
             faces = self.images[fname]
             boxes = []
             for _,_,_,box in faces:
@@ -113,7 +113,7 @@ class EyesFile:
     # @returns a list of eye coordinates: [(leye,reye),(leye,reye),...]
     def getEyes(self,filename):
         fname = self._parseName(filename)
-        if self.images.has_key(fname):
+        if fname in self.images:
             faces = self.images[fname]
             eyes = []
             for _,left,right,_ in faces:
@@ -135,7 +135,7 @@ class EyesFile:
                 for i in range(1,len(line),4):
                     fname = self._parseName(line[0])
                     if len(line) < i+4:
-                        print "Warning in %s image %s: Count of numbers is not a multiple of four."%(self.filename,fname)
+                        print("Warning in %s image %s: Count of numbers is not a multiple of four."%(self.filename,fname))
                         break
                     eye1 = pv.Point(float(line[i+0]),float(line[i+1]))
                     eye2 = pv.Point(float(line[i+2]),float(line[i+3]))
@@ -148,7 +148,7 @@ class EyesFile:
         
                     #print fname,eye1,eye2,truth_rect
                     
-                    if not self.images.has_key(fname):
+                    if fname not in self.images:
                         self.images[fname] = []
                         
                     self.images[fname].append([fname,eye1,eye2,truth_rect])
@@ -170,7 +170,7 @@ class EyesFile:
     
                 #print fname,eye1,eye2,truth_rect
                 
-                if not self.images.has_key(fname):
+                if fname not in self.images:
                     self.images[fname] = []
                     
                 self.images[fname].append([fname,eye1,eye2,truth_rect])

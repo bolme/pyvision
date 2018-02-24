@@ -318,10 +318,10 @@ def test():
     r1 = BoundingRect(p1,p2)
     r2 = BoundingRect(p3,p4)
     r3 = Rect(3,3,3,3)
-    print r1
-    print r2
-    print r1.intersect(r2)
-    print r3.intersect(r2)
+    print(r1)
+    print(r2)
+    print(r1.intersect(r2))
+    print(r3.intersect(r2))
     
 # A main function that runs tests.
 if __name__ == "__main__":

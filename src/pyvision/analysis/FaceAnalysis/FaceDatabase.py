@@ -1,5 +1,5 @@
 import pyvision as pv
-from EyesFile import EyesFile
+from .EyesFile import EyesFile
 import os.path
 #import numpy as np
 
@@ -204,7 +204,7 @@ class PIE_ILLUM_Database(FaceDatabase):
         
         key = (month,sub,pose)
         
-        if self.eyes.has_key(key):
+        if key in self.eyes:
             leye,reye = self.eyes[key]
                     
             face_obj.left_eye = leye
@@ -231,8 +231,8 @@ class PIE_ILLUM_Database_c27(FaceDatabase):
             #print line
             data = line.split()
             if len(data) != 5:
-                print "Warning: expected 5 values: <", data, ">"
-                print "    in file:",coord_name
+                print("Warning: expected 5 values: <", data, ">")
+                print("    in file:",coord_name)
                 continue
             sub,lx,ly,rx,ry = data
             
@@ -289,7 +289,7 @@ class PIE_ILLUM_Database_c27(FaceDatabase):
         
         key = sub
         
-        if self.eyes.has_key(key):
+        if key in self.eyes:
             leye,reye = self.eyes[key]
                     
             face_obj.left_eye = leye

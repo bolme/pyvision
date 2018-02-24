@@ -58,7 +58,7 @@ import copy
 #import time
 import pyvision as pv
 import os
-import cPickle as pkl
+import pickle as pkl
 
 # Genetic algorithm message types
 _GA_EVALUATE="GA_EVALUATE"
@@ -313,7 +313,7 @@ class GAUnitRect(GAVariable):
             self.height = other.height
             
         if cx_dist <= 0 or cy_dist <= 0 or w_dist <= 0 or h_dist <= 0  :
-            print "Combining:",self,other,cx_dist,cy_dist,w_dist,h_dist
+            print("Combining:",self,other,cx_dist,cy_dist,w_dist,h_dist)
         self.cx += np.random.normal(0,cx_dist/3.0)
         self.cy += np.random.normal(0,cy_dist/3.0)
         self.width += np.random.normal(0,w_dist/3.0)
@@ -410,7 +410,7 @@ class GAUnitRect2(GAVariable):
             self.bottom = other.bottom
             
         if l_dist <= 0 or r_dist <= 0 or t_dist <= 0 or b_dist <= 0  :
-            print "Combining:",self,other,l_dist,r_dist,t_dist,b_dist
+            print("Combining:",self,other,l_dist,r_dist,t_dist,b_dist)
         self.left   += np.random.normal(0,l_dist/3.0)
         self.right  += np.random.normal(0,r_dist/3.0)
         self.top    += np.random.normal(0,t_dist/3.0)
@@ -718,7 +718,7 @@ def list_generate(args):
             dict_generate(args[i])
             
 def dict_generate(args): 
-    for i in args.keys():
+    for i in list(args.keys()):
         if isinstance(args[i],GAVariable):
             args[i] = args[i].generate()
         elif isinstance(args[i],(list,tuple)):
@@ -742,7 +742,7 @@ def _gaWork(data):
         dict_generate(kwargs)
         score = fitness(*args,**kwargs)
     except:
-        print "Error in work queue."
+        print("Error in work queue.")
         traceback.print_exc()
         score = np.inf
     return score
@@ -784,7 +784,7 @@ class GeneticAlgorithm:
                 self.dict_random(args[i])
 
     def dict_random(self,args):
-        for i in args.keys():
+        for i in list(args.keys()):
             if isinstance(args[i],GAVariable):
                 args[i].random()
             elif isinstance(args[i],(list,tuple)):
@@ -816,7 +816,7 @@ class GeneticAlgorithm:
                 self.dict_mutate(args[i])
 
     def dict_mutate(self,args):
-        for i in args.keys():
+        for i in list(args.keys()):
             if isinstance(args[i],GAVariable):
                 args[i].mutate()
             elif isinstance(args[i],(list,tuple)):
@@ -855,7 +855,7 @@ class GeneticAlgorithm:
     def dict_combine(self,args,other):
         assert len(args) == len(other)
 
-        for key in args.keys():
+        for key in list(args.keys()):
             if isinstance(args[key],GAVariable):
                 args[key].combine(other[key])
             elif isinstance(args[key],(list,tuple)):
@@ -896,14 +896,14 @@ class GeneticAlgorithm:
             self.best_score = score
             # Print data
             if verbose:
-                print "New Best Score:",score
+                print("New Best Score:",score)
                 
                 for i in range(len(args)):
-                    print "    arg%02d"%i,str(args[i])[:70]
+                    print("    arg%02d"%i,str(args[i])[:70])
                 keys = list(kwargs.keys())
                 keys.sort()
                 for key in keys:
-                    print "    %10s:"%key,str(kwargs[key])[:70]
+                    print("    %10s:"%key,str(kwargs[key])[:70])
             
         self.population.append([score,args,kwargs])
         self.population.sort(lambda x,y: cmp(x[0],y[0]))
@@ -920,7 +920,7 @@ class GeneticAlgorithm:
 
         if ilog != None:    
             ilog.pickle([score,args,kwargs],"Fitness_%0.8f"%score)
-            for i in xrange(len(extras)):
+            for i in range(len(extras)):
                 extra = extras[i]
                 if isinstance(extra,pv.Image):
                     ilog(extra,"extra_%02d_%0.8f"%(i,score))
@@ -943,14 +943,14 @@ class GeneticAlgorithm:
     
 
     def printPopulation(self):
-        print "GA Population (Iteration %d):"%self.iter,
+        print("GA Population (Iteration %d):"%self.iter, end=' ')
         for i in range(len(self.population)):
             if i % 10 == 0:
-                print
-                print "   ",
-            print "%8.3f"%self.population[i][0],
-        print
-        print
+                print()
+                print("   ", end=' ')
+            print("%8.3f"%self.population[i][0], end=' ')
+        print()
+        print()
         
     def plotConvergence(self):
         plot = pv.Plot(title="Population Statistics",xlabel="Iteration",ylabel="Score")
@@ -985,18 +985,18 @@ class GeneticAlgorithm:
             files = os.listdir(restart_dir)
             for filename in files:
                 if verbose:
-                    print filename
+                    print(filename)
                 if "_Fitness_" not in filename or not filename.endswith('.pkl'):
                     continue
                 path = os.path.join(restart_dir,filename)
                 data = pkl.load(open(path,'rb'))
                 if verbose:
-                    print 'Reloading:',path
+                    print('Reloading:',path)
                     for each in data:
                         if len(str(each)) > 70:
-                            print "    %s..."%str(each)[:70]
+                            print("    %s..."%str(each)[:70])
                         else:
-                            print "    %s"%str(each)
+                            print("    %s"%str(each))
                     
                 # Call addIninvidiual
                 self.addIndividual(data[0], data[1], data[2], ilog=ilog, display=display,verbose=verbose)

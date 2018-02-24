@@ -39,8 +39,8 @@ def _assignInitialPoints(cvmat,S):
 
     labels = np.zeros((h,w),dtype=np.int)
     
-    for x in xrange(w):
-        for y in xrange(h):
+    for x in range(w):
+        for y in range(h):
             labels[y,x] = label_map[ygroups[y],xgroups[x]]
 
     return label_map,xgroups,ygroups,labels
@@ -50,15 +50,15 @@ def _computeCentriods(mat,labels,label_map):
     mat = mat.reshape(c,h*w)
     centroids = np.zeros((label_map.max()+1,c))
     counts = np.zeros((label_map.max()+1,1))
-    for i in xrange(label_map.max()+1):
+    for i in range(label_map.max()+1):
         pass
         mask = (labels == i)
         #print mask.flatten()
         centroids[i,:] = mat[:,mask.flatten()].mean(axis=1)
         #pv.Image(1.0*mask).show()
     return centroids
-    for x in xrange(w):
-        for y in xrange(h):
+    for x in range(w):
+        for y in range(h):
             lab = labels[y,x]
             centroids[lab] += mat[:,y,x]
             counts[lab] += 1.0
@@ -71,7 +71,7 @@ def _computeLabels(mat,label_map,centroids,xgroups,ygroups,S,m):
     labels = np.zeros((h,w),dtype=np.int)
     dists = np.zeros((h,w),dtype=np.float32)
     dists[:,:] = np.inf
-    for lab in xrange(len(centroids)):
+    for lab in range(len(centroids)):
         centroid = centroids[lab]
         x,y = centroid[:2]
         centroid = centroid.reshape(c,1,1)
@@ -103,7 +103,7 @@ def slic2(im,S,m=20,L_scale=0.5,mean_scale=1.0,std_scale=3.0):
     
     # Compute a label map and assign initial labels
     label_map,xgroups,ygroups,labels = _assignInitialPoints(cvmat,S)
-    print label_map
+    print(label_map)
     
     # Compute color features
     mat = cv2.cvtColor(cvmat,cv2.cv.CV_BGR2Lab)

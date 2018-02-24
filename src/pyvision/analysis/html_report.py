@@ -6,7 +6,7 @@ Created on Nov 29, 2012
 
 import os
 import pyvision as pv
-import StringIO
+import io
 import base64
 
 class HtmlReport(object):
@@ -110,7 +110,7 @@ class HtmlReport(object):
         self.elements.append('''</div>''')
         
     def image(self,im,format='jpg'):
-        f = StringIO.StringIO()
+        f = io.StringIO()
         im.asAnnotated().save(f,format)
         #f.flush()
         #print "Saving Image",len(f.getvalue())
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     rpt.line()
     rpt.end_hidden()
     #rpt.line()
-    print rpt.asText()
+    print(rpt.asText())
     rpt.save("/Users/bolme/test_report.html",show=True)
     
     

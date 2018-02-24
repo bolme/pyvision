@@ -22,7 +22,7 @@ def createData():
     xy.points(data[:,[0,2]])
     xy.show(window='X vs Z')
 
-    print repr(data)
+    print(repr(data))
     
     return data
         

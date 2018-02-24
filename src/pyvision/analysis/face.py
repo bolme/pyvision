@@ -53,13 +53,13 @@ class EyesFile:
         '''
         Returns the list of file names.
         '''
-        names = self.images.keys()
+        names = list(self.images.keys())
         names.sort()
         return names
     
     def findFace(self,filename,rect):
         fname = self._parseName(filename)
-        if self.images.has_key(fname):
+        if fname in self.images:
             faces = self.images[fname]
             for each in faces:
                 truth_rect = each[3]
@@ -69,7 +69,7 @@ class EyesFile:
 
     def getFaces(self,filename):
         fname = self._parseName(filename)
-        if self.images.has_key(fname):
+        if fname in self.images:
             faces = self.images[fname]
             boxes = []
             for _,_,_,box in faces:
@@ -79,7 +79,7 @@ class EyesFile:
        
     def getEyes(self,filename):
         fname = self._parseName(filename)
-        if self.images.has_key(fname):
+        if fname in self.images:
             faces = self.images[fname]
             eyes = []
             for _,left,right,_ in faces:
@@ -108,7 +108,7 @@ class EyesFile:
     
                 #print fname,eye1,eye2,truth_rect
                 
-                if not self.images.has_key(fname):
+                if fname not in self.images:
                     self.images[fname] = []
                     
                 self.images[fname].append([fname,eye1,eye2,truth_rect])
@@ -130,7 +130,7 @@ class EyesFile:
     
                 #print fname,eye1,eye2,truth_rect
                 
-                if not self.images.has_key(fname):
+                if fname not in self.images:
                     self.images[fname] = []
                     
                 self.images[fname].append([fname,eye1,eye2,truth_rect])
@@ -168,7 +168,7 @@ class CSU_SRT:
                 for image in images:
                     name = image.split('.')[0]
                     image_id += 1
-                    print name, image_id, subject_id
+                    print(name, image_id, subject_id)
                     ir = CSU_SRT.ImageRecord(name,subject_id,image_id)
                     self.images.append(ir)
                     self.filenames[name] = ir
@@ -178,12 +178,12 @@ class CSU_SRT:
         self.total_images = image_id
     
     def getNames(self):
-        tmp = self.filenames.keys()
+        tmp = list(self.filenames.keys())
         tmp.sort()
         return tmp;
     
     def getRecord(self,name):
-        if self.filenames.has_key(name):
+        if name in self.filenames:
             return self.filenames[name]
         
         return None
@@ -199,7 +199,7 @@ class CSU_Dist:
         for iname in srt.getNames():
             self.matrix[iname] = {}
             filename = directory+'/'+iname+extention
-            print "Reading:",iname
+            print("Reading:",iname)
             f = open(filename,'r')
             for line in f:
                 jname,dist = line.split()
@@ -207,7 +207,7 @@ class CSU_Dist:
                 if srt.getRecord(jname):
                     self.matrix[iname][jname] = -float(dist)
                     count += 1
-        print "Read:",count
+        print("Read:",count)
                     
     
     def getPosNeg(self):

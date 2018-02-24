@@ -10,7 +10,7 @@ table[1,"image"] = im.filename
 table[1,"width"] = im.size[0]
 table[1,"height"] = im.size[1]
 ilog(table,"ImageData")
-print table
+print(table)
 
 plot = pv.Plot(title="Some Dots and Lines");
 plot.points([[3.5,7.1],[1,1],[5.5,2]],shape=2)

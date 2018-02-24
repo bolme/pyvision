@@ -91,7 +91,7 @@ V1LIKE_PARAMS_A = {
         },
     'filter': {
         'kshape': (43,43),
-        'orients': [ o*np.pi/16 for o in xrange(16) ],
+        'orients': [ o*np.pi/16 for o in range(16) ],
         'freqs': [ 1./n for n in [2, 3, 4, 6, 11, 18] ],
         'phases': [0],
         },
@@ -152,7 +152,7 @@ def oppnorm_convert(arr, threshold=0.1):
     arr = arr.astype('float32')
     out = np.empty(arr.shape[:2]+(2,), dtype='float32')
 
-    print out.shape
+    print(out.shape)
 
     # red-green
     out[:,:,0] = arr[:,:,0] - arr[:,:,1]
@@ -415,7 +415,7 @@ def v1like_pool(hin, conv_mode, lsum_ksize, outshape=None, order=1):
         #k2d = np.ones((lsum_ksize, lsum_ksize), 'f')
         krow = k1d[None,:]
         kcol = k1d[:,None]
-        for d in xrange(aux.shape[2]):
+        for d in range(aux.shape[2]):
             if order == 1:
                 aux[:,:,d] = conv(conv(hin[:,:,d], krow, conv_mode), kcol, conv_mode)
             else:
@@ -476,7 +476,7 @@ def v1like_filter(hin, conv_mode, filterbank, use_cache=False):
     else:
         raise NotImplementedError
 
-    for i in xrange(nfilters):
+    for i in range(nfilters):
         filt = filterbank[i]
 
         if use_cache:
@@ -685,12 +685,12 @@ def v1like_fromarray(arr, params):
         if arrh > arrw:
             new_w = arrw - smallest_edge + 1
             new_h =  int(np.round(1.*new_w  * arrh/arrw))
-            print new_w, new_h
+            print(new_w, new_h)
             raise
         elif arrh < arrw:
             new_h = arrh - smallest_edge + 1
             new_w =  int(np.round(1.*new_h  * arrw/arrh))
-            print new_w, new_h
+            print(new_w, new_h)
             raise
         else:
             pass
@@ -753,11 +753,11 @@ def v1like_fromarray(arr, params):
     elif params['color_space'] == 'hsv':
         orig_imga_conv = hsv_convert(orig_imga)
     else:
-        raise ValueError, "params['color_space'] not understood"
+        raise ValueError("params['color_space'] not understood")
 
     # -- process each map
 
-    for cidx in xrange(orig_imga_conv.shape[2]):
+    for cidx in range(orig_imga_conv.shape[2]):
         imga0 = orig_imga_conv[:,:,cidx]
 
         assert(imga0.min() != imga0.max())

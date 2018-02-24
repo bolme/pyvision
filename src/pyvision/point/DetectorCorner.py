@@ -163,7 +163,7 @@ class _CornerTest(unittest.TestCase):
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
-        self.assertEquals(len(points),390)
+        self.assertEqual(len(points),390)
 
     def testDetectorCorner2(self):
         detector = DetectorCorner()
@@ -175,7 +175,7 @@ class _CornerTest(unittest.TestCase):
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
-        self.assertEquals(len(points),390)
+        self.assertEqual(len(points),390)
 
     def testDetectorCorner3(self):
         detector = DetectorCorner()
@@ -187,7 +187,7 @@ class _CornerTest(unittest.TestCase):
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
-        self.assertEquals(len(points),390)
+        self.assertEqual(len(points),390)
 
     def testDetectorCorner4(self):
         detector = DetectorCorner()
@@ -199,7 +199,7 @@ class _CornerTest(unittest.TestCase):
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
-        self.assertEquals(len(points),351)
+        self.assertEqual(len(points),351)
 
     def testDetectorCorner5(self):
         detector = DetectorCorner(selector='best')
@@ -211,7 +211,7 @@ class _CornerTest(unittest.TestCase):
             im.annotatePoint(pt)
             
         if self.SHOW_IMAGES: im.show()  
-        self.assertEquals(len(points),250)
+        self.assertEqual(len(points),250)
         
     def testDetectorCorner6(self):
         detector = DetectorCorner(selector='all')

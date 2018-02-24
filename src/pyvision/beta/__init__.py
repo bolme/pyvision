@@ -28,8 +28,8 @@ def installVideoTaskManager():
     '''
     Install the video task manager beta code into the pyvision namespace.
     '''
-    from vtm import VideoTask, VideoTaskManager
-    from videotasks import FaceDetectorVT
+    from .vtm import VideoTask, VideoTaskManager
+    from .videotasks import FaceDetectorVT
     pv.VideoTask = VideoTask
     pv.VideoTaskManager = VideoTaskManager
     pass

@@ -67,14 +67,14 @@ if __name__ == "__main__":
     rects = cd(im)
     
     # print the list of rectangles
-    print "Face Detection Output:",rects
+    print("Face Detection Output:",rects)
     
     # Also call the eye detector like a function with the original image and
     # the list of face detections to locate the eyes.
     eyes = el(im,rects)
     
     # print the list of eyes.  Format [ [ face_rect, left_eye, right_eye], ...]
-    print "Eye Locator Output:",eyes
+    print("Eye Locator Output:",eyes)
     
     # Now you can process the detection and eye data for each face detected in the
     # image.  Here we  annotate the image with the face detection box and 

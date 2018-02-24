@@ -49,7 +49,7 @@ import numpy as np
 #import scipy as sp
 import scipy.io as spio
 import pyvision as pv
-import roc
+from . import roc
 import gzip
 
 BIOMETRIC_SIGNATURE = '{http://www.bee-biometrics.org/schemas/sigset/0.1}biometric-signature'
@@ -107,7 +107,7 @@ def parseSigSet(filename):
         result.append( (name,signature) )
         for pres in sig.findall('presentation'):
             presentation = {}
-            for key in pres.keys():
+            for key in list(pres.keys()):
                 presentation[key] = pres.get(key)
             signature.append(presentation)
 
@@ -118,7 +118,7 @@ def parseSigSet(filename):
         result.append( (name, signature ) )
         for pres in sig.findall(PRESENTATION):
             presentation = {}
-            for key in pres.keys():
+            for key in list(pres.keys()):
                 presentation[key] = pres.get(key)
             signature.append(presentation)
 
@@ -129,11 +129,11 @@ def parseSigSet(filename):
         result.append( (name, signature) )
         for pres in sig.findall(COMPLEX_PRESENTATION):
             presentation = {}
-            for key in pres.keys():
+            for key in list(pres.keys()):
                 presentation[key] = pres.get(key)
             for comp in pres.findall(COMPLEX_COMPONENT):
                 for data in comp.findall(COMPLEX_DATA):
-                    for key in data.keys():
+                    for key in list(data.keys()):
                         presentation[key] = data.get(key)
             
             signature.append(presentation)
@@ -164,7 +164,7 @@ def sigset2xml(ss):
         sig.tail="\n    "
         for presentation in signature[1]:
             pres = ET.SubElement(sig,'presentation')
-            for key,value in presentation.iteritems():
+            for key,value in presentation.items():
                 pres.set(key,value)
             pres.tail="\n    "
     tree = ET.ElementTree(root)
@@ -191,12 +191,12 @@ def formatSigset(ss,n=None):
     for name,data in ss:
         if c == n:
             break
-        print "Name: %s"%name
+        print("Name: %s"%name)
         for i in range(len(data)):
-            print "    Presentation %d" %i
+            print("    Presentation %d" %i)
             pres = data[i]
-            for key,value in pres.iteritems():
-                print "        %-15s : %s"%(key,value) 
+            for key,value in pres.items():
+                print("        %-15s : %s"%(key,value)) 
         c += 1
                
 
@@ -294,7 +294,7 @@ class BEEDistanceMatrix:
         little_endian = struct.pack("<I",0x12345678)
         
         if line[3] != big_endian and line[3] != little_endian:
-            print "Warning unsupported magic number is BEE matrix: 0x%s"%binascii.hexlify(line[3])
+            print("Warning unsupported magic number is BEE matrix: 0x%s"%binascii.hexlify(line[3]))
             
         self.magic_number = struct.unpack_from("=I",line[3])[0]
         if self.magic_number == 0x12345678:
@@ -380,9 +380,9 @@ class BEEDistanceMatrix:
                 self.queries = parseSigSet(ss_name)
                 assert len(self.queries) == self.n_queries
             except:
-                print "Warning: cound not read the query sigset for distance matrix"
-                print "         SigSet File:",ss_name
-                print "         Expected:",self.n_queries,"Read:",len(self.queries)
+                print("Warning: cound not read the query sigset for distance matrix")
+                print("         SigSet File:",ss_name)
+                print("         Expected:",self.n_queries,"Read:",len(self.queries))
         
             try:
                 ss_name = os.path.join(sigset_dir,self.target_filename)
@@ -390,9 +390,9 @@ class BEEDistanceMatrix:
     
                 assert len(self.targets) == self.n_targets
             except:
-                print "Warning: cound not read the target sigset for distance matrix"
-                print "         SigSet File:",ss_name
-                print "         Expected:",self.n_targets,"Read:",len(self.targets)
+                print("Warning: cound not read the target sigset for distance matrix")
+                print("         SigSet File:",ss_name)
+                print("         Expected:",self.n_targets,"Read:",len(self.targets))
         
      
     def cohort_norm(self):
@@ -493,7 +493,7 @@ class BEEDistanceMatrix:
                 result[c*i+j,0] = i 
                 result[c*i+j,1] = j
                 result[c*i+j,2] = self.matrix[i,j]
-                if BEE_CODE_MAP.has_key(mask[i,j]):
+                if mask[i,j] in BEE_CODE_MAP:
                     result[c*i+j,3] = BEE_CODE_MAP[mask[i,j]]
                 else:
                     result[c*i+j,3] = "0x%02x"%mask[i,j]
@@ -504,15 +504,15 @@ class BEEDistanceMatrix:
             
     
     def printInfo(self):
-        print "BEEDistanceMatrix:",self.filename
-        print "    is_distance     :",self.is_distance
-        print "    target_filename :",self.target_filename
-        print "    query_filename  :",self.query_filename
-        print "    n_queries       :",self.n_queries
-        print "    n_targets       :",self.n_targets
-        print "    <total size>    :",self.n_targets*self.n_queries
-        print "    magic_number    : %x"%self.magic_number
-        print "    matrix.shape    :",self.matrix.shape
+        print("BEEDistanceMatrix:",self.filename)
+        print("    is_distance     :",self.is_distance)
+        print("    target_filename :",self.target_filename)
+        print("    query_filename  :",self.query_filename)
+        print("    n_queries       :",self.n_queries)
+        print("    n_targets       :",self.n_targets)
+        print("    <total size>    :",self.n_targets*self.n_queries)
+        print("    magic_number    : %x"%self.magic_number)
+        print("    matrix.shape    :",self.matrix.shape)
         
     def write(self,filename):
         self.save(filename)

@@ -177,13 +177,13 @@ class TestImage(unittest.TestCase):
         imcrop = self.im.crop(rect)
         cropSize = imcrop.size
         
-        self.assertEquals((35,70), cropSize)
+        self.assertEqual((35,70), cropSize)
         
         rect = pv.Rect(620, 460, 35, 70)
         imcrop = self.im.crop(rect)
         cropSize = imcrop.size
         
-        self.assertEquals((35,70), cropSize)
+        self.assertEqual((35,70), cropSize)
         
     def test_asHSV(self):
         im = pv.Image(pv.BABOON)
@@ -213,12 +213,12 @@ class TestVideo(unittest.TestCase):
         for frame_name in SYNC_FRAMES:
             frame_path = os.path.join(DATA_DIR,frame_name)
             ffmpeg_frame = pv.Image(frame_path)
-            opencv_frame = video.next()
+            opencv_frame = next(video)
             #print ffmpeg_frame.asMatrix3D().shape
             #print opencv_frame.asMatrix3D().shape
             diff = ffmpeg_frame.asMatrix3D() - opencv_frame.asMatrix3D()
             diff_max = max(abs(diff.max()),abs(diff.min()))
-            self.assert_(diff_max < 30.0) # Test on MacOS never exceeds 25
+            self.assertTrue(diff_max < 30.0) # Test on MacOS never exceeds 25
             diff = pv.Image(diff)
             if ilog != None:
                 #print frame_name,diff_max
@@ -228,7 +228,7 @@ class TestVideo(unittest.TestCase):
             frame_num += 1
 
         # Make sure that this is the last frame of the video
-        self.assertRaises(StopIteration, video.next)
+        self.assertRaises(StopIteration, video.__next__)
             
         if ilog != None:
             ilog.show()
@@ -243,7 +243,7 @@ class TestVideo(unittest.TestCase):
             #_.show(delay=0)
             count += 1
         
-        self.assertEquals(count,5)
+        self.assertEqual(count,5)
         
     def disabletestFFMPEGFrameCount(self):
         """Frame Count Test"""
@@ -255,7 +255,7 @@ class TestVideo(unittest.TestCase):
             #_.show(delay=0)
             count += 1
         
-        self.assertEquals(count,5)
+        self.assertEqual(count,5)
         
         
     def disabletestFFMPEGBugsVideo(self):
@@ -268,7 +268,7 @@ class TestVideo(unittest.TestCase):
         for frame in video:            
             
             if ilog != None:
-                print "Processing Frame:",i
+                print("Processing Frame:",i)
                 
                 #if frame != None:
                 ilog(frame,format='jpg')

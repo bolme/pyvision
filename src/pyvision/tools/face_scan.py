@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # Create an image log if this is being saved to a file.
     ilog = None
     if options.log_dir != None:
-        print "Creating Image Log..."
+        print("Creating Image Log...")
         ilog = pv.ImageLog(options.log_dir)
     
     # For each image run face and eye detection
@@ -181,7 +181,7 @@ if __name__ == "__main__":
         #else:
         #    csv_file.writerow([pathname,"NA","NA","NA","NA","NA","NA","NA","NA","NA"])
         
-        print "Processed %5d of %d: [%2d faces] %s "%(c,len(image_names),n_faces,pathname)
+        print("Processed %5d of %d: [%2d faces] %s "%(c,len(image_names),n_faces,pathname))
         
         if ilog != None:
             basename = os.path.basename(pathname)

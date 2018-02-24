@@ -52,7 +52,7 @@ class ImageBuffer:
         '''
         @param N: how many image frames to buffer
         '''
-        self._data = [None for _ in xrange(N)]
+        self._data = [None for _ in range(N)]
         self._count = 0
         self._max = N
             
@@ -73,7 +73,7 @@ class ImageBuffer:
             return False
             
     def clear(self):
-        self._data = [None for _ in xrange(self._max)]
+        self._data = [None for _ in range(self._max)]
         self._count = 0
             
     def getCount(self):
@@ -121,13 +121,13 @@ class ImageBuffer:
         
         if type(v) == list:
             #create an iterator from an input list of images
-            idxs = range(len(v))
+            idxs = list(range(len(v)))
             V = ( v[i] for i in idxs)
         else:
             V = v
             
         while not self.isFull():
-            im = V.next()
+            im = next(V)
             self.add(im)
 
         return

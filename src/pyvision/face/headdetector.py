@@ -177,14 +177,14 @@ class HeadDetector(object):
         @param image_dir: A pathname containing images.
         @param eye_data: a list of tuples (from csv) filename,eye1x,eye1y,eye2x,eye2y
         '''
-        print "Training"
+        print("Training")
         
         data_set = []
         
         progress = pv.ProgressBar(maxValue=len(eye_data))
         for row in eye_data:
             filename = row[0]
-            print "Processing",row
+            print("Processing",row)
             points = [float(val) for val in row[1:]]
             eye1 = pv.Point(points[0],points[1])
             eye2 = pv.Point(points[2],points[3])
@@ -217,7 +217,7 @@ class HeadDetector(object):
                 if score > 0.7:
                     success = 1.0
                 row = detection[1],success,detection[2:]
-                print row
+                print(row)
                 data_set.append(row)                    
                             
             # Display the results
@@ -230,14 +230,14 @@ class HeadDetector(object):
             im.annotateRect(self.prescale*truth,color='red')
             progress.updateAmount()
             progress.show()
-            print
+            print()
             #im.show(delay=1)
         progress.finish()
         obs = [each[1] for each in data_set]   
         data = [each[2] for each in data_set] 
         
-        print obs
-        print data
+        print(obs)
+        print(data)
         
         self.quality.train(obs,data)
         
@@ -247,15 +247,15 @@ class HeadDetector(object):
             self.quality[each[0]][1].append(each[1])
             self.quality[each[0]][2].append(each[2])
         
-        for key,value in self.quality.iteritems():
-            print "Training:",key
+        for key,value in self.quality.items():
+            print("Training:",key)
             obs = value[1]
             data = value[2]
             assert len(obs) == len(data)
             value[0].train(obs,data)
-            print value[0].params
+            print(value[0].params)
             
-        print "Done Training"
+        print("Done Training")
         
         
     def __call__(self,*args,**kwargs):

@@ -50,7 +50,7 @@ class StatsModelWrapper(object):
         data = open(filename,'rb').read()
         state['model_data'] = data
         
-        for key,value in self.__dict__.iteritems():
+        for key,value in self.__dict__.items():
             if key != 'model':
                 state[key] = value
         
@@ -65,7 +65,7 @@ class StatsModelWrapper(object):
         open(filename,'wb').write(state['model_data'])
         self.model.load(filename)
         os.remove(filename)
-        for key,value in state.iteritems():
+        for key,value in state.items():
             if key not in ('model_data','model_class'):
                 setattr(self,key,value)
                 
@@ -172,11 +172,11 @@ if __name__ == '__main__':
     
     model = svc_rbf(pv.IRIS_DATA[0::2,:],labels[0::2])
     
-    import cPickle as pkl
+    import pickle as pkl
     buf = pkl.dumps(model)
     model = pkl.loads(buf)
-    print "Prediction:",np.float32([model.predict(s) for s in pv.IRIS_DATA[1::2,:]])
-    print "Prediction:",model.predict_all(pv.IRIS_DATA[1::2,:])
+    print("Prediction:",np.float32([model.predict(s) for s in pv.IRIS_DATA[1::2,:]]))
+    print("Prediction:",model.predict_all(pv.IRIS_DATA[1::2,:]))
     assert 0
 
 

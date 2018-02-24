@@ -132,7 +132,7 @@ class ImageMontage(object):
             ypos = row*th
             lbltext = "%d"%(i)
             ((txtw, txth), _) = cv2.getTextSize(lbltext, *self._txtfont)
-            print "DEBUG: tw, th = %d,%d"%(txtw,txth)
+            print("DEBUG: tw, th = %d,%d"%(txtw,txth))
             if txtw > 0 and txth > 0:
                 cv2.rectangle(self._cvMontageImage, (xpos, ypos), (xpos+txtw + 3, ypos+txth + 3),
                              (0, 0, 0), thickness=cv2.FILLED)
@@ -353,19 +353,19 @@ class VideoMontage(pv.Video):
         """ Return an iterator for this video """
         return VideoMontage(self.vids, layout=self.layout, tile_size=self.vidsize)
 
-    def next(self):
-        if len(self.stopped) == len(self.vids.keys()):
-            print "All Videos in the Video Montage Have Completed."
+    def __next__(self):
+        if len(self.stopped) == len(list(self.vids.keys())):
+            print("All Videos in the Video Montage Have Completed.")
             raise StopIteration
 
         #get next image from each video and put on montage
         #if video has ended, continue to display last image
         #stop when all videos are done.  
-        for key in self.vids.keys():
+        for key in list(self.vids.keys()):
             if key in self.stopped: continue #this video has already reached its end.
             v = self.vids[key]
             try:
-                tmp = v.next()
+                tmp = next(v)
                 self.imgs[key] = tmp
             except StopIteration:
                 #print "End of a Video %s Reached"%key
@@ -392,7 +392,7 @@ def demo_imageMontage():
     jpgs = [os.path.join(JPGDIR, f) for f in filenames if f.endswith(".jpg")]
 
     for fn in jpgs:
-        print counter
+        print(counter)
         if counter > 8: break
         imageList.append(pv.Image(fn))
         counter += 1

@@ -69,7 +69,7 @@ Genetic Algorithm     optimization        pyvision.optimize.GeneticAlgorithm
 
 import unittest
 import sys
-import cPickle as pkl
+import pickle as pkl
 
 __version__ = "1.2.0"
 __info__ = "https://github.com/bolme/pyvision/wiki"
@@ -166,7 +166,7 @@ from pyvision.analysis.Montage import ImageMontage, VideoMontage
 try:
     from pyvision.analysis.plot import Plot
 except:
-    print "Warning: could not load plotting library."
+    print("Warning: could not load plotting library.")
     
 from pyvision.analysis.Table import Table
 
@@ -191,7 +191,7 @@ from pyvision.ml.knn import RobustPNorm,PNorm,correlation,chisquared,KNearestNei
 try:
     from pyvision.util.fast_util import LocalMaximumDetector
 except:
-    print "Warning: could not import fast_util."
+    print("Warning: could not import fast_util.")
     
 from pyvision.util.windows import cosineWindow, hammingWindow, hannWindow
 
@@ -216,12 +216,12 @@ from pyvision.analysis.bee import parseSigSet,saveSigset,computeMaskMatrix,BEE_C
 try:
     from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO,FONT_ARIAL,BUGS_VIDEO,CAR_VIDEO, IRIS_DATA, IRIS_LABELS
 except:
-    print "Warning: could not import data."
+    print("Warning: could not import data.")
 from pyvision.surveillance.VideoStreamProcessor import *
 
-from analysis.progress_bar import ProgressBar
+from .analysis.progress_bar import ProgressBar
 
-from analysis.gui_tools import capturePointsFromMouse
+from .analysis.gui_tools import capturePointsFromMouse
 
 from pyvision.face import REDUCED_LEYE, REDUCED_REYE, REDUCED_SIZE
 
@@ -235,7 +235,7 @@ from pyvision.beta.vtm import VideoTaskManager, VideoTask, _VideoDataItem
 
 from pyvision.analysis.html_report import HtmlReport
 # Import the beta components
-import beta
+from . import beta
 
 import time
 
@@ -251,7 +251,7 @@ def searchNames(text,item):
     '''Search dir(object) for patterns matching text'''
     for name in dir(item):
         if text.upper() in name.upper():
-            print name
+            print(name)
     
 def getTypeName(item):
     '''
@@ -273,7 +273,7 @@ def getTypeName(item):
             type_name = type_name[:-1]
             type_name += ")"
         elif isinstance(item,dict):
-            type_list = set([getTypeName(each) for _,each in item.iteritems()])
+            type_list = set([getTypeName(each) for _,each in item.items()])
             type_name = 'dict:%d('%len(item)
             for each in type_list:
                 type_name += each+","
@@ -322,7 +322,7 @@ def inspectObject(item,name='<top>',max_depth=5,verbose=False,print_depth=0,info
     if info == None:
         info = pv.Table()
         info.setColumnFormat('name','%s')
-        print dir(info)
+        print(dir(info))
     i = info.nRows()
 
     info[i,'name'] = ('    '*print_depth) + name
@@ -365,7 +365,7 @@ def inspectObject(item,name='<top>',max_depth=5,verbose=False,print_depth=0,info
                 
         if isinstance(item,dict):
             processed_types = set()
-            for _,each in item.iteritems():
+            for _,each in item.items():
                 if type(each) in processed_types:
                     continue
                 processed_types.add(type(each))
@@ -481,9 +481,9 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = sys.version.split(' ')[0].split('.')[:3]
         rmajor,rminor,rsub = 2,3,0 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub), end=' ', file=sys.stderr)
         sys.stderr.flush()
-        self.assert_(major > rmajor 
+        self.assertTrue(major > rmajor 
                      or major == rmajor and minor >= rminor 
                      or major == rmajor and minor == rminor and sub >= sub)
 
@@ -492,9 +492,9 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = PIL.Image.VERSION.split('.')[:3]
         rmajor,rminor,rsub = 1,1,5 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub), end=' ', file=sys.stderr)
         sys.stderr.flush()
-        self.assert_(major > rmajor 
+        self.assertTrue(major > rmajor 
                      or major == rmajor and minor >= rminor 
                      or major == rmajor and minor == rminor and sub >= sub)
 
@@ -503,9 +503,9 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = cv2.__version__.split('.')[:3]
         rmajor,rminor,rsub = 2,4,2 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub), end=' ', file=sys.stderr)
         sys.stderr.flush()
-        self.assert_(major > rmajor 
+        self.assertTrue(major > rmajor 
                      or major == rmajor and minor >= rminor 
                      or major == rmajor and minor == rminor and sub >= sub)
 
@@ -514,9 +514,9 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = scipy.__version__.split('.')[:3]
         rmajor,rminor,rsub = 0,7,0 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub), end=' ', file=sys.stderr)
         sys.stderr.flush()
-        self.assert_(major > rmajor 
+        self.assertTrue(major > rmajor 
                      or major == rmajor and minor >= rminor 
                      or major == rmajor and minor == rminor and sub >= sub)
         
@@ -525,9 +525,9 @@ class _VersionTest(unittest.TestCase):
         major,minor,sub = numpy.__version__.split('.')[:3]
         rmajor,rminor,rsub = 1,0,4 # 2008/03/20
         major,minor,sub = int(major),int(minor),int(sub)
-        print >> sys.stderr, "%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub),
+        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub), end=' ', file=sys.stderr)
         sys.stderr.flush()
-        self.assert_(major > rmajor 
+        self.assertTrue(major > rmajor 
                      or major == rmajor and minor >= rminor 
                      or major == rmajor and minor == rminor and sub >= sub)
                 
@@ -587,7 +587,7 @@ def test():
         cd_suite = unittest.TestLoader().loadTestsFromTestCase(_TestCascadeDetector)
         test_suites.append(cd_suite)
     except:
-        print "WARNING: Could not load _TestCascadeDetector."
+        print("WARNING: Could not load _TestCascadeDetector.")
         
     #from pyvision.face.PCA import _TestFacePCA
     #fpca_suite = unittest.TestLoader().loadTestsFromTestCase(_TestFacePCA)
@@ -630,7 +630,7 @@ def test():
         surf_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSURF)
         test_suites.append(surf_suite)
     except:
-        print "WARNING: Could not load _TestSURF."
+        print("WARNING: Could not load _TestSURF.")
             
     pyvision_suite = unittest.TestSuite(test_suites)
     

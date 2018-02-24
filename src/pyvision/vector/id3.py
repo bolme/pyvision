@@ -52,7 +52,7 @@ def entropy(labels):
         count += 1.0
         
     ent = 0.0
-    for each in sums.values():
+    for each in list(sums.values()):
         p_i = each/count
         ent -= p_i * lg (p_i)
     return ent
@@ -74,7 +74,7 @@ def maxValue(labels):
         
     highVal = 0.0
     highLab = labels[0]
-    for key,value in sums.iteritems():
+    for key,value in sums.items():
         if value > highVal:
             highVal = value
             highLab = key
@@ -89,7 +89,7 @@ def splitFeatures(feature,features):
     split = {}
     for label,values in features:
         key = values[feature]
-        if not split.has_key(key):
+        if key not in split:
             split[key] = []
         split[key].append([label,values])
         
@@ -134,7 +134,7 @@ class ID3:
                 correct += 1
             else:
                 wrong += 1
-        print "Test: %d/%d"%(correct,correct+wrong)   
+        print("Test: %d/%d"%(correct,correct+wrong))   
         return float(correct)/float(correct+wrong)
         
 
@@ -154,8 +154,8 @@ class Node:
         
     def train(self,features):
         labels = getLabels(features)
-        print "Ent:",entropy(labels)
-        print "Max:",maxValue(labels)
+        print("Ent:",entropy(labels))
+        print("Max:",maxValue(labels))
         
         self.label = maxValue(labels)
         self.entropy = entropy(labels)
@@ -171,7 +171,7 @@ class Node:
         for i in range(no_feature):
             gain = self.entropy
             s = splitFeatures(i,features)
-            for _,vals in s.iteritems():
+            for _,vals in s.items():
                 scale = float(len(vals))/float(len(features))
                 e = entropy(getLabels(vals))
                 #print "Split %3d:"%i,key,len(vals), e
@@ -180,12 +180,12 @@ class Node:
                 max_gain = gain
                 max_feature = i
                 max_children = s
-        print "Gain: ",max_gain,max_feature
+        print("Gain: ",max_gain,max_feature)
         self.feature = max_feature
         self.gain = max_gain
         
         self.children = {}
-        for label,features in max_children.iteritems():
+        for label,features in max_children.items():
             self.children[label] = Node(features)
               
         #for i in range(features):
@@ -194,7 +194,7 @@ class Node:
         
         if self.feature:
             val = feature[self.feature]
-            if self.children.has_key(val):
+            if val in self.children:
                 return self.children[val].classify(feature)
         return self.label,None
     
