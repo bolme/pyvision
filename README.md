@@ -1,13 +1,13 @@
-PyVision Computer Vision Toolkit
+#PyVision Computer Vision Toolkit
     by David Bolme
 
 As of August 2014, PyVision is now hosted at github:
-    http://github.com/bolme/pyvision
+    <http://github.com/bolme/pyvision>
 
 For additional documentation please see the github wiki:
-    http://github.com/bolme/pyvision/wiki
+    <http://github.com/bolme/pyvision/wiki>
 
-PyVision is a object-oriented Computer Vision Toolkit (BSD Licenses) 
+PyVision is a object-oriented Computer Vision Toolkit (**BSD Licenses**) 
 that is designed to allow the rapid prototype and analysis of computer 
 vision algorithms.  Using python as a foundation this package provides 
 a simple framework that unifies the Matlab like functionality of 
@@ -20,25 +20,27 @@ analysis in Excel, R, or SAS.
 PyVision is a collection of computer vision algorithms that I have implemented 
 as part of my Ph.D. face recognition research.  The purpose of the library is 
 to provide a set of utilities that interface with common computer vision and 
-machine learning libraries that will allow rapid vision algorithm prototyping.  
+machine learning libraries that will allow rapid vision algorithm prototyping. 
 For example the current implementation has an image class which will easily 
 translate image data between PIL, numpy array, and opencv formats.
 
+### Overview
 Currently, PyVision contains a set of popular computer vision algorithms 
 including: 
-    * canny edge detection 
-	* harris corner detection
-	* viola and jones face detection
-	* support vector machines and other classifiers
-	* image normalization primitives
-	* Difference of Gaussian ROI detection
-	* Genetic Algorithm
-	* Phase Correlation
-	* Eye Detection (ASEF and MOSSE Filters)
-	* PCA and LDA analysis
-	* PCA Face Recognition
-	* Image Affine Transform
-	* Video Stream Processing
+
+- canny edge detection 
+- harris corner detection
+- viola and jones face detection
+- support vector machines and other classifiers
+- image normalization primitives
+- Difference of Gaussian ROI detection
+- Genetic Algorithm
+- Phase Correlation
+- Eye Detection (ASEF and MOSSE Filters)
+- PCA and LDA analysis
+- PCA Face Recognition
+- Image Affine Transform
+- Video Stream Processing
 
 Pyvision also has a set of built in analysis tools (based on scipy) for 
 analyzing and testing vision algorithms.  This includes a simple image 
@@ -70,34 +72,38 @@ development will be related that area.  Contributions in other areas of
 research are welcome including: Object Recognition, Biological Vision, 
 Multiview Geometry, etc.
 
-Dependencies
-	PIL
-	scipy
-	numpy
-	OpenCV
-	scikit learn (As of pyvision 2.0)
-	scikit image (As of pyvision 2.0)
+### Dependencies
+
+- PIL
+- scipy
+- numpy
+- OpenCV
+- scikit learn (As of pyvision 2.0)
+- scikit image (As of pyvision 2.0)
 	
 
-Features:
-	Python based for rapid prototyping.
-	Common data types with easy conversion.
-	Automatically tuned or easy to configure algorithms.
-	Numerical support from scipy.
-	Image support from PIL.
-	Pretrained algorithms for common tasks.
-	Python and R based algorithms analysis.
-	Unit tests for algorithm verification.
-	Sample code and tutorials.
-	Save and load configurations with python's pickle.
-	Simple interfaces to third party software: OpenCV and libsvm.
+### Features:
+	
+- Python based for rapid prototyping.
+- Common data types with easy conversion.
+- Automatically tuned or easy to configure algorithms.
+- Numerical support from scipy.
+- Image support from PIL.
+- Pretrained algorithms for common tasks.
+- Python and R based algorithms analysis.
+- Unit tests for algorithm verification.
+- Sample code and tutorials.
+- Save and load configurations with python's pickle.
+- Simple interfaces to third party software: OpenCV and libsvm.
 
-Notes:
+** Notes: **
 	Image.asOpenCV() - Requires fix to opencv bug #1618474 included in cvs on 
 	    Jan 25, 2007 18:19:21 UTC by rstanchak
 	
-Releases:
-    1.1.0 - It has been a while since the last release.  OpenCV has improved 
+### Releases:
+
+* 1.2.0 - Support for Python 3 and OpenCV 3
+* 1.1.0 - It has been a while since the last release.  OpenCV has improved 
             recently and has become more stable with improved python bindings.  
             As a result PyVision is adapting to use OpenCV for much of its
             core functionality.  In general OpenCV tends to be faster and 
@@ -105,38 +111,13 @@ Releases:
             PIL.  Additionally OpenCV will be used in the future for machine
             learning algorithms.  The Video Task Manager (VTM) framework is 
             improving for quickly developing video processing pipelines.  
-    1.0.0 - Many interface things have been cleaned up.
+* 1.0.0 - Many interface things have been cleaned up.
             Function arguments that are keywords have been change and may not 
             work as in previous version.  These include: buffer, type, filter,
             iter. All warnings and errors from the code analysis have been 
             fixed.
-    0.8.1 - Released in July 2010. This is the last release before a major 
+* 0.8.1 - Released in July 2010. This is the last release before a major 
             upgrade and the last version to support OpenCV 1.0 with the swig 
             bindings.
-    0.8.0 - Released in June 2009.  This was primarily to support FaceL.
+* 0.8.0 - Released in June 2009.  This was primarily to support FaceL.
 
-Changes for Version 2.0:
-
-The major modivation for this release is that OpenCV no longer supports the 1.0
-python interface.  This causes issues with backwards compatibility.  For this
-reason it is used as an excuse for major cleanup and to remove code that is 
-no longer needed such as the SVM.  That functionality will be supported through
-new interfaces or by going directly to OpenCV, scikit learn, or scikit image.
-
-Here is a list of major 2.0 changes:
-    * Removes support for any references to the legacy cv module and iplimage 
-      formats.
-    * NumpyToOpenCV and OpenCVToNUmpy conversions removed.
-    * ImageClass: asOpenCV and asOpenCVBW removed TYPE_OPENCV removed.  
-      Subsititude with asOpenCV2 and asOpenCV2BW
-    * FFMPEGVideo support has been removed.
-    * Image transforms now use cv2 interface.
-    * Removed SVM, VectorClassifier, RidgeRegression, PCA, SVMEyeDetector, 
-      SVMFaceRec because they are rarely used now and there are implemetations
-      in scikit learn.
-    * FilterEyeLocator performance was reduced in the conversion.  It probably
-      also runs slower.  (This may be fixed later.)
-    * Removed libsvm, PointLocator, Polynomial Fitting.
-    * SURF does not seem to be avalible currently.  Could be replaced with ORB.
-      SURF may be readded in the future.
-      

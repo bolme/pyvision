@@ -12,7 +12,7 @@ try:
         assert cv_version_data[1] == 4
     
 except:
-    print "ERROR: Could not load OpenCV.  Make sure the python bindings for opencv 2.4.9 or later are installed."
+    print("ERROR: Could not load OpenCV.  Make sure the python bindings for opencv 2.4.9 or later are installed.")
     raise
 
 package_data = {}
@@ -53,12 +53,30 @@ for path,dirs,files in os.walk(DATA_DIR):
 
 #pyvision/config
 
-setup(name='PyVision',
+setup(name='pyvision_toolkit',
       version='1.2.0',
       description='A computer vision library for python.',
       author='David Bolme',
       author_email='dbolme@gmail.com',
       url='https://github.com/bolme/pyvision',
+      keywords = ["machine learning", "vision", "image"],
+         classifiers = [
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Other Environment",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "Natural Language :: English",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: OS Independent",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Scientific/Engineering :: Image Recognition",
+        ],
+    long_description = "A computer vision library for python.",
+
       packages=['pyvision',
                 'pyvision.vector',
                 'pyvision.point',
@@ -85,4 +103,12 @@ setup(name='PyVision',
                 ],
       package_dir = {'': 'src'},
       package_data = package_data,
+      install_requires=[
+          'opencv-python',
+          'Pillow',
+          'numpy',
+          'scipy',
+          'scikit-image',
+          'scikit-learn',
+      ],
 )
