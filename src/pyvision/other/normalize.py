@@ -36,7 +36,6 @@
 import scipy.ndimage as ndi
 import numpy as np
 import pyvision as pv
-import cv2
 
 def normalizeMeanStd(matrix):
     ''' TODO: deprecated please use meanStd.'''
@@ -130,7 +129,7 @@ def gaussianFilter(im,sigma):
     Smooth an image using a Gaussian filter.
     '''    
     cvim = cv.CreateImage(im.size,cv.IPL_DEPTH_8U,im.channels)
-
+    
     cv.Smooth(im.asOpenCV(),cvim,cv.CV_GAUSSIAN,0,0,sigma)
     return pv.Image(cvim)
 

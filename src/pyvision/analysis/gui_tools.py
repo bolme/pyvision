@@ -38,7 +38,7 @@ Created on Oct 31, 2011
 '''
 
 import pyvision as pv
-import cv2
+#import cv2
 import PIL.Image as pil
 from collections import defaultdict
 
@@ -72,6 +72,7 @@ class CaptureClicks:
         '''
         Initialize the data.
         '''
+        import cv2
         self.window = window
         self.im = im.copy()
         self.keep_window_open = keep_window_open
@@ -83,6 +84,7 @@ class CaptureClicks:
         '''
         Display the window and run the main event loop.
         '''
+        import cv2
         global CALLBACK_DICT
         # Setup the mouse callback to handle mause events (optional)
         cv2.namedWindow(self.window)
@@ -122,6 +124,7 @@ class CaptureClicks:
         '''
         Call back function for mouse events.
         '''
+        import cv2
         if event in [cv2.EVENT_LBUTTONDOWN]:
             point = pv.Point(x,y)
             self.im.annotateLabel(point,str(len(self.points)),mark='below')
@@ -151,6 +154,7 @@ class CaptureClicksVideo:
         '''
         Display the window and run the main event loop.
         '''
+        import cv2
         # Setup the mouse callback to handle mause events (optional)
         cv.NamedWindow("PyVision Capture Points")
         
@@ -187,7 +191,7 @@ class CaptureClicksVideo:
         del self.buffer
         
         if not self.keep_window_open:
-            cv.DestroyWindow("PyVision Capture Points")
+            cv2.DestroyWindow("PyVision Capture Points")
         
         return self.points
             
@@ -251,6 +255,7 @@ class CaptureClicksVideo:
         '''
         Call back function for mouse events.
         '''
+        import cv2
         if event in [cv2.CV_EVENT_LBUTTONDOWN]:
             if self.frame not in self.points:
                 self.points[self.frame] = []

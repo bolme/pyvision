@@ -37,7 +37,7 @@ Created on Mar 14, 2011
 import pyvision as pv
 import PIL.Image
 import weakref
-import cv2
+#import cv2
 import numpy as np
 
 class ImageMontage(object):
@@ -76,6 +76,7 @@ class ImageMontage(object):
         self._gutter = gutter
         self._by_row = by_row
         
+        import cv2
         self._txtfont = (cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
         self._txtcolor = (255, 255, 255)
         
@@ -99,6 +100,7 @@ class ImageMontage(object):
         image pointer (position in list of images), etc. This internally constructs
         the montage, but show() is required for display and mouse-click handling.
         """
+        import cv2
         # initialize to zeros
         self._cvMontageImage[:,:,:] = 0
 
@@ -141,43 +143,8 @@ class ImageMontage(object):
                 font_thick = self._txtfont[2]
                 color = self._txtcolor
                 cv2.putText(self._cvMontageImage, lbltext, (xpos+1, ypos+1+txth), font, font_size, color,font_thick)
-        return
-            
-            
-            
-                
-        img_ptr = self._imgPtr
-        if img_ptr > 0:
-            #we are not showing the first few images in imageList
-            #so display the decrement arrow
-            #cv.FillConvexPoly()
-            cv2.fillConvexPoly(self._cvMontageImage, self._decrArrow, (125, 125, 125))
-        if img_ptr + (self._rows * self._cols) < len(self._images):
-            #we are not showing the last images in imageList
-            #so display increment arrow
-            cv2.fillConvexPoly(self._cvMontageImage, self._incrArrow, (125, 125, 125))
-
-        self._image_positions = []
-        if self._by_row:
-            for row in range(self._rows):
-                for col in range(self._cols):
-                    if img_ptr > len(self._images) - 1: break
-                    tile = pv.Image(self._images[img_ptr].asAnnotated())
-                    self._composite(tile, (row, col), img_ptr)
-                    img_ptr += 1
-        else:
-            for col in range(self._cols):
-                for row in range(self._rows):
-                    if img_ptr > len(self._images) - 1: break
-                    tile = pv.Image(self._images[img_ptr].asAnnotated())
-                    self._composite(tile, (row, col), img_ptr)
-                    img_ptr += 1
-
-                    #if mousePos != None:
-                    #    (x,y) = mousePos
-                    #    cv.Rectangle(self._cvMontageImage, (x-2,y-2), (x+2,y+2), (0,0,255), thickness=cv.CV_FILLED)
-
-
+ 
+ 
     def asImage(self):
         """
         If you don't want to use the montage's built-in mouse-click handling by calling
@@ -208,6 +175,7 @@ class ImageMontage(object):
         @param imgNum: The image index of the tile being drawn, this helps us display the
         appropriate label in the lower left corner if self._labels is not None.
         """
+        import cv2
         (row, col) = pos
 
         if self._keep_aspect:
@@ -298,6 +266,7 @@ class clickHandler(object):
         Increment or Decrement the set of images shown in the montage
         if appropriate.
         """
+        import cv2
         IM = self.IM()  #IM object is obtained via weak reference to image montage
         if IM is None: return #if the reference was deleted already...
 
@@ -399,6 +368,7 @@ def demo_imageMontage():
 
     im = ImageMontage(imageList, (2, 3), tile_size=(128, 96), gutter=2, by_row=False)
     im.show(window="Image Montage", delay=0)
+    import cv2
     cv2.destroyWindow('Image Montage')
 
 

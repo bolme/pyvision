@@ -47,7 +47,7 @@ import PIL.ImageFont as ImageFont
 import numpy
 import numpy as np
 #import cv
-import cv2
+#import cv2
 import pyvision
 import pyvision as pv
 
@@ -740,6 +740,7 @@ class Image:
         '''
         Create a matrix version of the image compatible with OpenCV 2 (cv2) in BGR format.
         '''
+        import cv2
         data_buffer = self.toBufferRGB(8)
         self.opencv2 = cv2.cvtColor(numpy.frombuffer(data_buffer,numpy.uint8).reshape(self.height,self.width,3),cv2.COLOR_RGB2BGR)            
 
@@ -784,6 +785,7 @@ class Image:
             image_buffer = self.opencv2bw.tostring()
         elif self.type == TYPE_OPENCV2:
             # Convert to gray then get buffer
+            import cv2
             tmp = cv2.cvtColor(self.opencv2, cv2.COLOR_BGR2GRAY)
             image_buffer = tmp.tostring()
         elif self.type == TYPE_MATRIX_RGB:
@@ -858,10 +860,12 @@ class Image:
             image_buffer = mat.tostring()
         elif self.type == TYPE_OPENCV2BW:
             # Convert to color
+            import cv2
             tmp = cv2.cvtColor(self.opencv2bw, cv2.COLOR_GRAY2RGB)
             image_buffer = tmp.tostring()
         elif self.type == TYPE_OPENCV2:
             # Convert BGR to RGB
+            import cv2
             tmp = cv2.cvtColor(self.opencv2, cv2.COLOR_BGR2RGB)
             image_buffer = tmp.tostring() 
         elif self.type == TYPE_MATRIX_RGB:
@@ -1061,6 +1065,7 @@ class Image:
             
         else:
             # Otherwise, use an opencv window
+            import cv2
             if window is None:
                 window = "PyVisionImage"
 

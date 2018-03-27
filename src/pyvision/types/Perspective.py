@@ -44,7 +44,7 @@ import os.path
 import numpy as np
 import numpy.linalg as la
 import pyvision as pv
-import cv2
+#import cv2
 
 
 def logPolar(im,center=None,radius=None,M=None,size=(64,128)):
@@ -66,6 +66,7 @@ def logPolar(im,center=None,radius=None,M=None,size=(64,128)):
     if center == None:
         center = pv.Point(0.5*w,0.5*h)
     src = im.asOpenCV2()
+    import cv2
     dst = cv2.logPolar( src, center.asOpenCV(), M, cv2.INTER_LINEAR+cv2.WARP_FILL_OUTLIERS )
     return pv.Image(dst)
     
@@ -134,6 +135,7 @@ def PerspectiveFromPoints(source, dest, new_size, method=0, ransacReprojThreshol
         d[i,0] = dest[i].X()
         d[i,1] = dest[i].Y()
         
+    import cv2
     matrix,mask = cv2.findHomography(s,d,method,ransacReprojThreshold)
     
     #print retval,matrix
@@ -186,6 +188,7 @@ class PerspectiveTransform:
         ''' Transform an image. '''
         matrix = self.matrix
         src = im.asOpenCV2()
+        import cv2
         dst = cv2.warpPerspective( src, matrix, self.size)                    
         return pv.Image(dst)
 

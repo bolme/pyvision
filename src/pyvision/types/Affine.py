@@ -58,7 +58,7 @@ import random
 import pyvision
 import pyvision as pv
 import numpy as np
-import cv2
+#import cv2
 
 from pyvision.types.img import Image, TYPE_PIL, TYPE_MATRIX_2D, TYPE_MATRIX_RGB, TYPE_OPENCV2, TYPE_OPENCV2BW
 from pyvision.types.Point import Point
@@ -579,12 +579,14 @@ class AffineTransform:
             
         elif im_a.getType() == TYPE_OPENCV2:
             # Transform an opencv 2 image
+            import cv2
             src = im_a.asOpenCV2()
             dst = cv2.warpPerspective(src, self.matrix, self.size)
             result = pv.Image(dst)
 
         elif im_a.getType() == TYPE_OPENCV2BW:
             # Transform a bw opencv 2 image
+            import cv2
             src = im_a.asOpenCV2BW()
             dst = cv2.warpPerspective(src, self.matrix, self.size)
             result = pv.Image(dst)

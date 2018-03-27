@@ -37,7 +37,7 @@ Created on Jan 11, 2011
 '''
 
 import pyvision as pv
-import cv2
+#import cv2
 import numpy as np
 
 HIST_HS = "HIST_HS"
@@ -140,6 +140,7 @@ def HSHist(im,h_bins=32,s_bins=32,mask=None,normalize=True):
     if mask != None:
         mask = mask.asOpenCV2BW()
         
+    import cv2
     hist = cv2.calcHist([hsv],channels,None,hist_size,ranges)
 
     return pv.Histogram(hist,HIST_HS,h_bins,s_bins,None)
@@ -236,6 +237,7 @@ def hsBackProjectHist(im,fg_hist,bg_hist=None):
 
     #cv.CalcBackProject(planes,output,fg_hist.hist)
     #calcBackProject(images, channels, hist, ranges, scale[, dst]) -> dst
+    import cv2
     output = cv2.calcBackProject([hsv], [0,1], fg_hist.hist, ranges, 1.0)
     return pv.Image(output)
 

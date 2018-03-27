@@ -37,7 +37,7 @@ import pyvision as pv
 #import cv
 import random
 #from scipy import weave
-import cv2
+#import cv2
 
 
 class VideoInterface(object):
@@ -86,6 +86,7 @@ class VideoInterface(object):
         if self.size == None:
             return frame
         else:
+            import cv2
             #depth = frame.depth
             #channels = frame.channels
             w,h = self.size
@@ -170,7 +171,7 @@ class VideoInterface(object):
             key = self._pauseAndPlay(delayObj)
             if key == 'q': break #user selected quit playback
         
-        if window != None: cv.DestroyWindow(window)
+        #if window != None: cv.DestroyWindow(window)
         return(fn)
     
     def _pauseAndPlay(self,delayObj={'wait_time':20, 'current_state':'PLAYING'}):
@@ -257,6 +258,7 @@ class Webcam(VideoInterface):
         # TODO: Video capture is unreliable under linux.  This may just be a timing issue when running under parallels.
         retval,frame = self.cv_capture.read()
         if self.flipped:
+            import cv2
             frame = cv2.flip(frame,-1)
         im = pv.Image(self.resize(frame))
         im.orig_frame = pv.Image(frame)
@@ -294,6 +296,7 @@ class Video(VideoInterface):
         vid = Video(cam_url) 
         vid.play()
         '''
+        import cv2
         self.filename = filename
         self.cv_capture = cv2.VideoCapture( filename );
         self._numframes = self.cv_capture.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -301,6 +304,7 @@ class Video(VideoInterface):
         self.current_frame = 0
 
     def query(self):
+        import cv2
         if self.current_frame > 0 and self.cv_capture.get(cv2.CAP_PROP_FRAME_COUNT) == 1.0:
             return None
         retval,frame = self.cv_capture.read()
@@ -311,6 +315,7 @@ class Video(VideoInterface):
         return pv.Image(self.resize(frame))
     
     def setFrame(self,n):
+        import cv2
         assert n >= 0 and n <= 1
         self.cv_capture.set(cv2.CAP_PROP_POS_AVI_RATIO, float(n))
         

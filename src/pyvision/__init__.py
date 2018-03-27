@@ -207,8 +207,6 @@ from pyvision.ml.lda import lda
 
 from pyvision.ml.regression import LogisticRegression
 
-from pyvision.other.surf import surf
-
 from pyvision.other.texture import lbp,LBP_CLASSIC,LBP_RAD1,LBP_RAD2,LBP_RAD3,LBP_RAD4,LBP_RAD8
 
 from pyvision.analysis.bee import parseSigSet,saveSigset,computeMaskMatrix,BEE_CODE_MAP,BEE_DONTCARE,BEE_MATCH,BEE_NONMATCH,BEEDistanceMatrix
@@ -217,7 +215,6 @@ try:
     from pyvision.data import AIRPLANE,BABOON,FRUITS,LENA,LOGO,TAZ_IMAGE,TAZ_VIDEO,FONT_ARIAL,BUGS_VIDEO,CAR_VIDEO, IRIS_DATA, IRIS_LABELS
 except:
     print("Warning: could not import data.")
-from pyvision.surveillance.VideoStreamProcessor import *
 
 from .analysis.progress_bar import ProgressBar
 
@@ -228,8 +225,6 @@ from pyvision.face import REDUCED_LEYE, REDUCED_REYE, REDUCED_SIZE
 # Removed for opencv 3 from pyvision.types.kinect import Kinect
 
 from pyvision.surveillance.kalman import KalmanFilter
-
-from pyvision.ml.opencv_ml import svc_linear, svc_rbf, svr_linear, svr_rbf, random_forest, boost, gbtrees
 
 from pyvision.beta.vtm import VideoTaskManager, VideoTask, _VideoDataItem
 
