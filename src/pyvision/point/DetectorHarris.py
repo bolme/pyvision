@@ -57,6 +57,8 @@ class DetectorHarris(DetectorROI):
         '''
         void cvCornerHarris( const CvArr* image, CvArr* harris_responce, int block_size, int aperture_size=3, double k=0.04 );
         '''
+        import cv2
+        
         gray = im.asOpenCV2BW()
         #gray = opencv.cvCreateImage( opencv.cvGetSize(cvim), 8, 1 );
         #corners = cv.CreateImage( cv.GetSize(gray), 32, 1 );

@@ -320,7 +320,10 @@ class Image:
         @return: an OpenCV HSV encoded image
         '''
         cvim = self.asOpenCV2()
-        dst = cv2.cvtColor(cvim, cv2.COLOR_BGR2HSV)
+        import skimage.color
+        dst = skimage.color.rgb2hsv(cvim[:,:,::-1])
+        dst *= [[[180,255,255]]]
+        dst = dst.astype(np.uint8)
         
         return dst
         
@@ -329,9 +332,18 @@ class Image:
         '''
         @return: an OpenCV LAB encoded image
         '''
-        cvim = self.asOpenCV()
-        dst = cv.CreateImage(cv.GetSize(cvim), cv.IPL_DEPTH_8U, 3)
-        cv.CvtColor(cvim, dst, cv.CV_BGR2Lab)
+        try:
+            import cv2
+            cvim = self.asOpenCV()
+            dst = cv.CreateImage(cv.GetSize(cvim), cv.IPL_DEPTH_8U, 3)
+            cv2.CvtColor(cvim, dst, cv.CV_BGR2Lab)
+            return dst
+        except:
+            pass
+        
+        import skimage.color
+        cvim = self.asOpenCV2()
+        dst = skimage.color.rgb2lab(cvim[:,:,::-1])
         
         return dst
     
@@ -740,9 +752,11 @@ class Image:
         '''
         Create a matrix version of the image compatible with OpenCV 2 (cv2) in BGR format.
         '''
-        import cv2
         data_buffer = self.toBufferRGB(8)
-        self.opencv2 = cv2.cvtColor(numpy.frombuffer(data_buffer,numpy.uint8).reshape(self.height,self.width,3),cv2.COLOR_RGB2BGR)            
+        data_buffer = np.frombuffer(data_buffer,dtype=np.uint8).reshape(self.height,self.width,3)[:,:,::-1]
+        self.opencv2 = data_buffer.copy()
+        #print("buffertype",data_buffer.shape,data_buffer.dtype)
+        #self.opencv2 = cv2.cvtColor(numpy.frombuffer(data_buffer,numpy.uint8).reshape(self.height,self.width,3),cv2.COLOR_RGB2BGR)            
 
 
     def _generateOpenCV2BW(self):
@@ -865,8 +879,10 @@ class Image:
             image_buffer = tmp.tostring()
         elif self.type == TYPE_OPENCV2:
             # Convert BGR to RGB
-            import cv2
-            tmp = cv2.cvtColor(self.opencv2, cv2.COLOR_BGR2RGB)
+            
+            #import cv2
+            tmp = self.opencv2[:,:,::-1]
+            #tmp = cv2.cvtColor(self.opencv2, cv2.COLOR_BGR2RGB)
             image_buffer = tmp.tostring() 
         elif self.type == TYPE_MATRIX_RGB:
             # Just get buffer
@@ -912,6 +928,7 @@ class Image:
             returns the image data as a binary python string.
             TODO: Not yet implemented
         '''
+        raise NotImplementedError()
 
     def thumbnail(self, newSize):
         ''' Returns a resized version of the image that fits in new_size but preserves the aspect ratio.
@@ -1065,28 +1082,33 @@ class Image:
             
         else:
             # Otherwise, use an opencv window
-            import cv2
-            if window is None:
-                window = "PyVisionImage"
-
-            # Create the window
-            cv2.namedWindow(window)
-            
-            # Set the location
-            if pos is not None:
-                cv2.moveWindow(window, pos[0], pos[1])
-            
-            # Resize the image.    
-            if size is not None:
-                x = pyvision.Image(self.asAnnotated().resize(size) )
-            else:
-                x = pyvision.Image(self.asAnnotated())    
+            try:
+                import cv2
+                if window is None:
+                    window = "PyVisionImage"
+    
+                # Create the window
+                cv2.namedWindow(window)
                 
-            # Display the result
-            cv2.imshow(window, x.asOpenCV2() )
-            key = cv2.waitKey(delay=delay)
-            del x
-            return key
+                # Set the location
+                if pos is not None:
+                    cv2.moveWindow(window, pos[0], pos[1])
+                
+                # Resize the image.    
+                if size is not None:
+                    x = pyvision.Image(self.asAnnotated().resize(size) )
+                else:
+                    x = pyvision.Image(self.asAnnotated())    
+                    
+                # Display the result
+                cv2.imshow(window, x.asOpenCV2() )
+                key = cv2.waitKey(delay=delay)
+                del x
+                return key
+            except:
+                import skimage.io
+                skimage.io.use_plugin('matplotlib')
+                skimage.io.imshow(self.asOpenCV2())
         
         
     def __repr__(self):

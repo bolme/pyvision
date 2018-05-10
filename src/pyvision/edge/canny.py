@@ -47,6 +47,8 @@ def canny(im,threshold1=40.0,threshold2=100.0,aperture_size=3,sigma=None):
     '''
     void cvCanny( const CvArr* image, CvArr* edges, double threshold1, double threshold2, int aperture_size=3 );
     '''
+    import cv2 
+    
     gray = im.asOpenCV2BW()
     
 

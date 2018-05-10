@@ -579,16 +579,20 @@ class AffineTransform:
             
         elif im_a.getType() == TYPE_OPENCV2:
             # Transform an opencv 2 image
-            import cv2
             src = im_a.asOpenCV2()
-            dst = cv2.warpPerspective(src, self.matrix, self.size)
+            import skimage.transform
+            dst = skimage.transform.warp(src, self.inverse,output_shape=self.size)
+            dst = 255*dst
+            dst = dst.astype(np.uint8)
             result = pv.Image(dst)
 
         elif im_a.getType() == TYPE_OPENCV2BW:
             # Transform a bw opencv 2 image
-            import cv2
             src = im_a.asOpenCV2BW()
-            dst = cv2.warpPerspective(src, self.matrix, self.size)
+            import skimage.transform
+            dst = skimage.transform.warp(src, self.inverse,output_shape=self.size)
+            dst = 255*dst
+            dst = dst.astype(np.uint8)
             result = pv.Image(dst)
 
         else:
@@ -792,6 +796,7 @@ class _AffineTest(unittest.TestCase):
 
         # Transform the images
         im = affine(im)
+        #im.save('out.png')
         test_im = affine(test_im)
 
         # Correlate the resulting images

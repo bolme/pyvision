@@ -189,9 +189,6 @@ class TestImage(unittest.TestCase):
         im = pv.Image(pv.BABOON)
         hsv = im.asHSV()
         im = pv.Image(hsv)
-        #im.show(delay=0)
-
-        im = pv.Image(os.path.join(pv.__path__[0],"data","misc","baboon_bw.jpg"))
 
 
 
