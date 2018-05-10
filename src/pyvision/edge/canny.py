@@ -34,7 +34,7 @@
 import unittest
 import os.path
 
-import cv2
+#import cv2
 
 import pyvision as pv
 

@@ -42,7 +42,7 @@ up the interface and provides a bridge to many of the PyVision data
 structures.
 '''
 
-import cv2
+#import cv2
 import math
 import struct
 import array

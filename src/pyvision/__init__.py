@@ -147,6 +147,14 @@ def disableCommercialUseWarnings():
 #================================== Imports =====================================
 
 
+HAS_CV2 = False
+
+try:
+    import cv2
+    HAS_CV2 = True
+except:
+    pass
+
 from pyvision.types.img import Image
 
 from pyvision.types.Video import Video, Webcam, VideoFromImages, VideoFromFileList, VideoFromImageStack, VideoFromDirectory
@@ -494,15 +502,20 @@ class _VersionTest(unittest.TestCase):
                      or major == rmajor and minor == rminor and sub >= sub)
 
     def test_opencv_version(self):
-        import cv2
-        major,minor,sub = cv2.__version__.split('.')[:3]
-        rmajor,rminor,rsub = 2,4,2 # 2008/03/20
-        major,minor,sub = int(major),int(minor),int(sub)
-        print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub))
-        sys.stderr.flush()
-        self.assertTrue(major > rmajor 
-                     or major == rmajor and minor >= rminor 
-                     or major == rmajor and minor == rminor and sub >= sub)
+        if HAS_CV2:
+            import cv2
+            major,minor,sub = cv2.__version__.split('.')[:3]
+            rmajor,rminor,rsub = 2,4,2 # 2008/03/20
+            major,minor,sub = int(major),int(minor),int(sub)
+            print("%d.%d.%d >= %d.%d.%d "%(major,minor,sub,rmajor,rminor,rsub))
+            sys.stderr.flush()
+            self.assertTrue(major > rmajor 
+                         or major == rmajor and minor >= rminor 
+                         or major == rmajor and minor == rminor and sub >= sub)
+        else:
+            print("NA ")
+            sys.stderr.flush()
+            
 
     def test_scipy__version(self):
         import scipy
@@ -561,14 +574,6 @@ def test():
     corner_suite = unittest.TestLoader().loadTestsFromTestCase(_CornerTest)
     test_suites.append(corner_suite)
     
-    from pyvision.point.DetectorDOG import _DetectorDOGTestCase
-    dog_suite = unittest.TestLoader().loadTestsFromTestCase(_DetectorDOGTestCase)
-    test_suites.append(dog_suite)
-    
-    from pyvision.point.DetectorHarris import _HarrisTest
-    harris_suite = unittest.TestLoader().loadTestsFromTestCase(_HarrisTest)
-    test_suites.append(harris_suite)
-    
     from pyvision.point.PhaseCorrelation import _TestPhaseCorrelation
     pc_suite = unittest.TestLoader().loadTestsFromTestCase(_TestPhaseCorrelation)
     test_suites.append(pc_suite)
@@ -595,10 +600,19 @@ def test():
     # Replaced by ASEF work
     # from pyvision.face.SVMEyeDetector import _TestSVMEyeDetector 
     # svmed_suite = unittest.TestLoader().loadTestsFromTestCase(_TestSVMEyeDetector)
-    
-    from pyvision.edge.canny import _TestCanny
-    canny_suite = unittest.TestLoader().loadTestsFromTestCase(_TestCanny)
-    test_suites.append(canny_suite)
+    if HAS_CV2:
+        from pyvision.edge.canny import _TestCanny
+        canny_suite = unittest.TestLoader().loadTestsFromTestCase(_TestCanny)
+        test_suites.append(canny_suite)
+
+        from pyvision.point.DetectorHarris import _HarrisTest
+        harris_suite = unittest.TestLoader().loadTestsFromTestCase(_HarrisTest)
+        test_suites.append(harris_suite)        
+
+        from pyvision.point.DetectorDOG import _DetectorDOGTestCase
+        dog_suite = unittest.TestLoader().loadTestsFromTestCase(_DetectorDOGTestCase)
+        test_suites.append(dog_suite)
+        
     
     from pyvision.analysis.stats import _TestStats
     stats_suite = unittest.TestLoader().loadTestsFromTestCase(_TestStats)
