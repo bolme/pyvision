@@ -54,7 +54,7 @@ import pyvision as pv
 from . import exif
 import os
 
-
+_MATPLOTLIB_FIGURES = {}
 
 TYPE_MATRIX_2D  = "TYPE_MATRIX2D" 
 '''Image was created using a 2D "gray-scale" numpy array'''
@@ -1109,6 +1109,15 @@ class Image:
             except:
                 print("Cannot use OpenCV.")
                 import matplotlib.pyplot as plt
+
+                global _MATPLOTLIB_FIGURES
+                
+                if not _MATPLOTLIB_FIGURES.has_key(window):
+                    idx = len(_MATPLOTLIB_FIGURES) + 1
+                    _MATPLOTLIB_FIGURES[window] = idx
+                
+                fig_id = _MATPLOTLIB_FIGURES[window]
+                plt.figure(fig_id)
                 plt.clf()
                 plt.title(window)
                 disp = pv.Image(self.asAnnotated()).asOpenCV2()[:,:,::-1]
