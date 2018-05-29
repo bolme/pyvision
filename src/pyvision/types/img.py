@@ -54,7 +54,7 @@ import pyvision as pv
 from . import exif
 import os
 
-
+_MATPLOTLIB_FIGURES = {}
 
 TYPE_MATRIX_2D  = "TYPE_MATRIX2D" 
 '''Image was created using a 2D "gray-scale" numpy array'''
@@ -1082,10 +1082,11 @@ class Image:
             
         else:
             # Otherwise, use an opencv window
+            if window is None:
+                window = "PyVisionImage"
+                
             try:
                 import cv2
-                if window is None:
-                    window = "PyVisionImage"
     
                 # Create the window
                 cv2.namedWindow(window)
@@ -1106,9 +1107,26 @@ class Image:
                 del x
                 return key
             except:
-                import skimage.io
-                skimage.io.use_plugin('matplotlib')
-                skimage.io.imshow(self.asOpenCV2())
+                print("Cannot use OpenCV.")
+                import matplotlib.pyplot as plt
+
+                global _MATPLOTLIB_FIGURES
+                
+                if not _MATPLOTLIB_FIGURES.has_key(window):
+                    idx = len(_MATPLOTLIB_FIGURES) + 1
+                    _MATPLOTLIB_FIGURES[window] = idx
+                
+                fig_id = _MATPLOTLIB_FIGURES[window]
+                plt.figure(fig_id)
+                plt.clf()
+                plt.title(window)
+                disp = pv.Image(self.asAnnotated()).asOpenCV2()[:,:,::-1]
+                plt.imshow(disp)
+                plt.show(block=False)
+                result = plt.waitforbuttonpress(timeout=delay/1000.0)
+                #result = plt.ginput(1, timeout=100.0)
+                #skimage.io.use_plugin('matplotlib')
+                #skimage.io.imshow(self.asOpenCV2())
         
         
     def __repr__(self):
