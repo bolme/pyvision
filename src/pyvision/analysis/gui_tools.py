@@ -94,8 +94,7 @@ class CaptureClicks:
         
         while True:
             key_press = self.im.show(self.window,delay=100)
-            key_press=key_press%128
-            
+            key_press = key_press%128
             # Handle key press events.
             if key_press == ord(' '):
                 break
@@ -166,6 +165,7 @@ class CaptureClicksVideo:
         
         while True:
             key_press = self.im.show("PyVision Capture Points",delay=100)
+            key_press = key_press%128
             
             # Handle key press events.
             if key_press == ord('r'):
