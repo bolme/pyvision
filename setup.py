@@ -1,19 +1,6 @@
 from distutils.core import setup
 import os
 
-try:
-    import cv2
-    cv_version_data = cv2.__version__.split('.')
-    cv_version_data = [int(cv_version_data[0]),int(cv_version_data[1])]
-    if cv_version_data[0] > 2:
-        pass
-    else:
-        assert cv_version_data[0] == 2
-        assert cv_version_data[1] == 4
-    
-except:
-    print("ERROR: Could not load OpenCV.  Make sure the python bindings for opencv 2.4.9 or later are installed.")
-    raise
 
 package_data = {}
 
@@ -54,7 +41,7 @@ for path,dirs,files in os.walk(DATA_DIR):
 #pyvision/config
 
 setup(name='pyvision_toolkit',
-      version='1.2.0',
+      version='1.3.0',
       description='A computer vision library for python.',
       author='David Bolme',
       author_email='dbolme@gmail.com',
