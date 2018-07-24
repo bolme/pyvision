@@ -1,0 +1,4 @@
+include LICENSE QUICKSTART.md README.md build_docs.sh
+
+recursive-include test *.py *.sh
+recursive-include samples *.py *.ipynb *.jpg *.png
