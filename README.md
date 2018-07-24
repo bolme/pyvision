@@ -77,10 +77,13 @@ Multiview Geometry, etc.
 - PIL
 - scipy
 - numpy
-- OpenCV
 - scikit learn (As of pyvision 2.0)
 - scikit image (As of pyvision 2.0)
 	
+
+### Recommended
+- OpenCV (optional)
+
 
 ### Features:
 	
@@ -102,7 +105,7 @@ Multiview Geometry, etc.
 	
 ### Releases:
 
-* 1.3.0 - OpenCV is no longer required.  This makes setup easier.  Better support for "pip install pyvision".
+* 1.3.0 - OpenCV is no longer required.  This makes setup easier.  Better support for "pip install pyvision_toolkit".
 * 1.2.0 - Support for Python 3 and OpenCV 3
 * 1.1.0 - It has been a while since the last release.  OpenCV has improved 
             recently and has become more stable with improved python bindings.  
