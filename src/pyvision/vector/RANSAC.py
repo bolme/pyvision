@@ -65,7 +65,7 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
 
         sample = new_sample
 
-        ty = b[sample,:]
+        ty = b[sample]
         tX = A[sample,:]
         
         #print tX.shape,ty.shape
@@ -92,7 +92,7 @@ def RANSAC(A,b,count=None,tol=1.0,niter=None,group=1,verbose=False,full_output=F
     #error,count,inliers = computeErrorAndCount(A,b,bestx,group,tol)
     inliers = bestinliers
     for _ in range(10):
-        ty = b[inliers.flatten(),:]
+        ty = b[inliers.flatten()]
         tX = A[inliers.flatten(),:]
         try:
             x = np.linalg.lstsq(tX,ty)[0]        
@@ -147,7 +147,7 @@ def LMeDs(A,b,quantile=0.75,N = None,verbose=True):
     for i in range(N):
         sample = random.sample(tmp,k)
 
-        ty = b[sample,:]
+        ty = b[sample]
         tX = A[sample,:]
 
         try:
@@ -182,7 +182,7 @@ def LMeDs(A,b,quantile=0.75,N = None,verbose=True):
             sample = best_sample.copy()
             sample[i] = not sample[i]
             
-            ty = b[sample,:]
+            ty = b[sample]
             tX = A[sample,:]
             
             try:

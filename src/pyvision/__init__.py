@@ -71,7 +71,7 @@ import unittest
 import sys
 import pickle as pkl
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 __info__ = "https://github.com/bolme/pyvision/wiki"
 __license__= '''
 PyVision License
