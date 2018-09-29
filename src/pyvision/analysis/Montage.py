@@ -105,7 +105,7 @@ class ImageMontage(object):
         self._cvMontageImage[:,:,:] = 0
 
         for i in range(self._rows*self._cols):
-            if i > len(self._image_list):
+            if i >= len(self._image_list):
                 break
             row = i / self._cols
             col = i % self._cols
