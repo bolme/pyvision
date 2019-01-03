@@ -1053,31 +1053,22 @@ class Image:
         @param size: Optional output size for image, None=native size.
         @returns: the return value of the cv.WaitKey call.
         '''
-        if window==None and pv.runningInNotebook() and 'pylab' in list(globals().keys()):
+        if window==None and pv.runningInNotebook():
             # If running in notebook, then try to display the image inline.
+            #print("Trying to display in notebook.")
             try:
-                import IPython
-                import pylab
-
-                if size is None:
-                    size = self.size
-                    
-                    # Constrain the size of the output
-                    max_dim = max(size[0],size[1])
-                    
-                    if max_dim > 800:
-                        scale = 800.0/max_dim
-                        size = (int(scale*size[0]),int(scale*size[1]))
                 
-                w,h = size
-                
-                # TODO: Cant quite figure out how figsize works and how to set it to native pixels
-                #pylab.figure()
-                IPython.core.pylabtools.figsize(1.25*w/72.0,1.25*h/72.0) #@UndefinedVariable
-                pylab.figure()
-                pylab.imshow(self.asAnnotated(),origin='upper',aspect='auto')
+                import IPython.display as disp
+                import cv2
+                try:
+                    val,buf = cv2.imencode('.jpg',self.asOpenCV2())
+                except:
+                    val,buf = cv2.imencode('.jpg',self.asOpenCV2BW())
+                a = disp.Image(buf,format='jpg')       
+                return a
             except:
-                print("WARNING: could not display image in ipython notebook.")
+                print("WARNING: could not display image in notebook.")
+                raise
                 self.show(window="PyVisionImage",pos=pos,delay=delay,size=size)
             
         else:

@@ -413,17 +413,17 @@ def runningInNotebook():
     '''
     # Check that the type of ipython instance is consistent with the notebook.
     try:
-        import IPython
-        gui = IPython.core.pylabtools.find_gui_and_backend() #@UndefinedVariable
-        if 'inline' not in gui:
-            #print 'missing inline'
-            return False
+        ip = get_ipython()
+
+        if ip.has_trait('kernel'):
+            return True
+        
     except:
         #print "error importing"
         return False
     
     #print "success in notebook"
-    return True
+    return False
     
 
 
