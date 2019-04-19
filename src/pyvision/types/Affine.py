@@ -38,6 +38,7 @@ specifies the transformation and a size for the output image.
 '''
 
 
+from __future__ import print_function
 
 import unittest
 import os.path
@@ -581,7 +582,7 @@ class AffineTransform:
             # Transform an opencv 2 image
             src = im_a.asOpenCV2()
             import skimage.transform
-            dst = skimage.transform.warp(src, self.inverse,output_shape=self.size)
+            dst = skimage.transform.warp(src, self.inverse,output_shape=(self.size[1],self.size[0]))
             dst = 255*dst
             dst = dst.astype(np.uint8)
             result = pv.Image(dst)
@@ -590,7 +591,7 @@ class AffineTransform:
             # Transform a bw opencv 2 image
             src = im_a.asOpenCV2BW()
             import skimage.transform
-            dst = skimage.transform.warp(src, self.inverse,output_shape=self.size)
+            dst = skimage.transform.warp(src, self.inverse,output_shape=(self.size[1],self.size[0]))
             dst = 255*dst
             dst = dst.astype(np.uint8)
             result = pv.Image(dst)
@@ -608,6 +609,11 @@ class AffineTransform:
             
         # Append the prev image and new transform
         result.aff_prev.append( (weakref.ref(prev_im), self.inverse) )
+        
+        #print("Affine",result.size,self.size)
+        
+        # Check the size of the output
+        assert result.size == self.size
         
         return result
 
@@ -955,6 +961,41 @@ class _AffineTest(unittest.TestCase):
         #taccu.show()
         
         
+    def test_output_shapes_and_types(self):
+        fname = os.path.join(pv.__path__[0],'data','nonface','NONFACE_13.jpg')
+        torig = tprev = im_a = Image(fname)
+        #im_a.show()
+        w,h = im_a.size
+        out_size = (w/2,h/2)
+        # Scale
+        aff = AffineScale(0.5,out_size)
+        
+        im_b = im_a
+        self.assertEqual(im_b.getType(),TYPE_PIL)
+        res = aff(im_b)
+        self.assertEqual(out_size, res.size)
+        
+        im_b = pv.Image(im_a.asMatrix2D())
+        self.assertEqual(im_b.getType(),TYPE_MATRIX_2D)
+        res = aff(im_b)
+        self.assertEqual(out_size, res.size)
+        
+        im_b = pv.Image(im_a.asMatrix3D())
+        self.assertEqual(im_b.getType(),TYPE_MATRIX_RGB)
+        res = aff(im_b)
+        self.assertEqual(out_size, res.size)
+
+        im_b = pv.Image(im_a.asOpenCV2())
+        self.assertEqual(im_b.getType(),TYPE_OPENCV2)
+        res = aff(im_b)
+        self.assertEqual(out_size, res.size)
+        
+        im_b = pv.Image(im_a.asOpenCV2BW())
+        self.assertEqual(im_b.getType(),TYPE_OPENCV2BW)
+        res = aff(im_b)
+        self.assertEqual(out_size, res.size)
+        
+
         
         
         

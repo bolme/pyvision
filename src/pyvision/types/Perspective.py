@@ -190,7 +190,9 @@ class PerspectiveTransform:
         src = im.asOpenCV2()
         import cv2
         dst = cv2.warpPerspective( src, matrix, self.size)                    
-        return pv.Image(dst)
+        result = pv.Image(dst)
+        #print("Perspective",result.size)
+        return result
 
         
     ##
