@@ -1060,10 +1060,8 @@ class Image:
                 
                 import IPython.display as disp
                 import cv2
-                try:
-                    val,buf = cv2.imencode('.jpg',self.asOpenCV2())
-                except:
-                    val,buf = cv2.imencode('.jpg',self.asOpenCV2BW())
+                tmp = pv.Image(self.asAnnotated())
+                val,buf = cv2.imencode('.jpg',tmp.asOpenCV2())
                 a = disp.Image(buf,format='jpg')       
                 return a
             except:
