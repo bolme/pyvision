@@ -107,11 +107,11 @@ class ImageMontage(object):
         for i in range(self._rows*self._cols):
             if i >= len(self._image_list):
                 break
-            row = i / self._cols
+            row = i // self._cols
             col = i % self._cols
             if not self._by_row:
                 row = i % self._rows
-                col = i / self._rows
+                col = i // self._rows
             tw = self._tileSize[0]
             th = self._tileSize[1]
             xpos = col*tw
@@ -125,8 +125,8 @@ class ImageMontage(object):
             assert ch==3
             
             # Draw Image
-            xpos += (tw - iw)/2
-            ypos += (th - ih)/2
+            xpos += (tw - iw)//2
+            ypos += (th - ih)//2
             self._cvMontageImage[ypos:ypos+ih,xpos:xpos+iw,:] = cv_tile
 
             # Draw Text
@@ -134,8 +134,8 @@ class ImageMontage(object):
             ypos = row*th
             lbltext = "%d"%(i)
             ((txtw, txth), _) = cv2.getTextSize(lbltext, *self._txtfont)
-            print("DEBUG: tw, th = %d,%d"%(txtw,txth))
-            if txtw > 0 and txth > 0:
+            #print("DEBUG: tw, th = %d,%d"%(txtw,txth))
+            if self._labels is not None and txtw > 0 and txth > 0:
                 cv2.rectangle(self._cvMontageImage, (xpos, ypos), (xpos+txtw + 3, ypos+txth + 3),
                              (0, 0, 0), thickness=cv2.FILLED)
                 font = self._txtfont[0]
@@ -219,7 +219,7 @@ class ImageMontage(object):
         #    cv.Copy(cvTileBGR, cvImg)  #should respect the ROI
         #else:
         #    cv.Copy(cvTile, cvImg)  #should respect the ROI
-
+        print (self._labels)
         if self._labels == 'index':
             #draw image number in lower left corner, respective to ROI
             lbltext = "%d" % imgNum
@@ -227,8 +227,8 @@ class ImageMontage(object):
             lbltext = str(self._labels[imgNum])
         else:
             lbltext = None
-
-        if not lbltext is None:
+        print(lbltext)
+        if lbltext is not None:
             ((tw, th), _) = cv2.getTextSize(lbltext, *self._txtfont)
             #print "DEBUG: tw, th = %d,%d"%(tw,th)
             if tw > 0 and th > 0:
