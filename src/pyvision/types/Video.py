@@ -34,10 +34,7 @@
 import time
 import os
 import pyvision as pv
-#import cv
 import random
-#from scipy import weave
-#import cv2
 
 
 class VideoInterface(object):
@@ -236,6 +233,7 @@ class Webcam(VideoInterface):
         on your computer. See the OpenCV highgui documentation for details.
         @param flipped: Set to true if camera is installed upside-down.
         '''
+        import cv2
         self.cv_capture = cv2.VideoCapture( camera_num )  
         self.flipped = flipped      
         #cv.SetCaptureProperty(self.cv_capture,cv.CV_CAP_PROP_FRAME_WIDTH,1600.0)
