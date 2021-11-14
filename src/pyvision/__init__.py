@@ -71,7 +71,7 @@ import unittest
 import sys
 import pickle as pkl
 
-__version__ = "1.3.3"
+__version__ = "1.3.4"
 __info__ = "https://github.com/bolme/pyvision/wiki"
 __license__= '''
 PyVision License
@@ -196,10 +196,10 @@ from pyvision.other.distance import boolToUbyte, ubyteToBool, hamming, hamming_t
 
 from pyvision.ml.knn import RobustPNorm,PNorm,correlation,chisquared,KNearestNeighbors,FLANNTree,FLANN_IMPORTED
 
-try:
-    from pyvision.util.fast_util import LocalMaximumDetector
-except:
-    print("Warning: could not import fast_util.")
+#try:
+#    from pyvision.util.fast_util import LocalMaximumDetector
+#except:
+#    print("Warning: could not import fast_util.")
     
 from pyvision.util.windows import cosineWindow, hammingWindow, hannWindow
 
