@@ -47,10 +47,20 @@ import copy
 import weakref
 
 try:
-    from PIL.Image import AFFINE,NEAREST,BILINEAR,BICUBIC,ANTIALIAS #@UnusedImport
+    from PIL.Image import AFFINE,NEAREST,BILINEAR,BICUBIC #@UnusedImport
+
 except:
-    from Image import AFFINE,NEAREST,BILINEAR,BICUBIC,ANTIALIAS #@UnusedImport @Reimport
-    
+    from Image import AFFINE,NEAREST,BILINEAR,BICUBIC #@UnusedImport @Reimport
+    try:
+        from Image import LANCZOS as ANTIALIAS
+    except:
+        from Image import ANTIALIAS
+
+try:
+    from PIL.Image import LANCZOS as ANTIALIAS
+except:
+    from PIL.Image import ANTIALIAS
+
 from numpy import array,dot,sqrt
 from numpy.linalg import inv,solve,lstsq
 from scipy.ndimage import affine_transform

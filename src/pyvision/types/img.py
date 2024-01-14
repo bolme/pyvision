@@ -40,7 +40,11 @@ __version__ = "$Revision$"
 # PIL Imports
 import PIL.ImageDraw
 import PIL.Image
-from PIL.Image import BICUBIC, ANTIALIAS
+from PIL.Image import BICUBIC
+try:
+    from PIL.Image import LANCZOS as ANTIALIAS
+except:
+    from PIL.Image import ANTIALIAS
 import PIL.ImageFont as ImageFont
 
 # Imaging imports
