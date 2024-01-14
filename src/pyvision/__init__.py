@@ -71,12 +71,12 @@ import unittest
 import sys
 import pickle as pkl
 
-__version__ = "1.3.4"
+__version__ = "1.3.5"
 __info__ = "https://github.com/bolme/pyvision/wiki"
 __license__= '''
 PyVision License
 
-Copyright (c) 2006-2010 David S. Bolme
+Copyright (c) 2006-2024 David S. Bolme
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
