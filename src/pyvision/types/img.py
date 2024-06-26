@@ -625,10 +625,16 @@ class Image:
             font = ImageFont.load_default()
         elif isinstance(font,int):
             font = ImageFont.truetype(pv.FONT_ARIAL, font)
-        
+
         # Compute the size
-        tw,th = draw.textsize(label, font=font)
-        
+        # Pillow deprecated textsize in 9.5.0 and replaced it with textbbox
+        if hasattr(draw, 'textbbox'):
+            left, top, right, bottom = draw.textbbox(xy=(0, 0), text=label, font=font)
+            tw = right - left
+            th = bottom - top
+        elif hasattr(draw, 'textsize'):
+            tw, th = draw.textsize(label, font=font)
+
         # Select the position relative to the point
         if mark in [True, 'right']:
             textpt = pv.Point(point.X()+5,point.Y()-th/2)
